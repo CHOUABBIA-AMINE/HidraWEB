@@ -1,0 +1,258 @@
+[
+  {
+    "Menu": "Foundation",
+    "Parent": "ROOT",
+    "Permission": "Authenticated",
+    "Icon": "folder",
+    "Order": 10,
+    "Route": ""
+  },
+  {
+    "Menu": "Command Dashboard",
+    "Parent": "Foundation",
+    "Permission": "Authenticated",
+    "Icon": "dashboard",
+    "Order": 20,
+    "Route": "/dashboard"
+  },
+  {
+    "Menu": "Topology",
+    "Parent": "Foundation",
+    "Permission": "HIDRA_TOPOLOGY_*_READ",
+    "Icon": "map",
+    "Order": 21,
+    "Route": "/topology"
+  },
+  {
+    "Menu": "Monitoring",
+    "Parent": "Foundation",
+    "Permission": "HIDRA_MONITORING_*_READ",
+    "Icon": "monitor_heart",
+    "Order": 22,
+    "Route": "/monitoring"
+  },
+  {
+    "Menu": "Alarm",
+    "Parent": "Foundation",
+    "Permission": "HIDRA_ALARM_*_READ",
+    "Icon": "notifications_active",
+    "Order": 23,
+    "Route": "/alarm"
+  },
+  {
+    "Menu": "Leak Detection",
+    "Parent": "Foundation",
+    "Permission": "HIDRA_LEAKDETECTION_*_READ",
+    "Icon": "water_drop",
+    "Order": 24,
+    "Route": "/leakdetection"
+  },
+  {
+    "Menu": "Operations",
+    "Parent": "ROOT",
+    "Permission": "Authenticated",
+    "Icon": "folder",
+    "Order": 25,
+    "Route": ""
+  },
+  {
+    "Menu": "Telemetry",
+    "Parent": "Operations",
+    "Permission": "HIDRA_TELEMETRY_*_READ",
+    "Icon": "sensors",
+    "Order": 35,
+    "Route": "/telemetry"
+  },
+  {
+    "Menu": "Planning",
+    "Parent": "Operations",
+    "Permission": "HIDRA_PLANNING_*_READ",
+    "Icon": "event_note",
+    "Order": 36,
+    "Route": "/planning"
+  },
+  {
+    "Menu": "Assets",
+    "Parent": "Operations",
+    "Permission": "HIDRA_ASSETS_*_READ",
+    "Icon": "precision_manufacturing",
+    "Order": 37,
+    "Route": "/assets"
+  },
+  {
+    "Menu": "Integrity",
+    "Parent": "Operations",
+    "Permission": "HIDRA_INTEGRITY_*_READ",
+    "Icon": "verified",
+    "Order": 38,
+    "Route": "/integrity"
+  },
+  {
+    "Menu": "Risk",
+    "Parent": "Operations",
+    "Permission": "HIDRA_RISK_*_READ",
+    "Icon": "warning",
+    "Order": 39,
+    "Route": "/risk"
+  },
+  {
+    "Menu": "Hse",
+    "Parent": "Operations",
+    "Permission": "HIDRA_HSE_*_READ",
+    "Icon": "health_and_safety",
+    "Order": 40,
+    "Route": "/hse"
+  },
+  {
+    "Menu": "Incident",
+    "Parent": "Operations",
+    "Permission": "HIDRA_INCIDENT_*_READ",
+    "Icon": "report_problem",
+    "Order": 41,
+    "Route": "/incident"
+  },
+  {
+    "Menu": "Custody",
+    "Parent": "Operations",
+    "Permission": "HIDRA_CUSTODY_*_READ",
+    "Icon": "scale",
+    "Order": 42,
+    "Route": "/custody"
+  },
+  {
+    "Menu": "Decision Support",
+    "Parent": "ROOT",
+    "Permission": "Authenticated",
+    "Icon": "folder",
+    "Order": 43,
+    "Route": ""
+  },
+  {
+    "Menu": "Simulation",
+    "Parent": "Decision Support",
+    "Permission": "HIDRA_SIMULATION_*_READ",
+    "Icon": "science",
+    "Order": 53,
+    "Route": "/simulation"
+  },
+  {
+    "Menu": "Analytics",
+    "Parent": "Decision Support",
+    "Permission": "HIDRA_ANALYTICS_*_READ",
+    "Icon": "insights",
+    "Order": 54,
+    "Route": "/analytics"
+  },
+  {
+    "Menu": "Reporting",
+    "Parent": "Decision Support",
+    "Permission": "HIDRA_REPORTING_*_READ",
+    "Icon": "summarize",
+    "Order": 55,
+    "Route": "/reporting"
+  },
+  {
+    "Menu": "Governance",
+    "Parent": "ROOT",
+    "Permission": "Authenticated",
+    "Icon": "folder",
+    "Order": 56,
+    "Route": ""
+  },
+  {
+    "Menu": "Workflow",
+    "Parent": "Governance",
+    "Permission": "HIDRA_WORKFLOW_*_READ",
+    "Icon": "account_tree",
+    "Order": 66,
+    "Route": "/workflow"
+  },
+  {
+    "Menu": "Documents",
+    "Parent": "Governance",
+    "Permission": "HIDRA_DOCUMENTS_*_READ",
+    "Icon": "description",
+    "Order": 67,
+    "Route": "/documents"
+  },
+  {
+    "Menu": "Audit",
+    "Parent": "Governance",
+    "Permission": "HIDRA_AUDIT_*_READ",
+    "Icon": "history",
+    "Order": 68,
+    "Route": "/audit"
+  },
+  {
+    "Menu": "Configuration",
+    "Parent": "Governance",
+    "Permission": "HIDRA_CONFIGURATION_*_READ",
+    "Icon": "settings",
+    "Order": 69,
+    "Route": "/configuration"
+  },
+  {
+    "Menu": "Notification",
+    "Parent": "Governance",
+    "Permission": "HIDRA_NOTIFICATION_*_READ",
+    "Icon": "notifications",
+    "Order": 70,
+    "Route": "/notification"
+  },
+  {
+    "Menu": "Administration",
+    "Parent": "ROOT",
+    "Permission": "Authenticated",
+    "Icon": "folder",
+    "Order": 71,
+    "Route": ""
+  },
+  {
+    "Menu": "Identity",
+    "Parent": "Administration",
+    "Permission": "HIDRA_IDENTITY_*_READ",
+    "Icon": "admin_panel_settings",
+    "Order": 81,
+    "Route": "/identity"
+  },
+  {
+    "Menu": "Organization",
+    "Parent": "Administration",
+    "Permission": "HIDRA_ORGANIZATION_*_READ",
+    "Icon": "corporate_fare",
+    "Order": 82,
+    "Route": "/organization"
+  },
+  {
+    "Menu": "Party",
+    "Parent": "Administration",
+    "Permission": "HIDRA_PARTY_*_READ",
+    "Icon": "groups",
+    "Order": 83,
+    "Route": "/party"
+  },
+  {
+    "Menu": "Integration",
+    "Parent": "Administration",
+    "Permission": "HIDRA_INTEGRATION_*_READ",
+    "Icon": "hub",
+    "Order": 84,
+    "Route": "/integration"
+  },
+  {
+    "Menu": "Permission Catalog",
+    "Parent": "Administration",
+    "Permission": "HIDRA_SECURITY_PERMISSIONS_READ",
+    "Icon": "shield",
+    "Order": 85,
+    "Route": "/security/permissions"
+  },
+  {
+    "Menu": "Realtime Monitor",
+    "Parent": "Administration",
+    "Permission": "HIDRA_REALTIME_CAPABILITIES_READ",
+    "Icon": "wifi_tethering",
+    "Order": 86,
+    "Route": "/realtime"
+  }
+]

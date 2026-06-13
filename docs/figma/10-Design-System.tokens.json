@@ -1,0 +1,9 @@
+{
+  "primary": "#0B5D3B",
+  "secondary": "#334155",
+  "critical": "#B42318",
+  "warning": "#B54708",
+  "success": "#067647",
+  "info": "#175CD3",
+  "background": "#F8FAFC"
+}

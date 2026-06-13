@@ -1,0 +1,6683 @@
+[
+  {
+    "module": "alarm",
+    "kind": "request",
+    "name": "AcknowledgeAlarmRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "alarmId"
+      },
+      {
+        "type": "String",
+        "name": "acknowledgedByActorId"
+      },
+      {
+        "type": "String",
+        "name": "acknowledgedByDisplayName"
+      },
+      {
+        "type": "String",
+        "name": "organizationUnitId"
+      },
+      {
+        "type": "String",
+        "name": "organizationUnitCode"
+      },
+      {
+        "type": "String",
+        "name": "comment"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      }
+    ],
+    "field_count": 7,
+    "path": "src/main/java/dz/sh/hidra/modules/alarm/api/rest/request/AcknowledgeAlarmRequest.java"
+  },
+  {
+    "module": "alarm",
+    "kind": "request",
+    "name": "CloseAlarmRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "alarmId"
+      },
+      {
+        "type": "AlarmClosureType",
+        "name": "closureType"
+      },
+      {
+        "type": "String",
+        "name": "closureReasonId"
+      },
+      {
+        "type": "String",
+        "name": "closureComment"
+      },
+      {
+        "type": "String",
+        "name": "closedByActorId"
+      },
+      {
+        "type": "boolean",
+        "name": "requiresReview"
+      },
+      {
+        "type": "String",
+        "name": "reviewWorkflowInstanceId"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      }
+    ],
+    "field_count": 8,
+    "path": "src/main/java/dz/sh/hidra/modules/alarm/api/rest/request/CloseAlarmRequest.java"
+  },
+  {
+    "module": "alarm",
+    "kind": "request",
+    "name": "RaiseAlarmRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "alarmNumber"
+      },
+      {
+        "type": "String",
+        "name": "alarmTypeId"
+      },
+      {
+        "type": "String",
+        "name": "severityId"
+      },
+      {
+        "type": "String",
+        "name": "priorityId"
+      },
+      {
+        "type": "String",
+        "name": "titleAr"
+      },
+      {
+        "type": "String",
+        "name": "titleFr"
+      },
+      {
+        "type": "String",
+        "name": "titleEn"
+      },
+      {
+        "type": "String",
+        "name": "descriptionAr"
+      },
+      {
+        "type": "String",
+        "name": "descriptionFr"
+      },
+      {
+        "type": "String",
+        "name": "descriptionEn"
+      },
+      {
+        "type": "AlarmSourceType",
+        "name": "sourceType"
+      },
+      {
+        "type": "String",
+        "name": "sourceReferenceId"
+      },
+      {
+        "type": "String",
+        "name": "monitoringAlertCandidateId"
+      },
+      {
+        "type": "String",
+        "name": "monitoringEvaluationId"
+      },
+      {
+        "type": "String",
+        "name": "telemetryReadingId"
+      },
+      {
+        "type": "String",
+        "name": "planningTargetId"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetTypeCode"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetId"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetCode"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetNameSnapshot"
+      },
+      {
+        "type": "Instant",
+        "name": "firstDetectedAt"
+      },
+      {
+        "type": "String",
+        "name": "owningOrganizationUnitId"
+      },
+      {
+        "type": "String",
+        "name": "owningOrganizationUnitCode"
+      },
+      {
+        "type": "String",
+        "name": "owningOrganizationUnitNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "workflowInstanceId"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      }
+    ],
+    "field_count": 26,
+    "path": "src/main/java/dz/sh/hidra/modules/alarm/api/rest/request/RaiseAlarmRequest.java"
+  },
+  {
+    "module": "alarm",
+    "kind": "request",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/alarm/api/rest/request/package-info.java"
+  },
+  {
+    "module": "alarm",
+    "kind": "response",
+    "name": "AlarmResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "alarmNumber"
+      },
+      {
+        "type": "String",
+        "name": "alarmTypeId"
+      },
+      {
+        "type": "String",
+        "name": "severityId"
+      },
+      {
+        "type": "String",
+        "name": "titleFr"
+      },
+      {
+        "type": "AlarmSourceType",
+        "name": "sourceType"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetTypeCode"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetId"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetCode"
+      },
+      {
+        "type": "AlarmState",
+        "name": "currentState"
+      },
+      {
+        "type": "Instant",
+        "name": "raisedAt"
+      },
+      {
+        "type": "Instant",
+        "name": "acknowledgedAt"
+      },
+      {
+        "type": "Instant",
+        "name": "closedAt"
+      }
+    ],
+    "field_count": 13,
+    "path": "src/main/java/dz/sh/hidra/modules/alarm/api/rest/response/AlarmResponse.java"
+  },
+  {
+    "module": "alarm",
+    "kind": "response",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/alarm/api/rest/response/package-info.java"
+  },
+  {
+    "module": "analytics",
+    "kind": "request",
+    "name": "CreateAnalyticsDatasetRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameAr"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "nameEn"
+      },
+      {
+        "type": "String",
+        "name": "subjectAreaId"
+      },
+      {
+        "type": "AnalyticsDatasetType",
+        "name": "datasetType"
+      },
+      {
+        "type": "AnalyticsRefreshMode",
+        "name": "refreshMode"
+      },
+      {
+        "type": "String",
+        "name": "schemaVersion"
+      },
+      {
+        "type": "String",
+        "name": "createdFrom"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/analytics/api/rest/request/CreateAnalyticsDatasetRequest.java"
+  },
+  {
+    "module": "analytics",
+    "kind": "request",
+    "name": "CreateAnalyticsInsightRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "insightType"
+      },
+      {
+        "type": "String",
+        "name": "subjectAreaId"
+      },
+      {
+        "type": "String",
+        "name": "scopeType"
+      },
+      {
+        "type": "String",
+        "name": "scopeId"
+      },
+      {
+        "type": "String",
+        "name": "title"
+      },
+      {
+        "type": "String",
+        "name": "summary"
+      },
+      {
+        "type": "String",
+        "name": "severityId"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "confidenceScore"
+      },
+      {
+        "type": "String",
+        "name": "sourceProjectionSnapshotId"
+      },
+      {
+        "type": "String",
+        "name": "sourceTrendAnalysisId"
+      },
+      {
+        "type": "String",
+        "name": "sourceModelRunId"
+      }
+    ],
+    "field_count": 11,
+    "path": "src/main/java/dz/sh/hidra/modules/analytics/api/rest/request/CreateAnalyticsInsightRequest.java"
+  },
+  {
+    "module": "analytics",
+    "kind": "request",
+    "name": "RunMetricEvaluationRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "metricDefinitionVersionId"
+      },
+      {
+        "type": "Instant",
+        "name": "periodStart"
+      },
+      {
+        "type": "Instant",
+        "name": "periodEnd"
+      },
+      {
+        "type": "String",
+        "name": "scopeType"
+      },
+      {
+        "type": "String",
+        "name": "scopeId"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      }
+    ],
+    "field_count": 6,
+    "path": "src/main/java/dz/sh/hidra/modules/analytics/api/rest/request/RunMetricEvaluationRequest.java"
+  },
+  {
+    "module": "analytics",
+    "kind": "request",
+    "name": "RunProjectionRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "projectionDefinitionId"
+      },
+      {
+        "type": "AnalyticsRunMode",
+        "name": "runMode"
+      },
+      {
+        "type": "Instant",
+        "name": "periodStart"
+      },
+      {
+        "type": "Instant",
+        "name": "periodEnd"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      }
+    ],
+    "field_count": 5,
+    "path": "src/main/java/dz/sh/hidra/modules/analytics/api/rest/request/RunProjectionRequest.java"
+  },
+  {
+    "module": "analytics",
+    "kind": "request",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/analytics/api/rest/request/package-info.java"
+  },
+  {
+    "module": "analytics",
+    "kind": "response",
+    "name": "AnalyticsDatasetResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "subjectAreaId"
+      },
+      {
+        "type": "AnalyticsDatasetType",
+        "name": "datasetType"
+      },
+      {
+        "type": "AnalyticsRefreshMode",
+        "name": "refreshMode"
+      },
+      {
+        "type": "AnalyticsLineageStatus",
+        "name": "lineageStatus"
+      },
+      {
+        "type": "AnalyticsQualityStatus",
+        "name": "qualityStatus"
+      }
+    ],
+    "field_count": 8,
+    "path": "src/main/java/dz/sh/hidra/modules/analytics/api/rest/response/AnalyticsDatasetResponse.java"
+  },
+  {
+    "module": "analytics",
+    "kind": "response",
+    "name": "AnalyticsInsightResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "insightType"
+      },
+      {
+        "type": "String",
+        "name": "subjectAreaId"
+      },
+      {
+        "type": "String",
+        "name": "scopeType"
+      },
+      {
+        "type": "String",
+        "name": "scopeId"
+      },
+      {
+        "type": "String",
+        "name": "title"
+      },
+      {
+        "type": "String",
+        "name": "severityId"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "confidenceScore"
+      },
+      {
+        "type": "AnalyticsInsightStatus",
+        "name": "status"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/analytics/api/rest/response/AnalyticsInsightResponse.java"
+  },
+  {
+    "module": "analytics",
+    "kind": "response",
+    "name": "AnalyticsProjectionRunResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "projectionDefinitionId"
+      },
+      {
+        "type": "AnalyticsRunStatus",
+        "name": "runStatus"
+      },
+      {
+        "type": "AnalyticsRunMode",
+        "name": "runMode"
+      },
+      {
+        "type": "Instant",
+        "name": "periodStart"
+      },
+      {
+        "type": "Instant",
+        "name": "periodEnd"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      }
+    ],
+    "field_count": 7,
+    "path": "src/main/java/dz/sh/hidra/modules/analytics/api/rest/response/AnalyticsProjectionRunResponse.java"
+  },
+  {
+    "module": "analytics",
+    "kind": "response",
+    "name": "MetricEvaluationRunResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "metricDefinitionVersionId"
+      },
+      {
+        "type": "AnalyticsRunStatus",
+        "name": "runStatus"
+      },
+      {
+        "type": "Instant",
+        "name": "periodStart"
+      },
+      {
+        "type": "Instant",
+        "name": "periodEnd"
+      },
+      {
+        "type": "String",
+        "name": "scopeType"
+      },
+      {
+        "type": "String",
+        "name": "scopeId"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      }
+    ],
+    "field_count": 8,
+    "path": "src/main/java/dz/sh/hidra/modules/analytics/api/rest/response/MetricEvaluationRunResponse.java"
+  },
+  {
+    "module": "analytics",
+    "kind": "response",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/analytics/api/rest/response/package-info.java"
+  },
+  {
+    "module": "assets",
+    "kind": "request",
+    "name": "CreateMaintenanceWorkOrderRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "workOrderNumber"
+      },
+      {
+        "type": "String",
+        "name": "maintainableAssetId"
+      },
+      {
+        "type": "String",
+        "name": "maintenancePlanId"
+      },
+      {
+        "type": "String",
+        "name": "sourceRecommendationId"
+      },
+      {
+        "type": "String",
+        "name": "workOrderTypeId"
+      },
+      {
+        "type": "String",
+        "name": "priorityId"
+      },
+      {
+        "type": "String",
+        "name": "title"
+      },
+      {
+        "type": "String",
+        "name": "description"
+      },
+      {
+        "type": "String",
+        "name": "assignedOrganizationUnitId"
+      },
+      {
+        "type": "String",
+        "name": "assignedActorId"
+      },
+      {
+        "type": "Instant",
+        "name": "plannedStartAt"
+      },
+      {
+        "type": "Instant",
+        "name": "plannedEndAt"
+      },
+      {
+        "type": "String",
+        "name": "workflowInstanceId"
+      },
+      {
+        "type": "String",
+        "name": "createdByActorId"
+      }
+    ],
+    "field_count": 14,
+    "path": "src/main/java/dz/sh/hidra/modules/assets/api/rest/request/CreateMaintenanceWorkOrderRequest.java"
+  },
+  {
+    "module": "assets",
+    "kind": "request",
+    "name": "RecordAssetConditionRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "maintainableAssetId"
+      },
+      {
+        "type": "AssetConditionStatus",
+        "name": "conditionStatus"
+      },
+      {
+        "type": "String",
+        "name": "conditionTypeId"
+      },
+      {
+        "type": "String",
+        "name": "sourceModule"
+      },
+      {
+        "type": "String",
+        "name": "sourceReferenceId"
+      },
+      {
+        "type": "String",
+        "name": "summary"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "conditionScore"
+      },
+      {
+        "type": "Instant",
+        "name": "observedAt"
+      },
+      {
+        "type": "String",
+        "name": "observedByActorId"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/assets/api/rest/request/RecordAssetConditionRequest.java"
+  },
+  {
+    "module": "assets",
+    "kind": "request",
+    "name": "RegisterMaintainableAssetRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "assetNumber"
+      },
+      {
+        "type": "String",
+        "name": "assetCode"
+      },
+      {
+        "type": "String",
+        "name": "assetName"
+      },
+      {
+        "type": "String",
+        "name": "assetTypeId"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetTypeCode"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetId"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetCodeSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "criticalityId"
+      },
+      {
+        "type": "String",
+        "name": "ownerOrganizationUnitId"
+      },
+      {
+        "type": "String",
+        "name": "ownerOrganizationUnitNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "manufacturerPartyId"
+      },
+      {
+        "type": "String",
+        "name": "manufacturerNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "modelId"
+      },
+      {
+        "type": "String",
+        "name": "serialIdentityId"
+      },
+      {
+        "type": "Instant",
+        "name": "installedAt"
+      },
+      {
+        "type": "Instant",
+        "name": "commissionedAt"
+      },
+      {
+        "type": "String",
+        "name": "createdByActorId"
+      }
+    ],
+    "field_count": 18,
+    "path": "src/main/java/dz/sh/hidra/modules/assets/api/rest/request/RegisterMaintainableAssetRequest.java"
+  },
+  {
+    "module": "assets",
+    "kind": "request",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/assets/api/rest/request/package-info.java"
+  },
+  {
+    "module": "assets",
+    "kind": "response",
+    "name": "AssetConditionResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "maintainableAssetId"
+      },
+      {
+        "type": "AssetConditionStatus",
+        "name": "conditionStatus"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "conditionScore"
+      },
+      {
+        "type": "Instant",
+        "name": "observedAt"
+      }
+    ],
+    "field_count": 5,
+    "path": "src/main/java/dz/sh/hidra/modules/assets/api/rest/response/AssetConditionResponse.java"
+  },
+  {
+    "module": "assets",
+    "kind": "response",
+    "name": "MaintainableAssetResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "assetNumber"
+      },
+      {
+        "type": "String",
+        "name": "assetCode"
+      },
+      {
+        "type": "String",
+        "name": "assetName"
+      },
+      {
+        "type": "String",
+        "name": "assetTypeId"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetTypeCode"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetId"
+      },
+      {
+        "type": "AssetLifecycleStatus",
+        "name": "status"
+      },
+      {
+        "type": "String",
+        "name": "criticalityId"
+      },
+      {
+        "type": "Instant",
+        "name": "registeredAt"
+      }
+    ],
+    "field_count": 10,
+    "path": "src/main/java/dz/sh/hidra/modules/assets/api/rest/response/MaintainableAssetResponse.java"
+  },
+  {
+    "module": "assets",
+    "kind": "response",
+    "name": "MaintenanceWorkOrderResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "workOrderNumber"
+      },
+      {
+        "type": "String",
+        "name": "maintainableAssetId"
+      },
+      {
+        "type": "String",
+        "name": "sourceRecommendationId"
+      },
+      {
+        "type": "String",
+        "name": "workOrderTypeId"
+      },
+      {
+        "type": "MaintenanceWorkOrderStatus",
+        "name": "status"
+      },
+      {
+        "type": "String",
+        "name": "title"
+      },
+      {
+        "type": "Instant",
+        "name": "plannedStartAt"
+      },
+      {
+        "type": "Instant",
+        "name": "completedAt"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/assets/api/rest/response/MaintenanceWorkOrderResponse.java"
+  },
+  {
+    "module": "assets",
+    "kind": "response",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/assets/api/rest/response/package-info.java"
+  },
+  {
+    "module": "audit",
+    "kind": "request",
+    "name": "RecordAuditAccessRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "actorId"
+      },
+      {
+        "type": "String",
+        "name": "actorDisplayNameSnapshot"
+      },
+      {
+        "type": "AuditAccessType",
+        "name": "accessType"
+      },
+      {
+        "type": "String",
+        "name": "auditEventId"
+      },
+      {
+        "type": "String",
+        "name": "searchFilterHash"
+      },
+      {
+        "type": "String",
+        "name": "exportRequestId"
+      },
+      {
+        "type": "Integer",
+        "name": "resultCount"
+      },
+      {
+        "type": "String",
+        "name": "purposeText"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/audit/api/rest/request/RecordAuditAccessRequest.java"
+  },
+  {
+    "module": "audit",
+    "kind": "request",
+    "name": "RecordAuditEventRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "eventTypeId"
+      },
+      {
+        "type": "String",
+        "name": "eventCategoryId"
+      },
+      {
+        "type": "String",
+        "name": "severityId"
+      },
+      {
+        "type": "String",
+        "name": "sourceModule"
+      },
+      {
+        "type": "String",
+        "name": "sourceComponent"
+      },
+      {
+        "type": "String",
+        "name": "sourceEventId"
+      },
+      {
+        "type": "String",
+        "name": "actionCode"
+      },
+      {
+        "type": "String",
+        "name": "actionLabelSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "actorId"
+      },
+      {
+        "type": "AuditActorType",
+        "name": "actorType"
+      },
+      {
+        "type": "String",
+        "name": "actorDisplayNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "actorUsernameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "targetModule"
+      },
+      {
+        "type": "String",
+        "name": "targetType"
+      },
+      {
+        "type": "String",
+        "name": "targetId"
+      },
+      {
+        "type": "String",
+        "name": "targetCodeSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "targetLabelSnapshot"
+      },
+      {
+        "type": "AuditOperation",
+        "name": "operation"
+      },
+      {
+        "type": "String",
+        "name": "decisionCode"
+      },
+      {
+        "type": "String",
+        "name": "reasonId"
+      },
+      {
+        "type": "String",
+        "name": "reasonText"
+      },
+      {
+        "type": "String",
+        "name": "workflowInstanceId"
+      },
+      {
+        "type": "String",
+        "name": "workflowTaskId"
+      },
+      {
+        "type": "String",
+        "name": "workflowActionId"
+      },
+      {
+        "type": "String",
+        "name": "requestId"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      },
+      {
+        "type": "String",
+        "name": "causationId"
+      },
+      {
+        "type": "Instant",
+        "name": "occurredAt"
+      },
+      {
+        "type": "String",
+        "name": "payloadJson"
+      }
+    ],
+    "field_count": 29,
+    "path": "src/main/java/dz/sh/hidra/modules/audit/api/rest/request/RecordAuditEventRequest.java"
+  },
+  {
+    "module": "audit",
+    "kind": "request",
+    "name": "RequestAuditExportRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "requestedByActorId"
+      },
+      {
+        "type": "String",
+        "name": "requestedByDisplayNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "purposeId"
+      },
+      {
+        "type": "String",
+        "name": "filterJson"
+      },
+      {
+        "type": "String",
+        "name": "format"
+      },
+      {
+        "type": "String",
+        "name": "workflowInstanceId"
+      }
+    ],
+    "field_count": 6,
+    "path": "src/main/java/dz/sh/hidra/modules/audit/api/rest/request/RequestAuditExportRequest.java"
+  },
+  {
+    "module": "audit",
+    "kind": "request",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/audit/api/rest/request/package-info.java"
+  },
+  {
+    "module": "audit",
+    "kind": "response",
+    "name": "AuditAccessRecordResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "actorId"
+      },
+      {
+        "type": "AuditAccessType",
+        "name": "accessType"
+      },
+      {
+        "type": "String",
+        "name": "auditEventId"
+      },
+      {
+        "type": "String",
+        "name": "exportRequestId"
+      },
+      {
+        "type": "Integer",
+        "name": "resultCount"
+      },
+      {
+        "type": "Instant",
+        "name": "accessedAt"
+      }
+    ],
+    "field_count": 7,
+    "path": "src/main/java/dz/sh/hidra/modules/audit/api/rest/response/AuditAccessRecordResponse.java"
+  },
+  {
+    "module": "audit",
+    "kind": "response",
+    "name": "AuditEventResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "sourceModule"
+      },
+      {
+        "type": "String",
+        "name": "actionCode"
+      },
+      {
+        "type": "AuditEventStatus",
+        "name": "eventStatus"
+      },
+      {
+        "type": "String",
+        "name": "actorId"
+      },
+      {
+        "type": "AuditActorType",
+        "name": "actorType"
+      },
+      {
+        "type": "String",
+        "name": "targetModule"
+      },
+      {
+        "type": "String",
+        "name": "targetType"
+      },
+      {
+        "type": "String",
+        "name": "targetId"
+      },
+      {
+        "type": "AuditOperation",
+        "name": "operation"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      },
+      {
+        "type": "Instant",
+        "name": "occurredAt"
+      },
+      {
+        "type": "Instant",
+        "name": "recordedAt"
+      }
+    ],
+    "field_count": 13,
+    "path": "src/main/java/dz/sh/hidra/modules/audit/api/rest/response/AuditEventResponse.java"
+  },
+  {
+    "module": "audit",
+    "kind": "response",
+    "name": "AuditExportRequestResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "requestedByActorId"
+      },
+      {
+        "type": "String",
+        "name": "purposeId"
+      },
+      {
+        "type": "String",
+        "name": "format"
+      },
+      {
+        "type": "AuditExportStatus",
+        "name": "status"
+      },
+      {
+        "type": "Integer",
+        "name": "recordCount"
+      },
+      {
+        "type": "Instant",
+        "name": "requestedAt"
+      },
+      {
+        "type": "Instant",
+        "name": "completedAt"
+      }
+    ],
+    "field_count": 8,
+    "path": "src/main/java/dz/sh/hidra/modules/audit/api/rest/response/AuditExportRequestResponse.java"
+  },
+  {
+    "module": "audit",
+    "kind": "response",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/audit/api/rest/response/package-info.java"
+  },
+  {
+    "module": "configuration",
+    "kind": "request",
+    "name": "CreateConfigurationDefinitionRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "namespaceId"
+      },
+      {
+        "type": "String",
+        "name": "key"
+      },
+      {
+        "type": "String",
+        "name": "displayNameFr"
+      },
+      {
+        "type": "String",
+        "name": "displayNameAr"
+      },
+      {
+        "type": "String",
+        "name": "displayNameEn"
+      },
+      {
+        "type": "ConfigurationValueType",
+        "name": "valueType"
+      },
+      {
+        "type": "ConfigurationSensitivity",
+        "name": "sensitivity"
+      },
+      {
+        "type": "boolean",
+        "name": "scoped"
+      },
+      {
+        "type": "boolean",
+        "name": "requiresApproval"
+      },
+      {
+        "type": "String",
+        "name": "defaultValue"
+      },
+      {
+        "type": "String",
+        "name": "description"
+      }
+    ],
+    "field_count": 11,
+    "path": "src/main/java/dz/sh/hidra/modules/configuration/api/rest/request/CreateConfigurationDefinitionRequest.java"
+  },
+  {
+    "module": "configuration",
+    "kind": "request",
+    "name": "CreateFeatureFlagRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "nameAr"
+      },
+      {
+        "type": "String",
+        "name": "nameEn"
+      },
+      {
+        "type": "String",
+        "name": "owningModule"
+      },
+      {
+        "type": "FeatureFlagEvaluationStrategy",
+        "name": "evaluationStrategy"
+      },
+      {
+        "type": "boolean",
+        "name": "defaultEnabled"
+      },
+      {
+        "type": "String",
+        "name": "description"
+      }
+    ],
+    "field_count": 8,
+    "path": "src/main/java/dz/sh/hidra/modules/configuration/api/rest/request/CreateFeatureFlagRequest.java"
+  },
+  {
+    "module": "configuration",
+    "kind": "request",
+    "name": "SetConfigurationValueRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "definitionId"
+      },
+      {
+        "type": "String",
+        "name": "definitionVersionId"
+      },
+      {
+        "type": "String",
+        "name": "environment"
+      },
+      {
+        "type": "String",
+        "name": "rawValue"
+      },
+      {
+        "type": "String",
+        "name": "jsonValue"
+      },
+      {
+        "type": "String",
+        "name": "secretReference"
+      },
+      {
+        "type": "Instant",
+        "name": "effectiveFrom"
+      },
+      {
+        "type": "Instant",
+        "name": "effectiveTo"
+      },
+      {
+        "type": "String",
+        "name": "createdByActorId"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/configuration/api/rest/request/SetConfigurationValueRequest.java"
+  },
+  {
+    "module": "configuration",
+    "kind": "request",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/configuration/api/rest/request/package-info.java"
+  },
+  {
+    "module": "configuration",
+    "kind": "response",
+    "name": "ConfigurationDefinitionResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "namespaceId"
+      },
+      {
+        "type": "String",
+        "name": "key"
+      },
+      {
+        "type": "String",
+        "name": "displayNameFr"
+      },
+      {
+        "type": "ConfigurationValueType",
+        "name": "valueType"
+      },
+      {
+        "type": "ConfigurationSensitivity",
+        "name": "sensitivity"
+      },
+      {
+        "type": "ConfigurationDefinitionStatus",
+        "name": "status"
+      },
+      {
+        "type": "boolean",
+        "name": "scoped"
+      },
+      {
+        "type": "boolean",
+        "name": "requiresApproval"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/configuration/api/rest/response/ConfigurationDefinitionResponse.java"
+  },
+  {
+    "module": "configuration",
+    "kind": "response",
+    "name": "ConfigurationValueResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "definitionId"
+      },
+      {
+        "type": "String",
+        "name": "definitionVersionId"
+      },
+      {
+        "type": "String",
+        "name": "environment"
+      },
+      {
+        "type": "ConfigurationValueStatus",
+        "name": "status"
+      },
+      {
+        "type": "Instant",
+        "name": "effectiveFrom"
+      },
+      {
+        "type": "Instant",
+        "name": "effectiveTo"
+      }
+    ],
+    "field_count": 7,
+    "path": "src/main/java/dz/sh/hidra/modules/configuration/api/rest/response/ConfigurationValueResponse.java"
+  },
+  {
+    "module": "configuration",
+    "kind": "response",
+    "name": "FeatureFlagResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "owningModule"
+      },
+      {
+        "type": "FeatureFlagStatus",
+        "name": "status"
+      },
+      {
+        "type": "FeatureFlagEvaluationStrategy",
+        "name": "evaluationStrategy"
+      },
+      {
+        "type": "boolean",
+        "name": "defaultEnabled"
+      }
+    ],
+    "field_count": 7,
+    "path": "src/main/java/dz/sh/hidra/modules/configuration/api/rest/response/FeatureFlagResponse.java"
+  },
+  {
+    "module": "configuration",
+    "kind": "response",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/configuration/api/rest/response/package-info.java"
+  },
+  {
+    "module": "custody",
+    "kind": "request",
+    "name": "CreateCustodyTransferTicketRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "ticketNumber"
+      },
+      {
+        "type": "String",
+        "name": "measurementPeriodId"
+      },
+      {
+        "type": "String",
+        "name": "agreementId"
+      },
+      {
+        "type": "String",
+        "name": "transferPointId"
+      },
+      {
+        "type": "String",
+        "name": "batchId"
+      },
+      {
+        "type": "String",
+        "name": "quantityCalculationId"
+      },
+      {
+        "type": "Instant",
+        "name": "ticketDate"
+      },
+      {
+        "type": "String",
+        "name": "issuedByActorId"
+      },
+      {
+        "type": "String",
+        "name": "workflowInstanceId"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/custody/api/rest/request/CreateCustodyTransferTicketRequest.java"
+  },
+  {
+    "module": "custody",
+    "kind": "request",
+    "name": "OpenCustodyDiscrepancyRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "discrepancyNumber"
+      },
+      {
+        "type": "String",
+        "name": "reconciliationId"
+      },
+      {
+        "type": "String",
+        "name": "discrepancyTypeId"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "differenceQuantity"
+      },
+      {
+        "type": "String",
+        "name": "quantityUnitId"
+      },
+      {
+        "type": "String",
+        "name": "description"
+      },
+      {
+        "type": "String",
+        "name": "assignedActorId"
+      },
+      {
+        "type": "Instant",
+        "name": "openedAt"
+      }
+    ],
+    "field_count": 8,
+    "path": "src/main/java/dz/sh/hidra/modules/custody/api/rest/request/OpenCustodyDiscrepancyRequest.java"
+  },
+  {
+    "module": "custody",
+    "kind": "request",
+    "name": "OpenCustodyMeasurementPeriodRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "periodCode"
+      },
+      {
+        "type": "String",
+        "name": "agreementId"
+      },
+      {
+        "type": "String",
+        "name": "transferPointId"
+      },
+      {
+        "type": "Instant",
+        "name": "periodStart"
+      },
+      {
+        "type": "Instant",
+        "name": "periodEnd"
+      }
+    ],
+    "field_count": 5,
+    "path": "src/main/java/dz/sh/hidra/modules/custody/api/rest/request/OpenCustodyMeasurementPeriodRequest.java"
+  },
+  {
+    "module": "custody",
+    "kind": "request",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/custody/api/rest/request/package-info.java"
+  },
+  {
+    "module": "custody",
+    "kind": "response",
+    "name": "CustodyDiscrepancyResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "discrepancyNumber"
+      },
+      {
+        "type": "String",
+        "name": "reconciliationId"
+      },
+      {
+        "type": "String",
+        "name": "discrepancyTypeId"
+      },
+      {
+        "type": "CustodyDiscrepancyStatus",
+        "name": "status"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "differenceQuantity"
+      },
+      {
+        "type": "Instant",
+        "name": "openedAt"
+      }
+    ],
+    "field_count": 7,
+    "path": "src/main/java/dz/sh/hidra/modules/custody/api/rest/response/CustodyDiscrepancyResponse.java"
+  },
+  {
+    "module": "custody",
+    "kind": "response",
+    "name": "CustodyMeasurementPeriodResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "periodCode"
+      },
+      {
+        "type": "String",
+        "name": "agreementId"
+      },
+      {
+        "type": "String",
+        "name": "transferPointId"
+      },
+      {
+        "type": "Instant",
+        "name": "periodStart"
+      },
+      {
+        "type": "Instant",
+        "name": "periodEnd"
+      },
+      {
+        "type": "CustodyPeriodStatus",
+        "name": "status"
+      }
+    ],
+    "field_count": 7,
+    "path": "src/main/java/dz/sh/hidra/modules/custody/api/rest/response/CustodyMeasurementPeriodResponse.java"
+  },
+  {
+    "module": "custody",
+    "kind": "response",
+    "name": "CustodyTransferTicketResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "ticketNumber"
+      },
+      {
+        "type": "String",
+        "name": "measurementPeriodId"
+      },
+      {
+        "type": "String",
+        "name": "agreementId"
+      },
+      {
+        "type": "String",
+        "name": "transferPointId"
+      },
+      {
+        "type": "CustodyTicketStatus",
+        "name": "status"
+      },
+      {
+        "type": "Instant",
+        "name": "ticketDate"
+      },
+      {
+        "type": "Instant",
+        "name": "approvedAt"
+      }
+    ],
+    "field_count": 8,
+    "path": "src/main/java/dz/sh/hidra/modules/custody/api/rest/response/CustodyTransferTicketResponse.java"
+  },
+  {
+    "module": "custody",
+    "kind": "response",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/custody/api/rest/response/package-info.java"
+  },
+  {
+    "module": "documents",
+    "kind": "request",
+    "name": "LinkDocumentToTargetRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "documentId"
+      },
+      {
+        "type": "String",
+        "name": "documentVersionId"
+      },
+      {
+        "type": "String",
+        "name": "targetModule"
+      },
+      {
+        "type": "String",
+        "name": "targetTypeCode"
+      },
+      {
+        "type": "String",
+        "name": "targetId"
+      },
+      {
+        "type": "String",
+        "name": "targetCodeSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "targetLabelSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "linkRoleId"
+      },
+      {
+        "type": "boolean",
+        "name": "primaryLink"
+      },
+      {
+        "type": "String",
+        "name": "linkedByActorId"
+      }
+    ],
+    "field_count": 10,
+    "path": "src/main/java/dz/sh/hidra/modules/documents/api/rest/request/LinkDocumentToTargetRequest.java"
+  },
+  {
+    "module": "documents",
+    "kind": "request",
+    "name": "RegisterDocumentRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "titleAr"
+      },
+      {
+        "type": "String",
+        "name": "titleFr"
+      },
+      {
+        "type": "String",
+        "name": "titleEn"
+      },
+      {
+        "type": "String",
+        "name": "documentTypeId"
+      },
+      {
+        "type": "String",
+        "name": "documentCategoryId"
+      },
+      {
+        "type": "String",
+        "name": "classificationId"
+      },
+      {
+        "type": "int",
+        "name": "confidentialityLevel"
+      },
+      {
+        "type": "String",
+        "name": "ownerModule"
+      },
+      {
+        "type": "String",
+        "name": "ownerTargetTypeCode"
+      },
+      {
+        "type": "String",
+        "name": "ownerTargetId"
+      },
+      {
+        "type": "String",
+        "name": "ownerTargetCodeSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "ownerTargetLabelSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "createdByActorId"
+      },
+      {
+        "type": "String",
+        "name": "createdByDisplayNameSnapshot"
+      }
+    ],
+    "field_count": 15,
+    "path": "src/main/java/dz/sh/hidra/modules/documents/api/rest/request/RegisterDocumentRequest.java"
+  },
+  {
+    "module": "documents",
+    "kind": "request",
+    "name": "UploadDocumentVersionRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "documentId"
+      },
+      {
+        "type": "int",
+        "name": "versionNumber"
+      },
+      {
+        "type": "String",
+        "name": "versionLabel"
+      },
+      {
+        "type": "String",
+        "name": "titleAr"
+      },
+      {
+        "type": "String",
+        "name": "titleFr"
+      },
+      {
+        "type": "String",
+        "name": "titleEn"
+      },
+      {
+        "type": "String",
+        "name": "description"
+      },
+      {
+        "type": "String",
+        "name": "storageObjectId"
+      },
+      {
+        "type": "String",
+        "name": "mimeType"
+      },
+      {
+        "type": "String",
+        "name": "originalFilename"
+      },
+      {
+        "type": "String",
+        "name": "fileExtension"
+      },
+      {
+        "type": "long",
+        "name": "fileSizeBytes"
+      },
+      {
+        "type": "String",
+        "name": "checksumAlgorithm"
+      },
+      {
+        "type": "String",
+        "name": "checksumValue"
+      },
+      {
+        "type": "String",
+        "name": "languageCode"
+      },
+      {
+        "type": "LocalDate",
+        "name": "documentDate"
+      },
+      {
+        "type": "LocalDate",
+        "name": "effectiveFrom"
+      },
+      {
+        "type": "LocalDate",
+        "name": "effectiveTo"
+      },
+      {
+        "type": "String",
+        "name": "uploadedByActorId"
+      },
+      {
+        "type": "String",
+        "name": "uploadedByDisplayNameSnapshot"
+      }
+    ],
+    "field_count": 20,
+    "path": "src/main/java/dz/sh/hidra/modules/documents/api/rest/request/UploadDocumentVersionRequest.java"
+  },
+  {
+    "module": "documents",
+    "kind": "request",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/documents/api/rest/request/package-info.java"
+  },
+  {
+    "module": "documents",
+    "kind": "response",
+    "name": "DocumentResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "titleFr"
+      },
+      {
+        "type": "String",
+        "name": "documentTypeId"
+      },
+      {
+        "type": "String",
+        "name": "classificationId"
+      },
+      {
+        "type": "int",
+        "name": "confidentialityLevel"
+      },
+      {
+        "type": "DocumentStatus",
+        "name": "status"
+      },
+      {
+        "type": "String",
+        "name": "currentVersionId"
+      },
+      {
+        "type": "String",
+        "name": "ownerModule"
+      },
+      {
+        "type": "String",
+        "name": "ownerTargetId"
+      },
+      {
+        "type": "Instant",
+        "name": "createdAt"
+      }
+    ],
+    "field_count": 11,
+    "path": "src/main/java/dz/sh/hidra/modules/documents/api/rest/response/DocumentResponse.java"
+  },
+  {
+    "module": "documents",
+    "kind": "response",
+    "name": "DocumentTargetLinkResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "documentId"
+      },
+      {
+        "type": "String",
+        "name": "documentVersionId"
+      },
+      {
+        "type": "String",
+        "name": "targetModule"
+      },
+      {
+        "type": "String",
+        "name": "targetTypeCode"
+      },
+      {
+        "type": "String",
+        "name": "targetId"
+      },
+      {
+        "type": "String",
+        "name": "linkRoleId"
+      },
+      {
+        "type": "boolean",
+        "name": "primaryLink"
+      },
+      {
+        "type": "Instant",
+        "name": "linkedAt"
+      },
+      {
+        "type": "boolean",
+        "name": "active"
+      }
+    ],
+    "field_count": 10,
+    "path": "src/main/java/dz/sh/hidra/modules/documents/api/rest/response/DocumentTargetLinkResponse.java"
+  },
+  {
+    "module": "documents",
+    "kind": "response",
+    "name": "DocumentVersionResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "documentId"
+      },
+      {
+        "type": "int",
+        "name": "versionNumber"
+      },
+      {
+        "type": "String",
+        "name": "versionLabel"
+      },
+      {
+        "type": "String",
+        "name": "mimeType"
+      },
+      {
+        "type": "String",
+        "name": "originalFilename"
+      },
+      {
+        "type": "long",
+        "name": "fileSizeBytes"
+      },
+      {
+        "type": "String",
+        "name": "checksumValue"
+      },
+      {
+        "type": "DocumentVersionStatus",
+        "name": "versionStatus"
+      },
+      {
+        "type": "Instant",
+        "name": "uploadedAt"
+      }
+    ],
+    "field_count": 10,
+    "path": "src/main/java/dz/sh/hidra/modules/documents/api/rest/response/DocumentVersionResponse.java"
+  },
+  {
+    "module": "documents",
+    "kind": "response",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/documents/api/rest/response/package-info.java"
+  },
+  {
+    "module": "hse",
+    "kind": "request",
+    "name": "CloseHseCaseRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "hseCaseId"
+      },
+      {
+        "type": "String",
+        "name": "closureSummary"
+      },
+      {
+        "type": "boolean",
+        "name": "impactAssessed"
+      },
+      {
+        "type": "boolean",
+        "name": "capaCompleted"
+      },
+      {
+        "type": "boolean",
+        "name": "evidenceReviewed"
+      },
+      {
+        "type": "boolean",
+        "name": "regulatoryReviewed"
+      },
+      {
+        "type": "String",
+        "name": "closedByActorId"
+      },
+      {
+        "type": "String",
+        "name": "closedByDisplayNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "workflowInstanceId"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/hse/api/rest/request/CloseHseCaseRequest.java"
+  },
+  {
+    "module": "hse",
+    "kind": "request",
+    "name": "CreateHseCapaRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "hseCaseId"
+      },
+      {
+        "type": "String",
+        "name": "actionNumber"
+      },
+      {
+        "type": "String",
+        "name": "actionTypeId"
+      },
+      {
+        "type": "String",
+        "name": "title"
+      },
+      {
+        "type": "String",
+        "name": "description"
+      },
+      {
+        "type": "String",
+        "name": "ownerActorId"
+      },
+      {
+        "type": "String",
+        "name": "ownerDisplayNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "ownerOrganizationUnitId"
+      },
+      {
+        "type": "String",
+        "name": "ownerOrganizationUnitNameSnapshot"
+      },
+      {
+        "type": "Instant",
+        "name": "targetDate"
+      },
+      {
+        "type": "boolean",
+        "name": "verificationRequired"
+      },
+      {
+        "type": "String",
+        "name": "linkedWorkOrderId"
+      },
+      {
+        "type": "String",
+        "name": "workflowTaskId"
+      }
+    ],
+    "field_count": 13,
+    "path": "src/main/java/dz/sh/hidra/modules/hse/api/rest/request/CreateHseCapaRequest.java"
+  },
+  {
+    "module": "hse",
+    "kind": "request",
+    "name": "OpenHseCaseRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "caseNumber"
+      },
+      {
+        "type": "String",
+        "name": "title"
+      },
+      {
+        "type": "String",
+        "name": "description"
+      },
+      {
+        "type": "String",
+        "name": "caseTypeId"
+      },
+      {
+        "type": "String",
+        "name": "severityId"
+      },
+      {
+        "type": "String",
+        "name": "priorityId"
+      },
+      {
+        "type": "HseCaseSourceType",
+        "name": "sourceType"
+      },
+      {
+        "type": "String",
+        "name": "incidentReferenceId"
+      },
+      {
+        "type": "String",
+        "name": "incidentCodeSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "incidentTitleSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "targetModule"
+      },
+      {
+        "type": "String",
+        "name": "targetTypeCode"
+      },
+      {
+        "type": "String",
+        "name": "targetId"
+      },
+      {
+        "type": "String",
+        "name": "targetCodeSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "targetLabelSnapshot"
+      },
+      {
+        "type": "Instant",
+        "name": "occurredAt"
+      },
+      {
+        "type": "String",
+        "name": "reportedByActorId"
+      },
+      {
+        "type": "String",
+        "name": "reportedByDisplayNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "responsibleOrganizationUnitId"
+      },
+      {
+        "type": "String",
+        "name": "responsibleOrganizationUnitNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "workflowInstanceId"
+      }
+    ],
+    "field_count": 21,
+    "path": "src/main/java/dz/sh/hidra/modules/hse/api/rest/request/OpenHseCaseRequest.java"
+  },
+  {
+    "module": "hse",
+    "kind": "request",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/hse/api/rest/request/package-info.java"
+  },
+  {
+    "module": "hse",
+    "kind": "response",
+    "name": "HseCapaResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "hseCaseId"
+      },
+      {
+        "type": "String",
+        "name": "actionNumber"
+      },
+      {
+        "type": "String",
+        "name": "title"
+      },
+      {
+        "type": "CapaStatus",
+        "name": "status"
+      },
+      {
+        "type": "Instant",
+        "name": "targetDate"
+      },
+      {
+        "type": "Instant",
+        "name": "completedAt"
+      }
+    ],
+    "field_count": 7,
+    "path": "src/main/java/dz/sh/hidra/modules/hse/api/rest/response/HseCapaResponse.java"
+  },
+  {
+    "module": "hse",
+    "kind": "response",
+    "name": "HseCaseResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "caseNumber"
+      },
+      {
+        "type": "String",
+        "name": "title"
+      },
+      {
+        "type": "String",
+        "name": "caseTypeId"
+      },
+      {
+        "type": "String",
+        "name": "severityId"
+      },
+      {
+        "type": "HseCaseStatus",
+        "name": "status"
+      },
+      {
+        "type": "HseCaseSourceType",
+        "name": "sourceType"
+      },
+      {
+        "type": "String",
+        "name": "incidentReferenceId"
+      },
+      {
+        "type": "String",
+        "name": "targetModule"
+      },
+      {
+        "type": "String",
+        "name": "targetTypeCode"
+      },
+      {
+        "type": "String",
+        "name": "targetId"
+      },
+      {
+        "type": "Instant",
+        "name": "reportedAt"
+      },
+      {
+        "type": "Instant",
+        "name": "closedAt"
+      }
+    ],
+    "field_count": 13,
+    "path": "src/main/java/dz/sh/hidra/modules/hse/api/rest/response/HseCaseResponse.java"
+  },
+  {
+    "module": "hse",
+    "kind": "response",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/hse/api/rest/response/package-info.java"
+  },
+  {
+    "module": "identity",
+    "kind": "request",
+    "name": "CreateUserRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "username"
+      },
+      {
+        "type": "String",
+        "name": "emailAddress"
+      },
+      {
+        "type": "String",
+        "name": "displayName"
+      },
+      {
+        "type": "UserType",
+        "name": "userType"
+      },
+      {
+        "type": "String",
+        "name": "employeeReferenceId"
+      }
+    ],
+    "field_count": 5,
+    "path": "src/main/java/dz/sh/hidra/modules/identity/api/rest/request/CreateUserRequest.java"
+  },
+  {
+    "module": "identity",
+    "kind": "request",
+    "name": "EvaluatePermissionRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "userId"
+      },
+      {
+        "type": "String",
+        "name": "permissionCode"
+      },
+      {
+        "type": "String",
+        "name": "resourceType"
+      },
+      {
+        "type": "String",
+        "name": "resourceReferenceId"
+      },
+      {
+        "type": "AuthorizationScope",
+        "name": "scope"
+      }
+    ],
+    "field_count": 5,
+    "path": "src/main/java/dz/sh/hidra/modules/identity/api/rest/request/EvaluatePermissionRequest.java"
+  },
+  {
+    "module": "identity",
+    "kind": "request",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/identity/api/rest/request/package-info.java"
+  },
+  {
+    "module": "identity",
+    "kind": "response",
+    "name": "PermissionDecisionResponse",
+    "fields": [
+      {
+        "type": "boolean",
+        "name": "permitted"
+      },
+      {
+        "type": "AuthorizationDecisionValue",
+        "name": "decision"
+      },
+      {
+        "type": "String",
+        "name": "reasonCode"
+      },
+      {
+        "type": "String",
+        "name": "reasonMessage"
+      },
+      {
+        "type": "Instant",
+        "name": "evaluatedAt"
+      }
+    ],
+    "field_count": 5,
+    "path": "src/main/java/dz/sh/hidra/modules/identity/api/rest/response/PermissionDecisionResponse.java"
+  },
+  {
+    "module": "identity",
+    "kind": "response",
+    "name": "UserResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "username"
+      },
+      {
+        "type": "String",
+        "name": "emailAddress"
+      },
+      {
+        "type": "String",
+        "name": "displayName"
+      },
+      {
+        "type": "UserType",
+        "name": "userType"
+      },
+      {
+        "type": "UserStatus",
+        "name": "status"
+      }
+    ],
+    "field_count": 6,
+    "path": "src/main/java/dz/sh/hidra/modules/identity/api/rest/response/UserResponse.java"
+  },
+  {
+    "module": "identity",
+    "kind": "response",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/identity/api/rest/response/package-info.java"
+  },
+  {
+    "module": "incident",
+    "kind": "request",
+    "name": "CloseIncidentRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "incidentId"
+      },
+      {
+        "type": "String",
+        "name": "closureSummary"
+      },
+      {
+        "type": "boolean",
+        "name": "resolutionVerified"
+      },
+      {
+        "type": "boolean",
+        "name": "evidenceReviewed"
+      },
+      {
+        "type": "boolean",
+        "name": "rootCauseReviewed"
+      },
+      {
+        "type": "boolean",
+        "name": "followUpActionsCreated"
+      },
+      {
+        "type": "String",
+        "name": "closedByActorId"
+      },
+      {
+        "type": "String",
+        "name": "closedByActorNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "workflowInstanceId"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/incident/api/rest/request/CloseIncidentRequest.java"
+  },
+  {
+    "module": "incident",
+    "kind": "request",
+    "name": "OpenIncidentRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "incidentNumber"
+      },
+      {
+        "type": "String",
+        "name": "title"
+      },
+      {
+        "type": "String",
+        "name": "description"
+      },
+      {
+        "type": "String",
+        "name": "classificationId"
+      },
+      {
+        "type": "String",
+        "name": "severityId"
+      },
+      {
+        "type": "String",
+        "name": "priorityId"
+      },
+      {
+        "type": "IncidentSourceType",
+        "name": "sourceType"
+      },
+      {
+        "type": "String",
+        "name": "sourceReferenceId"
+      },
+      {
+        "type": "String",
+        "name": "sourceReferenceCode"
+      },
+      {
+        "type": "Instant",
+        "name": "detectedAt"
+      },
+      {
+        "type": "Instant",
+        "name": "occurredAt"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetTypeCode"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetId"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetCode"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "locationDescriptionAr"
+      },
+      {
+        "type": "String",
+        "name": "locationDescriptionLt"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "latitude"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "longitude"
+      },
+      {
+        "type": "String",
+        "name": "responsibleOrganizationUnitId"
+      },
+      {
+        "type": "String",
+        "name": "responsibleOrganizationUnitCode"
+      },
+      {
+        "type": "String",
+        "name": "responsibleOrganizationUnitNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "createdByActorId"
+      },
+      {
+        "type": "String",
+        "name": "createdByActorNameSnapshot"
+      }
+    ],
+    "field_count": 24,
+    "path": "src/main/java/dz/sh/hidra/modules/incident/api/rest/request/OpenIncidentRequest.java"
+  },
+  {
+    "module": "incident",
+    "kind": "request",
+    "name": "RecordIncidentResponseActionRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "incidentId"
+      },
+      {
+        "type": "String",
+        "name": "actionTypeId"
+      },
+      {
+        "type": "ResponseActionStatus",
+        "name": "actionStatus"
+      },
+      {
+        "type": "String",
+        "name": "description"
+      },
+      {
+        "type": "ResponseTargetType",
+        "name": "targetType"
+      },
+      {
+        "type": "String",
+        "name": "targetReferenceId"
+      },
+      {
+        "type": "String",
+        "name": "targetReferenceCode"
+      },
+      {
+        "type": "Instant",
+        "name": "plannedStartAt"
+      },
+      {
+        "type": "Instant",
+        "name": "plannedEndAt"
+      },
+      {
+        "type": "Instant",
+        "name": "startedAt"
+      },
+      {
+        "type": "Instant",
+        "name": "completedAt"
+      },
+      {
+        "type": "String",
+        "name": "performedByActorId"
+      },
+      {
+        "type": "String",
+        "name": "performedByActorNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "organizationUnitId"
+      },
+      {
+        "type": "String",
+        "name": "resultSummary"
+      },
+      {
+        "type": "String",
+        "name": "failureReason"
+      }
+    ],
+    "field_count": 16,
+    "path": "src/main/java/dz/sh/hidra/modules/incident/api/rest/request/RecordIncidentResponseActionRequest.java"
+  },
+  {
+    "module": "incident",
+    "kind": "request",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/incident/api/rest/request/package-info.java"
+  },
+  {
+    "module": "incident",
+    "kind": "response",
+    "name": "IncidentResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "incidentNumber"
+      },
+      {
+        "type": "String",
+        "name": "title"
+      },
+      {
+        "type": "String",
+        "name": "classificationId"
+      },
+      {
+        "type": "String",
+        "name": "severityId"
+      },
+      {
+        "type": "IncidentStatus",
+        "name": "status"
+      },
+      {
+        "type": "IncidentSourceType",
+        "name": "sourceType"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetTypeCode"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetId"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetCode"
+      },
+      {
+        "type": "Instant",
+        "name": "detectedAt"
+      },
+      {
+        "type": "Instant",
+        "name": "reportedAt"
+      },
+      {
+        "type": "Instant",
+        "name": "closedAt"
+      }
+    ],
+    "field_count": 13,
+    "path": "src/main/java/dz/sh/hidra/modules/incident/api/rest/response/IncidentResponse.java"
+  },
+  {
+    "module": "incident",
+    "kind": "response",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/incident/api/rest/response/package-info.java"
+  },
+  {
+    "module": "integration",
+    "kind": "request",
+    "name": "RecordExchangeMessageRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "jobRunId"
+      },
+      {
+        "type": "String",
+        "name": "externalSystemId"
+      },
+      {
+        "type": "String",
+        "name": "endpointId"
+      },
+      {
+        "type": "IntegrationDirection",
+        "name": "direction"
+      },
+      {
+        "type": "String",
+        "name": "messageTypeId"
+      },
+      {
+        "type": "String",
+        "name": "externalMessageId"
+      },
+      {
+        "type": "String",
+        "name": "payloadFormatId"
+      },
+      {
+        "type": "PayloadStorageMode",
+        "name": "payloadStorageMode"
+      },
+      {
+        "type": "String",
+        "name": "payloadSanitized"
+      },
+      {
+        "type": "String",
+        "name": "payloadReference"
+      },
+      {
+        "type": "String",
+        "name": "payloadHash"
+      },
+      {
+        "type": "Long",
+        "name": "contentLengthBytes"
+      },
+      {
+        "type": "Instant",
+        "name": "receivedOrSentAt"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      },
+      {
+        "type": "ExchangeMessageStatus",
+        "name": "status"
+      }
+    ],
+    "field_count": 15,
+    "path": "src/main/java/dz/sh/hidra/modules/integration/api/rest/request/RecordExchangeMessageRequest.java"
+  },
+  {
+    "module": "integration",
+    "kind": "request",
+    "name": "RegisterExternalSystemRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameAr"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "nameEn"
+      },
+      {
+        "type": "String",
+        "name": "systemTypeId"
+      },
+      {
+        "type": "String",
+        "name": "ownerOrganizationUnitId"
+      },
+      {
+        "type": "IntegrationEnvironment",
+        "name": "environment"
+      },
+      {
+        "type": "IntegrationCriticality",
+        "name": "criticality"
+      },
+      {
+        "type": "String",
+        "name": "description"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/integration/api/rest/request/RegisterExternalSystemRequest.java"
+  },
+  {
+    "module": "integration",
+    "kind": "request",
+    "name": "StartIntegrationJobRunRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "jobDefinitionId"
+      },
+      {
+        "type": "long",
+        "name": "runNumber"
+      },
+      {
+        "type": "JobTriggerType",
+        "name": "triggerType"
+      },
+      {
+        "type": "String",
+        "name": "triggeredByActorId"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      }
+    ],
+    "field_count": 5,
+    "path": "src/main/java/dz/sh/hidra/modules/integration/api/rest/request/StartIntegrationJobRunRequest.java"
+  },
+  {
+    "module": "integration",
+    "kind": "request",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/integration/api/rest/request/package-info.java"
+  },
+  {
+    "module": "integration",
+    "kind": "response",
+    "name": "ExternalSystemResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "systemTypeId"
+      },
+      {
+        "type": "IntegrationEnvironment",
+        "name": "environment"
+      },
+      {
+        "type": "IntegrationCriticality",
+        "name": "criticality"
+      },
+      {
+        "type": "ExternalSystemStatus",
+        "name": "status"
+      },
+      {
+        "type": "Instant",
+        "name": "createdAt"
+      }
+    ],
+    "field_count": 8,
+    "path": "src/main/java/dz/sh/hidra/modules/integration/api/rest/response/ExternalSystemResponse.java"
+  },
+  {
+    "module": "integration",
+    "kind": "response",
+    "name": "IntegrationExchangeMessageResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "jobRunId"
+      },
+      {
+        "type": "String",
+        "name": "externalSystemId"
+      },
+      {
+        "type": "IntegrationDirection",
+        "name": "direction"
+      },
+      {
+        "type": "String",
+        "name": "externalMessageId"
+      },
+      {
+        "type": "String",
+        "name": "payloadHash"
+      },
+      {
+        "type": "ExchangeMessageStatus",
+        "name": "status"
+      },
+      {
+        "type": "Instant",
+        "name": "receivedOrSentAt"
+      }
+    ],
+    "field_count": 8,
+    "path": "src/main/java/dz/sh/hidra/modules/integration/api/rest/response/IntegrationExchangeMessageResponse.java"
+  },
+  {
+    "module": "integration",
+    "kind": "response",
+    "name": "IntegrationJobRunResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "jobDefinitionId"
+      },
+      {
+        "type": "long",
+        "name": "runNumber"
+      },
+      {
+        "type": "JobTriggerType",
+        "name": "triggerType"
+      },
+      {
+        "type": "JobRunStatus",
+        "name": "status"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      },
+      {
+        "type": "Instant",
+        "name": "startedAt"
+      },
+      {
+        "type": "Instant",
+        "name": "completedAt"
+      }
+    ],
+    "field_count": 8,
+    "path": "src/main/java/dz/sh/hidra/modules/integration/api/rest/response/IntegrationJobRunResponse.java"
+  },
+  {
+    "module": "integration",
+    "kind": "response",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/integration/api/rest/response/package-info.java"
+  },
+  {
+    "module": "integrity",
+    "kind": "request",
+    "name": "CreateIntegrityAssessmentRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "programId"
+      },
+      {
+        "type": "String",
+        "name": "assessmentNumber"
+      },
+      {
+        "type": "String",
+        "name": "title"
+      },
+      {
+        "type": "String",
+        "name": "description"
+      },
+      {
+        "type": "String",
+        "name": "assessmentTypeId"
+      },
+      {
+        "type": "String",
+        "name": "methodologyId"
+      },
+      {
+        "type": "Instant",
+        "name": "assessmentDate"
+      },
+      {
+        "type": "String",
+        "name": "assessedByActorId"
+      },
+      {
+        "type": "String",
+        "name": "workflowInstanceId"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/integrity/api/rest/request/CreateIntegrityAssessmentRequest.java"
+  },
+  {
+    "module": "integrity",
+    "kind": "request",
+    "name": "CreateIntegrityProgramRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameAr"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "nameEn"
+      },
+      {
+        "type": "String",
+        "name": "description"
+      },
+      {
+        "type": "String",
+        "name": "programTypeId"
+      },
+      {
+        "type": "String",
+        "name": "ownerOrganizationUnitId"
+      },
+      {
+        "type": "String",
+        "name": "ownerOrganizationUnitNameSnapshot"
+      },
+      {
+        "type": "Instant",
+        "name": "plannedStartAt"
+      },
+      {
+        "type": "Instant",
+        "name": "plannedEndAt"
+      },
+      {
+        "type": "String",
+        "name": "createdByActorId"
+      }
+    ],
+    "field_count": 11,
+    "path": "src/main/java/dz/sh/hidra/modules/integrity/api/rest/request/CreateIntegrityProgramRequest.java"
+  },
+  {
+    "module": "integrity",
+    "kind": "request",
+    "name": "OpenIntegrityCaseRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "caseNumber"
+      },
+      {
+        "type": "String",
+        "name": "title"
+      },
+      {
+        "type": "String",
+        "name": "description"
+      },
+      {
+        "type": "String",
+        "name": "caseTypeId"
+      },
+      {
+        "type": "String",
+        "name": "severityId"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetTypeCode"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetId"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetCodeSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "primaryDefectId"
+      },
+      {
+        "type": "String",
+        "name": "sourceIncidentId"
+      },
+      {
+        "type": "String",
+        "name": "sourceHseCaseId"
+      },
+      {
+        "type": "String",
+        "name": "responsibleOrganizationUnitId"
+      },
+      {
+        "type": "String",
+        "name": "workflowInstanceId"
+      },
+      {
+        "type": "String",
+        "name": "openedByActorId"
+      }
+    ],
+    "field_count": 14,
+    "path": "src/main/java/dz/sh/hidra/modules/integrity/api/rest/request/OpenIntegrityCaseRequest.java"
+  },
+  {
+    "module": "integrity",
+    "kind": "request",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/integrity/api/rest/request/package-info.java"
+  },
+  {
+    "module": "integrity",
+    "kind": "response",
+    "name": "IntegrityAssessmentResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "programId"
+      },
+      {
+        "type": "String",
+        "name": "assessmentNumber"
+      },
+      {
+        "type": "String",
+        "name": "title"
+      },
+      {
+        "type": "String",
+        "name": "assessmentTypeId"
+      },
+      {
+        "type": "IntegrityAssessmentStatus",
+        "name": "status"
+      },
+      {
+        "type": "Instant",
+        "name": "assessmentDate"
+      }
+    ],
+    "field_count": 7,
+    "path": "src/main/java/dz/sh/hidra/modules/integrity/api/rest/response/IntegrityAssessmentResponse.java"
+  },
+  {
+    "module": "integrity",
+    "kind": "response",
+    "name": "IntegrityCaseResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "caseNumber"
+      },
+      {
+        "type": "String",
+        "name": "title"
+      },
+      {
+        "type": "String",
+        "name": "caseTypeId"
+      },
+      {
+        "type": "IntegrityCaseStatus",
+        "name": "status"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetTypeCode"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetId"
+      },
+      {
+        "type": "String",
+        "name": "primaryDefectId"
+      },
+      {
+        "type": "Instant",
+        "name": "openedAt"
+      },
+      {
+        "type": "Instant",
+        "name": "closedAt"
+      }
+    ],
+    "field_count": 10,
+    "path": "src/main/java/dz/sh/hidra/modules/integrity/api/rest/response/IntegrityCaseResponse.java"
+  },
+  {
+    "module": "integrity",
+    "kind": "response",
+    "name": "IntegrityProgramResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "programTypeId"
+      },
+      {
+        "type": "IntegrityProgramStatus",
+        "name": "status"
+      },
+      {
+        "type": "Instant",
+        "name": "plannedStartAt"
+      },
+      {
+        "type": "Instant",
+        "name": "plannedEndAt"
+      }
+    ],
+    "field_count": 7,
+    "path": "src/main/java/dz/sh/hidra/modules/integrity/api/rest/response/IntegrityProgramResponse.java"
+  },
+  {
+    "module": "integrity",
+    "kind": "response",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/integrity/api/rest/response/package-info.java"
+  },
+  {
+    "module": "leakdetection",
+    "kind": "request",
+    "name": "CreateLeakCandidateRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "runId"
+      },
+      {
+        "type": "String",
+        "name": "profileId"
+      },
+      {
+        "type": "String",
+        "name": "candidateNumber"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetType"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetId"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetCode"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetNameSnapshot"
+      },
+      {
+        "type": "Instant",
+        "name": "suspectedAt"
+      },
+      {
+        "type": "Instant",
+        "name": "firstEvidenceAt"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "confidenceScore"
+      },
+      {
+        "type": "String",
+        "name": "summary"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      }
+    ],
+    "field_count": 12,
+    "path": "src/main/java/dz/sh/hidra/modules/leakdetection/api/rest/request/CreateLeakCandidateRequest.java"
+  },
+  {
+    "module": "leakdetection",
+    "kind": "request",
+    "name": "EscalateLeakCaseRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "caseId"
+      },
+      {
+        "type": "String",
+        "name": "candidateId"
+      },
+      {
+        "type": "LeakEscalationTargetType",
+        "name": "targetType"
+      },
+      {
+        "type": "String",
+        "name": "targetReferenceId"
+      },
+      {
+        "type": "String",
+        "name": "targetCodeSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "targetNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "escalatedByActorId"
+      },
+      {
+        "type": "String",
+        "name": "reasonText"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/leakdetection/api/rest/request/EscalateLeakCaseRequest.java"
+  },
+  {
+    "module": "leakdetection",
+    "kind": "request",
+    "name": "OpenLeakCaseRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "caseNumber"
+      },
+      {
+        "type": "String",
+        "name": "primaryCandidateId"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetType"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetId"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetCode"
+      },
+      {
+        "type": "String",
+        "name": "owningOrganizationUnitId"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "confidenceScore"
+      },
+      {
+        "type": "String",
+        "name": "openedByActorId"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/leakdetection/api/rest/request/OpenLeakCaseRequest.java"
+  },
+  {
+    "module": "leakdetection",
+    "kind": "request",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/leakdetection/api/rest/request/package-info.java"
+  },
+  {
+    "module": "leakdetection",
+    "kind": "response",
+    "name": "LeakCandidateResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "candidateNumber"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetType"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetId"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetCode"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "confidenceScore"
+      },
+      {
+        "type": "LeakSeverityLevel",
+        "name": "severityLevel"
+      },
+      {
+        "type": "LeakCandidateStatus",
+        "name": "status"
+      },
+      {
+        "type": "Instant",
+        "name": "suspectedAt"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/leakdetection/api/rest/response/LeakCandidateResponse.java"
+  },
+  {
+    "module": "leakdetection",
+    "kind": "response",
+    "name": "LeakCaseResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "caseNumber"
+      },
+      {
+        "type": "String",
+        "name": "primaryCandidateId"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetType"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetId"
+      },
+      {
+        "type": "LeakDetectionCaseStatus",
+        "name": "status"
+      },
+      {
+        "type": "LeakSeverityLevel",
+        "name": "severityLevel"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "confidenceScore"
+      },
+      {
+        "type": "Instant",
+        "name": "openedAt"
+      },
+      {
+        "type": "Instant",
+        "name": "closedAt"
+      }
+    ],
+    "field_count": 10,
+    "path": "src/main/java/dz/sh/hidra/modules/leakdetection/api/rest/response/LeakCaseResponse.java"
+  },
+  {
+    "module": "leakdetection",
+    "kind": "response",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/leakdetection/api/rest/response/package-info.java"
+  },
+  {
+    "module": "monitoring",
+    "kind": "request",
+    "name": "CreateMonitoringRuleRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameAr"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "nameEn"
+      },
+      {
+        "type": "MonitoringRuleType",
+        "name": "ruleType"
+      },
+      {
+        "type": "String",
+        "name": "evaluationFrequencyId"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetType"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetId"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetCode"
+      },
+      {
+        "type": "String",
+        "name": "telemetryPointId"
+      },
+      {
+        "type": "String",
+        "name": "planningTargetTypeId"
+      },
+      {
+        "type": "String",
+        "name": "expression"
+      },
+      {
+        "type": "String",
+        "name": "createdByActorId"
+      }
+    ],
+    "field_count": 13,
+    "path": "src/main/java/dz/sh/hidra/modules/monitoring/api/rest/request/CreateMonitoringRuleRequest.java"
+  },
+  {
+    "module": "monitoring",
+    "kind": "request",
+    "name": "RecordDeviationRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "evaluationId"
+      },
+      {
+        "type": "String",
+        "name": "planTargetId"
+      },
+      {
+        "type": "String",
+        "name": "expectedFlowStateId"
+      },
+      {
+        "type": "String",
+        "name": "trustedTelemetryReadingId"
+      },
+      {
+        "type": "String",
+        "name": "telemetryPointId"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetType"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetId"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetCode"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "actualValue"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "expectedValue"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "differenceValue"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "differencePercent"
+      },
+      {
+        "type": "String",
+        "name": "unitId"
+      },
+      {
+        "type": "DeviationSeverity",
+        "name": "severity"
+      },
+      {
+        "type": "String",
+        "name": "reasonCode"
+      },
+      {
+        "type": "String",
+        "name": "reasonMessage"
+      }
+    ],
+    "field_count": 16,
+    "path": "src/main/java/dz/sh/hidra/modules/monitoring/api/rest/request/RecordDeviationRequest.java"
+  },
+  {
+    "module": "monitoring",
+    "kind": "request",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/monitoring/api/rest/request/package-info.java"
+  },
+  {
+    "module": "monitoring",
+    "kind": "response",
+    "name": "DeviationResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "planTargetId"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetType"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetId"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "actualValue"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "expectedValue"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "differencePercent"
+      },
+      {
+        "type": "DeviationSeverity",
+        "name": "severity"
+      },
+      {
+        "type": "DeviationStatus",
+        "name": "status"
+      },
+      {
+        "type": "Instant",
+        "name": "detectedAt"
+      }
+    ],
+    "field_count": 10,
+    "path": "src/main/java/dz/sh/hidra/modules/monitoring/api/rest/response/DeviationResponse.java"
+  },
+  {
+    "module": "monitoring",
+    "kind": "response",
+    "name": "MonitoringRuleResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "MonitoringRuleType",
+        "name": "ruleType"
+      },
+      {
+        "type": "MonitoringLifecycleStatus",
+        "name": "status"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetType"
+      },
+      {
+        "type": "String",
+        "name": "topologyAssetId"
+      },
+      {
+        "type": "String",
+        "name": "telemetryPointId"
+      }
+    ],
+    "field_count": 8,
+    "path": "src/main/java/dz/sh/hidra/modules/monitoring/api/rest/response/MonitoringRuleResponse.java"
+  },
+  {
+    "module": "monitoring",
+    "kind": "response",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/monitoring/api/rest/response/package-info.java"
+  },
+  {
+    "module": "notification",
+    "kind": "request",
+    "name": "CreateNotificationMessageRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "requestId"
+      },
+      {
+        "type": "String",
+        "name": "recipientId"
+      },
+      {
+        "type": "String",
+        "name": "channelId"
+      },
+      {
+        "type": "String",
+        "name": "templateId"
+      },
+      {
+        "type": "String",
+        "name": "templateVersionId"
+      },
+      {
+        "type": "String",
+        "name": "locale"
+      },
+      {
+        "type": "String",
+        "name": "subjectRendered"
+      },
+      {
+        "type": "String",
+        "name": "bodyRendered"
+      },
+      {
+        "type": "String",
+        "name": "shortTextRendered"
+      },
+      {
+        "type": "String",
+        "name": "payloadHash"
+      },
+      {
+        "type": "String",
+        "name": "priorityId"
+      },
+      {
+        "type": "Instant",
+        "name": "scheduledAt"
+      },
+      {
+        "type": "Instant",
+        "name": "expiresAt"
+      }
+    ],
+    "field_count": 13,
+    "path": "src/main/java/dz/sh/hidra/modules/notification/api/rest/request/CreateNotificationMessageRequest.java"
+  },
+  {
+    "module": "notification",
+    "kind": "request",
+    "name": "ReceiveNotificationRequestRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "sourceModule"
+      },
+      {
+        "type": "String",
+        "name": "sourceEventType"
+      },
+      {
+        "type": "String",
+        "name": "sourceEventId"
+      },
+      {
+        "type": "String",
+        "name": "targetType"
+      },
+      {
+        "type": "String",
+        "name": "targetId"
+      },
+      {
+        "type": "String",
+        "name": "targetCodeSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "targetLabelSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "categoryId"
+      },
+      {
+        "type": "String",
+        "name": "priorityId"
+      },
+      {
+        "type": "String",
+        "name": "policyId"
+      },
+      {
+        "type": "String",
+        "name": "templateId"
+      },
+      {
+        "type": "String",
+        "name": "templateVersionId"
+      },
+      {
+        "type": "String",
+        "name": "requestedByActorId"
+      },
+      {
+        "type": "String",
+        "name": "requestedByDisplayNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      },
+      {
+        "type": "String",
+        "name": "requestId"
+      },
+      {
+        "type": "Instant",
+        "name": "expiresAt"
+      }
+    ],
+    "field_count": 17,
+    "path": "src/main/java/dz/sh/hidra/modules/notification/api/rest/request/ReceiveNotificationRequestRequest.java"
+  },
+  {
+    "module": "notification",
+    "kind": "request",
+    "name": "RecordDeliveryAttemptRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "messageId"
+      },
+      {
+        "type": "int",
+        "name": "attemptNumber"
+      },
+      {
+        "type": "String",
+        "name": "channelId"
+      },
+      {
+        "type": "String",
+        "name": "providerReference"
+      },
+      {
+        "type": "String",
+        "name": "providerMessageId"
+      },
+      {
+        "type": "DeliveryAttemptStatus",
+        "name": "attemptStatus"
+      },
+      {
+        "type": "Instant",
+        "name": "attemptedAt"
+      },
+      {
+        "type": "Instant",
+        "name": "completedAt"
+      },
+      {
+        "type": "String",
+        "name": "failureCode"
+      },
+      {
+        "type": "String",
+        "name": "failureMessage"
+      },
+      {
+        "type": "Instant",
+        "name": "nextRetryAt"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      }
+    ],
+    "field_count": 12,
+    "path": "src/main/java/dz/sh/hidra/modules/notification/api/rest/request/RecordDeliveryAttemptRequest.java"
+  },
+  {
+    "module": "notification",
+    "kind": "request",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/notification/api/rest/request/package-info.java"
+  },
+  {
+    "module": "notification",
+    "kind": "response",
+    "name": "NotificationDeliveryAttemptResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "messageId"
+      },
+      {
+        "type": "int",
+        "name": "attemptNumber"
+      },
+      {
+        "type": "String",
+        "name": "channelId"
+      },
+      {
+        "type": "DeliveryAttemptStatus",
+        "name": "attemptStatus"
+      },
+      {
+        "type": "Instant",
+        "name": "attemptedAt"
+      },
+      {
+        "type": "Instant",
+        "name": "completedAt"
+      },
+      {
+        "type": "Instant",
+        "name": "nextRetryAt"
+      }
+    ],
+    "field_count": 8,
+    "path": "src/main/java/dz/sh/hidra/modules/notification/api/rest/response/NotificationDeliveryAttemptResponse.java"
+  },
+  {
+    "module": "notification",
+    "kind": "response",
+    "name": "NotificationMessageResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "requestId"
+      },
+      {
+        "type": "String",
+        "name": "recipientId"
+      },
+      {
+        "type": "String",
+        "name": "channelId"
+      },
+      {
+        "type": "String",
+        "name": "templateVersionId"
+      },
+      {
+        "type": "String",
+        "name": "locale"
+      },
+      {
+        "type": "NotificationMessageStatus",
+        "name": "status"
+      },
+      {
+        "type": "Instant",
+        "name": "scheduledAt"
+      },
+      {
+        "type": "Instant",
+        "name": "createdAt"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/notification/api/rest/response/NotificationMessageResponse.java"
+  },
+  {
+    "module": "notification",
+    "kind": "response",
+    "name": "NotificationRequestResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "sourceModule"
+      },
+      {
+        "type": "String",
+        "name": "sourceEventType"
+      },
+      {
+        "type": "String",
+        "name": "sourceEventId"
+      },
+      {
+        "type": "String",
+        "name": "targetType"
+      },
+      {
+        "type": "String",
+        "name": "targetId"
+      },
+      {
+        "type": "NotificationRequestStatus",
+        "name": "status"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      },
+      {
+        "type": "Instant",
+        "name": "requestedAt"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/notification/api/rest/response/NotificationRequestResponse.java"
+  },
+  {
+    "module": "notification",
+    "kind": "response",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/notification/api/rest/response/package-info.java"
+  },
+  {
+    "module": "organization",
+    "kind": "request",
+    "name": "AssignEmployeeRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "employeeId"
+      },
+      {
+        "type": "String",
+        "name": "organizationUnitId"
+      },
+      {
+        "type": "String",
+        "name": "positionId"
+      },
+      {
+        "type": "AssignmentType",
+        "name": "assignmentType"
+      },
+      {
+        "type": "String",
+        "name": "operationalScopeType"
+      },
+      {
+        "type": "String",
+        "name": "operationalScopeId"
+      },
+      {
+        "type": "String",
+        "name": "operationalScopeCode"
+      },
+      {
+        "type": "String",
+        "name": "operationalScopeName"
+      },
+      {
+        "type": "Instant",
+        "name": "validFrom"
+      },
+      {
+        "type": "Instant",
+        "name": "validTo"
+      }
+    ],
+    "field_count": 10,
+    "path": "src/main/java/dz/sh/hidra/modules/organization/api/rest/request/AssignEmployeeRequest.java"
+  },
+  {
+    "module": "organization",
+    "kind": "request",
+    "name": "CreateOrganizationUnitRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameAr"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "nameEn"
+      },
+      {
+        "type": "String",
+        "name": "unitTypeId"
+      },
+      {
+        "type": "String",
+        "name": "parentUnitId"
+      },
+      {
+        "type": "OrganizationUnitStatus",
+        "name": "status"
+      },
+      {
+        "type": "Instant",
+        "name": "validFrom"
+      }
+    ],
+    "field_count": 8,
+    "path": "src/main/java/dz/sh/hidra/modules/organization/api/rest/request/CreateOrganizationUnitRequest.java"
+  },
+  {
+    "module": "organization",
+    "kind": "request",
+    "name": "RegisterEmployeeRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "employeeNumber"
+      },
+      {
+        "type": "String",
+        "name": "firstNameAr"
+      },
+      {
+        "type": "String",
+        "name": "lastNameAr"
+      },
+      {
+        "type": "String",
+        "name": "firstNameLt"
+      },
+      {
+        "type": "String",
+        "name": "lastNameLt"
+      },
+      {
+        "type": "String",
+        "name": "displayNameAr"
+      },
+      {
+        "type": "String",
+        "name": "displayNameLt"
+      },
+      {
+        "type": "String",
+        "name": "emailAddress"
+      },
+      {
+        "type": "String",
+        "name": "mobileNumber"
+      },
+      {
+        "type": "EmployeeType",
+        "name": "employeeType"
+      },
+      {
+        "type": "String",
+        "name": "identityUserReference"
+      }
+    ],
+    "field_count": 11,
+    "path": "src/main/java/dz/sh/hidra/modules/organization/api/rest/request/RegisterEmployeeRequest.java"
+  },
+  {
+    "module": "organization",
+    "kind": "request",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/organization/api/rest/request/package-info.java"
+  },
+  {
+    "module": "organization",
+    "kind": "response",
+    "name": "EmployeeResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "employeeNumber"
+      },
+      {
+        "type": "String",
+        "name": "displayNameAr"
+      },
+      {
+        "type": "String",
+        "name": "displayNameLt"
+      },
+      {
+        "type": "String",
+        "name": "emailAddress"
+      },
+      {
+        "type": "EmployeeType",
+        "name": "employeeType"
+      },
+      {
+        "type": "EmployeeStatus",
+        "name": "status"
+      },
+      {
+        "type": "String",
+        "name": "identityUserReference"
+      }
+    ],
+    "field_count": 8,
+    "path": "src/main/java/dz/sh/hidra/modules/organization/api/rest/response/EmployeeResponse.java"
+  },
+  {
+    "module": "organization",
+    "kind": "response",
+    "name": "OrganizationUnitResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameAr"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "nameEn"
+      },
+      {
+        "type": "String",
+        "name": "unitTypeId"
+      },
+      {
+        "type": "String",
+        "name": "parentUnitId"
+      },
+      {
+        "type": "OrganizationUnitStatus",
+        "name": "status"
+      }
+    ],
+    "field_count": 8,
+    "path": "src/main/java/dz/sh/hidra/modules/organization/api/rest/response/OrganizationUnitResponse.java"
+  },
+  {
+    "module": "organization",
+    "kind": "response",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/organization/api/rest/response/package-info.java"
+  },
+  {
+    "module": "party",
+    "kind": "request",
+    "name": "AssignPartyRoleRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "partyId"
+      },
+      {
+        "type": "String",
+        "name": "roleId"
+      },
+      {
+        "type": "Instant",
+        "name": "validFrom"
+      },
+      {
+        "type": "Instant",
+        "name": "validTo"
+      },
+      {
+        "type": "boolean",
+        "name": "qualificationRequired"
+      }
+    ],
+    "field_count": 5,
+    "path": "src/main/java/dz/sh/hidra/modules/party/api/rest/request/AssignPartyRoleRequest.java"
+  },
+  {
+    "module": "party",
+    "kind": "request",
+    "name": "RegisterPartyRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "partyTypeId"
+      },
+      {
+        "type": "String",
+        "name": "legalName"
+      },
+      {
+        "type": "String",
+        "name": "tradeName"
+      },
+      {
+        "type": "String",
+        "name": "shortName"
+      },
+      {
+        "type": "String",
+        "name": "countryCode"
+      },
+      {
+        "type": "String",
+        "name": "jurisdictionCode"
+      },
+      {
+        "type": "String",
+        "name": "primaryRoleCodeSnapshot"
+      }
+    ],
+    "field_count": 8,
+    "path": "src/main/java/dz/sh/hidra/modules/party/api/rest/request/RegisterPartyRequest.java"
+  },
+  {
+    "module": "party",
+    "kind": "request",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/party/api/rest/request/package-info.java"
+  },
+  {
+    "module": "party",
+    "kind": "response",
+    "name": "PartyResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "legalName"
+      },
+      {
+        "type": "String",
+        "name": "tradeName"
+      },
+      {
+        "type": "String",
+        "name": "shortName"
+      },
+      {
+        "type": "String",
+        "name": "countryCode"
+      },
+      {
+        "type": "PartyStatus",
+        "name": "status"
+      },
+      {
+        "type": "String",
+        "name": "primaryRoleCodeSnapshot"
+      }
+    ],
+    "field_count": 8,
+    "path": "src/main/java/dz/sh/hidra/modules/party/api/rest/response/PartyResponse.java"
+  },
+  {
+    "module": "party",
+    "kind": "response",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/party/api/rest/response/package-info.java"
+  },
+  {
+    "module": "planning",
+    "kind": "request",
+    "name": "CreateOperationalPlanRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "periodId"
+      },
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameAr"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "nameEn"
+      },
+      {
+        "type": "String",
+        "name": "planTypeId"
+      },
+      {
+        "type": "String",
+        "name": "productTypeId"
+      },
+      {
+        "type": "String",
+        "name": "topologyScopeType"
+      },
+      {
+        "type": "String",
+        "name": "topologyScopeId"
+      },
+      {
+        "type": "String",
+        "name": "topologyScopeCode"
+      },
+      {
+        "type": "String",
+        "name": "topologyScopeNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "responsibleOrganizationUnitId"
+      },
+      {
+        "type": "String",
+        "name": "createdByActorId"
+      }
+    ],
+    "field_count": 13,
+    "path": "src/main/java/dz/sh/hidra/modules/planning/api/rest/request/CreateOperationalPlanRequest.java"
+  },
+  {
+    "module": "planning",
+    "kind": "request",
+    "name": "CreatePlanningPeriodRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameAr"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "nameEn"
+      },
+      {
+        "type": "String",
+        "name": "periodTypeId"
+      },
+      {
+        "type": "Instant",
+        "name": "periodStart"
+      },
+      {
+        "type": "Instant",
+        "name": "periodEnd"
+      },
+      {
+        "type": "String",
+        "name": "timeZone"
+      },
+      {
+        "type": "String",
+        "name": "createdByActorId"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/planning/api/rest/request/CreatePlanningPeriodRequest.java"
+  },
+  {
+    "module": "planning",
+    "kind": "request",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/planning/api/rest/request/package-info.java"
+  },
+  {
+    "module": "planning",
+    "kind": "response",
+    "name": "OperationalPlanResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "periodId"
+      },
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "topologyScopeType"
+      },
+      {
+        "type": "String",
+        "name": "topologyScopeId"
+      },
+      {
+        "type": "OperationalPlanStatus",
+        "name": "status"
+      },
+      {
+        "type": "String",
+        "name": "approvedRevisionId"
+      }
+    ],
+    "field_count": 8,
+    "path": "src/main/java/dz/sh/hidra/modules/planning/api/rest/response/OperationalPlanResponse.java"
+  },
+  {
+    "module": "planning",
+    "kind": "response",
+    "name": "PlanningPeriodResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "Instant",
+        "name": "periodStart"
+      },
+      {
+        "type": "Instant",
+        "name": "periodEnd"
+      },
+      {
+        "type": "String",
+        "name": "timeZone"
+      },
+      {
+        "type": "PlanningPeriodStatus",
+        "name": "status"
+      }
+    ],
+    "field_count": 7,
+    "path": "src/main/java/dz/sh/hidra/modules/planning/api/rest/response/PlanningPeriodResponse.java"
+  },
+  {
+    "module": "planning",
+    "kind": "response",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/planning/api/rest/response/package-info.java"
+  },
+  {
+    "module": "reporting",
+    "kind": "request",
+    "name": "CreateReportDefinitionRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameAr"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "nameEn"
+      },
+      {
+        "type": "String",
+        "name": "reportCategoryId"
+      },
+      {
+        "type": "String",
+        "name": "ownerModule"
+      },
+      {
+        "type": "String",
+        "name": "description"
+      },
+      {
+        "type": "boolean",
+        "name": "requiresApproval"
+      },
+      {
+        "type": "boolean",
+        "name": "restricted"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/reporting/api/rest/request/CreateReportDefinitionRequest.java"
+  },
+  {
+    "module": "reporting",
+    "kind": "request",
+    "name": "GenerateReportArtifactRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "reportRunId"
+      },
+      {
+        "type": "ReportArtifactType",
+        "name": "artifactType"
+      },
+      {
+        "type": "ReportFormat",
+        "name": "format"
+      },
+      {
+        "type": "String",
+        "name": "fileName"
+      },
+      {
+        "type": "String",
+        "name": "mimeType"
+      },
+      {
+        "type": "String",
+        "name": "storageObjectReferenceId"
+      },
+      {
+        "type": "String",
+        "name": "documentReferenceId"
+      },
+      {
+        "type": "String",
+        "name": "checksum"
+      },
+      {
+        "type": "Long",
+        "name": "sizeBytes"
+      },
+      {
+        "type": "Instant",
+        "name": "expiresAt"
+      }
+    ],
+    "field_count": 10,
+    "path": "src/main/java/dz/sh/hidra/modules/reporting/api/rest/request/GenerateReportArtifactRequest.java"
+  },
+  {
+    "module": "reporting",
+    "kind": "request",
+    "name": "QueueReportRunRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "reportRequestId"
+      },
+      {
+        "type": "String",
+        "name": "reportDefinitionId"
+      },
+      {
+        "type": "String",
+        "name": "templateVersionId"
+      },
+      {
+        "type": "ReportRunMode",
+        "name": "runMode"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      }
+    ],
+    "field_count": 5,
+    "path": "src/main/java/dz/sh/hidra/modules/reporting/api/rest/request/QueueReportRunRequest.java"
+  },
+  {
+    "module": "reporting",
+    "kind": "request",
+    "name": "RequestReportRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "reportDefinitionId"
+      },
+      {
+        "type": "String",
+        "name": "requestedByActorId"
+      },
+      {
+        "type": "String",
+        "name": "requestedByUsernameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "requestedByDisplayNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "requestedByRoleCodeSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "organizationUnitId"
+      },
+      {
+        "type": "String",
+        "name": "organizationUnitNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "purpose"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      },
+      {
+        "type": "String",
+        "name": "workflowReferenceId"
+      }
+    ],
+    "field_count": 10,
+    "path": "src/main/java/dz/sh/hidra/modules/reporting/api/rest/request/RequestReportRequest.java"
+  },
+  {
+    "module": "reporting",
+    "kind": "request",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/reporting/api/rest/request/package-info.java"
+  },
+  {
+    "module": "reporting",
+    "kind": "response",
+    "name": "ReportDefinitionResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "reportCategoryId"
+      },
+      {
+        "type": "String",
+        "name": "ownerModule"
+      },
+      {
+        "type": "boolean",
+        "name": "active"
+      },
+      {
+        "type": "String",
+        "name": "currentTemplateVersionId"
+      },
+      {
+        "type": "boolean",
+        "name": "requiresApproval"
+      },
+      {
+        "type": "boolean",
+        "name": "restricted"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/reporting/api/rest/response/ReportDefinitionResponse.java"
+  },
+  {
+    "module": "reporting",
+    "kind": "response",
+    "name": "ReportOutputArtifactResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "reportRunId"
+      },
+      {
+        "type": "ReportArtifactType",
+        "name": "artifactType"
+      },
+      {
+        "type": "ReportFormat",
+        "name": "format"
+      },
+      {
+        "type": "String",
+        "name": "fileName"
+      },
+      {
+        "type": "String",
+        "name": "mimeType"
+      },
+      {
+        "type": "String",
+        "name": "documentReferenceId"
+      },
+      {
+        "type": "String",
+        "name": "checksum"
+      },
+      {
+        "type": "Long",
+        "name": "sizeBytes"
+      },
+      {
+        "type": "Instant",
+        "name": "generatedAt"
+      }
+    ],
+    "field_count": 10,
+    "path": "src/main/java/dz/sh/hidra/modules/reporting/api/rest/response/ReportOutputArtifactResponse.java"
+  },
+  {
+    "module": "reporting",
+    "kind": "response",
+    "name": "ReportRequestResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "reportDefinitionId"
+      },
+      {
+        "type": "String",
+        "name": "requestedByActorId"
+      },
+      {
+        "type": "String",
+        "name": "requestedByDisplayNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "organizationUnitId"
+      },
+      {
+        "type": "Instant",
+        "name": "requestedAt"
+      },
+      {
+        "type": "ReportRequestStatus",
+        "name": "status"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      },
+      {
+        "type": "String",
+        "name": "workflowReferenceId"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/reporting/api/rest/response/ReportRequestResponse.java"
+  },
+  {
+    "module": "reporting",
+    "kind": "response",
+    "name": "ReportRunResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "reportRequestId"
+      },
+      {
+        "type": "String",
+        "name": "reportDefinitionId"
+      },
+      {
+        "type": "String",
+        "name": "templateVersionId"
+      },
+      {
+        "type": "ReportRunStatus",
+        "name": "status"
+      },
+      {
+        "type": "ReportRunMode",
+        "name": "runMode"
+      },
+      {
+        "type": "Instant",
+        "name": "queuedAt"
+      },
+      {
+        "type": "Instant",
+        "name": "completedAt"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/reporting/api/rest/response/ReportRunResponse.java"
+  },
+  {
+    "module": "reporting",
+    "kind": "response",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/reporting/api/rest/response/package-info.java"
+  },
+  {
+    "module": "risk",
+    "kind": "request",
+    "name": "AddRiskEvidenceRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "riskAssessmentId"
+      },
+      {
+        "type": "String",
+        "name": "evidenceModule"
+      },
+      {
+        "type": "String",
+        "name": "evidenceType"
+      },
+      {
+        "type": "String",
+        "name": "evidenceId"
+      },
+      {
+        "type": "String",
+        "name": "evidenceCodeSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "evidenceLabelSnapshot"
+      },
+      {
+        "type": "Instant",
+        "name": "evidenceTimestamp"
+      },
+      {
+        "type": "String",
+        "name": "evidenceHash"
+      },
+      {
+        "type": "String",
+        "name": "evidenceSummary"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/risk/api/rest/request/AddRiskEvidenceRequest.java"
+  },
+  {
+    "module": "risk",
+    "kind": "request",
+    "name": "CreateRiskAssessmentRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "riskRegisterId"
+      },
+      {
+        "type": "String",
+        "name": "assessmentNumber"
+      },
+      {
+        "type": "String",
+        "name": "title"
+      },
+      {
+        "type": "String",
+        "name": "description"
+      },
+      {
+        "type": "String",
+        "name": "assessmentTypeId"
+      },
+      {
+        "type": "String",
+        "name": "methodologyId"
+      },
+      {
+        "type": "String",
+        "name": "scopeId"
+      },
+      {
+        "type": "String",
+        "name": "riskScenarioId"
+      },
+      {
+        "type": "Instant",
+        "name": "assessmentDate"
+      },
+      {
+        "type": "Instant",
+        "name": "validFrom"
+      },
+      {
+        "type": "Instant",
+        "name": "validTo"
+      },
+      {
+        "type": "String",
+        "name": "assessedByActorId"
+      },
+      {
+        "type": "String",
+        "name": "assessedByDisplayNameSnapshot"
+      }
+    ],
+    "field_count": 13,
+    "path": "src/main/java/dz/sh/hidra/modules/risk/api/rest/request/CreateRiskAssessmentRequest.java"
+  },
+  {
+    "module": "risk",
+    "kind": "request",
+    "name": "CreateRiskRegisterRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameAr"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "nameEn"
+      },
+      {
+        "type": "String",
+        "name": "description"
+      },
+      {
+        "type": "String",
+        "name": "registerTypeId"
+      },
+      {
+        "type": "String",
+        "name": "ownerOrganizationUnitId"
+      },
+      {
+        "type": "String",
+        "name": "ownerOrganizationUnitNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "scopeType"
+      },
+      {
+        "type": "String",
+        "name": "scopeId"
+      },
+      {
+        "type": "String",
+        "name": "scopeCodeSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "scopeLabelSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "reviewFrequencyId"
+      },
+      {
+        "type": "Instant",
+        "name": "effectiveFrom"
+      },
+      {
+        "type": "Instant",
+        "name": "effectiveTo"
+      },
+      {
+        "type": "String",
+        "name": "createdByActorId"
+      },
+      {
+        "type": "String",
+        "name": "createdByDisplayNameSnapshot"
+      }
+    ],
+    "field_count": 17,
+    "path": "src/main/java/dz/sh/hidra/modules/risk/api/rest/request/CreateRiskRegisterRequest.java"
+  },
+  {
+    "module": "risk",
+    "kind": "request",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/risk/api/rest/request/package-info.java"
+  },
+  {
+    "module": "risk",
+    "kind": "response",
+    "name": "RiskAssessmentResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "riskRegisterId"
+      },
+      {
+        "type": "String",
+        "name": "assessmentNumber"
+      },
+      {
+        "type": "String",
+        "name": "title"
+      },
+      {
+        "type": "String",
+        "name": "riskScenarioId"
+      },
+      {
+        "type": "RiskAssessmentStatus",
+        "name": "status"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "inherentScore"
+      },
+      {
+        "type": "String",
+        "name": "inherentRatingId"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "residualScore"
+      },
+      {
+        "type": "String",
+        "name": "residualRatingId"
+      },
+      {
+        "type": "Instant",
+        "name": "assessmentDate"
+      }
+    ],
+    "field_count": 11,
+    "path": "src/main/java/dz/sh/hidra/modules/risk/api/rest/response/RiskAssessmentResponse.java"
+  },
+  {
+    "module": "risk",
+    "kind": "response",
+    "name": "RiskRegisterResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "registerTypeId"
+      },
+      {
+        "type": "String",
+        "name": "scopeType"
+      },
+      {
+        "type": "String",
+        "name": "scopeId"
+      },
+      {
+        "type": "RiskRegisterStatus",
+        "name": "status"
+      }
+    ],
+    "field_count": 7,
+    "path": "src/main/java/dz/sh/hidra/modules/risk/api/rest/response/RiskRegisterResponse.java"
+  },
+  {
+    "module": "risk",
+    "kind": "response",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/risk/api/rest/response/package-info.java"
+  },
+  {
+    "module": "simulation",
+    "kind": "request",
+    "name": "CreateSimulationModelRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameAr"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "nameEn"
+      },
+      {
+        "type": "String",
+        "name": "modelTypeId"
+      },
+      {
+        "type": "String",
+        "name": "topologyScopeType"
+      },
+      {
+        "type": "String",
+        "name": "topologyScopeId"
+      },
+      {
+        "type": "String",
+        "name": "description"
+      }
+    ],
+    "field_count": 8,
+    "path": "src/main/java/dz/sh/hidra/modules/simulation/api/rest/request/CreateSimulationModelRequest.java"
+  },
+  {
+    "module": "simulation",
+    "kind": "request",
+    "name": "CreateSimulationScenarioRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameAr"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "nameEn"
+      },
+      {
+        "type": "String",
+        "name": "scenarioTypeId"
+      },
+      {
+        "type": "String",
+        "name": "modelId"
+      },
+      {
+        "type": "String",
+        "name": "modelVersionId"
+      },
+      {
+        "type": "String",
+        "name": "topologySnapshotId"
+      },
+      {
+        "type": "String",
+        "name": "planningReferenceId"
+      },
+      {
+        "type": "String",
+        "name": "monitoringContextId"
+      },
+      {
+        "type": "String",
+        "name": "createdByActorId"
+      },
+      {
+        "type": "String",
+        "name": "createdByDisplayNameSnapshot"
+      }
+    ],
+    "field_count": 12,
+    "path": "src/main/java/dz/sh/hidra/modules/simulation/api/rest/request/CreateSimulationScenarioRequest.java"
+  },
+  {
+    "module": "simulation",
+    "kind": "request",
+    "name": "PublishSimulationRecommendationRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "runId"
+      },
+      {
+        "type": "String",
+        "name": "candidateId"
+      },
+      {
+        "type": "String",
+        "name": "recommendationTypeId"
+      },
+      {
+        "type": "String",
+        "name": "title"
+      },
+      {
+        "type": "String",
+        "name": "description"
+      },
+      {
+        "type": "String",
+        "name": "confidenceLevelId"
+      },
+      {
+        "type": "String",
+        "name": "targetModule"
+      },
+      {
+        "type": "String",
+        "name": "targetProposalReference"
+      },
+      {
+        "type": "String",
+        "name": "publishedByActorId"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/simulation/api/rest/request/PublishSimulationRecommendationRequest.java"
+  },
+  {
+    "module": "simulation",
+    "kind": "request",
+    "name": "QueueSimulationRunRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "scenarioId"
+      },
+      {
+        "type": "String",
+        "name": "modelVersionId"
+      },
+      {
+        "type": "String",
+        "name": "inputSnapshotId"
+      },
+      {
+        "type": "String",
+        "name": "runTypeId"
+      },
+      {
+        "type": "String",
+        "name": "requestedByActorId"
+      },
+      {
+        "type": "String",
+        "name": "requestedByDisplayNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "solverProfileId"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      }
+    ],
+    "field_count": 8,
+    "path": "src/main/java/dz/sh/hidra/modules/simulation/api/rest/request/QueueSimulationRunRequest.java"
+  },
+  {
+    "module": "simulation",
+    "kind": "request",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/simulation/api/rest/request/package-info.java"
+  },
+  {
+    "module": "simulation",
+    "kind": "response",
+    "name": "SimulationModelResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "modelTypeId"
+      },
+      {
+        "type": "String",
+        "name": "topologyScopeType"
+      },
+      {
+        "type": "SimulationModelStatus",
+        "name": "status"
+      },
+      {
+        "type": "Instant",
+        "name": "createdAt"
+      }
+    ],
+    "field_count": 7,
+    "path": "src/main/java/dz/sh/hidra/modules/simulation/api/rest/response/SimulationModelResponse.java"
+  },
+  {
+    "module": "simulation",
+    "kind": "response",
+    "name": "SimulationRecommendationResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "runId"
+      },
+      {
+        "type": "String",
+        "name": "candidateId"
+      },
+      {
+        "type": "String",
+        "name": "recommendationTypeId"
+      },
+      {
+        "type": "SimulationRecommendationStatus",
+        "name": "recommendationStatus"
+      },
+      {
+        "type": "String",
+        "name": "title"
+      },
+      {
+        "type": "String",
+        "name": "targetModule"
+      },
+      {
+        "type": "String",
+        "name": "targetProposalReference"
+      },
+      {
+        "type": "Instant",
+        "name": "publishedAt"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/simulation/api/rest/response/SimulationRecommendationResponse.java"
+  },
+  {
+    "module": "simulation",
+    "kind": "response",
+    "name": "SimulationRunResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "scenarioId"
+      },
+      {
+        "type": "String",
+        "name": "modelVersionId"
+      },
+      {
+        "type": "String",
+        "name": "inputSnapshotId"
+      },
+      {
+        "type": "String",
+        "name": "runTypeId"
+      },
+      {
+        "type": "SimulationRunStatus",
+        "name": "status"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      },
+      {
+        "type": "Instant",
+        "name": "queuedAt"
+      },
+      {
+        "type": "Instant",
+        "name": "completedAt"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/simulation/api/rest/response/SimulationRunResponse.java"
+  },
+  {
+    "module": "simulation",
+    "kind": "response",
+    "name": "SimulationScenarioResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "scenarioTypeId"
+      },
+      {
+        "type": "String",
+        "name": "modelId"
+      },
+      {
+        "type": "String",
+        "name": "modelVersionId"
+      },
+      {
+        "type": "String",
+        "name": "topologySnapshotId"
+      },
+      {
+        "type": "SimulationScenarioStatus",
+        "name": "status"
+      },
+      {
+        "type": "Instant",
+        "name": "createdAt"
+      }
+    ],
+    "field_count": 9,
+    "path": "src/main/java/dz/sh/hidra/modules/simulation/api/rest/response/SimulationScenarioResponse.java"
+  },
+  {
+    "module": "simulation",
+    "kind": "response",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/simulation/api/rest/response/package-info.java"
+  },
+  {
+    "module": "telemetry",
+    "kind": "request",
+    "name": "CreateTelemetrySourceRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameAr"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "nameEn"
+      },
+      {
+        "type": "String",
+        "name": "sourceTypeId"
+      },
+      {
+        "type": "String",
+        "name": "protocolId"
+      },
+      {
+        "type": "String",
+        "name": "endpointUri"
+      },
+      {
+        "type": "String",
+        "name": "externalReference"
+      }
+    ],
+    "field_count": 8,
+    "path": "src/main/java/dz/sh/hidra/modules/telemetry/api/rest/request/CreateTelemetrySourceRequest.java"
+  },
+  {
+    "module": "telemetry",
+    "kind": "request",
+    "name": "RegisterTelemetryPointRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "deviceId"
+      },
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameAr"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "nameEn"
+      },
+      {
+        "type": "String",
+        "name": "pointTypeId"
+      },
+      {
+        "type": "String",
+        "name": "signalTypeId"
+      },
+      {
+        "type": "String",
+        "name": "unitId"
+      },
+      {
+        "type": "Integer",
+        "name": "samplingPeriodSeconds"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "minOperationalValue"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "maxOperationalValue"
+      }
+    ],
+    "field_count": 11,
+    "path": "src/main/java/dz/sh/hidra/modules/telemetry/api/rest/request/RegisterTelemetryPointRequest.java"
+  },
+  {
+    "module": "telemetry",
+    "kind": "request",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/telemetry/api/rest/request/package-info.java"
+  },
+  {
+    "module": "telemetry",
+    "kind": "response",
+    "name": "TelemetryPointResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "deviceId"
+      },
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "signalTypeId"
+      },
+      {
+        "type": "String",
+        "name": "unitId"
+      },
+      {
+        "type": "TelemetryLifecycleStatus",
+        "name": "status"
+      }
+    ],
+    "field_count": 7,
+    "path": "src/main/java/dz/sh/hidra/modules/telemetry/api/rest/response/TelemetryPointResponse.java"
+  },
+  {
+    "module": "telemetry",
+    "kind": "response",
+    "name": "TelemetrySourceResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "sourceTypeId"
+      },
+      {
+        "type": "String",
+        "name": "protocolId"
+      },
+      {
+        "type": "TelemetryLifecycleStatus",
+        "name": "status"
+      }
+    ],
+    "field_count": 6,
+    "path": "src/main/java/dz/sh/hidra/modules/telemetry/api/rest/response/TelemetrySourceResponse.java"
+  },
+  {
+    "module": "telemetry",
+    "kind": "response",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/telemetry/api/rest/response/package-info.java"
+  },
+  {
+    "module": "topology",
+    "kind": "request",
+    "name": "CreatePipelineSystemRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameAr"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "nameEn"
+      },
+      {
+        "type": "PipelineSystemType",
+        "name": "systemType"
+      },
+      {
+        "type": "String",
+        "name": "description"
+      }
+    ],
+    "field_count": 6,
+    "path": "src/main/java/dz/sh/hidra/modules/topology/api/rest/request/CreatePipelineSystemRequest.java"
+  },
+  {
+    "module": "topology",
+    "kind": "request",
+    "name": "RegisterFacilityRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameAr"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "nameEn"
+      },
+      {
+        "type": "String",
+        "name": "facilityTypeId"
+      },
+      {
+        "type": "FacilityKind",
+        "name": "facilityKind"
+      },
+      {
+        "type": "String",
+        "name": "ownerPartyId"
+      },
+      {
+        "type": "String",
+        "name": "ownerPartyCodeSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "ownerPartyNameSnapshot"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "latitude"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "longitude"
+      },
+      {
+        "type": "BigDecimal",
+        "name": "elevationMeters"
+      }
+    ],
+    "field_count": 12,
+    "path": "src/main/java/dz/sh/hidra/modules/topology/api/rest/request/RegisterFacilityRequest.java"
+  },
+  {
+    "module": "topology",
+    "kind": "request",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/topology/api/rest/request/package-info.java"
+  },
+  {
+    "module": "topology",
+    "kind": "response",
+    "name": "FacilityResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameAr"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "nameEn"
+      },
+      {
+        "type": "FacilityKind",
+        "name": "facilityKind"
+      },
+      {
+        "type": "FacilityStatus",
+        "name": "status"
+      }
+    ],
+    "field_count": 7,
+    "path": "src/main/java/dz/sh/hidra/modules/topology/api/rest/response/FacilityResponse.java"
+  },
+  {
+    "module": "topology",
+    "kind": "response",
+    "name": "PipelineSystemResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "code"
+      },
+      {
+        "type": "String",
+        "name": "nameAr"
+      },
+      {
+        "type": "String",
+        "name": "nameFr"
+      },
+      {
+        "type": "String",
+        "name": "nameEn"
+      },
+      {
+        "type": "PipelineSystemType",
+        "name": "systemType"
+      },
+      {
+        "type": "TopologyStatus",
+        "name": "status"
+      }
+    ],
+    "field_count": 7,
+    "path": "src/main/java/dz/sh/hidra/modules/topology/api/rest/response/PipelineSystemResponse.java"
+  },
+  {
+    "module": "topology",
+    "kind": "response",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/topology/api/rest/response/package-info.java"
+  },
+  {
+    "module": "workflow",
+    "kind": "request",
+    "name": "CreateWorkflowTaskRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "instanceId"
+      },
+      {
+        "type": "String",
+        "name": "stepId"
+      },
+      {
+        "type": "String",
+        "name": "assignedActorId"
+      },
+      {
+        "type": "String",
+        "name": "assignedActorUsernameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "assignedActorDisplayNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "assignedOrganizationUnitId"
+      },
+      {
+        "type": "String",
+        "name": "assignedOrganizationUnitNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "assignedRoleCodeSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "priorityId"
+      },
+      {
+        "type": "Instant",
+        "name": "dueAt"
+      },
+      {
+        "type": "String",
+        "name": "assignmentModeId"
+      },
+      {
+        "type": "String",
+        "name": "taskLabelSnapshot"
+      }
+    ],
+    "field_count": 12,
+    "path": "src/main/java/dz/sh/hidra/modules/workflow/api/rest/request/CreateWorkflowTaskRequest.java"
+  },
+  {
+    "module": "workflow",
+    "kind": "request",
+    "name": "RecordWorkflowActionRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "instanceId"
+      },
+      {
+        "type": "String",
+        "name": "taskId"
+      },
+      {
+        "type": "WorkflowActionType",
+        "name": "actionType"
+      },
+      {
+        "type": "WorkflowDecision",
+        "name": "decision"
+      },
+      {
+        "type": "String",
+        "name": "reasonId"
+      },
+      {
+        "type": "String",
+        "name": "decisionNote"
+      },
+      {
+        "type": "String",
+        "name": "commentText"
+      },
+      {
+        "type": "String",
+        "name": "actorId"
+      },
+      {
+        "type": "String",
+        "name": "actorUsernameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "actorDisplayNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "actorRoleCodeSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "organizationUnitId"
+      },
+      {
+        "type": "String",
+        "name": "organizationUnitNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "organizationRoleCodeSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      },
+      {
+        "type": "long",
+        "name": "actionSequence"
+      },
+      {
+        "type": "String",
+        "name": "sourceSystem"
+      },
+      {
+        "type": "Instant",
+        "name": "actedAt"
+      }
+    ],
+    "field_count": 18,
+    "path": "src/main/java/dz/sh/hidra/modules/workflow/api/rest/request/RecordWorkflowActionRequest.java"
+  },
+  {
+    "module": "workflow",
+    "kind": "request",
+    "name": "StartWorkflowInstanceRequest",
+    "fields": [
+      {
+        "type": "String",
+        "name": "definitionId"
+      },
+      {
+        "type": "int",
+        "name": "definitionVersion"
+      },
+      {
+        "type": "String",
+        "name": "workflowPurposeId"
+      },
+      {
+        "type": "String",
+        "name": "targetModule"
+      },
+      {
+        "type": "String",
+        "name": "targetTypeId"
+      },
+      {
+        "type": "String",
+        "name": "targetId"
+      },
+      {
+        "type": "String",
+        "name": "targetCodeSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "targetLabelSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "currentStepId"
+      },
+      {
+        "type": "String",
+        "name": "startedByActorId"
+      },
+      {
+        "type": "String",
+        "name": "startedByUsernameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "startedByDisplayNameSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "startedByRoleCodeSnapshot"
+      },
+      {
+        "type": "String",
+        "name": "correlationId"
+      }
+    ],
+    "field_count": 14,
+    "path": "src/main/java/dz/sh/hidra/modules/workflow/api/rest/request/StartWorkflowInstanceRequest.java"
+  },
+  {
+    "module": "workflow",
+    "kind": "request",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/workflow/api/rest/request/package-info.java"
+  },
+  {
+    "module": "workflow",
+    "kind": "response",
+    "name": "WorkflowActionResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "instanceId"
+      },
+      {
+        "type": "String",
+        "name": "taskId"
+      },
+      {
+        "type": "WorkflowActionType",
+        "name": "actionType"
+      },
+      {
+        "type": "WorkflowDecision",
+        "name": "decision"
+      },
+      {
+        "type": "String",
+        "name": "reasonId"
+      },
+      {
+        "type": "String",
+        "name": "actorId"
+      },
+      {
+        "type": "String",
+        "name": "actorDisplayNameSnapshot"
+      },
+      {
+        "type": "long",
+        "name": "actionSequence"
+      },
+      {
+        "type": "Instant",
+        "name": "actedAt"
+      }
+    ],
+    "field_count": 10,
+    "path": "src/main/java/dz/sh/hidra/modules/workflow/api/rest/response/WorkflowActionResponse.java"
+  },
+  {
+    "module": "workflow",
+    "kind": "response",
+    "name": "WorkflowInstanceResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "definitionId"
+      },
+      {
+        "type": "int",
+        "name": "definitionVersion"
+      },
+      {
+        "type": "String",
+        "name": "targetModule"
+      },
+      {
+        "type": "String",
+        "name": "targetTypeId"
+      },
+      {
+        "type": "String",
+        "name": "targetId"
+      },
+      {
+        "type": "WorkflowInstanceStatus",
+        "name": "status"
+      },
+      {
+        "type": "String",
+        "name": "currentStepId"
+      },
+      {
+        "type": "Instant",
+        "name": "startedAt"
+      },
+      {
+        "type": "Instant",
+        "name": "completedAt"
+      }
+    ],
+    "field_count": 10,
+    "path": "src/main/java/dz/sh/hidra/modules/workflow/api/rest/response/WorkflowInstanceResponse.java"
+  },
+  {
+    "module": "workflow",
+    "kind": "response",
+    "name": "WorkflowTaskResponse",
+    "fields": [
+      {
+        "type": "String",
+        "name": "id"
+      },
+      {
+        "type": "String",
+        "name": "instanceId"
+      },
+      {
+        "type": "String",
+        "name": "stepId"
+      },
+      {
+        "type": "WorkflowTaskStatus",
+        "name": "status"
+      },
+      {
+        "type": "String",
+        "name": "assignedActorId"
+      },
+      {
+        "type": "String",
+        "name": "assignedOrganizationUnitId"
+      },
+      {
+        "type": "String",
+        "name": "priorityId"
+      },
+      {
+        "type": "Instant",
+        "name": "dueAt"
+      }
+    ],
+    "field_count": 8,
+    "path": "src/main/java/dz/sh/hidra/modules/workflow/api/rest/response/WorkflowTaskResponse.java"
+  },
+  {
+    "module": "workflow",
+    "kind": "response",
+    "name": "package-info",
+    "fields": [],
+    "field_count": 0,
+    "path": "src/main/java/dz/sh/hidra/modules/workflow/api/rest/response/package-info.java"
+  }
+]

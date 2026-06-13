@@ -1,0 +1,33 @@
+Menu,Parent,Permission,Icon,Order,Route
+Foundation,ROOT,Authenticated,folder,10,
+Command Dashboard,Foundation,Authenticated,dashboard,20,/dashboard
+Topology,Foundation,HIDRA_TOPOLOGY_*_READ,map,21,/topology
+Monitoring,Foundation,HIDRA_MONITORING_*_READ,monitor_heart,22,/monitoring
+Alarm,Foundation,HIDRA_ALARM_*_READ,notifications_active,23,/alarm
+Leak Detection,Foundation,HIDRA_LEAKDETECTION_*_READ,water_drop,24,/leakdetection
+Operations,ROOT,Authenticated,folder,25,
+Telemetry,Operations,HIDRA_TELEMETRY_*_READ,sensors,35,/telemetry
+Planning,Operations,HIDRA_PLANNING_*_READ,event_note,36,/planning
+Assets,Operations,HIDRA_ASSETS_*_READ,precision_manufacturing,37,/assets
+Integrity,Operations,HIDRA_INTEGRITY_*_READ,verified,38,/integrity
+Risk,Operations,HIDRA_RISK_*_READ,warning,39,/risk
+Hse,Operations,HIDRA_HSE_*_READ,health_and_safety,40,/hse
+Incident,Operations,HIDRA_INCIDENT_*_READ,report_problem,41,/incident
+Custody,Operations,HIDRA_CUSTODY_*_READ,scale,42,/custody
+Decision Support,ROOT,Authenticated,folder,43,
+Simulation,Decision Support,HIDRA_SIMULATION_*_READ,science,53,/simulation
+Analytics,Decision Support,HIDRA_ANALYTICS_*_READ,insights,54,/analytics
+Reporting,Decision Support,HIDRA_REPORTING_*_READ,summarize,55,/reporting
+Governance,ROOT,Authenticated,folder,56,
+Workflow,Governance,HIDRA_WORKFLOW_*_READ,account_tree,66,/workflow
+Documents,Governance,HIDRA_DOCUMENTS_*_READ,description,67,/documents
+Audit,Governance,HIDRA_AUDIT_*_READ,history,68,/audit
+Configuration,Governance,HIDRA_CONFIGURATION_*_READ,settings,69,/configuration
+Notification,Governance,HIDRA_NOTIFICATION_*_READ,notifications,70,/notification
+Administration,ROOT,Authenticated,folder,71,
+Identity,Administration,HIDRA_IDENTITY_*_READ,admin_panel_settings,81,/identity
+Organization,Administration,HIDRA_ORGANIZATION_*_READ,corporate_fare,82,/organization
+Party,Administration,HIDRA_PARTY_*_READ,groups,83,/party
+Integration,Administration,HIDRA_INTEGRATION_*_READ,hub,84,/integration
+Permission Catalog,Administration,HIDRA_SECURITY_PERMISSIONS_READ,shield,85,/security/permissions
+Realtime Monitor,Administration,HIDRA_REALTIME_CAPABILITIES_READ,wifi_tethering,86,/realtime

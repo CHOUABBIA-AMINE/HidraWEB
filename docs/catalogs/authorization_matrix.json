@@ -1,0 +1,538 @@
+[
+  {
+    "Role": "Administrator",
+    "Screen": "Login",
+    "Route": "/login",
+    "Action": "read",
+    "Permission": "External IdP / no HidraAPI login permission evidence",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Administrator",
+    "Screen": "Permission Catalog",
+    "Route": "/security/permissions",
+    "Action": "read",
+    "Permission": "HIDRA_SECURITY_PERMISSIONS_READ",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Administrator",
+    "Screen": "Realtime Monitor",
+    "Route": "/realtime",
+    "Action": "read",
+    "Permission": "HIDRA_REALTIME_CAPABILITIES_READ",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Administrator",
+    "Screen": "Audit Workbench",
+    "Route": "/audit",
+    "Action": "read",
+    "Permission": "HIDRA_AUDIT_*_READ / HIDRA_AUDIT_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Administrator",
+    "Screen": "Configuration Workbench",
+    "Route": "/configuration",
+    "Action": "read",
+    "Permission": "HIDRA_CONFIGURATION_*_READ / HIDRA_CONFIGURATION_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Administrator",
+    "Screen": "Identity Workbench",
+    "Route": "/identity",
+    "Action": "read",
+    "Permission": "HIDRA_IDENTITY_*_READ / HIDRA_IDENTITY_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Administrator",
+    "Screen": "Integration Workbench",
+    "Route": "/integration",
+    "Action": "read",
+    "Permission": "HIDRA_INTEGRATION_*_READ / HIDRA_INTEGRATION_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Administrator",
+    "Screen": "Notification Workbench",
+    "Route": "/notification",
+    "Action": "read",
+    "Permission": "HIDRA_NOTIFICATION_*_READ / HIDRA_NOTIFICATION_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Administrator",
+    "Screen": "Organization Workbench",
+    "Route": "/organization",
+    "Action": "read",
+    "Permission": "HIDRA_ORGANIZATION_*_READ / HIDRA_ORGANIZATION_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Administrator",
+    "Screen": "Party Workbench",
+    "Route": "/party",
+    "Action": "read",
+    "Permission": "HIDRA_PARTY_*_READ / HIDRA_PARTY_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Operational Engineer",
+    "Screen": "Login",
+    "Route": "/login",
+    "Action": "read",
+    "Permission": "External IdP / no HidraAPI login permission evidence",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Operational Engineer",
+    "Screen": "Operational Command Dashboard",
+    "Route": "/dashboard",
+    "Action": "read",
+    "Permission": "Derived from module read permissions and authenticated user session",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Operational Engineer",
+    "Screen": "Topology GIS Map",
+    "Route": "/topology/map",
+    "Action": "read",
+    "Permission": "HIDRA_TOPOLOGY_MAP_READ",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Operational Engineer",
+    "Screen": "Analytics Workbench",
+    "Route": "/analytics",
+    "Action": "read",
+    "Permission": "HIDRA_ANALYTICS_*_READ / HIDRA_ANALYTICS_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Operational Engineer",
+    "Screen": "Assets Workbench",
+    "Route": "/assets",
+    "Action": "read",
+    "Permission": "HIDRA_ASSETS_*_READ / HIDRA_ASSETS_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Operational Engineer",
+    "Screen": "Documents Workbench",
+    "Route": "/documents",
+    "Action": "read",
+    "Permission": "HIDRA_DOCUMENTS_*_READ / HIDRA_DOCUMENTS_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Operational Engineer",
+    "Screen": "Integrity Workbench",
+    "Route": "/integrity",
+    "Action": "read",
+    "Permission": "HIDRA_INTEGRITY_*_READ / HIDRA_INTEGRITY_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Operational Engineer",
+    "Screen": "Leak Detection Workbench",
+    "Route": "/leakdetection",
+    "Action": "read",
+    "Permission": "HIDRA_LEAKDETECTION_*_READ / HIDRA_LEAKDETECTION_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Operational Engineer",
+    "Screen": "Monitoring Workbench",
+    "Route": "/monitoring",
+    "Action": "read",
+    "Permission": "HIDRA_MONITORING_*_READ / HIDRA_MONITORING_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Operational Engineer",
+    "Screen": "Planning Workbench",
+    "Route": "/planning",
+    "Action": "read",
+    "Permission": "HIDRA_PLANNING_*_READ / HIDRA_PLANNING_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Operational Engineer",
+    "Screen": "Reporting Workbench",
+    "Route": "/reporting",
+    "Action": "read",
+    "Permission": "HIDRA_REPORTING_*_READ / HIDRA_REPORTING_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Operational Engineer",
+    "Screen": "Risk Workbench",
+    "Route": "/risk",
+    "Action": "read",
+    "Permission": "HIDRA_RISK_*_READ / HIDRA_RISK_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Operational Engineer",
+    "Screen": "Simulation Workbench",
+    "Route": "/simulation",
+    "Action": "read",
+    "Permission": "HIDRA_SIMULATION_*_READ / HIDRA_SIMULATION_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Operational Engineer",
+    "Screen": "Telemetry Workbench",
+    "Route": "/telemetry",
+    "Action": "read",
+    "Permission": "HIDRA_TELEMETRY_*_READ / HIDRA_TELEMETRY_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Operational Engineer",
+    "Screen": "Topology Workbench",
+    "Route": "/topology",
+    "Action": "read",
+    "Permission": "HIDRA_TOPOLOGY_*_READ / HIDRA_TOPOLOGY_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Control Room Operator",
+    "Screen": "Login",
+    "Route": "/login",
+    "Action": "read",
+    "Permission": "External IdP / no HidraAPI login permission evidence",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Control Room Operator",
+    "Screen": "Operational Command Dashboard",
+    "Route": "/dashboard",
+    "Action": "read",
+    "Permission": "Derived from module read permissions and authenticated user session",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Control Room Operator",
+    "Screen": "Realtime Monitor",
+    "Route": "/realtime",
+    "Action": "read",
+    "Permission": "HIDRA_REALTIME_CAPABILITIES_READ",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Control Room Operator",
+    "Screen": "Topology GIS Map",
+    "Route": "/topology/map",
+    "Action": "read",
+    "Permission": "HIDRA_TOPOLOGY_MAP_READ",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Control Room Operator",
+    "Screen": "Alarm Workbench",
+    "Route": "/alarm",
+    "Action": "read",
+    "Permission": "HIDRA_ALARM_*_READ / HIDRA_ALARM_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Control Room Operator",
+    "Screen": "Leak Detection Workbench",
+    "Route": "/leakdetection",
+    "Action": "read",
+    "Permission": "HIDRA_LEAKDETECTION_*_READ / HIDRA_LEAKDETECTION_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Control Room Operator",
+    "Screen": "Monitoring Workbench",
+    "Route": "/monitoring",
+    "Action": "read",
+    "Permission": "HIDRA_MONITORING_*_READ / HIDRA_MONITORING_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Control Room Operator",
+    "Screen": "Notification Workbench",
+    "Route": "/notification",
+    "Action": "read",
+    "Permission": "HIDRA_NOTIFICATION_*_READ / HIDRA_NOTIFICATION_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Control Room Operator",
+    "Screen": "Telemetry Workbench",
+    "Route": "/telemetry",
+    "Action": "read",
+    "Permission": "HIDRA_TELEMETRY_*_READ / HIDRA_TELEMETRY_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Control Room Operator",
+    "Screen": "Topology Workbench",
+    "Route": "/topology",
+    "Action": "read",
+    "Permission": "HIDRA_TOPOLOGY_*_READ / HIDRA_TOPOLOGY_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Field Supervisor",
+    "Screen": "Login",
+    "Route": "/login",
+    "Action": "read",
+    "Permission": "External IdP / no HidraAPI login permission evidence",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Field Supervisor",
+    "Screen": "Assets Workbench",
+    "Route": "/assets",
+    "Action": "read",
+    "Permission": "HIDRA_ASSETS_*_READ / HIDRA_ASSETS_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Field Supervisor",
+    "Screen": "Documents Workbench",
+    "Route": "/documents",
+    "Action": "read",
+    "Permission": "HIDRA_DOCUMENTS_*_READ / HIDRA_DOCUMENTS_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Field Supervisor",
+    "Screen": "Hse Workbench",
+    "Route": "/hse",
+    "Action": "read",
+    "Permission": "HIDRA_HSE_*_READ / HIDRA_HSE_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Field Supervisor",
+    "Screen": "Incident Workbench",
+    "Route": "/incident",
+    "Action": "read",
+    "Permission": "HIDRA_INCIDENT_*_READ / HIDRA_INCIDENT_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Field Supervisor",
+    "Screen": "Integrity Workbench",
+    "Route": "/integrity",
+    "Action": "read",
+    "Permission": "HIDRA_INTEGRITY_*_READ / HIDRA_INTEGRITY_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Field Supervisor",
+    "Screen": "Leak Detection Workbench",
+    "Route": "/leakdetection",
+    "Action": "read",
+    "Permission": "HIDRA_LEAKDETECTION_*_READ / HIDRA_LEAKDETECTION_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Field Supervisor",
+    "Screen": "Workflow Workbench",
+    "Route": "/workflow",
+    "Action": "read",
+    "Permission": "HIDRA_WORKFLOW_*_READ / HIDRA_WORKFLOW_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Workflow Validator",
+    "Screen": "Login",
+    "Route": "/login",
+    "Action": "read",
+    "Permission": "External IdP / no HidraAPI login permission evidence",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Workflow Validator",
+    "Screen": "Configuration Workbench",
+    "Route": "/configuration",
+    "Action": "read",
+    "Permission": "HIDRA_CONFIGURATION_*_READ / HIDRA_CONFIGURATION_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Workflow Validator",
+    "Screen": "Custody Workbench",
+    "Route": "/custody",
+    "Action": "read",
+    "Permission": "HIDRA_CUSTODY_*_READ / HIDRA_CUSTODY_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Workflow Validator",
+    "Screen": "Documents Workbench",
+    "Route": "/documents",
+    "Action": "read",
+    "Permission": "HIDRA_DOCUMENTS_*_READ / HIDRA_DOCUMENTS_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Workflow Validator",
+    "Screen": "Incident Workbench",
+    "Route": "/incident",
+    "Action": "read",
+    "Permission": "HIDRA_INCIDENT_*_READ / HIDRA_INCIDENT_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Workflow Validator",
+    "Screen": "Workflow Workbench",
+    "Route": "/workflow",
+    "Action": "read",
+    "Permission": "HIDRA_WORKFLOW_*_READ / HIDRA_WORKFLOW_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Department Manager",
+    "Screen": "Login",
+    "Route": "/login",
+    "Action": "read",
+    "Permission": "External IdP / no HidraAPI login permission evidence",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Department Manager",
+    "Screen": "Analytics Workbench",
+    "Route": "/analytics",
+    "Action": "read",
+    "Permission": "HIDRA_ANALYTICS_*_READ / HIDRA_ANALYTICS_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Department Manager",
+    "Screen": "Audit Workbench",
+    "Route": "/audit",
+    "Action": "read",
+    "Permission": "HIDRA_AUDIT_*_READ / HIDRA_AUDIT_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Department Manager",
+    "Screen": "Custody Workbench",
+    "Route": "/custody",
+    "Action": "read",
+    "Permission": "HIDRA_CUSTODY_*_READ / HIDRA_CUSTODY_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Department Manager",
+    "Screen": "Hse Workbench",
+    "Route": "/hse",
+    "Action": "read",
+    "Permission": "HIDRA_HSE_*_READ / HIDRA_HSE_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Department Manager",
+    "Screen": "Integrity Workbench",
+    "Route": "/integrity",
+    "Action": "read",
+    "Permission": "HIDRA_INTEGRITY_*_READ / HIDRA_INTEGRITY_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Department Manager",
+    "Screen": "Organization Workbench",
+    "Route": "/organization",
+    "Action": "read",
+    "Permission": "HIDRA_ORGANIZATION_*_READ / HIDRA_ORGANIZATION_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Department Manager",
+    "Screen": "Planning Workbench",
+    "Route": "/planning",
+    "Action": "read",
+    "Permission": "HIDRA_PLANNING_*_READ / HIDRA_PLANNING_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Department Manager",
+    "Screen": "Reporting Workbench",
+    "Route": "/reporting",
+    "Action": "read",
+    "Permission": "HIDRA_REPORTING_*_READ / HIDRA_REPORTING_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Department Manager",
+    "Screen": "Risk Workbench",
+    "Route": "/risk",
+    "Action": "read",
+    "Permission": "HIDRA_RISK_*_READ / HIDRA_RISK_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Department Manager",
+    "Screen": "Workflow Workbench",
+    "Route": "/workflow",
+    "Action": "read",
+    "Permission": "HIDRA_WORKFLOW_*_READ / HIDRA_WORKFLOW_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Executive",
+    "Screen": "Login",
+    "Route": "/login",
+    "Action": "read",
+    "Permission": "External IdP / no HidraAPI login permission evidence",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Executive",
+    "Screen": "Operational Command Dashboard",
+    "Route": "/dashboard",
+    "Action": "read",
+    "Permission": "Derived from module read permissions and authenticated user session",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Executive",
+    "Screen": "Analytics Workbench",
+    "Route": "/analytics",
+    "Action": "read",
+    "Permission": "HIDRA_ANALYTICS_*_READ / HIDRA_ANALYTICS_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Executive",
+    "Screen": "Hse Workbench",
+    "Route": "/hse",
+    "Action": "read",
+    "Permission": "HIDRA_HSE_*_READ / HIDRA_HSE_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Executive",
+    "Screen": "Monitoring Workbench",
+    "Route": "/monitoring",
+    "Action": "read",
+    "Permission": "HIDRA_MONITORING_*_READ / HIDRA_MONITORING_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Executive",
+    "Screen": "Reporting Workbench",
+    "Route": "/reporting",
+    "Action": "read",
+    "Permission": "HIDRA_REPORTING_*_READ / HIDRA_REPORTING_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  },
+  {
+    "Role": "Executive",
+    "Screen": "Risk Workbench",
+    "Route": "/risk",
+    "Action": "read",
+    "Permission": "HIDRA_RISK_*_READ / HIDRA_RISK_*_EXECUTE derived from permission catalog",
+    "Evidence": "Role mapping is frontend governance proposal; HidraAPI publishes derived permission catalog but not role-to-permission assignments."
+  }
+]

@@ -1,0 +1,36 @@
+{
+  "generatedAt": "2026-06-13T12:20:05",
+  "sourceFolder": "/mnt/data/HidraAPI_corrected",
+  "modules": 24,
+  "controllers": 30,
+  "endpoints": 183,
+  "dtos": 177,
+  "requestDtos": 93,
+  "responseDtos": 84,
+  "entities": 464,
+  "pages": 29,
+  "topologyLayers": [
+    "facilities",
+    "pipeline-segments",
+    "topology-connections",
+    "topology-nodes"
+  ],
+  "realtimeEvidence": [
+    "src/main/java/dz/sh/hidra/platform/realtime/package-info.java",
+    "src/main/java/dz/sh/hidra/platform/realtime/HidraRealtimeConfiguration.java",
+    "src/main/java/dz/sh/hidra/platform/realtime/HidraSseRegistry.java",
+    "src/main/java/dz/sh/hidra/platform/realtime/HidraRealtimePublisher.java",
+    "src/main/java/dz/sh/hidra/platform/realtime/HidraRealtimeRestController.java",
+    "src/main/java/dz/sh/hidra/platform/realtime/HidraRealtimeMessageController.java",
+    "src/main/java/dz/sh/hidra/platform/realtime/HidraRealtimeHeartbeatJob.java"
+  ],
+  "authenticationEvidence": {
+    "jwtModeProperty": "${HIDRA_SECURITY_AUTHENTICATION_MODE:jwt}",
+    "jwtIssuerProperty": "${HIDRA_JWT_ISSUER_URI:}",
+    "securityConfigurationFiles": [
+      "src/main/java/dz/sh/hidra/platform/configuration/HidraSecurityConfiguration.java",
+      "src/main/java/dz/sh/hidra/platform/configuration/HidraSecurityContextConfiguration.java"
+    ]
+  },
+  "finalVerdict": "READY WITH CONDITIONS"
+}

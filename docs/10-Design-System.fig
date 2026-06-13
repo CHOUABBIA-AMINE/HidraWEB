@@ -1,0 +1,34 @@
+{
+  "note": "This is a Figma handoff manifest, not a native Figma binary export. Native Figma projects must be created in Figma using this manifest and tokens.",
+  "project": "HidraWeb Design System",
+  "frames": [
+    "Login",
+    "Command Dashboard",
+    "Module Workbench",
+    "Topology GIS Map",
+    "Detail Drawer",
+    "Workflow Validation",
+    "Administration",
+    "Profile"
+  ],
+  "tokens": {
+    "primary": "#0B5D3B",
+    "secondary": "#334155",
+    "critical": "#B42318",
+    "warning": "#B54708",
+    "success": "#067647",
+    "info": "#175CD3",
+    "background": "#F8FAFC"
+  },
+  "components": [
+    "AppShell",
+    "ModuleCard",
+    "OperationalDataGrid",
+    "StatusChip",
+    "TopologyMap",
+    "LayerPanel",
+    "NotificationCenter",
+    "ProblemDetailAlert",
+    "ConfirmActionDialog"
+  ]
+}
