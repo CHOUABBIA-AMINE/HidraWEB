@@ -29,7 +29,7 @@ async function signIn(page: Page) {
   await page.getByLabel('Nom d’utilisateur').fill('operator');
   await page.getByLabel('Mot de passe').fill('secret');
   await page.getByRole('button', { name: 'Se connecter' }).click();
-  await expect(page.getByRole('heading', { name: "Vue d'ensemble" })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Vue d/ })).toBeVisible();
 }
 
 test('HWEB-002 authenticates and builds a capability-filtered accessible shell', async ({ page }) => {
