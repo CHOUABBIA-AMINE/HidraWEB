@@ -38,7 +38,13 @@ export function normalizeHidraApiError(error: unknown): HidraApiError {
   }
 
   if (axios.isAxiosError<HidraProblemDetail>(error)) {
-    const problem = error.response?.data;
+    const responseStatus = error.response?.status;
+    const responseProblem = error.response?.data;
+    const problem: HidraProblemDetail | undefined = responseProblem
+      ? { ...responseProblem, status: responseProblem.status ?? responseStatus }
+      : responseStatus
+        ? { status: responseStatus }
+        : undefined;
     const message = problem?.detail ?? problem?.title ?? error.message;
     return new HidraApiError(message, problem);
   }

@@ -1,20 +1,18 @@
-import { Button, Container, Stack, Typography } from '@mui/material';
-import { Link } from 'react-router';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
+
+import { StatusPage } from '@/components/feedback/StatusPage';
 
 export function NotFoundPage() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
   return (
-    <Container maxWidth="sm" sx={{ py: 8 }}>
-      <Stack spacing={2}>
-        <Typography component="h1" variant="h4">
-          Page not found
-        </Typography>
-        <Typography color="text.secondary">
-          The requested HidraWeb route is not part of the current implementation baseline.
-        </Typography>
-        <Button component={Link} to="/overview" variant="contained">
-          Return to overview
-        </Button>
-      </Stack>
-    </Container>
+    <StatusPage
+      actionLabel={t('status.returnOverview')}
+      code="404"
+      description={t('status.notFound.description')}
+      onAction={() => navigate('/overview')}
+      title={t('status.notFound.title')}
+    />
   );
 }
