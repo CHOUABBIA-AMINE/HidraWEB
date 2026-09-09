@@ -40,8 +40,8 @@ describe('HWEB-002 application shell', () => {
     render(<AppProviders><App /></AppProviders>);
 
     expect(await screen.findByRole('heading', { name: 'Connexion de développement' })).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText('Nom d’utilisateur'), { target: { value: 'operator' } });
-    fireEvent.change(screen.getByLabelText('Mot de passe'), { target: { value: 'secret' } });
+    fireEvent.change(screen.getByLabelText(/Nom d’utilisateur/), { target: { value: 'operator' } });
+    fireEvent.change(screen.getByLabelText(/Mot de passe/), { target: { value: 'secret' } });
     fireEvent.click(screen.getByRole('button', { name: 'Se connecter' }));
 
     expect(await screen.findByRole('heading', { name: "Vue d'ensemble" })).toBeInTheDocument();
