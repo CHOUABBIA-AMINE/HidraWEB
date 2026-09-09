@@ -1,4 +1,4 @@
-import { useMemo, type PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
@@ -28,24 +28,29 @@ export function PermissionProvider({ children }: PropsWithChildren) {
     staleTime: 5 * 60 * 1000,
   });
 
-  const value = useMemo<PermissionContextValue>(() => {
-    if (!enabled) {
-      return {
-        status: 'idle',
-        routes: [],
-        permissions: new Set(),
-        modules: new Set(),
-        catalogOnly: true,
-        can: () => false,
-        hasAnyModuleCapability: () => false,
-        reload: async () => undefined,
-      };
-    }
+  const reload = async (): Promise<void> => {
+    await Promise.all([catalogQuery.refetch(), routesQuery.refetch()]);
+  };
 
+  let value: PermissionContextValue;
+
+  if (!enabled) {
+    value = {
+      status: 'idle',
+      routes: [],
+      permissions: new Set(),
+      modules: new Set(),
+      catalogOnly: true,
+      can: () => false,
+      hasAnyModuleCapability: () => false,
+      reload: async () => undefined,
+    };
+  } else {
     const firstError = catalogQuery.error ?? routesQuery.error;
+
     if (firstError) {
       const error = normalizeHidraApiError(firstError);
-      return {
+      value = {
         status: 'error',
         routes: [],
         permissions: new Set(),
@@ -54,14 +59,10 @@ export function PermissionProvider({ children }: PropsWithChildren) {
         error,
         can: () => false,
         hasAnyModuleCapability: () => false,
-        reload: async () => {
-          await Promise.all([catalogQuery.refetch(), routesQuery.refetch()]);
-        },
+        reload,
       };
-    }
-
-    if (!catalogQuery.data || !routesQuery.data) {
-      return {
+    } else if (!catalogQuery.data || !routesQuery.data) {
+      value = {
         status: 'loading',
         routes: [],
         permissions: new Set(),
@@ -69,25 +70,21 @@ export function PermissionProvider({ children }: PropsWithChildren) {
         catalogOnly: true,
         can: () => false,
         hasAnyModuleCapability: () => false,
-        reload: async () => {
-          await Promise.all([catalogQuery.refetch(), routesQuery.refetch()]);
-        },
+        reload,
+      };
+    } else {
+      const normalized = normalizePermissionMetadata(catalogQuery.data, routesQuery.data);
+      value = {
+        status: 'ready',
+        catalog: catalogQuery.data,
+        ...normalized,
+        can: (permission) => normalized.permissions.has(permission),
+        hasAnyModuleCapability: (requiredModules) =>
+          requiredModules.length === 0 || requiredModules.some((module) => normalized.modules.has(module)),
+        reload,
       };
     }
-
-    const normalized = normalizePermissionMetadata(catalogQuery.data, routesQuery.data);
-    return {
-      status: 'ready',
-      catalog: catalogQuery.data,
-      ...normalized,
-      can: (permission) => normalized.permissions.has(permission),
-      hasAnyModuleCapability: (requiredModules) =>
-        requiredModules.length === 0 || requiredModules.some((module) => normalized.modules.has(module)),
-      reload: async () => {
-        await Promise.all([catalogQuery.refetch(), routesQuery.refetch()]);
-      },
-    };
-  }, [catalogQuery.data, catalogQuery.error, catalogQuery.refetch, enabled, routesQuery.data, routesQuery.error, routesQuery.refetch]);
+  }
 
   return <PermissionContext.Provider value={value}>{children}</PermissionContext.Provider>;
 }

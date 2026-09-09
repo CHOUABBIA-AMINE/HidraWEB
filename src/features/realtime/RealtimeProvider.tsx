@@ -1,8 +1,6 @@
-import { createContext, type PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
 
-export type RealtimeBootstrapStatus = 'not-connected';
-
-const RealtimeContext = createContext<RealtimeBootstrapStatus | undefined>(undefined);
+import { RealtimeContext } from '@/features/realtime/realtimeContext';
 
 export function RealtimeProvider({ children }: PropsWithChildren) {
   return <RealtimeContext.Provider value="not-connected">{children}</RealtimeContext.Provider>;

@@ -51,7 +51,7 @@ export function LoginPage() {
   return (
     <Box sx={{ bgcolor: 'grey.50', display: 'grid', minHeight: '100vh', placeItems: 'center', p: 3 }}>
       <Paper component="main" elevation={1} sx={{ width: 'min(100%, 440px)', p: { xs: 3, md: 5 } }}>
-        <Typography color="primary" fontWeight={700} variant="overline">HIDRA</Typography>
+        <Typography color="primary" sx={{ fontWeight: 700 }} variant="overline">HIDRA</Typography>
         <Typography component="h1" sx={{ mt: 1 }} variant="h4">{t('auth.basic.title')}</Typography>
         <Typography color="text.secondary" sx={{ mt: 1 }}>{t('auth.basic.description')}</Typography>
         <Box component="form" onSubmit={handleSubmit} sx={{ display: 'grid', gap: 2, mt: 4 }}>

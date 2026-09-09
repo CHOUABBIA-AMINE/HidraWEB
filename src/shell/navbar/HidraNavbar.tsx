@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '@/app/auth/useAuth';
 import { runtimeConfig } from '@/app/bootstrap/runtimeConfig';
-import { useRealtimeStatus } from '@/features/realtime/RealtimeProvider';
+import { useRealtimeStatus } from '@/features/realtime/useRealtimeStatus';
 
 interface HidraNavbarProps {
   sidebarCollapsed: boolean;
@@ -41,7 +41,7 @@ export function HidraNavbar({ sidebarCollapsed, onToggleSidebar }: HidraNavbarPr
           </IconButton>
         </Tooltip>
         <Box sx={{ minWidth: { xs: 96, md: 220 } }}>
-          <Typography color="primary" fontWeight={800} lineHeight={1.1} variant="h6">Hidra</Typography>
+          <Typography color="primary" sx={{ fontWeight: 800, lineHeight: 1.1 }} variant="h6">Hidra</Typography>
           <Typography color="text.secondary" noWrap sx={{ display: { xs: 'none', md: 'block' } }} variant="caption">
             Hydrocarbon Intelligence for Data, Risk, and Analytics
           </Typography>
@@ -77,7 +77,7 @@ export function HidraNavbar({ sidebarCollapsed, onToggleSidebar }: HidraNavbarPr
         </Tooltip>
         <Menu anchorEl={profileAnchor} onClose={closeProfile} open={Boolean(profileAnchor)}>
           <Box sx={{ minWidth: 240, px: 2, py: 1 }}>
-            <Typography fontWeight={600}>{auth.session?.principalLabel ?? t('shell.unknownPrincipal')}</Typography>
+            <Typography sx={{ fontWeight: 600 }}>{auth.session?.principalLabel ?? t('shell.unknownPrincipal')}</Typography>
             <Typography color="text.secondary" variant="caption">{t('shell.authMode', { mode: auth.mode })}</Typography>
           </Box>
           <Divider />
