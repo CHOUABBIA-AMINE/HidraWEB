@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, type PropsWithChildren } from 'react';
+import { createContext, useMemo, type PropsWithChildren } from 'react';
 
 export type PermissionBootstrapStatus = 'not-loaded';
 
@@ -21,12 +21,4 @@ export function PermissionProvider({ children }: PropsWithChildren) {
   }, []);
 
   return <PermissionContext.Provider value={value}>{children}</PermissionContext.Provider>;
-}
-
-export function usePermissions(): PermissionContextValue {
-  const context = useContext(PermissionContext);
-  if (!context) {
-    throw new Error('usePermissions must be used inside PermissionProvider.');
-  }
-  return context;
 }

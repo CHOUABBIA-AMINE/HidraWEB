@@ -10,7 +10,7 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   verify:
@@ -30,6 +30,17 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
+      - name: Commit initial dependency lock
+        if: github.event_name == 'push' && github.ref == 'refs/heads/hweb-001-bootstrap'
+        run: |
+          if [ -n "$(git status --porcelain -- package-lock.json)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add package-lock.json
+            git commit -m "HWEB-001 add deterministic dependency lock"
+            git push
+          fi
+
       - name: Lint
         run: npm run lint
 
@@ -47,12 +58,3 @@ jobs:
 
       - name: E2E bootstrap smoke test
         run: npm run test:e2e
-
-      - name: Publish generated dependency lock
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: package-lock
-          path: package-lock.json
-          if-no-files-found: error
-          retention-days: 1

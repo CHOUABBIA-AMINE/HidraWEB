@@ -1,4 +1,4 @@
-import { createContext, useContext, type PropsWithChildren } from 'react';
+import { createContext, type PropsWithChildren } from 'react';
 
 import { runtimeConfig, type HidraAuthMode } from '@/app/bootstrap/runtimeConfig';
 
@@ -17,12 +17,4 @@ export function AuthProvider({ children }: PropsWithChildren) {
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth(): AuthContextValue {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used inside AuthProvider.');
-  }
-  return context;
 }
