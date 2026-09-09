@@ -10,7 +10,7 @@ export function OverviewPage() {
     <Container maxWidth="lg">
       <Box sx={{ py: 6 }}>
         <Stack spacing={3}>
-          <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
+          <Stack direction="row" spacing={2} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
             <Typography component="h1" variant="h3">
               HidraWeb
             </Typography>
