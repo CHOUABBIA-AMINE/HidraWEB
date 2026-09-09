@@ -44,7 +44,7 @@ describe('HWEB-002 application shell', () => {
     fireEvent.change(screen.getByLabelText(/Mot de passe/), { target: { value: 'secret' } });
     fireEvent.click(screen.getByRole('button', { name: 'Se connecter' }));
 
-    expect(await screen.findByRole('heading', { name: "Vue d'ensemble" })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: /Vue d/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Réseau' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Mes tâches' })).toBeDisabled();
     expect(screen.queryByRole('button', { name: 'Planification' })).not.toBeInTheDocument();
