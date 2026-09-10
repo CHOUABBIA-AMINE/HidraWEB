@@ -46,7 +46,7 @@ describe('HWEB-002 application shell', () => {
 
     expect(await screen.findByRole('heading', { name: /Vue d/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Réseau' })).toHaveAttribute('aria-disabled', 'true');
-    expect(screen.getByRole('button', { name: 'Mes tâches' })).toHaveAttribute('aria-disabled', 'true');
+    expect(document.querySelector('[role="button"][aria-label="Mes tâches"][aria-disabled="true"]')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Planification' })).not.toBeInTheDocument();
 
     const navigationToggle = screen.getByRole('button', { name: 'Réduire la navigation' });
