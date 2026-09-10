@@ -45,8 +45,8 @@ describe('HWEB-002 application shell', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Se connecter' }));
 
     expect(await screen.findByRole('heading', { name: /Vue d/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Réseau' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Mes tâches' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Réseau' })).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('button', { name: 'Mes tâches' })).toHaveAttribute('aria-disabled', 'true');
     expect(screen.queryByRole('button', { name: 'Planification' })).not.toBeInTheDocument();
 
     const navigationToggle = screen.getByRole('button', { name: 'Réduire la navigation' });
