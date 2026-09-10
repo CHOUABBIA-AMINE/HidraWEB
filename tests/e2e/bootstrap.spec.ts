@@ -37,7 +37,7 @@ test('HWEB-002 authenticates and builds a capability-filtered accessible shell',
   await signIn(page);
 
   await expect(page.getByRole('button', { name: 'Réseau' })).toHaveAttribute('aria-disabled', 'true');
-  await expect(page.getByRole('button', { name: 'Mes tâches' })).toHaveAttribute('aria-disabled', 'true');
+  await expect(page.locator('[role="button"][aria-label="Mes tâches"][aria-disabled="true"]')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Planification' })).toHaveCount(0);
 
   const toggle = page.getByRole('button', { name: 'Réduire la navigation' });
