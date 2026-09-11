@@ -1,6 +1,6 @@
 import { Alert, Box, Chip, Container, Paper, Typography } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { OperationalSearchRequest } from '@/api/generated/workbench/model';
@@ -40,37 +40,35 @@ export function OperationalWorkbenchPage() {
     queryFn: fetchWorkbenchModules,
   });
 
-  useEffect(() => {
-    if (!selectedModule && modulesQuery.data?.length) {
-      setSelectedModule(modulesQuery.data[0]);
-    }
-  }, [modulesQuery.data, selectedModule]);
+  const effectiveModule = selectedModule && modulesQuery.data?.includes(selectedModule)
+    ? selectedModule
+    : modulesQuery.data?.[0] ?? '';
 
   const resourcesQuery = useQuery({
-    queryKey: workbenchQueryKeys.resources(selectedModule),
-    queryFn: () => fetchWorkbenchResources(selectedModule),
-    enabled: Boolean(selectedModule),
+    queryKey: workbenchQueryKeys.resources(effectiveModule),
+    queryFn: () => fetchWorkbenchResources(effectiveModule),
+    enabled: Boolean(effectiveModule && permissions.can(WORKBENCH_PERMISSIONS.resourcesRead)),
   });
 
-  useEffect(() => {
-    if (selectedModule && resourcesQuery.data?.length && !resourcesQuery.data.some((item) => item.resource === selectedResource)) {
-      setSelectedResource(resourcesQuery.data[0].resource);
-    }
-  }, [resourcesQuery.data, selectedModule, selectedResource]);
-
-  const descriptor = resourcesQuery.data?.find((item) => item.resource === selectedResource);
-  const effectiveAdvancedRequest = advancedRequest
-    ? { ...advancedRequest, page, size }
-    : null;
+  const effectiveResource = selectedResource && resourcesQuery.data?.some((item) => item.resource === selectedResource)
+    ? selectedResource
+    : resourcesQuery.data?.[0]?.resource ?? '';
+  const descriptor = resourcesQuery.data?.find((item) => item.resource === effectiveResource);
+  const effectiveAdvancedRequest = advancedRequest ? { ...advancedRequest, page, size } : null;
+  const recordsEnabled = Boolean(
+    effectiveModule
+    && effectiveResource
+    && permissions.can(effectiveAdvancedRequest ? WORKBENCH_PERMISSIONS.search : WORKBENCH_PERMISSIONS.listRead),
+  );
 
   const recordsQuery = useQuery({
     queryKey: effectiveAdvancedRequest
-      ? workbenchQueryKeys.search(selectedModule, selectedResource, effectiveAdvancedRequest)
-      : workbenchQueryKeys.list(selectedModule, selectedResource, page, size, committedQuery),
+      ? workbenchQueryKeys.search(effectiveModule, effectiveResource, effectiveAdvancedRequest)
+      : workbenchQueryKeys.list(effectiveModule, effectiveResource, page, size, committedQuery),
     queryFn: () => effectiveAdvancedRequest
-      ? searchWorkbenchRecords(selectedModule, selectedResource, effectiveAdvancedRequest)
-      : fetchWorkbenchRecords({ module: selectedModule, resource: selectedResource, page, size, query: committedQuery }),
-    enabled: Boolean(selectedModule && selectedResource),
+      ? searchWorkbenchRecords(effectiveModule, effectiveResource, effectiveAdvancedRequest)
+      : fetchWorkbenchRecords({ module: effectiveModule, resource: effectiveResource, page, size, query: committedQuery }),
+    enabled: recordsEnabled,
   });
 
   const fieldCandidates = useMemo(() => {
@@ -164,6 +162,7 @@ export function OperationalWorkbenchPage() {
       <Alert severity="info" sx={{ mt: 2 }}>{t('workbench.secondaryNotice')}</Alert>
 
       <Paper variant="outlined" sx={{ mt: 2, p: 2 }}>
+        {!permissions.can(WORKBENCH_PERMISSIONS.resourcesRead) ? <Alert severity="warning">{t('workbench.capabilityUnavailable')}</Alert> : null}
         {resourcesQuery.isLoading ? <WorkbenchLoadingState label={t('workbench.loadingResources')} /> : null}
         {resourcesQuery.error ? <WorkbenchErrorState error={resourcesQuery.error} onRetry={() => { void resourcesQuery.refetch(); }} /> : null}
         {resourcesQuery.data && resourcesQuery.data.length === 0 ? <WorkbenchEmptyState message={t('workbench.emptyResources')} /> : null}
@@ -182,8 +181,8 @@ export function OperationalWorkbenchPage() {
             query={queryInput}
             resources={resourcesQuery.data}
             searchEnabled={permissions.can(WORKBENCH_PERMISSIONS.search)}
-            selectedModule={selectedModule}
-            selectedResource={selectedResource}
+            selectedModule={effectiveModule}
+            selectedResource={effectiveResource}
           />
         ) : null}
       </Paper>
@@ -197,7 +196,8 @@ export function OperationalWorkbenchPage() {
       ) : null}
 
       <Box sx={{ mt: 2 }}>
-        {recordsQuery.isLoading && selectedResource ? <WorkbenchLoadingState label={t('workbench.loadingRecords')} /> : null}
+        {effectiveResource && !recordsEnabled ? <Alert severity="warning">{t('workbench.capabilityUnavailable')}</Alert> : null}
+        {recordsQuery.isLoading && effectiveResource ? <WorkbenchLoadingState label={t('workbench.loadingRecords')} /> : null}
         {recordsQuery.error ? <WorkbenchErrorState error={recordsQuery.error} onRetry={() => { void recordsQuery.refetch(); }} /> : null}
         {recordsQuery.data && recordsQuery.data.items.length === 0 ? <WorkbenchEmptyState message={t('workbench.emptyRecords')} /> : null}
         {descriptor && recordsQuery.data && recordsQuery.data.items.length > 0 ? (
