@@ -89,7 +89,6 @@ export function WorkflowTasksPage() {
   const instanceQuery = useQuery({ queryKey: workflowQueryKeys.instance(instanceId), queryFn: () => fetchInstance(instanceId), enabled: canInstances && Boolean(instanceId) });
   const timelineQuery = useQuery({ queryKey: workflowQueryKeys.timeline(instanceId), queryFn: () => fetchTimeline(instanceId), enabled: canInstances && Boolean(instanceId) });
 
-  const selectedAction = (actionsQuery.data ?? []).find((action) => action.transitionId === selectedTransitionId);
   const transitionMutation = useMutation({
     mutationFn: async (action: AvailableActionView) => {
       if (!selectedTaskId || !action.transitionId || !taskQuery.data?.updatedAt) throw new Error('Current task version is unavailable.');
@@ -101,7 +100,7 @@ export function WorkflowTasksPage() {
       });
     },
     onSuccess: async (result) => {
-      setSuccessMessage(t('workflow.executionSuccess', { decision: result.decision ?? selectedAction?.decision ?? '' }));
+      setSuccessMessage(`${result.decision ?? ''} · ${result.taskStatus ?? ''}`);
       setSelectedTransitionId('');
       setReasonId('');
       setCommentText('');
@@ -143,7 +142,6 @@ export function WorkflowTasksPage() {
           <Chip label="BACKEND-AUTHORITATIVE" variant="outlined" />
         </Box>
 
-        <Alert severity="info">{t('workflow.executionNotice')}</Alert>
         {!canTasks ? <Alert severity="warning">{t('workflow.unavailable')}</Alert> : null}
         {firstError ? <Alert severity="error">{displayError(firstError)}</Alert> : null}
         {transitionMutation.error ? <Alert severity="error">{displayError(transitionMutation.error)}</Alert> : null}
@@ -185,21 +183,21 @@ export function WorkflowTasksPage() {
                               <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
                                 <Chip color={permitted ? 'success' : 'default'} label={action.decision ?? action.transitionId ?? 'Action'} size="small" variant={permitted ? 'filled' : 'outlined'} />
                                 <Typography variant="body2">{action.fromStepId ?? '—'} → {action.toStepId ?? '—'}</Typography>
-                                {action.reasonRequired ? <Chip label={t('workflow.reasonRequired')} size="small" variant="outlined" /> : null}
-                                {action.commentRequired ? <Chip label={t('workflow.commentRequired')} size="small" variant="outlined" /> : null}
+                                {action.reasonRequired ? <Chip label="reasonId" size="small" variant="outlined" /> : null}
+                                {action.commentRequired ? <Chip label="comment" size="small" variant="outlined" /> : null}
                               </Stack>
                               {action.requiredPermissionCode ? <Typography color="text.secondary" variant="caption">{action.requiredPermissionCode}</Typography> : null}
-                              {permitted ? <Button disabled={transitionMutation.isPending} onClick={() => { setSelectedTransitionId(action.transitionId ?? ''); setReasonId(''); setCommentText(''); setDecisionNote(''); transitionMutation.reset(); }} size="small" variant={selected ? 'contained' : 'outlined'}>{t('workflow.executeAction', { decision: action.decision ?? '' })}</Button> : null}
+                              {permitted ? <Button disabled={transitionMutation.isPending} onClick={() => { setSelectedTransitionId(action.transitionId ?? ''); setReasonId(''); setCommentText(''); setDecisionNote(''); transitionMutation.reset(); }} size="small" variant={selected ? 'contained' : 'outlined'}>{action.decision ?? t('workflow.action')}</Button> : null}
                               {selected ? (
                                 <Stack spacing={1}>
-                                  {action.reasonRequired ? <TextField label={t('workflow.reason')} onChange={(event) => setReasonId(event.target.value)} required size="small" value={reasonId} /> : null}
-                                  {action.commentRequired ? <TextField label={t('workflow.comment')} multiline onChange={(event) => setCommentText(event.target.value)} required rows={2} size="small" value={commentText} /> : null}
-                                  <TextField label={t('workflow.decisionNote')} multiline onChange={(event) => setDecisionNote(event.target.value)} rows={2} size="small" value={decisionNote} />
+                                  {action.reasonRequired ? <TextField label="reasonId" onChange={(event) => setReasonId(event.target.value)} required size="small" value={reasonId} /> : null}
+                                  {action.commentRequired ? <TextField label="comment" multiline onChange={(event) => setCommentText(event.target.value)} required rows={2} size="small" value={commentText} /> : null}
+                                  <TextField label={t('workflow.note')} multiline onChange={(event) => setDecisionNote(event.target.value)} rows={2} size="small" value={decisionNote} />
                                   <Button
                                     disabled={transitionMutation.isPending || !taskQuery.data?.updatedAt || (action.reasonRequired === true && !reasonId.trim()) || (action.commentRequired === true && !commentText.trim())}
                                     onClick={() => transitionMutation.mutate(action)}
                                     variant="contained"
-                                  >{transitionMutation.isPending ? t('workflow.executing') : t('workflow.confirmExecution')}</Button>
+                                  >{transitionMutation.isPending ? '…' : `${t('workflow.action')}: ${action.decision ?? ''}`}</Button>
                                 </Stack>
                               ) : null}
                             </Stack>
