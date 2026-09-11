@@ -18,13 +18,13 @@ export function TopologyFeatureList({ features, onSelect, maxItems = 100 }: Topo
     <>
       <Typography component="h2" sx={{ mt: 2 }} variant="subtitle1">{t('topology.keyboardList')}</Typography>
       <List dense disablePadding>
-        {visibleFeatures.map((feature) => (
-          <ListItem key={feature.id} disableGutters secondaryAction={(
+        {visibleFeatures.map((feature, index) => (
+          <ListItem key={feature.id ?? `feature-${index}`} disableGutters secondaryAction={(
             <Button onClick={() => onSelect(feature)} size="small">{t('topology.inspect')}</Button>
           )}>
             <ListItemText
               primary={topologyFeatureLabel(feature)}
-              secondary={`${feature.properties.layer} · ${feature.properties.entityType}`}
+              secondary={`${feature.properties?.layer ?? '—'} · ${feature.properties?.entityType ?? '—'}`}
             />
           </ListItem>
         ))}
