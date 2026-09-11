@@ -40,6 +40,9 @@ jobs:
       - name: Generate HWEB-005 topology OpenAPI client
         run: npm run api:generate:topology
 
+      - name: Generate HWEB-006 telemetry/monitoring OpenAPI client
+        run: npm run api:generate:telemetry-monitoring
+
       - name: Lint
         run: npm run lint
 
