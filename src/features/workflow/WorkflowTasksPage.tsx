@@ -33,7 +33,7 @@ function AvailableAction({ action }: { action: AvailableActionView }) {
   const permitted = action.permitted === true;
   return (
     <Paper variant="outlined" sx={{ p: 1.5 }}>
-      <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" alignItems="center">
+      <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
         <Chip color={permitted ? 'success' : 'default'} label={action.decision ?? action.transitionId ?? 'Action'} size="small" variant={permitted ? 'filled' : 'outlined'} />
         <Typography variant="body2">{action.fromStepId ?? '—'} → {action.toStepId ?? '—'}</Typography>
         {action.reasonRequired ? <Chip label="reason required" size="small" variant="outlined" /> : null}
