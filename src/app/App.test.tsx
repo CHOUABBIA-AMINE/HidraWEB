@@ -64,7 +64,7 @@ describe('HWEB-002 / HWEB-004 / HWEB-005 capability-driven application shell', (
 
     expect(await screen.findByRole('heading', { name: /Vue d/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Réseau' })).not.toHaveAttribute('aria-disabled', 'true');
-    expect(screen.queryByRole('button', { name: 'Mes tâches' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Mes tâches' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Organisation' })).not.toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByRole('button', { name: 'Identité & accès' })).not.toHaveAttribute('aria-disabled', 'true');
     expect(screen.queryByRole('button', { name: 'Planification' })).not.toBeInTheDocument();
