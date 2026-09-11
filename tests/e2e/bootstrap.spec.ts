@@ -3,28 +3,41 @@ import { expect, test, type Page } from '@playwright/test';
 const routes = [
   {
     route: '/api/v1/topology/map/layers', methods: ['GET'], module: 'topology', resource: 'map', action: 'read',
-    permission: 'HIDRA_TOPOLOGY_MAP_READ', enforcementStatus: 'metadata-published; route-specific authorization annotations unavailable from current HidraAPI evidence',
+    permission: 'topology:map:read', enforcementStatus: 'backend-enforced',
   },
   {
     route: '/api/v1/workflow/tasks', methods: ['GET'], module: 'workflow', resource: 'tasks', action: 'read',
-    permission: 'HIDRA_WORKFLOW_TASKS_READ', enforcementStatus: 'metadata-published; route-specific authorization annotations unavailable from current HidraAPI evidence',
+    permission: 'workflow:tasks:read', enforcementStatus: 'backend-enforced',
   },
-  { route: '/api/v1/workbench/modules', methods: ['GET'], module: 'modules', resource: 'resources', action: 'read', permission: 'HIDRA_MODULES_RESOURCES_READ', enforcementStatus: 'metadata-published' },
-  { route: '/api/v1/workbench/{module}/resources', methods: ['GET'], module: 'dynamic-module', resource: 'resources', action: 'read', permission: 'HIDRA_DYNAMIC_MODULE_RESOURCES_READ', enforcementStatus: 'metadata-published' },
-  { route: '/api/v1/workbench/{module}/{resource}', methods: ['GET'], module: 'dynamic-module', resource: 'dynamic-resource', action: 'read', permission: 'HIDRA_DYNAMIC_MODULE_DYNAMIC_RESOURCE_READ', enforcementStatus: 'metadata-published' },
-  { route: '/api/v1/workbench/{module}/{resource}/{id}', methods: ['GET'], module: 'dynamic-module', resource: 'dynamic-resource', action: 'detail', permission: 'HIDRA_DYNAMIC_MODULE_DYNAMIC_RESOURCE_DETAIL', enforcementStatus: 'metadata-published' },
-  { route: '/api/v1/workbench/{module}/{resource}/search', methods: ['POST'], module: 'dynamic-module', resource: 'dynamic-resource', action: 'search', permission: 'HIDRA_DYNAMIC_MODULE_DYNAMIC_RESOURCE_SEARCH', enforcementStatus: 'metadata-published' },
-  { route: '/api/v1/identity/users', methods: ['POST'], module: 'identity', resource: 'users', action: 'execute', permission: 'HIDRA_IDENTITY_USERS_EXECUTE', enforcementStatus: 'metadata-published' },
-  { route: '/api/v1/identity/permissions/evaluations', methods: ['POST'], module: 'identity', resource: 'permissions', action: 'execute', permission: 'HIDRA_IDENTITY_PERMISSIONS_EXECUTE', enforcementStatus: 'metadata-published' },
-  { route: '/api/v1/organization/units', methods: ['POST'], module: 'organization', resource: 'units', action: 'execute', permission: 'HIDRA_ORGANIZATION_UNITS_EXECUTE', enforcementStatus: 'metadata-published' },
-  { route: '/api/v1/organization/employees', methods: ['POST'], module: 'organization', resource: 'employees', action: 'execute', permission: 'HIDRA_ORGANIZATION_EMPLOYEES_EXECUTE', enforcementStatus: 'metadata-published' },
-  { route: '/api/v1/organization/employees/assignments', methods: ['POST'], module: 'organization', resource: 'employees', action: 'execute', permission: 'HIDRA_ORGANIZATION_EMPLOYEES_EXECUTE', enforcementStatus: 'metadata-published' },
+  { route: '/api/v1/workbench/modules', methods: ['GET'], module: 'modules', resource: 'resources', action: 'read', permission: 'modules:resources:read', enforcementStatus: 'backend-enforced' },
+  { route: '/api/v1/workbench/{module}/resources', methods: ['GET'], module: 'dynamic-module', resource: 'resources', action: 'read', permission: 'dynamic-module:resources:read', enforcementStatus: 'backend-enforced' },
+  { route: '/api/v1/workbench/{module}/{resource}', methods: ['GET'], module: 'dynamic-module', resource: 'dynamic-resource', action: 'read', permission: 'dynamic-module:dynamic-resource:read', enforcementStatus: 'backend-enforced' },
+  { route: '/api/v1/workbench/{module}/{resource}/{id}', methods: ['GET'], module: 'dynamic-module', resource: 'dynamic-resource', action: 'read', permission: 'dynamic-module:dynamic-resource:read', enforcementStatus: 'backend-enforced' },
+  { route: '/api/v1/workbench/{module}/{resource}/search', methods: ['POST'], module: 'dynamic-module', resource: 'dynamic-resource', action: 'search', permission: 'dynamic-module:dynamic-resource:search', enforcementStatus: 'backend-enforced' },
+  { route: '/api/v1/identity/users', methods: ['POST'], module: 'identity', resource: 'users', action: 'execute', permission: 'identity:users:execute', enforcementStatus: 'backend-enforced' },
+  { route: '/api/v1/identity/permissions/evaluations', methods: ['POST'], module: 'identity', resource: 'permissions', action: 'execute', permission: 'identity:permissions:execute', enforcementStatus: 'backend-enforced' },
+  { route: '/api/v1/organization/units', methods: ['POST'], module: 'organization', resource: 'units', action: 'execute', permission: 'organization:units:execute', enforcementStatus: 'backend-enforced' },
+  { route: '/api/v1/organization/employees', methods: ['POST'], module: 'organization', resource: 'employees', action: 'execute', permission: 'organization:employees:execute', enforcementStatus: 'backend-enforced' },
+  { route: '/api/v1/organization/employees/assignments', methods: ['POST'], module: 'organization', resource: 'employees', action: 'execute', permission: 'organization:employees:execute', enforcementStatus: 'backend-enforced' },
+];
+
+const effectivePermissions = [
+  'topology:map:read',
+  'modules:resources:read',
+  'dynamic-module:resources:read',
+  'dynamic-module:dynamic-resource:read',
+  'dynamic-module:dynamic-resource:search',
+  'identity:users:execute',
+  'identity:permissions:execute',
+  'organization:units:execute',
+  'organization:employees:execute',
 ];
 
 const catalog = {
   strategy: 'derived-route-permission-catalog',
-  enforcement: 'catalog-only; backend currently authenticates all operational routes and does not expose route-specific @PreAuthorize evidence',
-  permissionFormat: 'HIDRA_<MODULE>_<RESOURCE>_<ACTION>',
+  enforcement: 'backend-enforced by HidraRouteAuthorizationInterceptor',
+  permissionFormat: '<module>:<resource>:<action>',
+  bootstrapAdminBypass: 'ROLE_HIDRA_ADMIN',
   routes,
 };
 
@@ -52,6 +65,7 @@ const organizationUnit = { module: 'organization', resource: 'organization-units
 async function mockPermissions(page: Page) {
   await page.route('**/api/v1/security/permissions/routes', (route) => route.fulfill({ json: routes }));
   await page.route('**/api/v1/security/permissions/catalog', (route) => route.fulfill({ json: catalog }));
+  await page.route('**/api/v1/identity/me/permissions', (route) => route.fulfill({ json: effectivePermissions }));
 }
 
 async function mockWorkbench(page: Page) {
@@ -115,6 +129,8 @@ test('HWEB-002 authenticates and builds a capability-filtered accessible shell',
 
 test('HWEB-002 keeps a rejected Basic authentication request on the 401 sign-in state', async ({ page }) => {
   await page.route('**/api/v1/security/permissions/routes', (route) => route.fulfill({ status: 401, json: { status: 401, title: 'Unauthorized' } }));
+  await page.route('**/api/v1/security/permissions/catalog', (route) => route.fulfill({ json: catalog }));
+  await page.route('**/api/v1/identity/me/permissions', (route) => route.fulfill({ status: 401, json: { status: 401, title: 'Unauthorized' } }));
   await page.goto('/overview');
   await page.getByLabel('Nom d’utilisateur').fill('operator');
   await page.getByLabel('Mot de passe').fill('wrong');
@@ -126,6 +142,7 @@ test('HWEB-002 keeps a rejected Basic authentication request on the 401 sign-in 
 test('HWEB-002 renders the global 403 state when HidraAPI refuses permission metadata', async ({ page }) => {
   await page.route('**/api/v1/security/permissions/routes', (route) => route.fulfill({ json: routes }));
   await page.route('**/api/v1/security/permissions/catalog', (route) => route.fulfill({ status: 403, json: { status: 403, title: 'Forbidden' } }));
+  await page.route('**/api/v1/identity/me/permissions', (route) => route.fulfill({ json: effectivePermissions }));
   await page.goto('/overview');
   await page.getByLabel('Nom d’utilisateur').fill('operator');
   await page.getByLabel('Mot de passe').fill('secret');
