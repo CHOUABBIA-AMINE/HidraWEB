@@ -39,12 +39,14 @@ vi.mock('@/api/client/hidraHttpClient', () => ({
 
 describe('HWEB-003 operational workbench', () => {
   it('discovers, lists and inspects generic backend records without entity-specific UI assumptions', async () => {
-    window.history.pushState({}, '', '/workbench');
     render(<AppProviders><App /></AppProviders>);
 
     fireEvent.change(await screen.findByLabelText(/Nom d’utilisateur/), { target: { value: 'operator' } });
     fireEvent.change(screen.getByLabelText(/Mot de passe/), { target: { value: 'secret' } });
     fireEvent.click(screen.getByRole('button', { name: 'Se connecter' }));
+
+    expect(await screen.findByRole('heading', { name: /Vue d/ })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Ouvrir l’atelier opérationnel' }));
 
     expect(await screen.findByRole('heading', { name: 'Atelier opérationnel' })).toBeInTheDocument();
     expect(await screen.findByText('High pressure')).toBeInTheDocument();
