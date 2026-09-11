@@ -30,9 +30,8 @@ import { usePermissions } from '@/features/permissions/usePermissions';
 const PAGE_SIZE = 50;
 type EventsTab = 'incidents' | 'leak' | 'hse';
 
-function value(value: unknown): string {
-  if (value === null || value === undefined || value === '') return '—';
-  return String(value);
+function value(input: unknown): string {
+  return input === null || input === undefined || input === '' ? '—' : String(input);
 }
 
 function incidentLabel(incident: IncidentView): string {
@@ -94,13 +93,7 @@ export function EventsPage() {
         <Alert severity="info">{t('events.queryScope')}</Alert>
 
         <Paper variant="outlined">
-          <Tabs
-            onChange={(_, next: EventsTab) => {
-              setTab(next);
-              setSelectedIncidentId('');
-            }}
-            value={tab}
-          >
+          <Tabs onChange={(_, next: EventsTab) => { setTab(next); setSelectedIncidentId(''); }} value={tab}>
             <Tab label={t('events.incidents')} value="incidents" />
             <Tab label={t('events.leakCases')} value="leak" />
             <Tab label={t('events.hseCases')} value="hse" />
@@ -157,11 +150,7 @@ export function EventsPage() {
                                 <TableCell>{value(incident.reportedAt)}</TableCell>
                                 <TableCell>{value(incident.topologyAssetName ?? incident.topologyAssetCode ?? incident.topologyAssetId)}</TableCell>
                                 <TableCell>{value(incident.responsibleActorName ?? incident.responsibleOrganizationUnitName ?? incident.responsibleOrganizationUnitCode)}</TableCell>
-                                <TableCell>
-                                  <Button disabled={!incident.id} onClick={() => setSelectedIncidentId(incident.id ?? '')} size="small">
-                                    {t('events.open')}
-                                  </Button>
-                                </TableCell>
+                                <TableCell><Button disabled={!incident.id} onClick={() => setSelectedIncidentId(incident.id ?? '')} size="small">{t('events.open')}</Button></TableCell>
                               </TableRow>
                             ))}
                           </TableBody>
@@ -191,12 +180,11 @@ export function EventsPage() {
 
                       {detail ? (
                         <>
-                          <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                          <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
                             {detail.status ? <Chip label={detail.status} size="small" variant="outlined" /> : null}
                             {detail.severityId ? <Chip label={`${t('events.severity')}: ${detail.severityId}`} size="small" variant="outlined" /> : null}
                             {detail.priorityId ? <Chip label={`${t('events.priority')}: ${detail.priorityId}`} size="small" variant="outlined" /> : null}
                           </Stack>
-
                           <DetailField label={t('events.description')}>{value(detail.description)}</DetailField>
                           <Divider />
                           <Box sx={{ display: 'grid', gap: 1.5, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' } }}>
