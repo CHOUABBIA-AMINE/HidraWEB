@@ -4,9 +4,9 @@
 Document role          : Canonical frontend-facing backend contract acceptance register
 Frontend repository    : CHOUABBIA-AMINE/HidraWEB
 Backend source of truth: CHOUABBIA-AMINE/HidraAPI main
-Backend baseline       : af4c3b4723619a25dd9a94f4d27f5a36adab982e
-OpenAPI artifact       : hidra-api-openapi-af4c3b4723619a25dd9a94f4d27f5a36adab982e
-Artifact digest        : sha256:64a187d362725d7cfd674f5f130d1345f97f88e9151e65d4d5d29d74e76d932a
+Backend baseline       : 6e3f3b2829bb63f0d004c8bc9ba386d05eb3edcc
+OpenAPI artifact       : hidra-api-openapi-6e3f3b2829bb63f0d004c8bc9ba386d05eb3edcc
+Artifact digest        : sha256:0c9ce17f797450e2463e103e2daecdd926fd3cf52c0f278ff8aef576913ab2ab
 Reconciled             : 2026-09-11
 Owner model            : HidraAPI owns business/security truth; HidraWEB records consumer verification
 ```
@@ -24,9 +24,9 @@ Owner model            : HidraAPI owns business/security truth; HidraWEB records
 
 ## Reconciliation result
 
-HidraAPI `main` at `af4c3b47…` is the current accepted backend baseline. Its post-remediation CI passes compile, tests and clean verification, boots the application, retrieves `/v3/api-docs`, deterministically sorts the document and uploads the SHA-named OpenAPI artifact above.
+HidraAPI `main` at `6e3f3b28…` is the accepted backend baseline for current frontend contract consumption. Post-merge CI run `34629074227` passed repository compile/test/full verification, acceptance compile/test/clean verify, deterministic OpenAPI publication, and artifact upload for that exact merge commit.
 
-HidraWEB consumes artifact-derived contract slices for HWEB-003 workbench, HWEB-004 identity/organization, HWEB-005 topology, HWEB-006 telemetry/monitoring, HWEB-007 workflow, and HWEB-008 alarm. The obsolete hand/source-derived snapshots have been retired. Springdoc optionality is preserved: HidraWEB normalizes optional response fields at its presentation/API boundary rather than falsifying the published schema.
+HidraWEB consumes artifact-derived contract slices for HWEB-003 workbench, HWEB-004 identity/organization, HWEB-005 topology, HWEB-006 telemetry/monitoring, HWEB-007 workflow, and HWEB-008 alarm. The workflow slice is now rebaselined on the accepted artifact above and includes authoritative transition execution. Springdoc optionality is preserved: HidraWEB normalizes optional response fields at its presentation/API boundary rather than falsifying the published schema.
 
 Backend route authorization is enforced with canonical `<module>:<resource>:<action>` permissions. HidraWEB obtains principal-specific effective grants from `GET /api/v1/identity/me/permissions`; the route catalog is metadata, not the current user's grant set. HidraAPI remains the final authorization boundary.
 
@@ -66,7 +66,7 @@ Verification gap: Live permitted/forbidden identity integration evidence is stil
 ```text
 Status          : VERIFIED
 Backend evidence: HidraAPI CI publishes hidra-api-openapi-${github.sha}; accepted artifact/digest are recorded above.
-Frontend evidence: HWEB-003/004/005/006/007/008 Orval inputs use slices extracted from that published artifact. CI regenerates all six slices before lint/typecheck/tests/build.
+Frontend evidence: HWEB-003/004/005/006/007/008 Orval inputs use slices extracted from published HidraAPI artifacts. HWEB-007 is rebaselined on backend commit 6e3f3b28… because GAP-WF-004 was added after the earlier global slice baseline. CI regenerates all six slices before lint/typecheck/tests/build.
 Retired         : Source-derived workbench, identity/organization and topology snapshots.
 ```
 
@@ -202,7 +202,7 @@ HWEB-006 state rule: TanStack Query owns server state; React local state owns po
 
 ## HWEB-007 workflow
 
-HWEB-007 is implemented at `/work/tasks` for the published query/action-visibility contract. Behavioral branch CI run `34609250694` at `b95c88f1d9ad140009b22fcf2bb9324a41feed9e` passed all five OpenAPI generation gates, lint, typecheck, 17/17 unit/component tests, production build, and 12/12 Playwright tests.
+HWEB-007 is implemented at `/work/tasks` for the published query, action-visibility and authoritative transition-execution contract. Branch CI run `34630590467` at `1162a93390ed0f614c39e3a59a0581518b9f6804` passed all six OpenAPI generation gates, lint, typecheck, unit/component tests, production build, Playwright installation, and E2E browser tests.
 
 Canonical HWEB-007 read grants:
 
@@ -234,20 +234,21 @@ Frontend evidence: Selecting a task with an instanceId loads the backend instanc
 ```text
 Status          : VERIFIED
 Route           : GET /api/v1/workflow/tasks/{id}/available-actions
-Frontend evidence: HWEB-007 displays only backend-returned AvailableActionView values, including permitted, reasonRequired, commentRequired and requiredPermissionCode metadata. Tests prove an available APPROVE decision is visible without being converted into a locally inferred executable transition.
-Frontend rule   : Never infer workflow transitions locally; available actions are backend-authoritative visibility metadata.
+Frontend evidence: HWEB-007 renders backend-returned AvailableActionView values directly. Only entries with permitted=true and a backend transitionId are offered for execution; reasonRequired, commentRequired and requiredPermissionCode remain backend-authored metadata.
+Frontend rule   : Never infer workflow transitions locally; available actions are backend-authoritative choices.
 ```
 
 ### GAP-WF-004 — Workflow transition execution contract
 
 ```text
-Status          : OPEN
-Backend evidence: The accepted artifact exposes POST /api/v1/workflow/actions, but backend source verification shows WorkflowApplicationService.recordWorkflowAction persists an action/audit record; it does not prove or expose a task-transition execution operation that advances the workflow from an AvailableActionView transition.
-Frontend state  : HWEB-007 intentionally renders available actions as informational, non-clickable workflow choices. It does not call POST /workflow/actions as a substitute transition endpoint.
-Completion gate : HidraAPI publishes and tests an explicit transition/action execution contract that accepts the backend-selected transition/decision, validates required reason/comment input, applies authorization/concurrency rules, advances task/instance state, and returns the authoritative result.
+Status          : VERIFIED
+Backend route   : POST /api/v1/workflow/tasks/{taskId}/transitions/{transitionId}/execute
+Backend evidence: HidraAPI issue #57 / PR #60. Acting principal/effective permissions are server-derived; task and instance rows are protected for concurrent execution; stale expectedTaskUpdatedAt, terminal/wrong-step/assignment/permission/reason/comment/definition/transition conditions are validated; action/history and state advancement occur atomically; authoritative task/instance/action result is returned. Conditional-expression and target-module-callback transitions fail closed until separately implemented.
+Frontend evidence: HWEB-007 consumes the exact generated ExecuteWorkflowTransitionRequest/TransitionExecutionResult contract. It sends the selected task updatedAt as expectedTaskUpdatedAt, never sends a desired state, executes only permitted backend actions, invalidates/refetches task/action/instance/timeline state after success, and handles stale conflicts as refresh-before-retry. Component and E2E tests assert the exact POST path/body and prove non-permitted actions have no execution control.
+Legacy rule     : POST /api/v1/workflow/actions remains record-only and is not used as a transition substitute.
 ```
 
-HWEB-007 state rule: TanStack Query owns task/detail/action/instance/timeline server state; React local state owns selected-task/presentation state. HidraWEB does not maintain a client workflow state machine.
+HWEB-007 state rule: TanStack Query owns task/detail/action/instance/timeline server state; React local state owns selected-task/action/form/presentation state. HidraWEB does not maintain a client workflow state machine.
 
 ---
 
@@ -296,9 +297,10 @@ Constraint      : Verification here covers the published command contract, not t
 
 ```text
 Status          : OPEN
-Backend evidence: AlarmState contains SUPPRESSED, but the accepted OpenAPI artifact exposes no suppression command route/request/result contract.
-Frontend state  : HWEB-008 deliberately renders no suppression mutation and explicitly communicates that suppression is unavailable through the accepted backend contract.
-Completion gate : HidraAPI defines suppression business semantics, authorization, request fields, lifecycle validation, audit/result/error behavior and automated tests, then publishes the operation in the repository OpenAPI artifact.
+Backend evidence: Suppression is a distinct Alarm Management domain concept, not merely an enum: AlarmSuppression, AlarmSuppressionScopeType, AlarmSuppressionStatus, persistence/repository support, SUPPRESSED/UNSUPPRESSED lifecycle events, and the Alarm data-definition document distinguish suppression from shelving. Backend PR #61 records the semantics audit. The accepted OpenAPI still exposes no suppression mutation.
+Blocking decision: Authoritative lifecycle behavior remains undefined for release/unsuppression (for example whether an alarm returns to its exact pre-suppression state or another state) and for clear/close/escalate interactions while suppressed. Those rules must not be invented by HidraWEB.
+Frontend state  : HWEB-008 deliberately renders no suppression mutation and communicates that suppression is unavailable through the accepted REST contract.
+Completion gate : HidraAPI completes the missing lifecycle decisions, implements/tests server-derived actor attribution, authorization, validation, audit and deterministic errors, then publishes the explicit suppression/release contract in deterministic OpenAPI.
 ```
 
 ### GAP-ALARM-005 — Trusted actor attribution for acknowledgement/closure
@@ -328,4 +330,6 @@ Before every HWEB phase:
 
 ## Current next phase decision
 
-HWEB-008 is implementation-complete for the backend-supported alarm query, acknowledgement/closure, and shelving lifecycle scope. `GAP-ALARM-004` suppression, `GAP-ALARM-005` trusted actor attribution, `GAP-WF-004` workflow transition execution, and `GAP-REALTIME-001` domain realtime publication remain backend-owned constraints. After HWEB-008 is merged and post-merge `main` CI is green, prioritize HidraAPI hardening for trusted actor attribution and workflow transition execution before consuming any new frontend mutation contract. Suppression semantics should be decided and implemented only if the alarm domain requires a capability distinct from shelving.
+HWEB-007 workflow transition execution is now fully consumed and `GAP-WF-004` is VERIFIED. HWEB-008 remains implementation-complete for backend-supported alarm query, acknowledgement/closure, and shelving lifecycle scope. `GAP-ALARM-004` suppression, `GAP-ALARM-005` trusted acknowledgement/closure actor attribution, and `GAP-REALTIME-001` domain realtime publication remain backend-owned constraints.
+
+The next frontend delivery phase is HWEB-009 Events / Incidents / leak-detection / HSE. It must start from a fresh HidraAPI contract audit and consume only published backend routes/DTOs/permissions; no suppression or realtime semantics may be inferred into that phase.
