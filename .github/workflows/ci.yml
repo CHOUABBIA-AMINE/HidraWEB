@@ -31,6 +31,9 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
 
+      - name: Generate HWEB-003 workbench OpenAPI client
+        run: npm run api:generate:workbench
+
       - name: Lint
         run: npm run lint
 
@@ -46,5 +49,5 @@ jobs:
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: E2E bootstrap smoke test
+      - name: E2E browser tests
         run: npm run test:e2e

@@ -18,7 +18,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "api:generate": "orval --config orval.config.ts",
-    "verify": "npm run lint && npm run typecheck && npm run test && npm run build"
+    "api:generate:workbench": "orval --config orval.workbench.config.ts",
+    "verify": "npm run api:generate:workbench && npm run lint && npm run typecheck && npm run test && npm run build"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
