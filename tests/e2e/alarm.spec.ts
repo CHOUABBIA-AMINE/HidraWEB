@@ -21,6 +21,7 @@ async function mockAlarm(page: Page) {
   await page.route('**/api/v1/alarm/alarms/alarm-1', (route) => route.fulfill({ json: alarm }));
   await page.route('**/api/v1/alarm/alarms/acknowledgements', async (route) => {
     expect(route.request().postDataJSON()).toMatchObject({ alarmId: 'alarm-1', acknowledgedByActorId: 'actor-1' });
+    await new Promise((resolve) => setTimeout(resolve, 250));
     await route.fulfill({ json: 'ack-1' });
   });
   await page.route('**/api/v1/alarm/alarms/alarm-1/shelvings/shelf-1/unshelve', (route) => route.fulfill({ json: 'unshelve-1' }));
@@ -53,5 +54,8 @@ test('HWEB-008 presents backend-governed alarm response without invented suppres
 
   await page.getByLabel('Référence acteur').first().fill('actor-1');
   await page.getByRole('button', { name: 'Acquitter' }).click();
+  await expect(page.getByRole('button', { name: 'Clôturer' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Mettre en étagère' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Retirer de l’étagère' })).toBeDisabled();
   await expect(page.getByText('Opération enregistrée par HidraAPI.')).toBeVisible();
 });
