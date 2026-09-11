@@ -1,5 +1,13 @@
 import { hidraHttpClient } from '@/api/client/hidraHttpClient';
-import type { AvailableActionView, InstanceView, PageTaskView, TaskView, TimelineEntry } from '@/api/generated/workflow/model';
+import type {
+  AvailableActionView,
+  ExecuteWorkflowTransitionRequest,
+  InstanceView,
+  PageTaskView,
+  TaskView,
+  TimelineEntry,
+  WorkflowTransitionExecutionResponse,
+} from '@/api/generated/workflow/model';
 
 export interface TaskInboxParams {
   view?: string;
@@ -37,4 +45,16 @@ export function fetchInstance(id: string): Promise<InstanceView> {
 
 export function fetchTimeline(id: string): Promise<TimelineEntry[]> {
   return hidraHttpClient<TimelineEntry[]>({ method: 'GET', url: `/api/v1/workflow/instances/${encodeURIComponent(id)}/timeline` });
+}
+
+export function executeWorkflowTransition(
+  taskId: string,
+  transitionId: string,
+  request: ExecuteWorkflowTransitionRequest,
+): Promise<WorkflowTransitionExecutionResponse> {
+  return hidraHttpClient<WorkflowTransitionExecutionResponse>({
+    method: 'POST',
+    url: `/api/v1/workflow/tasks/${encodeURIComponent(taskId)}/transitions/${encodeURIComponent(transitionId)}/execute`,
+    data: request,
+  });
 }
