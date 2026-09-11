@@ -37,7 +37,9 @@ describe('HWEB-007 workflow task workspace', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Se connecter' }));
 
     expect(await screen.findByRole('heading', { name: /Vue d/ })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Mes tâches' }));
+    const taskNavigation = screen.getAllByRole('button', { name: 'Mes tâches' }).find((button) => !button.hasAttribute('disabled') && button.getAttribute('aria-disabled') !== 'true');
+    expect(taskNavigation).toBeDefined();
+    fireEvent.click(taskNavigation!);
 
     expect(await screen.findByRole('heading', { name: 'Mes tâches' })).toBeInTheDocument();
     expect(await screen.findByText('Validate pressure deviation')).toBeInTheDocument();
