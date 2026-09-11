@@ -5,8 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { IdentityCommandPanel } from '@/features/context/components/IdentityCommandPanel';
 import { FixedResourceWorkspace } from '@/features/context/components/FixedResourceWorkspace';
 
-const RESOURCES = ['users', 'roles', 'permissions'] as const;
-type IdentityResource = (typeof RESOURCES)[number];
+type IdentityResource = 'users' | 'roles' | 'permissions';
 
 export function IdentityAdministrationPage() {
   const { t } = useTranslation();

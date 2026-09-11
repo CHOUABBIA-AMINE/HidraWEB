@@ -5,8 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { FixedResourceWorkspace } from '@/features/context/components/FixedResourceWorkspace';
 import { OrganizationCommandPanel } from '@/features/context/components/OrganizationCommandPanel';
 
-const RESOURCES = ['organization-units', 'employees', 'employee-assignments'] as const;
-type OrganizationResource = (typeof RESOURCES)[number];
+type OrganizationResource = 'organization-units' | 'employees' | 'employee-assignments';
 
 export function OrganizationAdministrationPage() {
   const { t } = useTranslation();
