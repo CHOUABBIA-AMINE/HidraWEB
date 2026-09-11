@@ -7,6 +7,7 @@ import { OverviewPage } from '@/app/pages/OverviewPage';
 import { AlarmConsolePage } from '@/features/alarm/AlarmConsolePage';
 import { IdentityAdministrationPage } from '@/features/context/IdentityAdministrationPage';
 import { OrganizationAdministrationPage } from '@/features/context/OrganizationAdministrationPage';
+import { IncidentWorkspacePage } from '@/features/incident/IncidentWorkspacePage';
 import { PermissionBootstrapBoundary } from '@/features/permissions/PermissionBootstrapBoundary';
 import { TelemetryMonitoringPage } from '@/features/telemetry-monitoring/TelemetryMonitoringPage';
 import { NetworkTopologyPage } from '@/features/topology/NetworkTopologyPage';
@@ -31,6 +32,7 @@ export const router = createBrowserRouter([
       { path: 'network', element: <NetworkTopologyPage /> },
       { path: 'operations', element: <TelemetryMonitoringPage /> },
       { path: 'alarms', element: <AlarmConsolePage /> },
+      { path: 'events', element: <IncidentWorkspacePage /> },
       { path: 'work/tasks', element: <WorkflowTasksPage /> },
       { path: 'workbench', element: <OperationalWorkbenchPage /> },
       { path: 'administration/organization', element: <OrganizationAdministrationPage /> },
