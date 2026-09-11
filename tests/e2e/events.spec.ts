@@ -38,7 +38,7 @@ test('HWEB-009 exposes only published incident reads and keeps leak/HSE query ga
 
   await page.getByRole('button', { name: 'Open' }).click();
   await expect(page.getByText('Operator One')).toBeVisible();
-  await expect(page.getByText('Pipeline Nord')).toBeVisible();
+  await expect(page.getByText('Pipeline Nord', { exact: true }).last()).toBeVisible();
 
   await page.getByRole('tab', { name: 'Leak detection' }).click();
   await expect(page.getByText(/issue #63/)).toBeVisible();
