@@ -116,7 +116,7 @@ test('HWEB-002 authenticates and builds a capability-filtered accessible shell',
   await signIn(page);
 
   await expect(page.getByRole('button', { name: 'Réseau' })).toBeEnabled();
-  await expect(page.locator('[role="button"][aria-label="Mes tâches"][aria-disabled="true"]')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Mes tâches' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Organisation' })).toBeEnabled();
   await expect(page.getByRole('button', { name: 'Identité & accès' })).toBeEnabled();
   await expect(page.getByRole('button', { name: 'Planification' })).toHaveCount(0);
