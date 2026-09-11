@@ -53,7 +53,7 @@ describe('HWEB-005 network topology workspace', () => {
     expect(await screen.findByText('FAC-1')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Inspecter' }));
-    expect(await screen.findByRole('heading', { name: 'FAC-1' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'FAC-1', level: 3 })).toBeInTheDocument();
     expect(window.location.pathname).toBe('/network');
   });
 });

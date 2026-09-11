@@ -45,7 +45,7 @@ test('HWEB-005 loads topology, searches, and inspects while preserving the netwo
   await expect(page.getByText('FAC-1')).toBeVisible();
 
   await page.getByRole('button', { name: 'Inspecter' }).click();
-  await expect(page.getByRole('heading', { name: 'FAC-1' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'FAC-1', level: 3 })).toBeVisible();
   await expect(page).toHaveURL(/\/network$/);
   await page.getByRole('button', { name: 'Fermer le panneau contextuel' }).click();
 
