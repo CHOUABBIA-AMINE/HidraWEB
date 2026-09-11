@@ -20,7 +20,8 @@
     "api:generate": "orval --config orval.config.ts",
     "api:generate:workbench": "orval --config orval.workbench.config.ts",
     "api:generate:identity-organization": "orval --config orval.identity-organization.config.ts",
-    "verify": "npm run api:generate:workbench && npm run api:generate:identity-organization && npm run lint && npm run typecheck && npm run test && npm run build"
+    "api:generate:topology": "orval --config orval.topology.config.ts",
+    "verify": "npm run api:generate:workbench && npm run api:generate:identity-organization && npm run api:generate:topology && npm run lint && npm run typecheck && npm run test && npm run build"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",

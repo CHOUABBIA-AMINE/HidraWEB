@@ -25,7 +25,7 @@ export const navigationSections: readonly NavigationSection[] = [
     { id: 'overview', labelKey: 'nav.overview', path: '/overview', capabilityModules: [], icon: 'overview', implemented: true, deliveryTask: 'HWEB-002' },
   ] },
   { id: 'operations', labelKey: 'nav.groups.operations', items: [
-    { id: 'network', labelKey: 'nav.network', path: '/network', capabilityModules: ['topology'], icon: 'network', implemented: false, deliveryTask: 'HWEB-005' },
+    { id: 'network', labelKey: 'nav.network', path: '/network', capabilityModules: ['topology'], icon: 'network', implemented: true, deliveryTask: 'HWEB-005' },
     { id: 'operations-overview', labelKey: 'nav.operationsOverview', path: '/operations', capabilityModules: ['telemetry', 'monitoring', 'topology'], icon: 'operations', implemented: false, deliveryTask: 'HWEB-006' },
     { id: 'alarms', labelKey: 'nav.alarms', path: '/alarms', capabilityModules: ['alarm'], icon: 'alarms', implemented: false, deliveryTask: 'HWEB-008' },
     { id: 'events', labelKey: 'nav.events', path: '/events', capabilityModules: ['incident', 'leakdetection', 'hse'], icon: 'events', implemented: false, deliveryTask: 'HWEB-009' },
