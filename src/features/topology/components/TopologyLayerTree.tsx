@@ -23,20 +23,24 @@ export function TopologyLayerTree({
   return (
     <Stack spacing={1}>
       <Typography component="h2" variant="subtitle1">{t('topology.layers')}</Typography>
-      {layers.map((layer) => (
-        <Box key={layer.id} sx={{ border: 1, borderColor: focusedLayerId === layer.id ? 'primary.main' : 'divider', borderRadius: 1, p: 1 }}>
-          <FormControlLabel
-            control={<Checkbox checked={!hiddenLayerIds.has(layer.id)} onChange={() => onToggle(layer.id)} />}
-            label={layer.label}
-          />
-          <Typography color="text.secondary" sx={{ display: 'block' }} variant="caption">
-            {layer.geometryType} · {layer.description}
-          </Typography>
-          <Button onClick={() => onFocus(layer.id)} size="small" sx={{ mt: 0.5 }}>
-            {t('topology.inspectLayer')}
-          </Button>
-        </Box>
-      ))}
+      {layers.flatMap((layer) => {
+        if (!layer.id) return [];
+        const layerId = layer.id;
+        return [(
+          <Box key={layerId} sx={{ border: 1, borderColor: focusedLayerId === layerId ? 'primary.main' : 'divider', borderRadius: 1, p: 1 }}>
+            <FormControlLabel
+              control={<Checkbox checked={!hiddenLayerIds.has(layerId)} onChange={() => onToggle(layerId)} />}
+              label={layer.label ?? layerId}
+            />
+            <Typography color="text.secondary" sx={{ display: 'block' }} variant="caption">
+              {layer.geometryType ?? '—'} · {layer.description ?? '—'}
+            </Typography>
+            <Button onClick={() => onFocus(layerId)} size="small" sx={{ mt: 0.5 }}>
+              {t('topology.inspectLayer')}
+            </Button>
+          </Box>
+        )];
+      })}
     </Stack>
   );
 }
