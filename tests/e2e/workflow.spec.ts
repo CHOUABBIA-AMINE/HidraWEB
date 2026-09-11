@@ -49,7 +49,7 @@ test('HWEB-007 presents backend-authoritative workflow tasks and available actio
   await expect(page.getByText('Validate pressure deviation')).toBeVisible();
   await page.getByRole('button', { name: 'Open' }).click();
 
-  await expect(page.getByText('APPROVE')).toBeVisible();
+  await expect(page.getByText('APPROVE', { exact: true })).toBeVisible();
   await expect(page.getByText('Pressure deviation DEV-1')).toBeVisible();
   await expect(page.getByText('Supervisor')).toBeVisible();
   await expect(page.getByText(/ne fournit pas encore d’endpoint d’exécution de transition/)).toBeVisible();
