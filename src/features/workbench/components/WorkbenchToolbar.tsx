@@ -119,7 +119,7 @@ export function WorkbenchToolbar(props: WorkbenchToolbarProps) {
           <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', mt: 2 }}>
             <Button onClick={props.onReset}>{t('workbench.reset')}</Button>
             <Button disabled={!props.searchEnabled || !props.selectedResource} onClick={props.onAdvancedSearch} variant="outlined">
-              {t('workbench.advanced')}
+              {t('workbench.applyAdvanced')}
             </Button>
           </Box>
         </AccordionDetails>
