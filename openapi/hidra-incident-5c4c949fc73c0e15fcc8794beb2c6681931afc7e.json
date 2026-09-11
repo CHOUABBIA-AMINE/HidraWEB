@@ -1,0 +1,95 @@
+{
+  "components": {
+    "schemas": {
+      "IncidentView": {
+        "properties": {
+          "cancelledAt": { "format": "date-time", "type": "string" },
+          "classificationId": { "type": "string" },
+          "closedAt": { "format": "date-time", "type": "string" },
+          "containedAt": { "format": "date-time", "type": "string" },
+          "createdAt": { "format": "date-time", "type": "string" },
+          "currentEscalationLevel": { "format": "int32", "type": "integer" },
+          "description": { "type": "string" },
+          "detectedAt": { "format": "date-time", "type": "string" },
+          "id": { "type": "string" },
+          "incidentNumber": { "type": "string" },
+          "latitude": { "type": "number" },
+          "locationDescriptionAr": { "type": "string" },
+          "locationDescriptionLt": { "type": "string" },
+          "longitude": { "type": "number" },
+          "occurredAt": { "format": "date-time", "type": "string" },
+          "priorityId": { "type": "string" },
+          "reportedAt": { "format": "date-time", "type": "string" },
+          "resolvedAt": { "format": "date-time", "type": "string" },
+          "responsibleActorId": { "type": "string" },
+          "responsibleActorName": { "type": "string" },
+          "responsibleOrganizationUnitCode": { "type": "string" },
+          "responsibleOrganizationUnitId": { "type": "string" },
+          "responsibleOrganizationUnitName": { "type": "string" },
+          "severityId": { "type": "string" },
+          "sourceReferenceCode": { "type": "string" },
+          "sourceReferenceId": { "type": "string" },
+          "sourceType": { "type": "string" },
+          "status": { "type": "string" },
+          "title": { "type": "string" },
+          "topologyAssetCode": { "type": "string" },
+          "topologyAssetId": { "type": "string" },
+          "topologyAssetName": { "type": "string" },
+          "topologyAssetTypeCode": { "type": "string" },
+          "updatedAt": { "format": "date-time", "type": "string" },
+          "workflowInstanceId": { "type": "string" }
+        },
+        "type": "object"
+      },
+      "PageIncidentView": {
+        "properties": {
+          "content": { "items": { "$ref": "#/components/schemas/IncidentView" }, "type": "array" },
+          "hasNext": { "type": "boolean" },
+          "page": { "format": "int32", "type": "integer" },
+          "size": { "format": "int32", "type": "integer" },
+          "totalElements": { "format": "int64", "type": "integer" },
+          "totalPages": { "format": "int32", "type": "integer" }
+        },
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "HidraAPI HWEB-009 Incident Query Slice",
+    "version": "5c4c949fc73c0e15fcc8794beb2c6681931afc7e"
+  },
+  "openapi": "3.0.1",
+  "paths": {
+    "/api/v1/incident/incidents": {
+      "get": {
+        "operationId": "incidents",
+        "parameters": [
+          { "in": "query", "name": "page", "required": false, "schema": { "default": 0, "format": "int32", "type": "integer" } },
+          { "in": "query", "name": "size", "required": false, "schema": { "default": 50, "format": "int32", "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/PageIncidentView" } } },
+            "description": "OK"
+          }
+        },
+        "tags": ["incident-query-controller"]
+      }
+    },
+    "/api/v1/incident/incidents/{id}": {
+      "get": {
+        "operationId": "incident",
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/IncidentView" } } },
+            "description": "OK"
+          }
+        },
+        "tags": ["incident-query-controller"]
+      }
+    }
+  }
+}
