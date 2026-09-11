@@ -9,6 +9,8 @@ const fixtures = vi.hoisted(() => {
     { route: '/api/v1/incident/incidents', methods: ['GET'], module: 'incident', resource: 'incidents', action: 'read', permission: 'incident:incidents:read', enforcementStatus: 'backend-enforced' },
     { route: '/api/v1/leakdetection/candidates', methods: ['GET'], module: 'leakdetection', resource: 'candidates', action: 'read', permission: 'leakdetection:candidates:read', enforcementStatus: 'backend-enforced' },
     { route: '/api/v1/leakdetection/cases', methods: ['GET'], module: 'leakdetection', resource: 'cases', action: 'read', permission: 'leakdetection:cases:read', enforcementStatus: 'backend-enforced' },
+    { route: '/api/v1/hse/cases', methods: ['GET'], module: 'hse', resource: 'cases', action: 'read', permission: 'hse:cases:read', enforcementStatus: 'backend-enforced' },
+    { route: '/api/v1/hse/capas', methods: ['GET'], module: 'hse', resource: 'capas', action: 'read', permission: 'hse:capas:read', enforcementStatus: 'backend-enforced' },
   ];
   const incident = {
     id: 'inc-1', incidentNumber: 'INC-2026-001', title: 'Pipeline pressure event', description: 'Operational incident under investigation.',
@@ -26,7 +28,24 @@ const fixtures = vi.hoisted(() => {
     owningOrganizationUnitId: 'org-1', status: 'OPEN', severityLevel: 'HIGH', confidenceScore: 0.95, openedAt: '2026-09-11T10:10:00Z',
     openedByActorId: 'actor-2', correlationId: 'corr-leak-1', updatedAt: '2026-09-11T11:10:00Z',
   };
-  return { routes, permissions: ['incident:incidents:read', 'leakdetection:candidates:read', 'leakdetection:cases:read'], incident, candidate, leakCase };
+  const hseCase = {
+    id: 'hse-1', caseNumber: 'HSE-2026-001', title: 'Pipeline release investigation', description: 'HSE investigation linked to the operational incident.',
+    caseTypeId: 'ENVIRONMENTAL', severityId: 'SEV-2', priorityId: 'P1', status: 'OPEN', sourceType: 'INCIDENT', incidentReferenceId: 'inc-1',
+    incidentCodeSnapshot: 'INC-2026-001', incidentTitleSnapshot: 'Pipeline pressure event', targetModule: 'topology', targetTypeCode: 'PIPELINE', targetId: 'PIPE-1',
+    targetCodeSnapshot: 'PL-001', targetLabelSnapshot: 'Pipeline Nord', reportedByActorId: 'actor-3', reportedByDisplayNameSnapshot: 'HSE Officer',
+    responsibleOrganizationUnitId: 'org-hse', responsibleOrganizationUnitNameSnapshot: 'HSE Department', workflowInstanceId: 'wf-hse-1', auditReferenceId: 'audit-hse-1',
+    occurredAt: '2026-09-11T10:00:00Z', reportedAt: '2026-09-11T10:30:00Z', updatedAt: '2026-09-11T11:30:00Z',
+  };
+  const capa = {
+    id: 'capa-1', hseCaseId: 'hse-1', actionNumber: 'CAPA-001', actionTypeId: 'CORRECTIVE', title: 'Inspect isolation valves', description: 'Verify isolation integrity.',
+    ownerActorId: 'actor-4', ownerDisplayNameSnapshot: 'Maintenance Lead', ownerOrganizationUnitId: 'org-maint', ownerOrganizationUnitNameSnapshot: 'Maintenance',
+    targetDate: '2026-09-15T00:00:00Z', verificationRequired: true, status: 'OPEN', linkedWorkOrderId: 'wo-1', workflowTaskId: 'task-hse-1', updatedAt: '2026-09-11T11:40:00Z',
+  };
+  return {
+    routes,
+    permissions: ['incident:incidents:read', 'leakdetection:candidates:read', 'leakdetection:cases:read', 'hse:cases:read', 'hse:capas:read'],
+    incident, candidate, leakCase, hseCase, capa,
+  };
 });
 
 const hidraHttpClient = vi.hoisted(() => vi.fn(async (config: { url?: string; method?: string }) => {
@@ -39,6 +58,10 @@ const hidraHttpClient = vi.hoisted(() => vi.fn(async (config: { url?: string; me
   if (config.url === '/api/v1/leakdetection/candidates/cand-1' && config.method === 'GET') return fixtures.candidate;
   if (config.url === '/api/v1/leakdetection/cases' && config.method === 'GET') return { content: [fixtures.leakCase], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false };
   if (config.url === '/api/v1/leakdetection/cases/case-1' && config.method === 'GET') return fixtures.leakCase;
+  if (config.url === '/api/v1/hse/cases' && config.method === 'GET') return { content: [fixtures.hseCase], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false };
+  if (config.url === '/api/v1/hse/cases/hse-1' && config.method === 'GET') return fixtures.hseCase;
+  if (config.url === '/api/v1/hse/capas' && config.method === 'GET') return { content: [fixtures.capa], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false };
+  if (config.url === '/api/v1/hse/capas/capa-1' && config.method === 'GET') return fixtures.capa;
   throw new Error(`Unexpected request ${config.method} ${config.url}`);
 }));
 
@@ -50,7 +73,7 @@ describe('HWEB-009 events workspace', () => {
     window.history.replaceState({}, '', '/overview');
   });
 
-  it('loads backend-governed incident and leak reads while keeping HSE blocked', async () => {
+  it('loads backend-governed incident, leak, HSE and CAPA reads', async () => {
     render(<AppProviders><App /></AppProviders>);
 
     fireEvent.change(await screen.findByLabelText(/Nom d’utilisateur/), { target: { value: 'operator' } });
@@ -72,6 +95,13 @@ describe('HWEB-009 events workspace', () => {
     expect(await screen.findByText('actor-2')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('tab', { name: 'HSE' }));
-    expect(await screen.findByText(/issue #64/)).toBeInTheDocument();
+    expect(await screen.findByText('HSE-2026-001')).toBeInTheDocument();
+    expect(screen.getByText('CAPA-001')).toBeInTheDocument();
+    fireEvent.click(screen.getAllByRole('button', { name: 'Open' })[0]);
+    expect(await screen.findByText('HSE Officer')).toBeInTheDocument();
+    expect(screen.getByText('audit-hse-1')).toBeInTheDocument();
+    fireEvent.click(screen.getAllByRole('button', { name: 'Open' })[1]);
+    expect(await screen.findByText('wo-1')).toBeInTheDocument();
+    expect(screen.getByText('task-hse-1')).toBeInTheDocument();
   });
 });

@@ -1,0 +1,140 @@
+{
+  "components": {
+    "schemas": {
+      "CapaView": {
+        "properties": {
+          "actionNumber": { "type": "string" },
+          "actionTypeId": { "type": "string" },
+          "completedAt": { "format": "date-time", "type": "string" },
+          "createdAt": { "format": "date-time", "type": "string" },
+          "description": { "type": "string" },
+          "hseCaseId": { "type": "string" },
+          "id": { "type": "string" },
+          "linkedWorkOrderId": { "type": "string" },
+          "ownerActorId": { "type": "string" },
+          "ownerDisplayNameSnapshot": { "type": "string" },
+          "ownerOrganizationUnitId": { "type": "string" },
+          "ownerOrganizationUnitNameSnapshot": { "type": "string" },
+          "status": { "type": "string" },
+          "targetDate": { "format": "date-time", "type": "string" },
+          "title": { "type": "string" },
+          "updatedAt": { "format": "date-time", "type": "string" },
+          "verificationRequired": { "type": "boolean" },
+          "verifiedAt": { "format": "date-time", "type": "string" },
+          "verifiedByActorId": { "type": "string" },
+          "workflowTaskId": { "type": "string" }
+        },
+        "type": "object"
+      },
+      "HseCaseView": {
+        "properties": {
+          "auditReferenceId": { "type": "string" },
+          "caseNumber": { "type": "string" },
+          "caseTypeId": { "type": "string" },
+          "closedAt": { "format": "date-time", "type": "string" },
+          "controlledAt": { "format": "date-time", "type": "string" },
+          "createdAt": { "format": "date-time", "type": "string" },
+          "description": { "type": "string" },
+          "id": { "type": "string" },
+          "incidentCodeSnapshot": { "type": "string" },
+          "incidentReferenceId": { "type": "string" },
+          "incidentTitleSnapshot": { "type": "string" },
+          "occurredAt": { "format": "date-time", "type": "string" },
+          "priorityId": { "type": "string" },
+          "reportedAt": { "format": "date-time", "type": "string" },
+          "reportedByActorId": { "type": "string" },
+          "reportedByDisplayNameSnapshot": { "type": "string" },
+          "resolvedAt": { "format": "date-time", "type": "string" },
+          "responsibleOrganizationUnitId": { "type": "string" },
+          "responsibleOrganizationUnitNameSnapshot": { "type": "string" },
+          "severityId": { "type": "string" },
+          "sourceType": { "type": "string" },
+          "status": { "type": "string" },
+          "targetCodeSnapshot": { "type": "string" },
+          "targetId": { "type": "string" },
+          "targetLabelSnapshot": { "type": "string" },
+          "targetModule": { "type": "string" },
+          "targetTypeCode": { "type": "string" },
+          "title": { "type": "string" },
+          "updatedAt": { "format": "date-time", "type": "string" },
+          "workflowInstanceId": { "type": "string" }
+        },
+        "type": "object"
+      },
+      "PageCapaView": {
+        "properties": {
+          "content": { "items": { "$ref": "#/components/schemas/CapaView" }, "type": "array" },
+          "hasNext": { "type": "boolean" },
+          "page": { "format": "int32", "type": "integer" },
+          "size": { "format": "int32", "type": "integer" },
+          "totalElements": { "format": "int64", "type": "integer" },
+          "totalPages": { "format": "int32", "type": "integer" }
+        },
+        "type": "object"
+      },
+      "PageHseCaseView": {
+        "properties": {
+          "content": { "items": { "$ref": "#/components/schemas/HseCaseView" }, "type": "array" },
+          "hasNext": { "type": "boolean" },
+          "page": { "format": "int32", "type": "integer" },
+          "size": { "format": "int32", "type": "integer" },
+          "totalElements": { "format": "int64", "type": "integer" },
+          "totalPages": { "format": "int32", "type": "integer" }
+        },
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "HidraAPI HWEB-009 HSE Query Slice",
+    "version": "1bfa44ed5fd9fea43e86b8ac7b7ac85c6bdf611b",
+    "x-source": {
+      "artifact": "hidra-api-openapi-1bfa44ed5fd9fea43e86b8ac7b7ac85c6bdf611b",
+      "artifactId": 10284237542,
+      "backendRepo": "CHOUABBIA-AMINE/HidraAPI",
+      "commit": "1bfa44ed5fd9fea43e86b8ac7b7ac85c6bdf611b",
+      "digest": "sha256:3c861464876f588fdd40352b379a2bfe2a87840272703b71d20d7f81e9a6898f"
+    }
+  },
+  "openapi": "3.0.1",
+  "paths": {
+    "/api/v1/hse/capas": {
+      "get": {
+        "operationId": "capas",
+        "parameters": [
+          { "in": "query", "name": "page", "required": false, "schema": { "default": 0, "format": "int32", "type": "integer" } },
+          { "in": "query", "name": "size", "required": false, "schema": { "default": 50, "format": "int32", "type": "integer" } }
+        ],
+        "responses": { "200": { "content": { "*/*": { "schema": { "$ref": "#/components/schemas/PageCapaView" } } }, "description": "OK" } },
+        "tags": ["hse-query-controller"]
+      }
+    },
+    "/api/v1/hse/capas/{id}": {
+      "get": {
+        "operationId": "capa",
+        "parameters": [{ "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "content": { "*/*": { "schema": { "$ref": "#/components/schemas/CapaView" } } }, "description": "OK" } },
+        "tags": ["hse-query-controller"]
+      }
+    },
+    "/api/v1/hse/cases": {
+      "get": {
+        "operationId": "cases",
+        "parameters": [
+          { "in": "query", "name": "page", "required": false, "schema": { "default": 0, "format": "int32", "type": "integer" } },
+          { "in": "query", "name": "size", "required": false, "schema": { "default": 50, "format": "int32", "type": "integer" } }
+        ],
+        "responses": { "200": { "content": { "*/*": { "schema": { "$ref": "#/components/schemas/PageHseCaseView" } } }, "description": "OK" } },
+        "tags": ["hse-query-controller"]
+      }
+    },
+    "/api/v1/hse/cases/{id}": {
+      "get": {
+        "operationId": "hseCase",
+        "parameters": [{ "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "content": { "*/*": { "schema": { "$ref": "#/components/schemas/HseCaseView" } } }, "description": "OK" } },
+        "tags": ["hse-query-controller"]
+      }
+    }
+  }
+}
