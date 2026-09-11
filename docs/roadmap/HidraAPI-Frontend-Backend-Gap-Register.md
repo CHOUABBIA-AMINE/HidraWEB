@@ -4,9 +4,9 @@
 Document role          : Canonical frontend-facing backend contract acceptance register
 Frontend repository    : CHOUABBIA-AMINE/HidraWEB
 Backend source of truth: CHOUABBIA-AMINE/HidraAPI main
-Backend baseline       : 6e3f3b2829bb63f0d004c8bc9ba386d05eb3edcc
-OpenAPI artifact       : hidra-api-openapi-6e3f3b2829bb63f0d004c8bc9ba386d05eb3edcc
-Artifact digest        : sha256:0c9ce17f797450e2463e103e2daecdd926fd3cf52c0f278ff8aef576913ab2ab
+Backend baseline       : 1bfa44ed5fd9fea43e86b8ac7b7ac85c6bdf611b
+OpenAPI artifact       : hidra-api-openapi-1bfa44ed5fd9fea43e86b8ac7b7ac85c6bdf611b
+Artifact digest        : sha256:3c861464876f588fdd40352b379a2bfe2a87840272703b71d20d7f81e9a6898f
 Reconciled             : 2026-09-11
 Owner model            : HidraAPI owns business/security truth; HidraWEB records consumer verification
 ```
@@ -24,9 +24,9 @@ Owner model            : HidraAPI owns business/security truth; HidraWEB records
 
 ## Reconciliation result
 
-HidraAPI `main` at `6e3f3b28…` is the accepted backend baseline for current frontend contract consumption. Post-merge CI run `34629074227` passed repository compile/test/full verification, acceptance compile/test/clean verify, deterministic OpenAPI publication, and artifact upload for that exact merge commit.
+HidraAPI `main` at `1bfa44ed…` is the latest accepted backend baseline used by HWEB-009. The phase intentionally consumes owner-specific deterministic OpenAPI artifacts: incident from `5c4c949f…`, leak detection from `ff92c6af…`, and HSE from `1bfa44ed…`. Each exact artifact and digest is recorded in the HWEB-009 section below.
 
-HidraWEB consumes artifact-derived contract slices for HWEB-003 workbench, HWEB-004 identity/organization, HWEB-005 topology, HWEB-006 telemetry/monitoring, HWEB-007 workflow, and HWEB-008 alarm. The workflow slice is now rebaselined on the accepted artifact above and includes authoritative transition execution. Springdoc optionality is preserved: HidraWEB normalizes optional response fields at its presentation/API boundary rather than falsifying the published schema.
+HidraWEB consumes artifact-derived contract slices for HWEB-003 workbench, HWEB-004 identity/organization, HWEB-005 topology, HWEB-006 telemetry/monitoring, HWEB-007 workflow, HWEB-008 alarm, and HWEB-009 incident/leak-detection/HSE reads. Springdoc optionality is preserved: HidraWEB normalizes optional response fields at its presentation/API boundary rather than falsifying the published schema.
 
 Backend route authorization is enforced with canonical `<module>:<resource>:<action>` permissions. HidraWEB obtains principal-specific effective grants from `GET /api/v1/identity/me/permissions`; the route catalog is metadata, not the current user's grant set. HidraAPI remains the final authorization boundary.
 
@@ -65,8 +65,8 @@ Verification gap: Live permitted/forbidden identity integration evidence is stil
 
 ```text
 Status          : VERIFIED
-Backend evidence: HidraAPI CI publishes hidra-api-openapi-${github.sha}; accepted artifact/digest are recorded above.
-Frontend evidence: HWEB-003/004/005/006/007/008 Orval inputs use slices extracted from published HidraAPI artifacts. HWEB-007 is rebaselined on backend commit 6e3f3b28… because GAP-WF-004 was added after the earlier global slice baseline. CI regenerates all six slices before lint/typecheck/tests/build.
+Backend evidence: HidraAPI CI publishes hidra-api-openapi-${github.sha}; accepted artifacts/digests are recorded in this register.
+Frontend evidence: HWEB-003/004/005/006/007/008/009 Orval inputs use slices extracted from published HidraAPI artifacts. HWEB-009 preserves owner-specific exact artifact pins for incident, leakdetection, and hse. CI regenerates every consumed slice before lint/typecheck/tests/build.
 Retired         : Source-derived workbench, identity/organization and topology snapshots.
 ```
 
@@ -289,8 +289,8 @@ Frontend rule   : Do not infer shelving or alarm state transitions locally; Hidr
 Status          : VERIFIED
 Routes          : POST /api/v1/alarm/alarms/acknowledgements
                   POST /api/v1/alarm/alarms/closures
-Frontend evidence: HWEB-008 consumes the exact AcknowledgeAlarmRequest and CloseAlarmRequest contracts behind alarm:alarms:execute. API/component/E2E tests prove command wiring and authoritative post-command refetch behavior.
-Constraint      : Verification here covers the published command contract, not trustworthiness of client-supplied actor attribution; that is tracked separately by GAP-ALARM-005.
+Frontend evidence: HWEB-008 consumes the published acknowledgement/closure command contracts behind alarm:alarms:execute. API/component/E2E tests prove command wiring and authoritative post-command refetch behavior.
+Constraint      : Trusted actor attribution is tracked separately by GAP-ALARM-005.
 ```
 
 ### GAP-ALARM-004 — Suppression mutation contract
@@ -300,19 +300,81 @@ Status          : OPEN
 Backend evidence: Suppression is a distinct Alarm Management domain concept, not merely an enum: AlarmSuppression, AlarmSuppressionScopeType, AlarmSuppressionStatus, persistence/repository support, SUPPRESSED/UNSUPPRESSED lifecycle events, and the Alarm data-definition document distinguish suppression from shelving. Backend PR #61 records the semantics audit. The accepted OpenAPI still exposes no suppression mutation.
 Blocking decision: Authoritative lifecycle behavior remains undefined for release/unsuppression (for example whether an alarm returns to its exact pre-suppression state or another state) and for clear/close/escalate interactions while suppressed. Those rules must not be invented by HidraWEB.
 Frontend state  : HWEB-008 deliberately renders no suppression mutation and communicates that suppression is unavailable through the accepted REST contract.
-Completion gate : HidraAPI completes the missing lifecycle decisions, implements/tests server-derived actor attribution, authorization, validation, audit and deterministic errors, then publishes the explicit suppression/release contract in deterministic OpenAPI.
+Completion gate : HidraAPI completes the missing lifecycle decisions, authorization, validation, audit and deterministic errors, then publishes the explicit suppression/release contract in deterministic OpenAPI.
 ```
 
 ### GAP-ALARM-005 — Trusted actor attribution for acknowledgement/closure
 
 ```text
-Status          : IN_PROGRESS
-Backend evidence: Shelving/unshelving resolve actor identity server-side through CurrentActorResolver. AcknowledgeAlarmRequest and CloseAlarmRequest currently carry actor-reference fields supplied by the client, and source verification does not establish authoritative replacement/validation from the authenticated principal before persistence.
-Frontend state  : HWEB-008 uses the accepted request fields but does not claim they are trusted server-derived identity; the UI warns about the current client-supplied attribution contract.
-Completion gate : HidraAPI derives the acknowledgement/closure actor from the authenticated principal (preferred) or strictly validates the supplied reference against that principal, removes browser-controlled impersonation risk, tests Basic/JWT behavior, and republishes OpenAPI.
+Status          : IMPLEMENTED
+Backend evidence: HidraAPI PR #59 merged as 7a435b122d0fdf020c3158fd472fa35b6162130d. Acknowledgement and closure actor identity is now server-derived from the authenticated principal; browser-controlled actor attribution is no longer authoritative. Post-merge CI 34616649939 passed and artifact hidra-api-openapi-7a435b122d0fdf020c3158fd472fa35b6162130d was published with sha256:5ba484af942fc4c6dce23b4011e217598d9418e62708f92de6f9723a041ae5b0.
+Frontend state  : The backend gap is closed, but HWEB-008 has not yet been separately re-accepted against this actor-attribution contract in this register; keep IMPLEMENTED rather than VERIFIED until that focused frontend reconciliation is performed.
 ```
 
 Alarm realtime publication remains covered by `GAP-REALTIME-001` and is DEFERRED until verified domain publishers/event families exist.
+
+---
+
+## HWEB-009 events and incidents
+
+HWEB-009 composes one `/events` user process while preserving separate backend ownership for `incident`, `leakdetection`, and `hse`. It does not create a frontend-owned shared event aggregate or infer cross-module relationships that are not published by owner-module DTOs.
+
+Latest green behavioral evidence before closure documentation:
+
+```text
+HidraWEB branch      : hweb-009-hse-workspace
+Behavioral HEAD      : 40ad230b4152274d8ad74be3c92908a573348fc0
+CI run               : 34654112588
+Result               : SUCCESS
+Verified gates       : all OpenAPI generators, lint, typecheck, unit/component tests, production build, Playwright install, E2E
+```
+
+### GAP-INCIDENT-001 — Incident list/detail query contract
+
+```text
+Status          : VERIFIED
+Backend SHA     : 5c4c949fc73c0e15fcc8794beb2c6681931afc7e
+Backend CI      : 34648671005
+Artifact        : hidra-api-openapi-5c4c949fc73c0e15fcc8794beb2c6681931afc7e
+Artifact digest : sha256:a5e563f2c0e56b03af32ed79e8ab26146fa8dec4eca43d9a33fd1049596e08c9
+Routes          : GET /api/v1/incident/incidents
+                  GET /api/v1/incident/incidents/{id}
+Frontend evidence: HWEB-009 incident workspace consumes the generated artifact-derived list/detail contracts with paging, backend route-derived permission checks, fail-closed behavior, and backend-published topology/actor/organization/workflow references only. Incident frontend merge SHA cc2d676ee1afdbd4e1fe70d8ffd1a05221df096d.
+```
+
+### GAP-LEAK-001 — Leak candidate/case query contracts
+
+```text
+Status          : VERIFIED
+Backend SHA     : ff92c6af819723f4965a8a631a633384be2c46e1
+Backend CI      : 34651081678
+Artifact        : hidra-api-openapi-ff92c6af819723f4965a8a631a633384be2c46e1
+Artifact digest : sha256:f77554c0488ebcc7a46d76d2a442378013afb30d0024e8929726c2fef5efc2eb
+Routes          : GET /api/v1/leakdetection/candidates
+                  GET /api/v1/leakdetection/candidates/{id}
+                  GET /api/v1/leakdetection/cases
+                  GET /api/v1/leakdetection/cases/{id}
+Frontend evidence: HWEB-009 leak workspace consumes generated artifact-derived candidate/case list/detail contracts with independent backend-derived read permissions, paging, exact backend fields only, and component/E2E coverage. Frontend merge SHA f7b0446024126c0b838f4853cbd1fca133f3d9a0; post-merge CI 34652031970 SUCCESS.
+```
+
+### GAP-HSE-001 — HSE case/CAPA query contracts
+
+```text
+Status          : VERIFIED
+Backend SHA     : 1bfa44ed5fd9fea43e86b8ac7b7ac85c6bdf611b
+Backend CI      : 34652739432
+Artifact        : hidra-api-openapi-1bfa44ed5fd9fea43e86b8ac7b7ac85c6bdf611b
+Artifact digest : sha256:3c861464876f588fdd40352b379a2bfe2a87840272703b71d20d7f81e9a6898f
+Routes          : GET /api/v1/hse/cases
+                  GET /api/v1/hse/cases/{id}
+                  GET /api/v1/hse/capas
+                  GET /api/v1/hse/capas/{id}
+Frontend evidence: HWEB-009 HSE workspace consumes generated artifact-derived HSE case/CAPA list/detail contracts with independent case/CAPA read permissions, paging, backend-published incident/topology/workflow/audit/work-order/task references only, and no invented lifecycle mutations. Behavioral HEAD 40ad230b4152274d8ad74be3c92908a573348fc0 passed CI 34654112588.
+```
+
+HWEB-009 state rule: TanStack Query owns incident/leak/HSE server state. React local state is limited to selected tab, page numbers, selected record identifiers, and presentation-only state. No frontend lifecycle state machine is maintained.
+
+HWEB-009 mutation rule: incident/leak/HSE command endpoints are not exposed merely because they exist. Any future mutation UI requires a separate exact contract/authorization/concurrency/actor-attribution/lifecycle review.
 
 ---
 
@@ -330,6 +392,6 @@ Before every HWEB phase:
 
 ## Current next phase decision
 
-HWEB-007 workflow transition execution is now fully consumed and `GAP-WF-004` is VERIFIED. HWEB-008 remains implementation-complete for backend-supported alarm query, acknowledgement/closure, and shelving lifecycle scope. `GAP-ALARM-004` suppression, `GAP-ALARM-005` trusted acknowledgement/closure actor attribution, and `GAP-REALTIME-001` domain realtime publication remain backend-owned constraints.
+HWEB-009 implementation is complete for the accepted read-composition scope and is at its final exact-head CI / PR #16 merge / post-merge verification gate. `GAP-ALARM-004` suppression remains OPEN and `GAP-REALTIME-001` remains DEFERRED. `GAP-ALARM-005` is backend IMPLEMENTED and requires a separate focused frontend reconciliation before it may be marked VERIFIED.
 
-The next frontend delivery phase is HWEB-009 Events / Incidents / leak-detection / HSE. It must start from a fresh HidraAPI contract audit and consume only published backend routes/DTOs/permissions; no suppression or realtime semantics may be inferred into that phase.
+Do not expand HWEB-009 closure into alarm suppression, realtime, HSE mutations, leak mutations, or any other new lifecycle surface.
