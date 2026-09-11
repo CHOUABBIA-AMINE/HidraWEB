@@ -3,7 +3,7 @@ import { defineConfig } from 'orval';
 export default defineConfig({
   topology: {
     input: {
-      target: './openapi/hidra-topology-e5385f0e1f8bb88b48c8e1368962ef72ec6922ae.json',
+      target: './openapi/hidra-topology-af4c3b4723619a25dd9a94f4d27f5a36adab982e.json',
     },
     output: {
       mode: 'single',
