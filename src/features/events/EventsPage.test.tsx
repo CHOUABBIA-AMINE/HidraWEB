@@ -15,24 +15,12 @@ const fixtures = vi.hoisted(() => {
     incidentNumber: 'INC-2026-001',
     title: 'Pipeline pressure event',
     description: 'Pressure deviation under operational assessment.',
-    status: 'OPEN',
-    severityId: 'SEV-2',
-    priorityId: 'P2',
-    sourceType: 'ALARM',
-    sourceReferenceCode: 'ALM-42',
-    detectedAt: '2026-09-11T09:00:00Z',
-    reportedAt: '2026-09-11T09:04:00Z',
-    topologyAssetId: 'pipe-1',
-    topologyAssetCode: 'PL-001',
-    topologyAssetName: 'Pipeline Nord',
-    responsibleOrganizationUnitCode: 'OPS-NORTH',
-    responsibleOrganizationUnitName: 'North Operations',
-    responsibleActorId: 'actor-1',
-    responsibleActorName: 'Operator A',
-    workflowInstanceId: 'wf-1',
-    currentEscalationLevel: 1,
-    createdAt: '2026-09-11T09:04:00Z',
-    updatedAt: '2026-09-11T09:10:00Z',
+    status: 'OPEN', severityId: 'SEV-2', priorityId: 'P2', sourceType: 'ALARM', sourceReferenceCode: 'ALM-42',
+    detectedAt: '2026-09-11T09:00:00Z', reportedAt: '2026-09-11T09:04:00Z',
+    topologyAssetId: 'pipe-1', topologyAssetCode: 'PL-001', topologyAssetName: 'Pipeline Nord',
+    responsibleOrganizationUnitCode: 'OPS-NORTH', responsibleOrganizationUnitName: 'North Operations',
+    responsibleActorId: 'actor-1', responsibleActorName: 'Operator A', workflowInstanceId: 'wf-1', currentEscalationLevel: 1,
+    createdAt: '2026-09-11T09:04:00Z', updatedAt: '2026-09-11T09:10:00Z',
   };
   return { routes, incident };
 });
@@ -57,7 +45,7 @@ describe('HWEB-009 events workspace', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Se connecter' }));
 
     expect(await screen.findByRole('heading', { name: /Vue d/ })).toBeInTheDocument();
-    const eventsNavigation = screen.getAllByRole('button', { name: 'Événements' }).find((button) => !button.hasAttribute('disabled') && button.getAttribute('aria-disabled') !== 'true');
+    const eventsNavigation = screen.getAllByRole('button', { name: 'Événements & incidents' }).find((button) => !button.hasAttribute('disabled') && button.getAttribute('aria-disabled') !== 'true');
     expect(eventsNavigation).toBeDefined();
     fireEvent.click(eventsNavigation!);
 
@@ -70,9 +58,7 @@ describe('HWEB-009 events workspace', () => {
     expect(await screen.findByText('North Operations')).toBeInTheDocument();
 
     await waitFor(() => expect(vi.mocked(hidraHttpClient)).toHaveBeenCalledWith(expect.objectContaining({
-      method: 'GET',
-      url: '/api/v1/incident/incidents',
-      params: { page: 0, size: 50 },
+      method: 'GET', url: '/api/v1/incident/incidents', params: { page: 0, size: 50 },
     })));
     expect(vi.mocked(hidraHttpClient)).toHaveBeenCalledWith(expect.objectContaining({ method: 'GET', url: '/api/v1/incident/incidents/inc-1' }));
 
