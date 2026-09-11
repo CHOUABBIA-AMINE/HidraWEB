@@ -64,11 +64,11 @@ export function WorkbenchToolbar(props: WorkbenchToolbarProps) {
           {props.resources.map((resource) => <MenuItem key={resource.resource} value={resource.resource}>{resource.resource}</MenuItem>)}
         </Select>
         <TextField
-          aria-label={t('workbench.query')}
           onChange={(event) => props.onQueryChange(event.target.value)}
           onKeyDown={(event) => { if (event.key === 'Enter') props.onBasicSearch(); }}
           placeholder={t('workbench.queryPlaceholder')}
           size="small"
+          slotProps={{ htmlInput: { 'aria-label': t('workbench.query') } }}
           value={props.query}
         />
         <Button disabled={!props.selectedResource} onClick={props.onBasicSearch} variant="contained">{t('workbench.apply')}</Button>
@@ -90,10 +90,10 @@ export function WorkbenchToolbar(props: WorkbenchToolbarProps) {
               {props.fieldCandidates.map((field) => <MenuItem key={field} value={field}>{field}</MenuItem>)}
             </Select>
             <TextField
-              aria-label={t('workbench.filterValue')}
               disabled={!props.advanced.filterField}
               onChange={(event) => updateAdvanced({ filterValue: event.target.value })}
               size="small"
+              slotProps={{ htmlInput: { 'aria-label': t('workbench.filterValue') } }}
               value={props.advanced.filterValue}
             />
             <Select
