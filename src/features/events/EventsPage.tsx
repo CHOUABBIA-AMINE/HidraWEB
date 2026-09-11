@@ -18,7 +18,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
@@ -45,7 +45,7 @@ function displayError(error: unknown, fallback: string): string {
   return normalized.message || fallback;
 }
 
-function DetailField({ label, children }: { label: string; children: React.ReactNode }) {
+function DetailField({ label, children }: { label: string; children: ReactNode }) {
   return (
     <Box>
       <Typography color="text.secondary" variant="caption">{label}</Typography>
