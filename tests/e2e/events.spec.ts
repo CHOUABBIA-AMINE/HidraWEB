@@ -6,28 +6,13 @@ const routes = [
 ];
 
 const incident = {
-  id: 'inc-1',
-  incidentNumber: 'INC-2026-001',
-  title: 'Pipeline pressure event',
-  description: 'Pressure deviation under operational assessment.',
-  status: 'OPEN',
-  severityId: 'SEV-2',
-  priorityId: 'P2',
-  sourceType: 'ALARM',
-  sourceReferenceCode: 'ALM-42',
-  detectedAt: '2026-09-11T09:00:00Z',
-  reportedAt: '2026-09-11T09:04:00Z',
-  topologyAssetId: 'pipe-1',
-  topologyAssetCode: 'PL-001',
-  topologyAssetName: 'Pipeline Nord',
-  responsibleOrganizationUnitCode: 'OPS-NORTH',
-  responsibleOrganizationUnitName: 'North Operations',
-  responsibleActorId: 'actor-1',
-  responsibleActorName: 'Operator A',
-  workflowInstanceId: 'wf-1',
-  currentEscalationLevel: 1,
-  createdAt: '2026-09-11T09:04:00Z',
-  updatedAt: '2026-09-11T09:10:00Z',
+  id: 'inc-1', incidentNumber: 'INC-2026-001', title: 'Pipeline pressure event',
+  description: 'Pressure deviation under operational assessment.', status: 'OPEN', severityId: 'SEV-2', priorityId: 'P2',
+  sourceType: 'ALARM', sourceReferenceCode: 'ALM-42', detectedAt: '2026-09-11T09:00:00Z', reportedAt: '2026-09-11T09:04:00Z',
+  topologyAssetId: 'pipe-1', topologyAssetCode: 'PL-001', topologyAssetName: 'Pipeline Nord',
+  responsibleOrganizationUnitCode: 'OPS-NORTH', responsibleOrganizationUnitName: 'North Operations',
+  responsibleActorId: 'actor-1', responsibleActorName: 'Operator A', workflowInstanceId: 'wf-1', currentEscalationLevel: 1,
+  createdAt: '2026-09-11T09:04:00Z', updatedAt: '2026-09-11T09:10:00Z',
 };
 
 async function mockEvents(page: Page) {
@@ -56,7 +41,7 @@ test('HWEB-009 loads incident register/detail and does not invent leak or HSE re
   await mockEvents(page);
   await signIn(page);
 
-  const eventsNavigation = page.getByRole('button', { name: 'Événements' }).filter({ visible: true });
+  const eventsNavigation = page.getByRole('button', { name: 'Événements & incidents' }).filter({ visible: true });
   const count = await eventsNavigation.count();
   let clicked = false;
   for (let index = 0; index < count; index += 1) {
