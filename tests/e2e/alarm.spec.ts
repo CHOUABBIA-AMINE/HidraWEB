@@ -48,7 +48,7 @@ test('HWEB-008 presents backend-governed alarm response without invented suppres
   await expect(page.getByText(/événements temps réel métier/)).toBeVisible();
 
   await page.getByRole('button', { name: 'Ouvrir' }).click();
-  await expect(page.getByText('Pipeline Nord')).toBeVisible();
+  await expect(page.getByText('Pipeline Nord', { exact: true }).last()).toBeVisible();
   await expect(page.getByText('MAINT')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Retirer de l’étagère' })).toBeVisible();
 
