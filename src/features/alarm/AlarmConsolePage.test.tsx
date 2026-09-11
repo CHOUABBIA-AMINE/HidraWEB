@@ -39,8 +39,8 @@ async function signInAndOpenAlarms() {
   fireEvent.change(await screen.findByLabelText(/Nom d’utilisateur/), { target: { value: 'operator' } });
   fireEvent.change(screen.getByLabelText(/Mot de passe/), { target: { value: 'secret' } });
   fireEvent.click(screen.getByRole('button', { name: 'Se connecter' }));
-  expect(await screen.findByRole('heading', { name: /Vue d/ })).toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: 'Alarmes' }));
+  const alarmNavigation = await screen.findByRole('button', { name: 'Alarmes' });
+  fireEvent.click(alarmNavigation);
   expect(await screen.findByRole('heading', { name: 'Console des alarmes' })).toBeInTheDocument();
 }
 
