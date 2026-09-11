@@ -4,9 +4,7 @@
   "private": true,
   "type": "module",
   "description": "Hidra operational enterprise frontend for HidraAPI.",
-  "engines": {
-    "node": ">=24.0.0 <25"
-  },
+  "engines": { "node": ">=24.0.0 <25" },
   "packageManager": "npm@11.19.0",
   "scripts": {
     "dev": "vite",
@@ -22,7 +20,8 @@
     "api:generate:identity-organization": "orval --config orval.identity-organization.config.ts",
     "api:generate:topology": "orval --config orval.topology.config.ts",
     "api:generate:telemetry-monitoring": "orval --config orval.telemetry-monitoring.config.ts",
-    "verify": "npm run api:generate:workbench && npm run api:generate:identity-organization && npm run api:generate:topology && npm run api:generate:telemetry-monitoring && npm run lint && npm run typecheck && npm run test && npm run build"
+    "api:generate:workflow": "orval --config orval.workflow.config.ts",
+    "verify": "npm run api:generate:workbench && npm run api:generate:identity-organization && npm run api:generate:topology && npm run api:generate:telemetry-monitoring && npm run api:generate:workflow && npm run lint && npm run typecheck && npm run test && npm run build"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
