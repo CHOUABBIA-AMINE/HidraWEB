@@ -101,8 +101,8 @@ describe('HWEB-009 events workspace', () => {
     expect(await screen.findByText('HSE Officer')).toBeInTheDocument();
     expect(screen.getByText('audit-hse-1')).toBeInTheDocument();
     fireEvent.click(screen.getAllByRole('button', { name: 'Open' })[1]);
-    expect(await screen.findByText('Maintenance Lead')).toBeInTheDocument();
-    expect(screen.getByText('wo-1')).toBeInTheDocument();
+    expect(await screen.findByText('wo-1')).toBeInTheDocument();
+    expect(screen.getByText('Maintenance Lead')).toBeInTheDocument();
     expect(screen.getByText('task-hse-1')).toBeInTheDocument();
   });
 });
