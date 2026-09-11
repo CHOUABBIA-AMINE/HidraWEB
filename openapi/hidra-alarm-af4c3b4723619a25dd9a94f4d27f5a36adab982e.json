@@ -1,0 +1,97 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "HidraAPI alarm contract slice",
+    "version": "af4c3b4723619a25dd9a94f4d27f5a36adab982e"
+  },
+  "paths": {
+    "/api/v1/alarm/alarms": {
+      "get": {
+        "operationId": "alarms",
+        "parameters": [
+          {"in":"query","name":"view","required":false,"schema":{"default":"active","type":"string"}},
+          {"in":"query","name":"state","required":false,"schema":{"type":"string"}},
+          {"in":"query","name":"severityId","required":false,"schema":{"type":"string"}},
+          {"in":"query","name":"topologyAssetId","required":false,"schema":{"type":"string"}},
+          {"in":"query","name":"from","required":false,"schema":{"format":"date-time","type":"string"}},
+          {"in":"query","name":"to","required":false,"schema":{"format":"date-time","type":"string"}},
+          {"in":"query","name":"page","required":false,"schema":{"default":0,"format":"int32","type":"integer"}},
+          {"in":"query","name":"size","required":false,"schema":{"default":50,"format":"int32","type":"integer"}}
+        ],
+        "responses": {"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/PageAlarmView"}}}}},
+        "tags": ["alarm-query-controller"]
+      }
+    },
+    "/api/v1/alarm/alarms/{id}": {
+      "get": {
+        "operationId": "alarm",
+        "parameters": [{"in":"path","name":"id","required":true,"schema":{"type":"string"}}],
+        "responses": {"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/AlarmView"}}}}},
+        "tags": ["alarm-query-controller"]
+      }
+    },
+    "/api/v1/alarm/alarms/{id}/shelvings": {
+      "get": {
+        "operationId": "shelvings",
+        "parameters": [{"in":"path","name":"id","required":true,"schema":{"type":"string"}}],
+        "responses": {"200":{"description":"OK","content":{"*/*":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/ShelvingView"}}}}}},
+        "tags": ["alarm-query-controller"]
+      },
+      "post": {
+        "operationId": "shelve",
+        "parameters": [
+          {"in":"path","name":"id","required":true,"schema":{"type":"string"}},
+          {"in":"header","name":"X-Correlation-Id","required":false,"schema":{"type":"string"}}
+        ],
+        "requestBody": {"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/ShelveAlarmRequest"}}}},
+        "responses": {"200":{"description":"OK","content":{"*/*":{"schema":{"type":"string"}}}}},
+        "tags": ["alarm-query-controller"]
+      }
+    },
+    "/api/v1/alarm/alarms/{id}/shelvings/{shelvingId}/unshelve": {
+      "post": {
+        "operationId": "unshelve",
+        "parameters": [
+          {"in":"path","name":"id","required":true,"schema":{"type":"string"}},
+          {"in":"path","name":"shelvingId","required":true,"schema":{"type":"string"}},
+          {"in":"header","name":"X-Correlation-Id","required":false,"schema":{"type":"string"}}
+        ],
+        "responses": {"200":{"description":"OK","content":{"*/*":{"schema":{"type":"string"}}}}},
+        "tags": ["alarm-query-controller"]
+      }
+    },
+    "/api/v1/alarm/alarms/acknowledgements": {
+      "post": {
+        "operationId": "acknowledgeAlarm",
+        "requestBody": {"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/AcknowledgeAlarmRequest"}}}},
+        "responses": {"200":{"description":"OK","content":{"*/*":{"schema":{"type":"string"}}}}},
+        "tags": ["spring-alarm-controller"]
+      }
+    },
+    "/api/v1/alarm/alarms/closures": {
+      "post": {
+        "operationId": "closeAlarm",
+        "requestBody": {"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/CloseAlarmRequest"}}}},
+        "responses": {"200":{"description":"OK","content":{"*/*":{"schema":{"type":"string"}}}}},
+        "tags": ["spring-alarm-controller"]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AcknowledgeAlarmRequest": {"type":"object","properties":{"acknowledgedByActorId":{"type":"string"},"acknowledgedByDisplayName":{"type":"string"},"alarmId":{"type":"string"},"comment":{"type":"string"},"correlationId":{"type":"string"},"organizationUnitCode":{"type":"string"},"organizationUnitId":{"type":"string"}}},
+      "AlarmView": {"type":"object","properties":{"acknowledgedAt":{"format":"date-time","type":"string"},"acknowledgedByActorId":{"type":"string"},"alarmNumber":{"type":"string"},"alarmTypeId":{"type":"string"},"clearedAt":{"format":"date-time","type":"string"},"closedAt":{"format":"date-time","type":"string"},"correlationId":{"type":"string"},"currentState":{"type":"string"},"firstDetectedAt":{"format":"date-time","type":"string"},"id":{"type":"string"},"incidentId":{"type":"string"},"lastUpdatedAt":{"format":"date-time","type":"string"},"owningOrganizationUnitId":{"type":"string"},"priorityId":{"type":"string"},"raisedAt":{"format":"date-time","type":"string"},"severityId":{"type":"string"},"sourceReferenceId":{"type":"string"},"sourceType":{"type":"string"},"titleAr":{"type":"string"},"titleEn":{"type":"string"},"titleFr":{"type":"string"},"topologyAssetCode":{"type":"string"},"topologyAssetId":{"type":"string"},"topologyAssetName":{"type":"string"},"topologyAssetTypeCode":{"type":"string"},"workflowInstanceId":{"type":"string"}}},
+      "CloseAlarmRequest": {"type":"object","properties":{"alarmId":{"type":"string"},"closedByActorId":{"type":"string"},"closureComment":{"type":"string"},"closureReasonId":{"type":"string"},"closureType":{"enum":["NORMALIZED","FALSE_ALARM","DUPLICATE","MAINTENANCE","CANCELLED","ESCALATED_TO_INCIDENT"],"type":"string"},"correlationId":{"type":"string"},"requiresReview":{"type":"boolean"},"reviewWorkflowInstanceId":{"type":"string"}}},
+      "PageAlarmView": {"type":"object","properties":{"content":{"type":"array","items":{"$ref":"#/components/schemas/AlarmView"}},"hasNext":{"type":"boolean"},"page":{"format":"int32","type":"integer"},"size":{"format":"int32","type":"integer"},"totalElements":{"format":"int64","type":"integer"},"totalPages":{"format":"int32","type":"integer"}}},
+      "ShelveAlarmRequest": {"type":"object","required":["shelvingReasonId"],"properties":{"reasonText":{"type":"string"},"shelvedUntil":{"format":"date-time","type":"string"},"shelvingReasonId":{"minLength":1,"type":"string"}}},
+      "ShelvingView": {"type":"object","properties":{"alarmId":{"type":"string"},"correlationId":{"type":"string"},"id":{"type":"string"},"reasonText":{"type":"string"},"shelvedAt":{"format":"date-time","type":"string"},"shelvedByActorId":{"type":"string"},"shelvedUntil":{"format":"date-time","type":"string"},"shelvingReasonId":{"type":"string"},"status":{"type":"string"},"unshelvedAt":{"format":"date-time","type":"string"},"unshelvedByActorId":{"type":"string"}}}
+    }
+  },
+  "x-hidra-contract-source": {
+    "repository": "CHOUABBIA-AMINE/HidraAPI",
+    "commit": "af4c3b4723619a25dd9a94f4d27f5a36adab982e",
+    "artifact": "hidra-api-openapi-af4c3b4723619a25dd9a94f4d27f5a36adab982e",
+    "digest": "sha256:64a187d362725d7cfd674f5f130d1345f97f88e9151e65d4d5d29d74e76d932a",
+    "extractedPaths": ["/api/v1/alarm/alarms","/api/v1/alarm/alarms/{id}","/api/v1/alarm/alarms/{id}/shelvings","/api/v1/alarm/alarms/{id}/shelvings/{shelvingId}/unshelve","/api/v1/alarm/alarms/acknowledgements","/api/v1/alarm/alarms/closures"]
+  }
+}

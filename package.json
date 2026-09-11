@@ -21,7 +21,8 @@
     "api:generate:topology": "orval --config orval.topology.config.ts",
     "api:generate:telemetry-monitoring": "orval --config orval.telemetry-monitoring.config.ts",
     "api:generate:workflow": "orval --config orval.workflow.config.ts",
-    "verify": "npm run api:generate:workbench && npm run api:generate:identity-organization && npm run api:generate:topology && npm run api:generate:telemetry-monitoring && npm run api:generate:workflow && npm run lint && npm run typecheck && npm run test && npm run build"
+    "api:generate:alarm": "orval --config orval.alarm.config.ts",
+    "verify": "npm run api:generate:workbench && npm run api:generate:identity-organization && npm run api:generate:topology && npm run api:generate:telemetry-monitoring && npm run api:generate:workflow && npm run api:generate:alarm && npm run lint && npm run typecheck && npm run test && npm run build"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",

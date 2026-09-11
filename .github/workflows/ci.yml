@@ -46,6 +46,9 @@ jobs:
       - name: Generate HWEB-007 workflow OpenAPI client
         run: npm run api:generate:workflow
 
+      - name: Generate HWEB-008 alarm OpenAPI client
+        run: npm run api:generate:alarm
+
       - name: Lint
         run: npm run lint
 

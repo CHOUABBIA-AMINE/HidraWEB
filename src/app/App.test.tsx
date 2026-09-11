@@ -19,6 +19,10 @@ const fixtures = vi.hoisted(() => {
       permission: 'workflow:instances:read', enforcementStatus: 'backend-enforced',
     },
     {
+      route: '/api/v1/alarm/alarms', methods: ['GET'], module: 'alarm', resource: 'alarms', action: 'read',
+      permission: 'alarm:alarms:read', enforcementStatus: 'backend-enforced',
+    },
+    {
       route: '/api/v1/identity/users', methods: ['POST'], module: 'identity', resource: 'users', action: 'execute',
       permission: 'identity:users:execute', enforcementStatus: 'backend-enforced',
     },
@@ -31,6 +35,7 @@ const fixtures = vi.hoisted(() => {
     'topology:map:read',
     'workflow:tasks:read',
     'workflow:instances:read',
+    'alarm:alarms:read',
     'identity:users:execute',
     'organization:units:execute',
   ];
@@ -55,7 +60,7 @@ vi.mock('@/api/client/hidraHttpClient', () => ({
   }),
 }));
 
-describe('HWEB-002 / HWEB-004 / HWEB-005 / HWEB-007 capability-driven application shell', () => {
+describe('HWEB-002 / HWEB-004 / HWEB-005 / HWEB-007 / HWEB-008 capability-driven application shell', () => {
   it('authenticates and enables only implemented navigation backed by effective grants', async () => {
     render(<AppProviders><App /></AppProviders>);
 
@@ -68,6 +73,7 @@ describe('HWEB-002 / HWEB-004 / HWEB-005 / HWEB-007 capability-driven applicatio
     expect(screen.getByRole('button', { name: 'Réseau' })).not.toHaveAttribute('aria-disabled', 'true');
     const taskButtons = screen.getAllByRole('button', { name: 'Mes tâches' });
     expect(taskButtons.some((button) => !button.hasAttribute('disabled') && button.getAttribute('aria-disabled') !== 'true')).toBe(true);
+    expect(screen.getByRole('button', { name: 'Alarmes' })).not.toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByRole('button', { name: 'Organisation' })).not.toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByRole('button', { name: 'Identité & accès' })).not.toHaveAttribute('aria-disabled', 'true');
     expect(screen.queryByRole('button', { name: 'Planification' })).not.toBeInTheDocument();
