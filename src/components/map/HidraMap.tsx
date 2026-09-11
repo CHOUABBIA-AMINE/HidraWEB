@@ -18,10 +18,6 @@ export function HidraMap({ data, selectedFeatureId, ariaLabel, onFeatureSelect }
   const selectionHandlerRef = useRef(onFeatureSelect);
   const [adapterError, setAdapterError] = useState<string | undefined>(undefined);
 
-  dataRef.current = data;
-  selectedFeatureRef.current = selectedFeatureId;
-  selectionHandlerRef.current = onFeatureSelect;
-
   useEffect(() => {
     let cancelled = false;
     let ownedAdapter: HidraMapAdapter | undefined;
@@ -51,12 +47,18 @@ export function HidraMap({ data, selectedFeatureId, ariaLabel, onFeatureSelect }
   }, []);
 
   useEffect(() => {
+    dataRef.current = data;
     adapterRef.current?.setData(data);
   }, [data]);
 
   useEffect(() => {
+    selectedFeatureRef.current = selectedFeatureId;
     adapterRef.current?.setSelectedFeature(selectedFeatureId);
   }, [selectedFeatureId]);
+
+  useEffect(() => {
+    selectionHandlerRef.current = onFeatureSelect;
+  }, [onFeatureSelect]);
 
   return (
     <Box aria-label={ariaLabel} role="region">
