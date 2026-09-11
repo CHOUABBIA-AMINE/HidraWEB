@@ -43,7 +43,7 @@ vi.mock('@/api/client/hidraHttpClient', () => ({
   }),
 }));
 
-describe('HWEB-002 / HWEB-004 capability-driven application shell', () => {
+describe('HWEB-002 / HWEB-004 / HWEB-005 capability-driven application shell', () => {
   it('authenticates and enables only implemented navigation backed by published module capabilities', async () => {
     render(<AppProviders><App /></AppProviders>);
 
@@ -53,7 +53,7 @@ describe('HWEB-002 / HWEB-004 capability-driven application shell', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Se connecter' }));
 
     expect(await screen.findByRole('heading', { name: /Vue d/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Réseau' })).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('button', { name: 'Réseau' })).not.toHaveAttribute('aria-disabled', 'true');
     expect(document.querySelector('[role="button"][aria-label="Mes tâches"][aria-disabled="true"]')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Organisation' })).not.toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByRole('button', { name: 'Identité & accès' })).not.toHaveAttribute('aria-disabled', 'true');
