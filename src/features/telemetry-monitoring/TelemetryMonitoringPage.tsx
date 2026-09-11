@@ -129,8 +129,7 @@ export function TelemetryMonitoringPage() {
     enabled: canDeviations,
   });
 
-  const trend = trendQuery.data ?? [];
-  const path = useMemo(() => numericTrendPath(trend), [trend]);
+  const path = useMemo(() => numericTrendPath(trendQuery.data ?? []), [trendQuery.data]);
   const history = historyQuery.data?.content ?? [];
   const rules = rulesQuery.data?.content ?? [];
   const deviations = deviationsQuery.data?.content ?? [];
@@ -140,10 +139,10 @@ export function TelemetryMonitoringPage() {
   };
 
   const inspectRule = (rule: MonitoringRuleView) => {
-    drawer.openDrawer({ title: rule.code ?? rule.id ?? t('telemetryMonitoring.rules'), content: <BackendObjectInspector title={rule.code ?? rule.id ?? 'Rule'} value={rule as Record<string, unknown>} /> });
+    drawer.openDrawer({ title: rule.code ?? rule.id ?? t('telemetryMonitoring.rules'), content: <BackendObjectInspector title={rule.code ?? rule.id ?? 'Rule'} value={rule as unknown as Record<string, unknown>} /> });
   };
   const inspectDeviation = (deviation: DeviationView) => {
-    drawer.openDrawer({ title: deviation.id ?? t('telemetryMonitoring.deviations'), content: <BackendObjectInspector title={deviation.id ?? 'Deviation'} value={deviation as Record<string, unknown>} /> });
+    drawer.openDrawer({ title: deviation.id ?? t('telemetryMonitoring.deviations'), content: <BackendObjectInspector title={deviation.id ?? 'Deviation'} value={deviation as unknown as Record<string, unknown>} /> });
   };
 
   return (
@@ -163,8 +162,8 @@ export function TelemetryMonitoringPage() {
         <Paper variant="outlined" sx={{ p: 2 }}>
           <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: 'minmax(240px, 1fr) 210px 210px 180px auto' } }}>
             <TextField label={t('telemetryMonitoring.pointId')} onChange={(event) => setPointInput(event.target.value)} size="small" value={pointInput} />
-            <TextField InputLabelProps={{ shrink: true }} label={t('telemetryMonitoring.from')} onChange={(event) => setFrom(event.target.value)} size="small" type="datetime-local" value={from} />
-            <TextField InputLabelProps={{ shrink: true }} label={t('telemetryMonitoring.to')} onChange={(event) => setTo(event.target.value)} size="small" type="datetime-local" value={to} />
+            <TextField label={t('telemetryMonitoring.from')} onChange={(event) => setFrom(event.target.value)} size="small" slotProps={{ inputLabel: { shrink: true } }} type="datetime-local" value={from} />
+            <TextField label={t('telemetryMonitoring.to')} onChange={(event) => setTo(event.target.value)} size="small" slotProps={{ inputLabel: { shrink: true } }} type="datetime-local" value={to} />
             <TextField disabled={!canReference || !readingStatesQuery.data} label={t('telemetryMonitoring.state')} onChange={(event) => setState(event.target.value)} select size="small" value={state}>
               <MenuItem value="">—</MenuItem>
               {(readingStatesQuery.data ?? []).map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
