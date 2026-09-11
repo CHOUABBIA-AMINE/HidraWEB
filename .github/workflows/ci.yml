@@ -55,6 +55,9 @@ jobs:
       - name: Generate HWEB-009 leak OpenAPI client
         run: npm run api:generate:leak
 
+      - name: Generate HWEB-009 HSE OpenAPI client
+        run: npm run api:generate:hse
+
       - name: Lint
         run: npm run lint
 
