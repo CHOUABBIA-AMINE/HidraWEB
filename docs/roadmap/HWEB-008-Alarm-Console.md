@@ -8,6 +8,8 @@ Backend baseline   : af4c3b4723619a25dd9a94f4d27f5a36adab982e
 OpenAPI artifact   : hidra-api-openapi-af4c3b4723619a25dd9a94f4d27f5a36adab982e
 Artifact digest    : sha256:64a187d362725d7cfd674f5f130d1345f97f88e9151e65d4d5d29d74e76d932a
 Frontend branch    : hweb-008-alarm-workspace
+Verified HEAD      : 4e9e308c219b23fa5e93e1b4a2fa27e774017276
+Verified CI run    : 34613930912
 ```
 
 ## Scope delivered
@@ -129,7 +131,16 @@ HWEB-008 adds:
 - browser coverage for active alarm presentation, detail, shelving, exact acknowledgement POST, absence of suppression semantics, realtime-deferred messaging, and the shared mutation concurrency guard;
 - production lint, TypeScript, build, and complete regression suites through the repository CI gate.
 
-The exact final branch SHA and CI run are recorded in the pull request after the documentation HEAD passes the complete gate.
+Final branch evidence at `4e9e308c219b23fa5e93e1b4a2fa27e774017276`, CI run `34613930912`:
+
+```text
+Alarm OpenAPI generation : PASS
+Lint                     : PASS
+Typecheck                : PASS
+Unit/component tests     : 20/20 PASS
+Production build         : PASS
+Playwright E2E           : 13/13 PASS
+```
 
 ## Exit decision
 
