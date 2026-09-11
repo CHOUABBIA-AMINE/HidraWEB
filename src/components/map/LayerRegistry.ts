@@ -9,11 +9,14 @@ export interface HidraLayerRegistration {
 }
 
 export function buildLayerRegistry(layers: readonly LayerDescriptor[]): HidraLayerRegistration[] {
-  return layers.map((layer) => ({
-    id: layer.id,
-    label: layer.label,
-    geometryType: layer.geometryType,
-    description: layer.description,
-    featuresEndpoint: layer.featuresEndpoint,
-  }));
+  return layers.flatMap((layer) => {
+    if (!layer.id) return [];
+    return [{
+      id: layer.id,
+      label: layer.label ?? layer.id,
+      geometryType: layer.geometryType ?? 'Unknown',
+      description: layer.description ?? '',
+      featuresEndpoint: layer.featuresEndpoint ?? '',
+    }];
+  });
 }

@@ -2,20 +2,20 @@
 
 ```text
 Phase                  : HWEB-005
-Status                 : IMPLEMENTED — CI verification pending
-Frontend branch        : hweb-005-network-topology-workspace
+Status                 : COMPLETE — revalidated on remediated HidraAPI contract
+Frontend implementation: merged by PR #7
+Frontend merge commit  : 72cf67322a5a76303f86ba3e55ea360a9ad6e5e7
 Backend source branch  : HidraAPI main
-Backend source commit  : e5385f0e1f8bb88b48c8e1368962ef72ec6922ae
-Frontend base commit   : 400c8333ae0ea7aa7f257fe355c2472607076703
+Backend source commit  : af4c3b4723619a25dd9a94f4d27f5a36adab982e
+Contract artifact      : hidra-api-openapi-af4c3b4723619a25dd9a94f4d27f5a36adab982e
+Artifact digest        : sha256:64a187d362725d7cfd674f5f130d1345f97f88e9151e65d4d5d29d74e76d932a
 ```
 
 ## Backend readiness decision
 
-HWEB-004 is merged. Its implementation/register branch passed the full existing HidraWEB CI gate before merge.
+HidraAPI remediation is complete for the HWEB-005 dependencies. Backend `main` at `af4c3b4723619a25dd9a94f4d27f5a36adab982e` passes compile, test, clean verify and acceptance Maven gates. Its CI boots the verified application, publishes `/v3/api-docs`, deterministically sorts the contract and uploads the SHA-named OpenAPI artifact listed above.
 
-HidraAPI topology readiness was re-audited against current source rather than the stale gap labels. The topology slice publishes typed map contracts and six backend-owned layers, and the topology remediation slice passed backend CI in PR #51. Current overall HidraAPI `main` is nevertheless compile-red because later workflow remediation references missing `HidraEffectivePermissionResolver`; this is recorded as a backend caveat rather than hidden.
-
-HidraAPI does not yet publish a deterministic CI OpenAPI artifact (`GAP-CONTRACT-001`). HWEB-005 therefore retains one explicit temporary exception: `openapi/hidra-topology-e5385f0e1f8bb88b48c8e1368962ef72ec6922ae.json`, reconciled from the exact current topology controller/use-case/adapter source. It must be replaced by the authoritative artifact when backend publication exists.
+HidraWEB no longer depends on the source-derived topology snapshot that was required while `GAP-CONTRACT-001` was open. The topology Orval input is now `openapi/hidra-topology-af4c3b4723619a25dd9a94f4d27f5a36adab982e.json`, an extracted topology slice of the backend-published artifact with the backend SHA, artifact name and digest recorded in the document itself.
 
 ## Endpoints and DTOs used
 
@@ -27,7 +27,7 @@ GET /api/v1/topology/map/geojson
 GET /api/v1/topology/map/search
 ```
 
-Generated DTOs consumed from the HWEB-005 Orval contract:
+Generated DTOs consumed by HWEB-005:
 
 ```text
 LayerDescriptor
@@ -41,69 +41,84 @@ FeatureCollection
 SearchResult
 ```
 
-Only layers returned by HidraAPI are rendered. Current backend source publishes `pipeline-systems`, `pipelines`, `facilities`, `topology-nodes`, `pipeline-segments`, and `topology-connections`; the frontend does not maintain a competing business layer catalog.
+Only layer descriptors returned by HidraAPI are rendered. HidraWEB does not maintain a competing topology business catalog or infer additional graph relationships.
 
 ## Permissions used
 
-```text
-HIDRA_TOPOLOGY_MAP_READ
-HIDRA_TOPOLOGY_MAP_SEARCH
-```
+The backend remediation replaced the historical `HIDRA_*` metadata convention with the canonical, backend-enforced permission format `<module>:<resource>:<action>`.
 
-These names come from the backend route-permission metadata convention and current registered topology routes. Backend metadata remains catalog-only; UI gating is convenience behavior and HidraAPI remains the final authorization boundary.
-
-## Frontend routes created/changed
+HWEB-005 therefore uses:
 
 ```text
-/network  -> specialized NetworkTopologyPage
+topology:map:read
+topology:map:search
 ```
 
-The existing stable `Réseau` navigation entry becomes implemented only for the topology capability module.
+HidraWEB now obtains principal-specific effective grants from:
+
+```text
+GET /api/v1/identity/me/permissions
+```
+
+The route catalog remains useful for metadata and module discovery, but it is no longer treated as the current user's authorization set. `HidraRouteAuthorizationInterceptor` remains the authoritative backend authorization boundary. The frontend supports the backend administrative wildcard grant `*`.
+
+## Frontend route
+
+```text
+/network  -> NetworkTopologyPage
+```
+
+The `Réseau` navigation capability is shown only when effective grants provide the corresponding topology module capability. Selection and inspection stay on `/network` and preserve map state.
 
 ## State ownership
 
-- TanStack Query: layer catalog, layer descriptor, sampled layer features, GeoJSON feature window, topology search results.
-- React local state: hidden layers, focused layer, search text, committed search, selected feature.
-- Contextual drawer: inspector presentation only; selection does not navigate away from `/network` or recreate map state.
-- Zustand: no topology entity store introduced.
+- TanStack Query owns layer catalog, layer descriptors, sampled layer features, GeoJSON windows and search results.
+- React local state owns hidden layers, focused layer, search text, committed search and selected feature.
+- The contextual drawer owns inspector presentation only.
+- No topology entity store or giant Zustand store was introduced.
 
 ## Map architecture
 
-`src/components/map/HidraMap.tsx` is the implementation-neutral frontend boundary. MapLibre is dynamically loaded only from `src/components/map/adapters/maplibreAdapter.ts`; topology features import no MapLibre implementation type. Backend feature geometry is validated and converted to the Hidra map boundary without adding business geometry or inferred relationships.
+`src/components/map/HidraMap.tsx` is the implementation-neutral map boundary. MapLibre is dynamically loaded only by `src/components/map/adapters/maplibreAdapter.ts`; topology feature code imports no MapLibre implementation types.
 
-A keyboard-accessible feature list is provided alongside the visual map. The map renders only the first count-aware backend window (1,000 features) and displays loaded/total counts plus `hasNext` as a performance guardrail instead of implying the entire network is resident.
+Backend feature geometry is validated at the presentation boundary and converted to Hidra map types without inventing geometry or business relationships. The accessible feature list remains available alongside the visual map. Feature loading is count-aware and bounded; the page exposes loaded/total information and `hasNext` rather than implying that the complete network is resident in memory.
 
 ## Error states
 
-- missing topology read capability -> constrained warning, no fake topology data;
-- 403 from HidraAPI -> explicit access-denied topology state;
-- other layer/GeoJSON/search failures -> backend load error;
+- effective grant absent -> capability-constrained state;
+- backend 403 -> explicit access-denied state;
+- layer/GeoJSON/search failure -> backend load error;
 - no backend layers -> empty state;
 - all layers hidden -> explicit local empty-map state;
-- MapLibre adapter initialization failure -> map-boundary error while non-map accessible data remains available.
+- map adapter initialization failure -> map-boundary error while accessible non-map data remains available.
 
-## Tests added
+## Tests and validation
 
-- topology API adapter route/parameter contract test;
-- typed topology-to-map presentation conversion test;
-- component integration test proving `/network`, layer/GeoJSON loading and contextual inspection without route loss;
-- Playwright HWEB-005 test covering authentication, capability-gated navigation, topology loading, inspector route preservation and topology search.
+HWEB-005 includes:
 
-## OpenAPI regeneration status
+- topology API adapter route/parameter tests;
+- typed topology-to-map presentation conversion tests;
+- component integration proving layer/GeoJSON loading and contextual inspection without route loss;
+- Playwright coverage for authentication, effective capability gating, topology loading, search and inspector route preservation;
+- full frontend generation/lint/typecheck/unit/build/E2E quality gates.
 
-`orval.topology.config.ts` and `npm run api:generate:topology` are added. CI generates HWEB-003, HWEB-004 and HWEB-005 clients before lint/typecheck/tests/build. The HWEB-005 snapshot remains temporary because the backend artifact gap is still open.
+The original HWEB-005 PR and post-merge `main` CI passed. The subsequent API-remediation reconciliation additionally regenerates HWEB-005 from the backend-published `af4c3b47…` artifact and updates the permission fixtures to the backend-enforced lower-case grants.
 
-## Relevant GAP-* status
+## OpenAPI status
 
-Before frontend CI, `GAP-TOPO-001`, `GAP-TOPO-002`, and `GAP-TOPO-003` are `IMPLEMENTED`. They must move to `VERIFIED` only after this branch consumes the generated contract and the mandatory frontend gate passes.
+`orval.topology.config.ts` now generates from the artifact-derived `af4c3b47…` topology slice. The obsolete `e5385f0…` source-derived topology snapshot has been removed. HWEB-003 and HWEB-004 generators are rebaselined the same way, and HWEB-006 telemetry/monitoring contract generation has been added as the next readiness gate.
 
-## Known backend gaps
+## Relevant GAP status
 
-- `GAP-CONTRACT-001` — stable repository-published OpenAPI artifact remains `OPEN`.
-- `GAP-SEC-003` — effective user-specific grants/backend route authorization remains `IN_PROGRESS`.
-- current HidraAPI main compile failure in workflow remediation; topology PR #51 itself was previously green.
-- realtime contracts remain out of scope for HWEB-005 and `GAP-REALTIME-001` remains `OPEN`.
+After the reconciliation branch passes the full frontend quality gate:
 
-## CI result
+- `GAP-TOPO-001` — `VERIFIED`.
+- `GAP-TOPO-002` — `VERIFIED`.
+- `GAP-TOPO-003` — `VERIFIED`.
+- `GAP-CONTRACT-001` — backend implementation is now consumed by HidraWEB and can be promoted to `VERIFIED` for frontend contract generation.
+- `GAP-SEC-001` / `GAP-SEC-003` — effective-grant consumption is wired; live allowed/forbidden identity integration evidence remains the final production verification gate.
+- `GAP-REALTIME-001` — remains `DEFERRED`; HWEB-005 does not depend on realtime domain publishers.
 
-Pending first HWEB-005 branch CI run. Do not mark phase complete or start HWEB-006 until every mandatory gate passes and the topology GAPs are promoted to `VERIFIED` with test evidence.
+## Remaining caveats
+
+There is no longer a HidraAPI compile failure or deterministic-OpenAPI publication gap at the reconciled SHA. The remaining cross-cutting caveats are external enterprise IdP registration/integration proof and the intentionally deferred realtime domain-event publication catalog.

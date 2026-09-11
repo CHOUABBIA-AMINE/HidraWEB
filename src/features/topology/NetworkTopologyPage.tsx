@@ -33,6 +33,10 @@ const MAP_PAGE_SIZE = 1000;
 const LAYER_SAMPLE_SIZE = 25;
 const SEARCH_PAGE_SIZE = 50;
 
+function definedString(value: string | undefined): value is string {
+  return typeof value === 'string' && value.length > 0;
+}
+
 export function NetworkTopologyPage() {
   const { t } = useTranslation();
   const permissions = usePermissions();
@@ -54,13 +58,14 @@ export function NetworkTopologyPage() {
 
   const layers = useMemo(() => layersQuery.data ?? [], [layersQuery.data]);
   const registry = useMemo(() => buildLayerRegistry(layers), [layers]);
+  const layerIds = useMemo(() => layers.map((layer) => layer.id).filter(definedString), [layers]);
   const visibleLayerIds = useMemo(
-    () => layers.map((layer) => layer.id).filter((layerId) => !hiddenLayerIds.has(layerId)),
-    [hiddenLayerIds, layers],
+    () => layerIds.filter((layerId) => !hiddenLayerIds.has(layerId)),
+    [hiddenLayerIds, layerIds],
   );
-  const effectiveFocusedLayerId = layers.some((layer) => layer.id === focusedLayerId)
+  const effectiveFocusedLayerId = layerIds.includes(focusedLayerId)
     ? focusedLayerId
-    : layers[0]?.id ?? '';
+    : layerIds[0] ?? '';
 
   const layerQuery = useQuery({
     queryKey: topologyQueryKeys.layer(effectiveFocusedLayerId),
@@ -91,6 +96,11 @@ export function NetworkTopologyPage() {
     () => registry.filter((layer) => visibleLayerIds.includes(layer.id)),
     [registry, visibleLayerIds],
   );
+  const searchFeatures = searchQuery.data?.features ?? [];
+  const focusedLayerFeatures = layerFeaturesQuery.data?.features ?? [];
+  const mapFeatures = geoJsonQuery.data?.features ?? [];
+  const mapPage = geoJsonQuery.data?.page ?? 0;
+  const mapTotalPages = geoJsonQuery.data?.totalPages ?? 0;
 
   const openFeature = (feature: Feature) => {
     setSelectedFeatureId(feature.id);
@@ -185,10 +195,10 @@ export function NetworkTopologyPage() {
         ) : null}
         {searchQuery.data ? (
           <Box sx={{ mt: 1 }}>
-            <Typography variant="subtitle2">{t('topology.searchResults')} · {searchQuery.data.totalFeatures}</Typography>
+            <Typography variant="subtitle2">{t('topology.searchResults')} · {searchQuery.data.totalFeatures ?? 0}</Typography>
             <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1, mt: 1 }}>
-              {searchQuery.data.features.map((feature) => (
-                <Button key={feature.id} onClick={() => openFeature(feature)} size="small" variant="outlined">
+              {searchFeatures.map((feature, index) => (
+                <Button key={feature.id ?? `search-${index}`} onClick={() => openFeature(feature)} size="small" variant="outlined">
                   {topologyFeatureLabel(feature)}
                 </Button>
               ))}
@@ -209,13 +219,13 @@ export function NetworkTopologyPage() {
           {layerQuery.data ? (
             <Box sx={{ borderTop: 1, borderColor: 'divider', mt: 2, pt: 2 }}>
               <Typography color="text.secondary" variant="overline">{t('topology.focusedLayer')}</Typography>
-              <Typography variant="subtitle2">{layerQuery.data.label}</Typography>
-              <Typography color="text.secondary" variant="body2">{layerQuery.data.description}</Typography>
+              <Typography variant="subtitle2">{layerQuery.data.label ?? layerQuery.data.id ?? '—'}</Typography>
+              <Typography color="text.secondary" variant="body2">{layerQuery.data.description ?? '—'}</Typography>
               {layerFeaturesQuery.data ? (
                 <Typography color="text.secondary" sx={{ mt: 1 }} variant="caption">
                   {t('topology.sampleCount', {
-                    loaded: layerFeaturesQuery.data.features.length,
-                    total: layerFeaturesQuery.data.totalFeatures,
+                    loaded: focusedLayerFeatures.length,
+                    total: layerFeaturesQuery.data.totalFeatures ?? 0,
                   })}
                 </Typography>
               ) : null}
@@ -244,11 +254,11 @@ export function NetworkTopologyPage() {
           {geoJsonQuery.data ? (
             <Paper variant="outlined" sx={{ p: 2 }}>
               <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
-                <Chip label={t('topology.loadedCount', { loaded: geoJsonQuery.data.features.length, total: geoJsonQuery.data.totalFeatures })} size="small" />
-                <Chip label={`page ${geoJsonQuery.data.page + 1}/${Math.max(geoJsonQuery.data.totalPages, 1)}`} size="small" variant="outlined" />
+                <Chip label={t('topology.loadedCount', { loaded: mapFeatures.length, total: geoJsonQuery.data.totalFeatures ?? 0 })} size="small" />
+                <Chip label={`page ${mapPage + 1}/${Math.max(mapTotalPages, 1)}`} size="small" variant="outlined" />
               </Stack>
               {geoJsonQuery.data.hasNext ? <Alert severity="warning" sx={{ mt: 1 }}>{t('topology.windowLimited')}</Alert> : null}
-              <TopologyFeatureList features={geoJsonQuery.data.features} onSelect={openFeature} />
+              <TopologyFeatureList features={mapFeatures} onSelect={openFeature} />
             </Paper>
           ) : null}
         </Stack>

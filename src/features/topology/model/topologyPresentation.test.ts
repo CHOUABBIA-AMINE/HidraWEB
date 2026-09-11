@@ -6,7 +6,6 @@ import { toHidraMapFeatureCollection } from '@/features/topology/model/topologyP
 const collection: FeatureCollection = {
   type: 'FeatureCollection',
   name: 'topology-map',
-  layer: null,
   page: 0,
   size: 1000,
   totalFeatures: 2,
@@ -18,13 +17,13 @@ const collection: FeatureCollection = {
       type: 'Feature',
       id: 'facility-1',
       geometry: { type: 'Point', coordinates: [2.1, 36.7] },
-      properties: { layer: 'facilities', entityType: 'facility', entityId: 'facility-1', code: 'FAC-1', nameFr: null, nameEn: null, nameAr: null, status: 'ACTIVE', facilityKind: null, nodeType: null, pipelineSystemId: null, pipelineType: null, fromNodeId: null, toNodeId: null, segmentType: null, flowDirection: null, connectionType: null },
+      properties: { layer: 'facilities', entityType: 'facility', entityId: 'facility-1', code: 'FAC-1', status: 'ACTIVE' },
     },
     {
       type: 'Feature',
       id: 'segment-1',
       geometry: { type: 'LineString', coordinates: [[2.1, 36.7], [2.2, 36.8]] },
-      properties: { layer: 'pipeline-segments', entityType: 'pipeline-segment', entityId: 'segment-1', code: 'SEG-1', nameFr: null, nameEn: null, nameAr: null, status: null, facilityKind: null, nodeType: null, pipelineSystemId: 'system-1', pipelineType: null, fromNodeId: 'node-1', toNodeId: 'node-2', segmentType: null, flowDirection: null, connectionType: null },
+      properties: { layer: 'pipeline-segments', entityType: 'pipeline-segment', entityId: 'segment-1', code: 'SEG-1', pipelineSystemId: 'system-1', fromNodeId: 'node-1', toNodeId: 'node-2' },
     },
   ],
 };

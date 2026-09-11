@@ -1,7 +1,7 @@
 export const WORKBENCH_PERMISSIONS = {
-  modulesRead: 'HIDRA_MODULES_RESOURCES_READ',
-  resourcesRead: 'HIDRA_DYNAMIC_MODULE_RESOURCES_READ',
-  listRead: 'HIDRA_DYNAMIC_MODULE_DYNAMIC_RESOURCE_READ',
-  detailRead: 'HIDRA_DYNAMIC_MODULE_DYNAMIC_RESOURCE_DETAIL',
-  search: 'HIDRA_DYNAMIC_MODULE_DYNAMIC_RESOURCE_SEARCH',
+  modulesRead: 'modules:resources:read',
+  resourcesRead: 'dynamic-module:resources:read',
+  listRead: 'dynamic-module:dynamic-resource:read',
+  detailRead: 'dynamic-module:dynamic-resource:read',
+  search: 'dynamic-module:dynamic-resource:search',
 } as const;

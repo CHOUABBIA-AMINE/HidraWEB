@@ -10,16 +10,17 @@ export interface TopologyInspectorProps {
 
 export function TopologyInspector({ feature }: TopologyInspectorProps) {
   const { t } = useTranslation();
-  const properties = Object.entries(feature.properties)
+  const rawProperties = feature.properties ?? {};
+  const properties = Object.entries(rawProperties)
     .filter(([, value]) => value !== null && value !== undefined && value !== '')
     .sort(([left], [right]) => left.localeCompare(right));
 
   return (
     <Stack spacing={2}>
       <Box>
-        <Typography variant="overline">{feature.properties.entityType}</Typography>
+        <Typography variant="overline">{feature.properties?.entityType ?? '—'}</Typography>
         <Typography component="h3" variant="h6">{topologyFeatureLabel(feature)}</Typography>
-        <Typography color="text.secondary" variant="body2">{feature.id}</Typography>
+        <Typography color="text.secondary" variant="body2">{feature.id ?? '—'}</Typography>
       </Box>
       <Divider />
       <Box component="dl" sx={{ display: 'grid', gap: 1, gridTemplateColumns: 'minmax(120px, auto) 1fr', m: 0 }}>

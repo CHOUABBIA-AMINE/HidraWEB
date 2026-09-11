@@ -12,7 +12,7 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useTranslation } from 'react-i18next';
 
-import type { OperationalResourceDescriptor } from '@/api/generated/workbench/model';
+import type { WorkbenchResourceDescriptor } from '@/features/workbench/api/workbenchApi';
 
 export interface AdvancedSearchDraft {
   filterField: string;
@@ -23,7 +23,7 @@ export interface AdvancedSearchDraft {
 
 interface WorkbenchToolbarProps {
   modules: string[];
-  resources: OperationalResourceDescriptor[];
+  resources: WorkbenchResourceDescriptor[];
   selectedModule: string;
   selectedResource: string;
   query: string;

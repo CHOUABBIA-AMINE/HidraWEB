@@ -3,13 +3,18 @@ import { useQuery } from '@tanstack/react-query';
 
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
 import { useAuth } from '@/app/auth/useAuth';
-import { fetchPermissionCatalog, fetchPermissionRoutes } from '@/features/permissions/api/permissionApi';
+import {
+  fetchEffectivePermissions,
+  fetchPermissionCatalog,
+  fetchPermissionRoutes,
+} from '@/features/permissions/api/permissionApi';
 import { PermissionContext, type PermissionContextValue } from '@/features/permissions/permissionContext';
 import { normalizePermissionMetadata } from '@/features/permissions/model/permissionModel';
 
 const permissionQueryKeys = {
   catalog: ['hidra', 'security', 'permissions', 'catalog'] as const,
   routes: ['hidra', 'security', 'permissions', 'routes'] as const,
+  effective: ['hidra', 'identity', 'me', 'permissions'] as const,
 };
 
 export function PermissionProvider({ children }: PropsWithChildren) {
@@ -27,9 +32,15 @@ export function PermissionProvider({ children }: PropsWithChildren) {
     enabled,
     staleTime: 5 * 60 * 1000,
   });
+  const effectiveQuery = useQuery({
+    queryKey: permissionQueryKeys.effective,
+    queryFn: fetchEffectivePermissions,
+    enabled,
+    staleTime: 60 * 1000,
+  });
 
   const reload = async (): Promise<void> => {
-    await Promise.all([catalogQuery.refetch(), routesQuery.refetch()]);
+    await Promise.all([catalogQuery.refetch(), routesQuery.refetch(), effectiveQuery.refetch()]);
   };
 
   let value: PermissionContextValue;
@@ -46,7 +57,7 @@ export function PermissionProvider({ children }: PropsWithChildren) {
       reload: async () => undefined,
     };
   } else {
-    const firstError = catalogQuery.error ?? routesQuery.error;
+    const firstError = catalogQuery.error ?? routesQuery.error ?? effectiveQuery.error;
 
     if (firstError) {
       const error = normalizeHidraApiError(firstError);
@@ -61,7 +72,7 @@ export function PermissionProvider({ children }: PropsWithChildren) {
         hasAnyModuleCapability: () => false,
         reload,
       };
-    } else if (!catalogQuery.data || !routesQuery.data) {
+    } else if (!catalogQuery.data || !routesQuery.data || !effectiveQuery.data) {
       value = {
         status: 'loading',
         routes: [],
@@ -73,14 +84,16 @@ export function PermissionProvider({ children }: PropsWithChildren) {
         reload,
       };
     } else {
-      const normalized = normalizePermissionMetadata(catalogQuery.data, routesQuery.data);
+      const normalized = normalizePermissionMetadata(catalogQuery.data, routesQuery.data, effectiveQuery.data);
       value = {
         status: 'ready',
         catalog: catalogQuery.data,
         ...normalized,
-        can: (permission) => normalized.permissions.has(permission),
+        can: (permission) => normalized.wildcard || normalized.permissions.has(permission),
         hasAnyModuleCapability: (requiredModules) =>
-          requiredModules.length === 0 || requiredModules.some((module) => normalized.modules.has(module)),
+          normalized.wildcard ||
+          requiredModules.length === 0 ||
+          requiredModules.some((module) => normalized.modules.has(module)),
         reload,
       };
     }

@@ -1,9 +1,10 @@
 import { expect, test, type Page } from '@playwright/test';
 
 const permissionRoutes = [
-  { route: '/api/v1/topology/map/layers', methods: ['GET'], module: 'topology', resource: 'map', action: 'read', permission: 'HIDRA_TOPOLOGY_MAP_READ', enforcementStatus: 'metadata-published; route-specific authorization annotations unavailable from current HidraAPI evidence' },
-  { route: '/api/v1/topology/map/search', methods: ['GET'], module: 'topology', resource: 'map', action: 'search', permission: 'HIDRA_TOPOLOGY_MAP_SEARCH', enforcementStatus: 'metadata-published; route-specific authorization annotations unavailable from current HidraAPI evidence' },
+  { route: '/api/v1/topology/map/layers', methods: ['GET'], module: 'topology', resource: 'map', action: 'read', permission: 'topology:map:read', enforcementStatus: 'backend-enforced' },
+  { route: '/api/v1/topology/map/search', methods: ['GET'], module: 'topology', resource: 'map', action: 'search', permission: 'topology:map:search', enforcementStatus: 'backend-enforced' },
 ];
+const effectivePermissions = ['topology:map:read', 'topology:map:search'];
 
 const layer = { id: 'facilities', label: 'Facilities', geometryType: 'Point', description: 'Facility locations', featuresEndpoint: '/api/v1/topology/map/layers/facilities/features' };
 const feature = {
@@ -15,8 +16,15 @@ const collection = { type: 'FeatureCollection', name: 'topology-map', layer: nul
 async function mockBackend(page: Page) {
   await page.route('**/api/v1/security/permissions/routes', (route) => route.fulfill({ json: permissionRoutes }));
   await page.route('**/api/v1/security/permissions/catalog', (route) => route.fulfill({
-    json: { strategy: 'derived-route-permission-catalog', enforcement: 'catalog-only', permissionFormat: 'HIDRA_<MODULE>_<RESOURCE>_<ACTION>', routes: permissionRoutes },
+    json: {
+      strategy: 'derived-route-permission-catalog',
+      enforcement: 'backend-enforced by HidraRouteAuthorizationInterceptor',
+      permissionFormat: '<module>:<resource>:<action>',
+      bootstrapAdminBypass: 'ROLE_HIDRA_ADMIN',
+      routes: permissionRoutes,
+    },
   }));
+  await page.route('**/api/v1/identity/me/permissions', (route) => route.fulfill({ json: effectivePermissions }));
   await page.route('**/api/v1/topology/map/layers/facilities/features?**', (route) => route.fulfill({ json: { ...collection, layer: 'facilities', size: 25 } }));
   await page.route('**/api/v1/topology/map/layers/facilities', (route) => route.fulfill({ json: layer }));
   await page.route('**/api/v1/topology/map/layers', (route) => route.fulfill({ json: [layer] }));

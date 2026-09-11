@@ -1,14 +1,14 @@
 import { defineConfig } from 'orval';
 
 export default defineConfig({
-  topology: {
+  telemetryMonitoring: {
     input: {
-      target: './openapi/hidra-topology-af4c3b4723619a25dd9a94f4d27f5a36adab982e.json',
+      target: './openapi/hidra-telemetry-monitoring-af4c3b4723619a25dd9a94f4d27f5a36adab982e.json',
     },
     output: {
       mode: 'single',
-      target: './src/api/generated/topology/topology.ts',
-      schemas: './src/api/generated/topology/model',
+      target: './src/api/generated/telemetry-monitoring/telemetryMonitoring.ts',
+      schemas: './src/api/generated/telemetry-monitoring/model',
       client: 'react-query',
       httpClient: 'axios',
       clean: true,

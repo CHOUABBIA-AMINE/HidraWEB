@@ -8,27 +8,34 @@ const fixtures = vi.hoisted(() => {
   const routes = [
     {
       route: '/api/v1/topology/map/layers', methods: ['GET'], module: 'topology', resource: 'map', action: 'read',
-      permission: 'HIDRA_TOPOLOGY_MAP_READ', enforcementStatus: 'metadata-published; route-specific authorization annotations unavailable from current HidraAPI evidence',
+      permission: 'topology:map:read', enforcementStatus: 'backend-enforced',
     },
     {
       route: '/api/v1/workflow/tasks', methods: ['GET'], module: 'workflow', resource: 'tasks', action: 'read',
-      permission: 'HIDRA_WORKFLOW_TASKS_READ', enforcementStatus: 'metadata-published; route-specific authorization annotations unavailable from current HidraAPI evidence',
+      permission: 'workflow:tasks:read', enforcementStatus: 'backend-enforced',
     },
     {
       route: '/api/v1/identity/users', methods: ['POST'], module: 'identity', resource: 'users', action: 'execute',
-      permission: 'HIDRA_IDENTITY_USERS_EXECUTE', enforcementStatus: 'metadata-published',
+      permission: 'identity:users:execute', enforcementStatus: 'backend-enforced',
     },
     {
       route: '/api/v1/organization/units', methods: ['POST'], module: 'organization', resource: 'units', action: 'execute',
-      permission: 'HIDRA_ORGANIZATION_UNITS_EXECUTE', enforcementStatus: 'metadata-published',
+      permission: 'organization:units:execute', enforcementStatus: 'backend-enforced',
     },
+  ];
+  const effectivePermissions = [
+    'topology:map:read',
+    'identity:users:execute',
+    'organization:units:execute',
   ];
   return {
     routes,
+    effectivePermissions,
     catalog: {
       strategy: 'derived-route-permission-catalog',
-      enforcement: 'catalog-only; backend currently authenticates all operational routes and does not expose route-specific @PreAuthorize evidence',
-      permissionFormat: 'HIDRA_<MODULE>_<RESOURCE>_<ACTION>',
+      enforcement: 'backend-enforced by HidraRouteAuthorizationInterceptor',
+      permissionFormat: '<module>:<resource>:<action>',
+      bootstrapAdminBypass: 'ROLE_HIDRA_ADMIN',
       routes,
     },
   };
@@ -39,12 +46,15 @@ vi.mock('@/api/client/hidraHttpClient', () => ({
     if (config.url?.endsWith('/catalog')) {
       return fixtures.catalog;
     }
+    if (config.url?.endsWith('/identity/me/permissions')) {
+      return fixtures.effectivePermissions;
+    }
     return fixtures.routes;
   }),
 }));
 
 describe('HWEB-002 / HWEB-004 / HWEB-005 capability-driven application shell', () => {
-  it('authenticates and enables only implemented navigation backed by published module capabilities', async () => {
+  it('authenticates and enables only implemented navigation backed by effective grants', async () => {
     render(<AppProviders><App /></AppProviders>);
 
     expect(await screen.findByRole('heading', { name: 'Connexion de développement' })).toBeInTheDocument();
@@ -54,7 +64,7 @@ describe('HWEB-002 / HWEB-004 / HWEB-005 capability-driven application shell', (
 
     expect(await screen.findByRole('heading', { name: /Vue d/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Réseau' })).not.toHaveAttribute('aria-disabled', 'true');
-    expect(document.querySelector('[role="button"][aria-label="Mes tâches"][aria-disabled="true"]')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Mes tâches' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Organisation' })).not.toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByRole('button', { name: 'Identité & accès' })).not.toHaveAttribute('aria-disabled', 'true');
     expect(screen.queryByRole('button', { name: 'Planification' })).not.toBeInTheDocument();

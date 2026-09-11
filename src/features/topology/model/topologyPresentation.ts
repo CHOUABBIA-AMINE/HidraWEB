@@ -18,8 +18,9 @@ function isCoordinates(value: unknown): value is HidraMapCoordinates {
 }
 
 function toMapFeature(feature: Feature): HidraMapFeature | null {
-  const geometry = feature.geometry as unknown as { type?: unknown; coordinates?: unknown };
-  if (!isGeometryType(geometry.type) || !isCoordinates(geometry.coordinates)) return null;
+  if (!feature.id || !feature.properties) return null;
+  const geometry = feature.geometry as unknown as { type?: unknown; coordinates?: unknown } | undefined;
+  if (!geometry || !isGeometryType(geometry.type) || !isCoordinates(geometry.coordinates)) return null;
 
   const rawProperties = feature.properties as unknown as Record<string, unknown>;
   const layer = rawProperties.layer;
@@ -39,7 +40,7 @@ function toMapFeature(feature: Feature): HidraMapFeature | null {
 }
 
 export function toHidraMapFeatureCollection(collection?: FeatureCollection): HidraMapFeatureCollection {
-  if (!collection) return EMPTY_MAP_COLLECTION;
+  if (!collection?.features) return EMPTY_MAP_COLLECTION;
   return {
     type: 'FeatureCollection',
     features: collection.features.map(toMapFeature).filter((feature): feature is HidraMapFeature => feature !== null),
@@ -48,14 +49,15 @@ export function toHidraMapFeatureCollection(collection?: FeatureCollection): Hid
 
 export function topologyFeatureLabel(feature: Feature): string {
   const properties = feature.properties;
-  return properties.code
-    ?? properties.nameFr
-    ?? properties.nameEn
-    ?? properties.nameAr
-    ?? properties.entityId
-    ?? feature.id;
+  return properties?.code
+    ?? properties?.nameFr
+    ?? properties?.nameEn
+    ?? properties?.nameAr
+    ?? properties?.entityId
+    ?? feature.id
+    ?? '—';
 }
 
 export function findTopologyFeature(collection: FeatureCollection | undefined, featureId: string): Feature | undefined {
-  return collection?.features.find((feature) => feature.id === featureId);
+  return collection?.features?.find((feature) => feature.id === featureId);
 }
