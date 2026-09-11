@@ -1,19 +1,46 @@
-import { Alert, Box, Button, Chip, Container, Divider, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
-import { useQuery } from '@tanstack/react-query';
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  Container,
+  Divider,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from '@mui/material';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
 import type { AvailableActionView, TaskView, TimelineEntry } from '@/api/generated/workflow/model';
 import { usePermissions } from '@/features/permissions/usePermissions';
-import { fetchAvailableActions, fetchInstance, fetchTask, fetchTasks, fetchTimeline, workflowQueryKeys } from '@/features/workflow/api/workflowApi';
+import {
+  executeWorkflowTransition,
+  fetchAvailableActions,
+  fetchInstance,
+  fetchTask,
+  fetchTasks,
+  fetchTimeline,
+  workflowQueryKeys,
+} from '@/features/workflow/api/workflowApi';
 import { WORKFLOW_PERMISSIONS } from '@/features/workflow/api/workflowPermissions';
 
 const INBOX_SIZE = 50;
 
 function displayError(error: unknown): string {
   const normalized = normalizeHidraApiError(error);
-  return normalized.status === 403 ? 'HidraAPI refused workflow access.' : normalized.message || 'Workflow data could not be loaded.';
+  if (normalized.status === 403) return 'HidraAPI refused workflow access.';
+  if (normalized.status === 409) return 'The task changed. Refresh the task and available actions before retrying.';
+  return normalized.message || 'Workflow data could not be loaded.';
 }
 
 function TaskSummary({ task, onOpen }: { task: TaskView; onOpen: () => void }) {
@@ -26,21 +53,6 @@ function TaskSummary({ task, onOpen }: { task: TaskView; onOpen: () => void }) {
       <TableCell>{task.assignedActorDisplayName ?? task.assignedActorUsername ?? task.assignedRoleCode ?? '—'}</TableCell>
       <TableCell><Button onClick={onOpen} size="small">Open</Button></TableCell>
     </TableRow>
-  );
-}
-
-function AvailableAction({ action }: { action: AvailableActionView }) {
-  const permitted = action.permitted === true;
-  return (
-    <Paper variant="outlined" sx={{ p: 1.5 }}>
-      <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
-        <Chip color={permitted ? 'success' : 'default'} label={action.decision ?? action.transitionId ?? 'Action'} size="small" variant={permitted ? 'filled' : 'outlined'} />
-        <Typography variant="body2">{action.fromStepId ?? '—'} → {action.toStepId ?? '—'}</Typography>
-        {action.reasonRequired ? <Chip label="reason required" size="small" variant="outlined" /> : null}
-        {action.commentRequired ? <Chip label="comment required" size="small" variant="outlined" /> : null}
-      </Stack>
-      {action.requiredPermissionCode ? <Typography color="text.secondary" variant="caption">{action.requiredPermissionCode}</Typography> : null}
-    </Paper>
   );
 }
 
@@ -59,7 +71,13 @@ function TimelineRow({ entry }: { entry: TimelineEntry }) {
 export function WorkflowTasksPage() {
   const { t } = useTranslation();
   const permissions = usePermissions();
+  const queryClient = useQueryClient();
   const [selectedTaskId, setSelectedTaskId] = useState('');
+  const [selectedTransitionId, setSelectedTransitionId] = useState('');
+  const [reasonId, setReasonId] = useState('');
+  const [commentText, setCommentText] = useState('');
+  const [decisionNote, setDecisionNote] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const canTasks = permissions.can(WORKFLOW_PERMISSIONS.tasksRead);
   const canInstances = permissions.can(WORKFLOW_PERMISSIONS.instancesRead);
   const inboxParams = { view: 'assigned', page: 0, size: INBOX_SIZE };
@@ -71,10 +89,46 @@ export function WorkflowTasksPage() {
   const instanceQuery = useQuery({ queryKey: workflowQueryKeys.instance(instanceId), queryFn: () => fetchInstance(instanceId), enabled: canInstances && Boolean(instanceId) });
   const timelineQuery = useQuery({ queryKey: workflowQueryKeys.timeline(instanceId), queryFn: () => fetchTimeline(instanceId), enabled: canInstances && Boolean(instanceId) });
 
+  const transitionMutation = useMutation({
+    mutationFn: async (action: AvailableActionView) => {
+      if (!selectedTaskId || !action.transitionId || !taskQuery.data?.updatedAt) throw new Error('Current task version is unavailable.');
+      return executeWorkflowTransition(selectedTaskId, action.transitionId, {
+        expectedTaskUpdatedAt: taskQuery.data.updatedAt,
+        reasonId: reasonId.trim() || undefined,
+        commentText: commentText.trim() || undefined,
+        decisionNote: decisionNote.trim() || undefined,
+      });
+    },
+    onSuccess: async (result) => {
+      setSuccessMessage(`${result.decision ?? ''} · ${result.taskStatus ?? ''}`);
+      setSelectedTransitionId('');
+      setReasonId('');
+      setCommentText('');
+      setDecisionNote('');
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['hidra', 'workflow', 'tasks'] }),
+        queryClient.invalidateQueries({ queryKey: workflowQueryKeys.task(selectedTaskId) }),
+        queryClient.invalidateQueries({ queryKey: workflowQueryKeys.actions(selectedTaskId) }),
+        instanceId ? queryClient.invalidateQueries({ queryKey: workflowQueryKeys.instance(instanceId) }) : Promise.resolve(),
+        instanceId ? queryClient.invalidateQueries({ queryKey: workflowQueryKeys.timeline(instanceId) }) : Promise.resolve(),
+      ]);
+    },
+  });
+
   const tasks = tasksQuery.data?.content ?? [];
   const actions = actionsQuery.data ?? [];
   const timeline = timelineQuery.data ?? [];
   const firstError = tasksQuery.error ?? taskQuery.error ?? actionsQuery.error ?? instanceQuery.error ?? timelineQuery.error;
+
+  const closeTask = () => {
+    setSelectedTaskId('');
+    setSelectedTransitionId('');
+    setReasonId('');
+    setCommentText('');
+    setDecisionNote('');
+    setSuccessMessage('');
+    transitionMutation.reset();
+  };
 
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
@@ -88,9 +142,10 @@ export function WorkflowTasksPage() {
           <Chip label="BACKEND-AUTHORITATIVE" variant="outlined" />
         </Box>
 
-        <Alert severity="info">{t('workflow.executionNotice')}</Alert>
         {!canTasks ? <Alert severity="warning">{t('workflow.unavailable')}</Alert> : null}
         {firstError ? <Alert severity="error">{displayError(firstError)}</Alert> : null}
+        {transitionMutation.error ? <Alert severity="error">{displayError(transitionMutation.error)}</Alert> : null}
+        {successMessage ? <Alert severity="success">{successMessage}</Alert> : null}
 
         {canTasks ? (
           <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', lg: selectedTaskId ? 'minmax(0, 1fr) minmax(360px, 0.8fr)' : '1fr' } }}>
@@ -103,7 +158,7 @@ export function WorkflowTasksPage() {
                 <Button onClick={() => void tasksQuery.refetch()}>{t('workflow.refresh')}</Button>
               </Box>
               {tasks.length ? (
-                <TableContainer sx={{ mt: 1 }}><Table size="small"><TableHead><TableRow><TableCell>{t('workflow.task')}</TableCell><TableCell>{t('workflow.status')}</TableCell><TableCell>{t('workflow.priority')}</TableCell><TableCell>{t('workflow.due')}</TableCell><TableCell>{t('workflow.assignee')}</TableCell><TableCell /></TableRow></TableHead><TableBody>{tasks.map((task, index) => <TaskSummary key={task.id ?? `task-${index}`} task={task} onOpen={() => setSelectedTaskId(task.id ?? '')} />)}</TableBody></Table></TableContainer>
+                <TableContainer sx={{ mt: 1 }}><Table size="small"><TableHead><TableRow><TableCell>{t('workflow.task')}</TableCell><TableCell>{t('workflow.status')}</TableCell><TableCell>{t('workflow.priority')}</TableCell><TableCell>{t('workflow.due')}</TableCell><TableCell>{t('workflow.assignee')}</TableCell><TableCell /></TableRow></TableHead><TableBody>{tasks.map((task, index) => <TaskSummary key={task.id ?? `task-${index}`} task={task} onOpen={() => { setSelectedTaskId(task.id ?? ''); setSuccessMessage(''); }} />)}</TableBody></Table></TableContainer>
               ) : !tasksQuery.isLoading && !tasksQuery.error ? <Alert severity="info" sx={{ mt: 2 }}>{t('workflow.empty')}</Alert> : null}
             </Paper>
 
@@ -112,11 +167,45 @@ export function WorkflowTasksPage() {
                 <Stack spacing={2}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
                     <Typography component="h2" variant="h6">{taskQuery.data?.taskLabel ?? selectedTaskId}</Typography>
-                    <Button onClick={() => setSelectedTaskId('')} size="small">{t('workflow.close')}</Button>
+                    <Button disabled={transitionMutation.isPending} onClick={closeTask} size="small">{t('workflow.close')}</Button>
                   </Box>
                   {taskQuery.data ? <Stack spacing={0.5}><Typography>{t('workflow.status')}: {taskQuery.data.status ?? '—'}</Typography><Typography>{t('workflow.step')}: {taskQuery.data.stepId ?? '—'}</Typography><Typography>{t('workflow.sla')}: {taskQuery.data.slaStatus ?? '—'}</Typography><Typography>{t('workflow.due')}: {taskQuery.data.dueAt ?? '—'}</Typography></Stack> : null}
                   <Divider />
-                  <Box><Typography component="h3" variant="subtitle1">{t('workflow.availableActions')}</Typography><Stack spacing={1} sx={{ mt: 1 }}>{actions.length ? actions.map((action, index) => <AvailableAction action={action} key={action.transitionId ?? `${action.decision ?? 'action'}-${index}`} />) : !actionsQuery.isLoading && !actionsQuery.error ? <Typography color="text.secondary">{t('workflow.noActions')}</Typography> : null}</Stack></Box>
+                  <Box>
+                    <Typography component="h3" variant="subtitle1">{t('workflow.availableActions')}</Typography>
+                    <Stack spacing={1} sx={{ mt: 1 }}>
+                      {actions.length ? actions.map((action, index) => {
+                        const permitted = action.permitted === true && Boolean(action.transitionId);
+                        const selected = action.transitionId === selectedTransitionId;
+                        return (
+                          <Paper key={action.transitionId ?? `${action.decision ?? 'action'}-${index}`} variant="outlined" sx={{ p: 1.5 }}>
+                            <Stack spacing={1}>
+                              <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
+                                <Chip color={permitted ? 'success' : 'default'} label={action.decision ?? action.transitionId ?? 'Action'} size="small" variant={permitted ? 'filled' : 'outlined'} />
+                                <Typography variant="body2">{action.fromStepId ?? '—'} → {action.toStepId ?? '—'}</Typography>
+                                {action.reasonRequired ? <Chip label="reasonId" size="small" variant="outlined" /> : null}
+                                {action.commentRequired ? <Chip label="comment" size="small" variant="outlined" /> : null}
+                              </Stack>
+                              {action.requiredPermissionCode ? <Typography color="text.secondary" variant="caption">{action.requiredPermissionCode}</Typography> : null}
+                              {permitted ? <Button disabled={transitionMutation.isPending} onClick={() => { setSelectedTransitionId(action.transitionId ?? ''); setReasonId(''); setCommentText(''); setDecisionNote(''); transitionMutation.reset(); }} size="small" variant={selected ? 'contained' : 'outlined'}>{action.decision ?? t('workflow.action')}</Button> : null}
+                              {selected ? (
+                                <Stack spacing={1}>
+                                  {action.reasonRequired ? <TextField label="reasonId" onChange={(event) => setReasonId(event.target.value)} required size="small" value={reasonId} /> : null}
+                                  {action.commentRequired ? <TextField label="comment" multiline onChange={(event) => setCommentText(event.target.value)} required rows={2} size="small" value={commentText} /> : null}
+                                  <TextField label={t('workflow.note')} multiline onChange={(event) => setDecisionNote(event.target.value)} rows={2} size="small" value={decisionNote} />
+                                  <Button
+                                    disabled={transitionMutation.isPending || !taskQuery.data?.updatedAt || (action.reasonRequired === true && !reasonId.trim()) || (action.commentRequired === true && !commentText.trim())}
+                                    onClick={() => transitionMutation.mutate(action)}
+                                    variant="contained"
+                                  >{transitionMutation.isPending ? '…' : `${t('workflow.action')}: ${action.decision ?? ''}`}</Button>
+                                </Stack>
+                              ) : null}
+                            </Stack>
+                          </Paper>
+                        );
+                      }) : !actionsQuery.isLoading && !actionsQuery.error ? <Typography color="text.secondary">{t('workflow.noActions')}</Typography> : null}
+                    </Stack>
+                  </Box>
                   {canInstances && instanceId ? <><Divider /><Box><Typography component="h3" variant="subtitle1">{t('workflow.instance')}</Typography>{instanceQuery.data ? <Stack spacing={0.5} sx={{ mt: 1 }}><Typography>{instanceQuery.data.targetLabel ?? instanceQuery.data.targetCode ?? instanceQuery.data.targetId ?? '—'}</Typography><Typography>{t('workflow.status')}: {instanceQuery.data.status ?? '—'}</Typography><Typography>{t('workflow.step')}: {instanceQuery.data.currentStepId ?? '—'}</Typography></Stack> : null}</Box><Box><Typography component="h3" variant="subtitle1">{t('workflow.timeline')}</Typography>{timeline.length ? <TableContainer sx={{ mt: 1 }}><Table size="small"><TableHead><TableRow><TableCell>#</TableCell><TableCell>{t('workflow.when')}</TableCell><TableCell>{t('workflow.action')}</TableCell><TableCell>{t('workflow.actor')}</TableCell><TableCell>{t('workflow.note')}</TableCell></TableRow></TableHead><TableBody>{timeline.map((entry, index) => <TimelineRow entry={entry} key={entry.id ?? `timeline-${index}`} />)}</TableBody></Table></TableContainer> : !timelineQuery.isLoading && !timelineQuery.error ? <Typography color="text.secondary" sx={{ mt: 1 }}>{t('workflow.noTimeline')}</Typography> : null}</Box></> : null}
                 </Stack>
               </Paper>
