@@ -62,6 +62,11 @@ async function signIn(page: Page) {
   await expect(page.getByRole('heading', { name: /Vue d/ })).toBeVisible();
 }
 
+async function openWorkbench(page: Page) {
+  await page.getByRole('button', { name: 'Ouvrir l’atelier opérationnel' }).click();
+  await expect(page).toHaveURL(/\/workbench$/);
+}
+
 test('HWEB-002 authenticates and builds a capability-filtered accessible shell', async ({ page }) => {
   await mockPermissions(page);
   await signIn(page);
@@ -111,7 +116,7 @@ test('HWEB-003 discovers, lists, searches and inspects a generic resource', asyn
   await mockPermissions(page);
   await mockWorkbench(page);
   await signIn(page);
-  await page.goto('/workbench');
+  await openWorkbench(page);
 
   await expect(page.getByRole('heading', { name: 'Atelier opérationnel' })).toBeVisible();
   await expect(page.getByText('High pressure')).toBeVisible();
@@ -131,6 +136,6 @@ test('HWEB-003 renders backend 403 from module discovery', async ({ page }) => {
   await mockPermissions(page);
   await page.route('**/api/v1/workbench/modules', (route) => route.fulfill({ status: 403, json: { status: 403, title: 'Forbidden' } }));
   await signIn(page);
-  await page.goto('/workbench');
+  await openWorkbench(page);
   await expect(page.getByText('Accès refusé')).toBeVisible();
 });
