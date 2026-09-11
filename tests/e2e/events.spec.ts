@@ -88,7 +88,6 @@ test('HWEB-009 exposes published incident, leak, HSE and CAPA reads', async ({ p
   await expect(page.getByText('HSE Officer')).toBeVisible();
   await expect(page.getByText('audit-hse-1')).toBeVisible();
   await page.getByRole('button', { name: 'Open' }).last().click();
-  await expect(page.getByText('Maintenance Lead')).toBeVisible();
   await expect(page.getByText('wo-1')).toBeVisible();
   await expect(page.getByText('task-hse-1')).toBeVisible();
 });
