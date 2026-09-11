@@ -5,6 +5,7 @@ import { LoginPage } from '@/app/pages/LoginPage';
 import { NotFoundPage } from '@/app/pages/NotFoundPage';
 import { OverviewPage } from '@/app/pages/OverviewPage';
 import { PermissionBootstrapBoundary } from '@/features/permissions/PermissionBootstrapBoundary';
+import { OperationalWorkbenchPage } from '@/features/workbench/OperationalWorkbenchPage';
 import { AppShell } from '@/shell/AppShell';
 
 export const router = createBrowserRouter([
@@ -21,6 +22,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate replace to="/overview" /> },
       { path: 'overview', element: <OverviewPage /> },
+      { path: 'workbench', element: <OperationalWorkbenchPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

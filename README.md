@@ -14,11 +14,7 @@ The implementation is governed by:
 
 If another document conflicts with those files, the canonical architecture wins.
 
-## HWEB-001 bootstrap
-
-The executable frontend foundation is being implemented on `hweb-001-bootstrap`.
-
-Technology baseline:
+## Technology baseline
 
 ```text
 React + TypeScript
@@ -44,29 +40,43 @@ Node baseline: **24 LTS**.
 ```bash
 cp .env.example .env.local
 npm install
+npm run api:generate:workbench
 npm run verify
 npm run dev
 ```
 
 HidraAPI development CORS currently allows `http://localhost:5173`, and the default development authentication mode is Basic.
 
-OpenAPI generation requires a running/reachable HidraAPI:
+Full OpenAPI generation requires a running/reachable HidraAPI:
 
 ```bash
 npm run api:generate
 ```
 
-Default OpenAPI source:
+Default full OpenAPI source:
 
 ```text
 http://localhost:8080/v3/api-docs
 ```
 
+HWEB-003 also carries a narrowly scoped source-derived workbench OpenAPI snapshot pinned to the verified HidraAPI commit. Generate it with:
+
+```bash
+npm run api:generate:workbench
+```
+
 Generated API files belong only under `src/api/generated/` and must not contain handwritten business logic.
+
+## Implemented application surfaces
+
+- `/overview` — authenticated shell overview.
+- `/workbench` — HWEB-003 secondary generic resource workbench. It is intentionally not a primary sidebar process and must not replace specialized operational UX.
 
 ## Development roadmap
 
 - [`docs/roadmap/HWEB-001-Bootstrap.md`](docs/roadmap/HWEB-001-Bootstrap.md)
+- [`docs/roadmap/HWEB-002-Application-Shell-Authentication-Permissions.md`](docs/roadmap/HWEB-002-Application-Shell-Authentication-Permissions.md)
+- [`docs/roadmap/HWEB-003-Operational-Workbench.md`](docs/roadmap/HWEB-003-Operational-Workbench.md)
 - [`docs/roadmap/HidraWeb-Development-Roadmap.md`](docs/roadmap/HidraWeb-Development-Roadmap.md)
 
 ## Source-of-truth rule
