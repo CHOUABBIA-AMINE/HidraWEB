@@ -1,4 +1,4 @@
 export const TOPOLOGY_PERMISSIONS = {
-  read: 'HIDRA_TOPOLOGY_MAP_READ',
-  search: 'HIDRA_TOPOLOGY_MAP_SEARCH',
+  read: 'topology:map:read',
+  search: 'topology:map:search',
 } as const;
