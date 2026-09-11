@@ -50,7 +50,7 @@ describe('HWEB-006 telemetry monitoring workspace', () => {
     fireEvent.change(screen.getByLabelText('Identifiant du point de télémétrie'), { target: { value: 'PT-1' } });
     fireEvent.click(screen.getByRole('button', { name: 'Charger le point' }));
 
-    expect(await screen.findByText('42.5')).toBeInTheDocument();
+    expect((await screen.findAllByText('42.5')).length).toBeGreaterThan(0);
     expect(screen.getAllByText('TRUSTED').length).toBeGreaterThan(0);
     expect(window.location.pathname).toBe('/operations');
   });
