@@ -1,4 +1,4 @@
-import maplibregl, { type GeoJSONSource } from 'maplibre-gl';
+import { LngLatBounds, Map, NavigationControl, type GeoJSONSource, type MapLayerMouseEvent } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 import type { HidraMapAdapter, HidraMapFeatureCollection, HidraMapSelection } from '@/components/map/mapTypes';
@@ -12,7 +12,7 @@ function asGeoJson(data: HidraMapFeatureCollection): Parameters<GeoJSONSource['s
   return data as unknown as Parameters<GeoJSONSource['setData']>[0];
 }
 
-function extendBounds(bounds: maplibregl.LngLatBounds, coordinates: unknown): void {
+function extendBounds(bounds: LngLatBounds, coordinates: unknown): void {
   if (!Array.isArray(coordinates)) return;
   if (
     coordinates.length >= 2
@@ -31,7 +31,7 @@ export function createMapLibreAdapter(
   container: HTMLElement,
   onFeatureSelect: (selection: HidraMapSelection) => void,
 ): HidraMapAdapter {
-  const map = new maplibregl.Map({
+  const map = new Map({
     container,
     center: [0, 0],
     zoom: 1,
@@ -48,7 +48,7 @@ export function createMapLibreAdapter(
     },
   });
 
-  map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
+  map.addControl(new NavigationControl({ showCompass: true }), 'top-right');
 
   let pendingData = EMPTY_COLLECTION;
   let selectedFeatureId: string | undefined;
@@ -68,7 +68,7 @@ export function createMapLibreAdapter(
 
   const fitInitialData = (data: HidraMapFeatureCollection) => {
     if (fittedInitialData || data.features.length === 0) return;
-    const bounds = new maplibregl.LngLatBounds();
+    const bounds = new LngLatBounds();
     data.features.forEach((feature) => extendBounds(bounds, feature.geometry.coordinates));
     if (!bounds.isEmpty()) {
       map.fitBounds(bounds, { duration: 0, maxZoom: 12, padding: 48 });
@@ -108,9 +108,9 @@ export function createMapLibreAdapter(
       },
     });
 
-    const handleClick = (event: { features?: Array<{ id?: string | number; properties?: Record<string, unknown> }> }) => {
+    const handleClick = (event: MapLayerMouseEvent) => {
       const feature = event.features?.[0];
-      const layer = feature?.properties?.layer;
+      const layer = feature?.properties.layer;
       if (feature?.id === undefined || typeof layer !== 'string') return;
       onFeatureSelect({ featureId: String(feature.id), layerId: layer });
     };

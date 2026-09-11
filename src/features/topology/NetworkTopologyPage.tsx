@@ -52,7 +52,7 @@ export function NetworkTopologyPage() {
     enabled: canRead,
   });
 
-  const layers = layersQuery.data ?? [];
+  const layers = useMemo(() => layersQuery.data ?? [], [layersQuery.data]);
   const registry = useMemo(() => buildLayerRegistry(layers), [layers]);
   const visibleLayerIds = useMemo(
     () => layers.map((layer) => layer.id).filter((layerId) => !hiddenLayerIds.has(layerId)),
@@ -148,7 +148,7 @@ export function NetworkTopologyPage() {
 
   return (
     <Container maxWidth={false} sx={{ py: 3 }}>
-      <Stack direction={{ xs: 'column', md: 'row' }} gap={2} justifyContent="space-between">
+      <Stack direction={{ xs: 'column', md: 'row' }} sx={{ gap: 2, justifyContent: 'space-between' }}>
         <Box>
           <Typography color="text.secondary" variant="overline">HWEB-005</Typography>
           <Typography component="h1" variant="h4">{t('topology.title')}</Typography>
@@ -160,7 +160,7 @@ export function NetworkTopologyPage() {
       {permissions.catalogOnly ? <Alert severity="warning" sx={{ mt: 2 }}>{t('topology.catalogOnly')}</Alert> : null}
 
       <Paper variant="outlined" sx={{ mt: 2, p: 2 }}>
-        <Stack direction={{ xs: 'column', md: 'row' }} gap={1}>
+        <Stack direction={{ xs: 'column', md: 'row' }} sx={{ gap: 1 }}>
           <TextField
             fullWidth
             label={t('topology.search')}
@@ -186,7 +186,7 @@ export function NetworkTopologyPage() {
         {searchQuery.data ? (
           <Box sx={{ mt: 1 }}>
             <Typography variant="subtitle2">{t('topology.searchResults')} · {searchQuery.data.totalFeatures}</Typography>
-            <Stack direction="row" flexWrap="wrap" gap={1} sx={{ mt: 1 }} useFlexGap>
+            <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1, mt: 1 }}>
               {searchQuery.data.features.map((feature) => (
                 <Button key={feature.id} onClick={() => openFeature(feature)} size="small" variant="outlined">
                   {topologyFeatureLabel(feature)}
@@ -243,7 +243,7 @@ export function NetworkTopologyPage() {
 
           {geoJsonQuery.data ? (
             <Paper variant="outlined" sx={{ p: 2 }}>
-              <Stack direction="row" flexWrap="wrap" gap={1} useFlexGap>
+              <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
                 <Chip label={t('topology.loadedCount', { loaded: geoJsonQuery.data.features.length, total: geoJsonQuery.data.totalFeatures })} size="small" />
                 <Chip label={`page ${geoJsonQuery.data.page + 1}/${Math.max(geoJsonQuery.data.totalPages, 1)}`} size="small" variant="outlined" />
               </Stack>

@@ -8,7 +8,7 @@ export interface MapLegendProps {
 
 export function MapLegend({ layers }: MapLegendProps) {
   return (
-    <Stack direction="row" flexWrap="wrap" gap={1} useFlexGap>
+    <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
       {layers.map((layer) => (
         <Chip key={layer.id} label={`${layer.label} · ${layer.geometryType}`} size="small" variant="outlined" />
       ))}
