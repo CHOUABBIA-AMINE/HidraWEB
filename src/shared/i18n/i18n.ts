@@ -2,6 +2,7 @@ import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 import { runtimeConfig } from '@/app/bootstrap/runtimeConfig';
+import { alarmTranslations } from '@/features/alarm/i18n/alarmTranslations';
 import { contextTranslations } from '@/features/context/i18n/contextTranslations';
 import { telemetryMonitoringTranslations } from '@/features/telemetry-monitoring/i18n/telemetryMonitoringTranslations';
 import { topologyTranslations } from '@/features/topology/i18n/topologyTranslations';
@@ -9,9 +10,9 @@ import { workbenchTranslations } from '@/features/workbench/i18n/workbenchTransl
 import { resources } from '@/shared/i18n/resources';
 
 const mergedResources = {
-  fr: { translation: { ...resources.fr.translation, context: contextTranslations.fr, telemetryMonitoring: telemetryMonitoringTranslations.fr, topology: topologyTranslations.fr, workbench: workbenchTranslations.fr } },
-  en: { translation: { ...resources.en.translation, context: contextTranslations.en, telemetryMonitoring: telemetryMonitoringTranslations.en, topology: topologyTranslations.en, workbench: workbenchTranslations.en } },
-  ar: { translation: { ...resources.ar.translation, context: contextTranslations.ar, telemetryMonitoring: telemetryMonitoringTranslations.ar, topology: topologyTranslations.ar, workbench: workbenchTranslations.ar } },
+  fr: { translation: { ...resources.fr.translation, alarm: alarmTranslations.fr, context: contextTranslations.fr, telemetryMonitoring: telemetryMonitoringTranslations.fr, topology: topologyTranslations.fr, workbench: workbenchTranslations.fr } },
+  en: { translation: { ...resources.en.translation, alarm: alarmTranslations.en, context: contextTranslations.en, telemetryMonitoring: telemetryMonitoringTranslations.en, topology: topologyTranslations.en, workbench: workbenchTranslations.en } },
+  ar: { translation: { ...resources.ar.translation, alarm: alarmTranslations.ar, context: contextTranslations.ar, telemetryMonitoring: telemetryMonitoringTranslations.ar, topology: topologyTranslations.ar, workbench: workbenchTranslations.ar } },
 };
 
 export const i18n = i18next.createInstance();
