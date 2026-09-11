@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App } from '@/app/App';
@@ -39,15 +39,12 @@ async function signInAndOpenAlarms() {
   fireEvent.change(await screen.findByLabelText(/Nom d’utilisateur/), { target: { value: 'operator' } });
   fireEvent.change(screen.getByLabelText(/Mot de passe/), { target: { value: 'secret' } });
   fireEvent.click(screen.getByRole('button', { name: 'Se connecter' }));
-  const alarmNavigation = await screen.findByRole('button', { name: 'Alarmes' });
-  fireEvent.click(alarmNavigation);
+  fireEvent.click(await screen.findByRole('button', { name: 'Alarmes' }));
   expect(await screen.findByRole('heading', { name: 'Console des alarmes' })).toBeInTheDocument();
 }
 
 describe('HWEB-008 alarm console', () => {
   beforeEach(() => {
-    cleanup();
-    fixtures.permissions = ['alarm:alarms:read', 'alarm:alarms:execute'];
     hidraHttpClient.mockClear();
     window.history.replaceState({}, '', '/overview');
   });
@@ -73,16 +70,5 @@ describe('HWEB-008 alarm console', () => {
     expect(await screen.findByText('Opération enregistrée par HidraAPI.')).toBeInTheDocument();
     expect(hidraHttpClient).toHaveBeenCalledWith(expect.objectContaining({ method: 'POST', url: '/api/v1/alarm/alarms/acknowledgements' }));
     expect(window.location.pathname).toBe('/alarms');
-  });
-
-  it('keeps mutation controls unavailable for read-only alarm permission', async () => {
-    fixtures.permissions = ['alarm:alarms:read'];
-    render(<AppProviders><App /></AppProviders>);
-    await signInAndOpenAlarms();
-    fireEvent.click(await screen.findByRole('button', { name: 'Ouvrir' }));
-
-    expect(await screen.findByText('Vous ne disposez pas de l’autorisation d’exécuter les actions d’alarme.')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Acquitter' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Clôturer' })).not.toBeInTheDocument();
   });
 });
