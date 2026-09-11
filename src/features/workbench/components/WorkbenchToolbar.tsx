@@ -76,7 +76,7 @@ export function WorkbenchToolbar(props: WorkbenchToolbarProps) {
 
       <Accordion disableGutters variant="outlined">
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography fontWeight={600}>{t('workbench.advanced')}</Typography>
+          <Typography sx={{ fontWeight: 600 }}>{t('workbench.advanced')}</Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr 160px' } }}>
