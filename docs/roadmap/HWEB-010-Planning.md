@@ -1,6 +1,6 @@
 # HWEB-010 — Planning
 
-Status: HWEB-010-02 IMPLEMENTATION COMPLETE — final merge/post-merge verification pending
+Status: HWEB-010-02 COMPLETE
 
 ## Accepted repository baselines
 
@@ -55,17 +55,18 @@ Implemented scope:
 - component coverage exercises period and plan list/detail reads;
 - Playwright coverage exercises the same published read path.
 
-### Exact-head frontend validation
+### Frontend verification evidence
 
 ```text
-Behavioral commit : d711b5014419e6022748d4d3c48c6052e37f5c39
-Pull request      : HidraWEB #20
-CI run            : 34659171158
-Result            : SUCCESS
-Gates             : HWEB-003..HWEB-010 OpenAPI generation; lint; typecheck; unit/component tests; production build; Playwright browser tests
+Behavioral commit      : d711b5014419e6022748d4d3c48c6052e37f5c39
+Behavioral CI          : 34659171158 — SUCCESS
+Final PR head          : bcd82c6f272990fd22d9f37d3260be276b56a254
+Final exact-head CI    : 34659336556 — SUCCESS
+Pull request           : HidraWEB #20 — MERGED
+Merge SHA              : aae64ce602d98233a298fae8653efdfd19b43951
+Post-merge main CI     : 34659530090 — SUCCESS
+Verified gates         : HWEB-003..HWEB-010 OpenAPI generation; lint; typecheck; unit/component tests; production build; Playwright browser tests
 ```
-
-A documentation-only evidence commit follows this behavioral head, so the final PR head must independently pass the same exact-head CI before merge.
 
 ### Published DTO fields used by HWEB-010-02
 
@@ -100,12 +101,11 @@ Those remain later HWEB-010 tasks and require their own verified contract eviden
 
 ```text
 GAP-PLAN-001 — Planning query contract
-Status          : IMPLEMENTED
+Status          : VERIFIED
 Backend owner   : planning
 Backend issue   : HidraAPI #68 — CLOSED
 Backend evidence: merge c9ef4886445479f7b2d88f8fa0d4a8b37cb59e55; OpenAPI artifact 10286503941
-Frontend scope  : HWEB-010-02 consumes planning period and operational-plan list/detail reads.
-Promotion rule  : mark VERIFIED only after exact-head frontend CI, merge, and push-triggered main CI are green.
+Frontend evidence: HWEB-010-02 consumes and tests planning period and operational-plan list/detail reads; PR #20 merged at aae64ce602d98233a298fae8653efdfd19b43951 and push-triggered main CI 34659530090 passed.
 ```
 
 ## Remaining HWEB-010 sequence
