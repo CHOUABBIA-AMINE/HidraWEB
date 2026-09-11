@@ -101,7 +101,7 @@ test('HWEB-002 authenticates and builds a capability-filtered accessible shell',
   await mockPermissions(page);
   await signIn(page);
 
-  await expect(page.getByRole('button', { name: 'Réseau' })).toHaveAttribute('aria-disabled', 'true');
+  await expect(page.getByRole('button', { name: 'Réseau' })).toBeEnabled();
   await expect(page.locator('[role="button"][aria-label="Mes tâches"][aria-disabled="true"]')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Organisation' })).toBeEnabled();
   await expect(page.getByRole('button', { name: 'Identité & accès' })).toBeEnabled();

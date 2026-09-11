@@ -37,6 +37,9 @@ jobs:
       - name: Generate HWEB-004 identity/organization OpenAPI client
         run: npm run api:generate:identity-organization
 
+      - name: Generate HWEB-005 topology OpenAPI client
+        run: npm run api:generate:topology
+
       - name: Lint
         run: npm run lint
 
