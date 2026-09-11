@@ -6,11 +6,17 @@ import { AppProviders } from '@/app/providers/AppProviders';
 
 const fixtures = vi.hoisted(() => {
   const routes = [
-    { route: '/api/v1/workbench/modules', methods: ['GET'], module: 'modules', resource: 'resources', action: 'read', permission: 'HIDRA_MODULES_RESOURCES_READ', enforcementStatus: 'metadata-published' },
-    { route: '/api/v1/workbench/{module}/resources', methods: ['GET'], module: 'dynamic-module', resource: 'resources', action: 'read', permission: 'HIDRA_DYNAMIC_MODULE_RESOURCES_READ', enforcementStatus: 'metadata-published' },
-    { route: '/api/v1/workbench/{module}/{resource}', methods: ['GET'], module: 'dynamic-module', resource: 'dynamic-resource', action: 'read', permission: 'HIDRA_DYNAMIC_MODULE_DYNAMIC_RESOURCE_READ', enforcementStatus: 'metadata-published' },
-    { route: '/api/v1/workbench/{module}/{resource}/{id}', methods: ['GET'], module: 'dynamic-module', resource: 'dynamic-resource', action: 'detail', permission: 'HIDRA_DYNAMIC_MODULE_DYNAMIC_RESOURCE_DETAIL', enforcementStatus: 'metadata-published' },
-    { route: '/api/v1/workbench/{module}/{resource}/search', methods: ['POST'], module: 'dynamic-module', resource: 'dynamic-resource', action: 'search', permission: 'HIDRA_DYNAMIC_MODULE_DYNAMIC_RESOURCE_SEARCH', enforcementStatus: 'metadata-published' },
+    { route: '/api/v1/workbench/modules', methods: ['GET'], module: 'modules', resource: 'resources', action: 'read', permission: 'modules:resources:read', enforcementStatus: 'backend-enforced' },
+    { route: '/api/v1/workbench/{module}/resources', methods: ['GET'], module: 'dynamic-module', resource: 'resources', action: 'read', permission: 'dynamic-module:resources:read', enforcementStatus: 'backend-enforced' },
+    { route: '/api/v1/workbench/{module}/{resource}', methods: ['GET'], module: 'dynamic-module', resource: 'dynamic-resource', action: 'read', permission: 'dynamic-module:dynamic-resource:read', enforcementStatus: 'backend-enforced' },
+    { route: '/api/v1/workbench/{module}/{resource}/{id}', methods: ['GET'], module: 'dynamic-module', resource: 'dynamic-resource', action: 'read', permission: 'dynamic-module:dynamic-resource:read', enforcementStatus: 'backend-enforced' },
+    { route: '/api/v1/workbench/{module}/{resource}/search', methods: ['POST'], module: 'dynamic-module', resource: 'dynamic-resource', action: 'search', permission: 'dynamic-module:dynamic-resource:search', enforcementStatus: 'backend-enforced' },
+  ];
+  const effectivePermissions = [
+    'modules:resources:read',
+    'dynamic-module:resources:read',
+    'dynamic-module:dynamic-resource:read',
+    'dynamic-module:dynamic-resource:search',
   ];
   const descriptor = {
     module: 'alarm', resource: 'alarm-events', entityName: 'AlarmEventJpaEntity', javaType: 'dz.sh.hidra.modules.alarm.infrastructure.AlarmEventJpaEntity',
@@ -18,15 +24,22 @@ const fixtures = vi.hoisted(() => {
     listEndpoint: '/api/v1/workbench/alarm/alarm-events', detailEndpoint: '/api/v1/workbench/alarm/alarm-events/{id}', searchEndpoint: '/api/v1/workbench/alarm/alarm-events/search',
   };
   const record = { module: 'alarm', resource: 'alarm-events', id: '1', attributes: { id: '1', message: 'High pressure', severity: 'HIGH' } };
-  return { routes, descriptor, record };
+  return { routes, effectivePermissions, descriptor, record };
 });
 
 vi.mock('@/api/client/hidraHttpClient', () => ({
   hidraHttpClient: vi.fn(async (config: { url?: string; method?: string }) => {
     if (config.url?.endsWith('/security/permissions/catalog')) {
-      return { strategy: 'derived-route-permission-catalog', enforcement: 'catalog-only', permissionFormat: 'HIDRA_<MODULE>_<RESOURCE>_<ACTION>', routes: fixtures.routes };
+      return {
+        strategy: 'derived-route-permission-catalog',
+        enforcement: 'backend-enforced by HidraRouteAuthorizationInterceptor',
+        permissionFormat: '<module>:<resource>:<action>',
+        bootstrapAdminBypass: 'ROLE_HIDRA_ADMIN',
+        routes: fixtures.routes,
+      };
     }
     if (config.url?.endsWith('/security/permissions/routes')) return fixtures.routes;
+    if (config.url?.endsWith('/identity/me/permissions')) return fixtures.effectivePermissions;
     if (config.url === '/api/v1/workbench/modules') return ['alarm'];
     if (config.url === '/api/v1/workbench/alarm/resources') return [fixtures.descriptor];
     if (config.url === '/api/v1/workbench/alarm/alarm-events/1') return fixtures.record;
