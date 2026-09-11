@@ -23,7 +23,8 @@
     "api:generate:workflow": "orval --config orval.workflow.config.ts",
     "api:generate:alarm": "orval --config orval.alarm.config.ts",
     "api:generate:incident": "orval --config orval.incident.config.ts",
-    "verify": "npm run api:generate:workbench && npm run api:generate:identity-organization && npm run api:generate:topology && npm run api:generate:telemetry-monitoring && npm run api:generate:workflow && npm run api:generate:alarm && npm run api:generate:incident && npm run lint && npm run typecheck && npm run test && npm run build"
+    "api:generate:leak": "orval --config orval.leak.config.ts",
+    "verify": "npm run api:generate:workbench && npm run api:generate:identity-organization && npm run api:generate:topology && npm run api:generate:telemetry-monitoring && npm run api:generate:workflow && npm run api:generate:alarm && npm run api:generate:incident && npm run api:generate:leak && npm run lint && npm run typecheck && npm run test && npm run build"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",

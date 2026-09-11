@@ -2,13 +2,24 @@ import { expect, test, type Page } from '@playwright/test';
 
 const routes = [
   { route: '/api/v1/incident/incidents', methods: ['GET'], module: 'incident', resource: 'incidents', action: 'read', permission: 'incident:incidents:read', enforcementStatus: 'backend-enforced' },
+  { route: '/api/v1/leakdetection/candidates', methods: ['GET'], module: 'leakdetection', resource: 'candidates', action: 'read', permission: 'leakdetection:candidates:read', enforcementStatus: 'backend-enforced' },
+  { route: '/api/v1/leakdetection/cases', methods: ['GET'], module: 'leakdetection', resource: 'cases', action: 'read', permission: 'leakdetection:cases:read', enforcementStatus: 'backend-enforced' },
 ];
-const effectivePermissions = ['incident:incidents:read'];
+const effectivePermissions = ['incident:incidents:read', 'leakdetection:candidates:read', 'leakdetection:cases:read'];
 const incident = {
   id: 'inc-1', incidentNumber: 'INC-2026-001', title: 'Pipeline pressure event', description: 'Operational incident under investigation.',
   status: 'OPEN', sourceType: 'ALARM', severityId: 'SEV-2', priorityId: 'P1', topologyAssetId: 'PIPE-1', topologyAssetCode: 'PL-001',
   topologyAssetName: 'Pipeline Nord', responsibleActorId: 'actor-1', responsibleActorName: 'Operator One', workflowInstanceId: 'wf-1',
   occurredAt: '2026-09-11T10:00:00Z', updatedAt: '2026-09-11T11:00:00Z', currentEscalationLevel: 1,
+};
+const candidate = {
+  id: 'cand-1', candidateNumber: 'LKC-001', status: 'OPEN', severityLevel: 'HIGH', confidenceScore: 0.91,
+  topologyAssetId: 'PIPE-1', topologyAssetCode: 'PL-001', topologyAssetName: 'Pipeline Nord', suspectedAt: '2026-09-11T10:05:00Z',
+  firstEvidenceAt: '2026-09-11T10:04:00Z', runId: 'run-1', profileId: 'profile-1', summary: 'Pressure imbalance candidate', correlationId: 'corr-leak-1', updatedAt: '2026-09-11T11:05:00Z',
+};
+const leakCase = {
+  id: 'case-1', caseNumber: 'LEAK-001', primaryCandidateId: 'cand-1', topologyAssetId: 'PIPE-1', topologyAssetCode: 'PL-001', owningOrganizationUnitId: 'org-1',
+  status: 'OPEN', severityLevel: 'HIGH', confidenceScore: 0.95, openedAt: '2026-09-11T10:10:00Z', openedByActorId: 'actor-2', correlationId: 'corr-leak-1', updatedAt: '2026-09-11T11:10:00Z',
 };
 
 async function mockEvents(page: Page) {
@@ -17,6 +28,10 @@ async function mockEvents(page: Page) {
   await page.route('**/api/v1/identity/me/permissions', (route) => route.fulfill({ json: effectivePermissions }));
   await page.route('**/api/v1/incident/incidents?**', (route) => route.fulfill({ json: { content: [incident], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false } }));
   await page.route('**/api/v1/incident/incidents/inc-1', (route) => route.fulfill({ json: incident }));
+  await page.route('**/api/v1/leakdetection/candidates?**', (route) => route.fulfill({ json: { content: [candidate], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false } }));
+  await page.route('**/api/v1/leakdetection/candidates/cand-1', (route) => route.fulfill({ json: candidate }));
+  await page.route('**/api/v1/leakdetection/cases?**', (route) => route.fulfill({ json: { content: [leakCase], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false } }));
+  await page.route('**/api/v1/leakdetection/cases/case-1', (route) => route.fulfill({ json: leakCase }));
 }
 
 async function signIn(page: Page) {
@@ -27,7 +42,7 @@ async function signIn(page: Page) {
   await expect(page.getByRole('heading', { name: /Vue d/ })).toBeVisible();
 }
 
-test('HWEB-009 exposes only published incident reads and keeps leak/HSE query gaps explicit', async ({ page }) => {
+test('HWEB-009 exposes published incident and leak reads while keeping HSE query gap explicit', async ({ page }) => {
   await mockEvents(page);
   await signIn(page);
 
@@ -41,7 +56,14 @@ test('HWEB-009 exposes only published incident reads and keeps leak/HSE query ga
   await expect(page.getByText('Pipeline Nord', { exact: true }).last()).toBeVisible();
 
   await page.getByRole('tab', { name: 'Leak detection' }).click();
-  await expect(page.getByText(/issue #63/)).toBeVisible();
+  await expect(page.getByText('LKC-001')).toBeVisible();
+  await expect(page.getByText('LEAK-001')).toBeVisible();
+  await page.getByRole('heading', { name: 'Leak candidates' }).locator('..').getByRole('button', { name: 'Refresh' }).isVisible();
+  await page.getByRole('button', { name: 'Open' }).first().click();
+  await expect(page.getByText('Pressure imbalance candidate')).toBeVisible();
+  await page.getByRole('button', { name: 'Open' }).last().click();
+  await expect(page.getByText('actor-2')).toBeVisible();
+
   await page.getByRole('tab', { name: 'HSE' }).click();
   await expect(page.getByText(/issue #64/)).toBeVisible();
 });
