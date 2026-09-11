@@ -4,6 +4,7 @@ import { RequireAuthentication } from '@/app/auth/RequireAuthentication';
 import { LoginPage } from '@/app/pages/LoginPage';
 import { NotFoundPage } from '@/app/pages/NotFoundPage';
 import { OverviewPage } from '@/app/pages/OverviewPage';
+import { AlarmConsolePage } from '@/features/alarm/AlarmConsolePage';
 import { IdentityAdministrationPage } from '@/features/context/IdentityAdministrationPage';
 import { OrganizationAdministrationPage } from '@/features/context/OrganizationAdministrationPage';
 import { PermissionBootstrapBoundary } from '@/features/permissions/PermissionBootstrapBoundary';
@@ -29,6 +30,7 @@ export const router = createBrowserRouter([
       { path: 'overview', element: <OverviewPage /> },
       { path: 'network', element: <NetworkTopologyPage /> },
       { path: 'operations', element: <TelemetryMonitoringPage /> },
+      { path: 'alarms', element: <AlarmConsolePage /> },
       { path: 'work/tasks', element: <WorkflowTasksPage /> },
       { path: 'workbench', element: <OperationalWorkbenchPage /> },
       { path: 'administration/organization', element: <OrganizationAdministrationPage /> },
