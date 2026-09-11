@@ -34,6 +34,9 @@ jobs:
       - name: Generate HWEB-003 workbench OpenAPI client
         run: npm run api:generate:workbench
 
+      - name: Generate HWEB-004 identity/organization OpenAPI client
+        run: npm run api:generate:identity-organization
+
       - name: Lint
         run: npm run lint
 

@@ -2,13 +2,14 @@ import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 import { runtimeConfig } from '@/app/bootstrap/runtimeConfig';
+import { contextTranslations } from '@/features/context/i18n/contextTranslations';
 import { workbenchTranslations } from '@/features/workbench/i18n/workbenchTranslations';
 import { resources } from '@/shared/i18n/resources';
 
 const mergedResources = {
-  fr: { translation: { ...resources.fr.translation, workbench: workbenchTranslations.fr } },
-  en: { translation: { ...resources.en.translation, workbench: workbenchTranslations.en } },
-  ar: { translation: { ...resources.ar.translation, workbench: workbenchTranslations.ar } },
+  fr: { translation: { ...resources.fr.translation, context: contextTranslations.fr, workbench: workbenchTranslations.fr } },
+  en: { translation: { ...resources.en.translation, context: contextTranslations.en, workbench: workbenchTranslations.en } },
+  ar: { translation: { ...resources.ar.translation, context: contextTranslations.ar, workbench: workbenchTranslations.ar } },
 };
 
 export const i18n = i18next.createInstance();
