@@ -12,13 +12,13 @@ import {
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import type { OperationalPageResponse, OperationalRecordResponse, OperationalResourceDescriptor } from '@/api/generated/workbench/model';
+import type { WorkbenchPage, WorkbenchRecord, WorkbenchResourceDescriptor } from '@/features/workbench/api/workbenchApi';
 
 interface WorkbenchDataGridProps {
-  descriptor: OperationalResourceDescriptor;
-  page: OperationalPageResponse;
+  descriptor: WorkbenchResourceDescriptor;
+  page: WorkbenchPage;
   detailEnabled: boolean;
-  onInspect: (record: OperationalRecordResponse) => void;
+  onInspect: (record: WorkbenchRecord) => void;
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
 }
@@ -50,7 +50,7 @@ export function WorkbenchDataGrid({
     const keys = new Set<string>();
     keys.add(descriptor.idField);
     descriptor.searchableFields.forEach((field) => keys.add(field));
-    page.items.forEach((item) => Object.keys(item.attributes ?? {}).forEach((field) => keys.add(field)));
+    page.items.forEach((item) => Object.keys(item.attributes).forEach((field) => keys.add(field)));
     return Array.from(keys).slice(0, 10);
   }, [descriptor, page.items]);
 
@@ -67,10 +67,10 @@ export function WorkbenchDataGrid({
           <TableBody>
             {page.items.map((item, index) => (
               <TableRow hover key={`${String(item.id ?? 'row')}-${index}`}>
-                {columns.map((column) => <TableCell key={column}>{renderValue(item.attributes?.[column])}</TableCell>)}
+                {columns.map((column) => <TableCell key={column}>{renderValue(item.attributes[column])}</TableCell>)}
                 <TableCell align="right">
                   <Button
-                    disabled={!detailEnabled || item.id === null || item.id === undefined}
+                    disabled={item.id === null || item.id === undefined || !detailEnabled}
                     onClick={() => onInspect(item)}
                     size="small"
                   >
