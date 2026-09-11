@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App } from '@/app/App';
@@ -46,6 +46,7 @@ async function signInAndOpenAlarms() {
 
 describe('HWEB-008 alarm console', () => {
   beforeEach(() => {
+    cleanup();
     fixtures.permissions = ['alarm:alarms:read', 'alarm:alarms:execute'];
     hidraHttpClient.mockClear();
     window.history.replaceState({}, '', '/overview');
