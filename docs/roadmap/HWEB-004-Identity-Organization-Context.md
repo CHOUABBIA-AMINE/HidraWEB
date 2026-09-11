@@ -1,11 +1,13 @@
 # HWEB-004 — Identity and Organization Context
 
 ```text
-Status                 : IN PROGRESS
+Status                 : COMPLETE — READY FOR REVIEW
 Frontend branch        : hweb-004-identity-organization-context
 Frontend base          : HidraWEB main @ df15bb5ced5136ed4a280c1086b95502ec22bf03
+Executable commit      : 1405d6b2cfdeba7811983772e97e09384672a4dd
 Backend source         : HidraAPI main @ f8853fb17b17ff08baf16c4abdfdc810fcbaf01d
 Backend owners         : identity, organization
+Verified CI            : run 34549005262 / job 103107729987
 ```
 
 ## Verified backend inventory
@@ -51,7 +53,7 @@ Organization resources required by HWEB-004:
 
 ## OpenAPI status
 
-HWEB-004 adds a source-derived OpenAPI snapshot for the five verified canonical command endpoints at backend commit `f8853fb...` and feeds it to Orval. Read/list/detail contracts continue to use the HWEB-003 workbench OpenAPI snapshot. A repository-wide stable HidraAPI OpenAPI artifact remains an HWEB-015-10 hardening gap.
+HWEB-004 adds a source-derived OpenAPI snapshot for the five verified canonical command endpoints at backend commit `f8853fb...` and feeds it to Orval. Read/list/detail contracts continue to use the HWEB-003 workbench OpenAPI snapshot. CI regenerates both clients before lint/typecheck/test/build. A repository-wide stable HidraAPI OpenAPI artifact remains an HWEB-015-10 hardening gap.
 
 ## Completion checklist
 
@@ -61,7 +63,25 @@ HWEB-004 adds a source-derived OpenAPI snapshot for the five verified canonical 
 - [x] HWEB-004-04 implement organization units and employee/assignment workspaces where endpoints exist.
 - [x] HWEB-004-05 establish reusable actor and organization display/reference components.
 - [x] HWEB-004-06 keep login credentials owned by identity and employee hierarchy owned by organization.
-- [ ] HWEB-004-07 authorization and workflow-reference tests.
+- [x] HWEB-004-07 authorization and workflow-reference tests.
+
+## Verification
+
+Executable commit `1405d6b2cfdeba7811983772e97e09384672a4dd` passed HidraWEB CI run `34549005262`, job `103107729987`:
+
+- dependency install — PASS
+- HWEB-003 workbench Orval generation — PASS
+- HWEB-004 identity/organization Orval generation — PASS
+- ESLint — PASS
+- TypeScript — PASS
+- Vitest — PASS: 6 files / 11 tests
+- production build — PASS
+- Playwright Chromium install — PASS
+- Playwright E2E — PASS: 8 tests
+
+HWEB-004-specific verification covers explicit identity-user vs employee actor resolution, organization-unit reference display/fallback, capability-driven administration navigation, identity/organization workbench reads, and a backend 403 identity mutation refusal.
+
+The Vite bundle-size warning remains non-blocking and belongs to later production/code-splitting hardening.
 
 ## Mandatory completion record
 
@@ -71,9 +91,9 @@ Endpoints and DTOs used         : 5 canonical command endpoints; HWEB-003 workbe
 Permissions used                : HIDRA_IDENTITY_USERS_EXECUTE, HIDRA_IDENTITY_PERMISSIONS_EXECUTE, HIDRA_ORGANIZATION_UNITS_EXECUTE, HIDRA_ORGANIZATION_EMPLOYEES_EXECUTE + HWEB-003 generic read permissions
 Frontend routes created/changed : /administration/users, /administration/organization
 State ownership                 : TanStack Query = backend state; local React state = tabs/forms/search/paging; contextual drawer = record detail
-Error states                    : backend errors remain normalized by central HTTP layer; read workspaces reuse HWEB-003 loading/empty/400/403/404/5xx handling
-Tests added                     : pending HWEB-004-07
-OpenAPI regeneration status     : source-derived identity/organization snapshot + Orval; HWEB-003 workbench generation retained
+Error states                    : backend errors normalized centrally; workbench loading/empty/400/403/404/5xx handling reused; backend 403 mutation tested
+Tests added                     : actor/organization reference tests; capability navigation test; identity/organization E2E reads; refused mutation E2E
+OpenAPI regeneration status     : source-derived identity/organization snapshot + Orval; HWEB-003 workbench generation retained; both generated in CI
 Known backend gaps              : no principal endpoint; no role/permission mutation controllers; no dedicated identity/organization read controllers; permission catalog metadata-only; no stable full OpenAPI artifact
-CI result                       : pending
+CI result                       : PASS — run 34549005262 / job 103107729987 on executable commit 1405d6b2cfdeba7811983772e97e09384672a4dd
 ```
