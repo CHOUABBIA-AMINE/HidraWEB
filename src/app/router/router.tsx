@@ -9,6 +9,7 @@ import { IdentityAdministrationPage } from '@/features/context/IdentityAdministr
 import { OrganizationAdministrationPage } from '@/features/context/OrganizationAdministrationPage';
 import { IncidentWorkspacePage } from '@/features/incident/IncidentWorkspacePage';
 import { PermissionBootstrapBoundary } from '@/features/permissions/PermissionBootstrapBoundary';
+import { PlanningWorkspacePage } from '@/features/planning/PlanningWorkspacePage';
 import { TelemetryMonitoringPage } from '@/features/telemetry-monitoring/TelemetryMonitoringPage';
 import { NetworkTopologyPage } from '@/features/topology/NetworkTopologyPage';
 import { OperationalWorkbenchPage } from '@/features/workbench/OperationalWorkbenchPage';
@@ -33,6 +34,7 @@ export const router = createBrowserRouter([
       { path: 'operations', element: <TelemetryMonitoringPage /> },
       { path: 'alarms', element: <AlarmConsolePage /> },
       { path: 'events', element: <IncidentWorkspacePage /> },
+      { path: 'planning', element: <PlanningWorkspacePage /> },
       { path: 'work/tasks', element: <WorkflowTasksPage /> },
       { path: 'workbench', element: <OperationalWorkbenchPage /> },
       { path: 'administration/organization', element: <OrganizationAdministrationPage /> },

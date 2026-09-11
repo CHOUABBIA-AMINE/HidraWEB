@@ -1,133 +1,116 @@
 # HWEB-010 — Planning
 
-Status: BLOCKED ON BACKEND QUERY CONTRACT
+Status: HWEB-010-02 IMPLEMENTATION COMPLETE — final merge/post-merge verification pending
+
+## Accepted repository baselines
+
+```text
+HidraWEB implementation base : 1e4da0577c3a12a95760f6ee03d21190420cdcfa
+HidraAPI accepted main SHA   : c9ef4886445479f7b2d88f8fa0d4a8b37cb59e55
+Backend artifact             : hidra-api-openapi-c9ef4886445479f7b2d88f8fa0d4a8b37cb59e55
+Artifact id                  : 10286503941
+Artifact digest              : sha256:cadc680414407bb3c388a093a3f8fa8fc5406a6b63b3760708f54576eff4b781
+Backend issue                : CHOUABBIA-AMINE/HidraAPI#68 — CLOSED
+Frontend inventory issue     : CHOUABBIA-AMINE/HidraWEB#18 — CLOSED
+```
 
 ## HWEB-010-01 — Contract inventory
 
-### Accepted repository baselines
+Completed. The original inventory correctly blocked frontend implementation while HidraAPI had no published planning query contract.
+
+HidraAPI PLN-001 subsequently published and merged a deterministic read-only planning contract at
+`c9ef4886445479f7b2d88f8fa0d4a8b37cb59e55`. Exact merge-SHA CI published the accepted OpenAPI artifact above.
+
+The accepted read contract includes:
 
 ```text
-HidraWEB main SHA : d56340e8170713ed29babcceccb066866b614eda
-HidraAPI main SHA : 1bfa44ed5fd9fea43e86b8ac7b7ac85c6bdf611b
-Backend artifact  : hidra-api-openapi-1bfa44ed5fd9fea43e86b8ac7b7ac85c6bdf611b
-Artifact id       : 10284237542
-Artifact digest   : sha256:3c861464876f588fdd40352b379a2bfe2a87840272703b71d20d7f81e9a6898f
-Backend issue     : CHOUABBIA-AMINE/HidraAPI#68
-Frontend issue    : CHOUABBIA-AMINE/HidraWEB#18
+GET /api/v1/planning/periods
+GET /api/v1/planning/periods/{id}
+GET /api/v1/planning/operational-plans
+GET /api/v1/planning/operational-plans/{id}
+GET /api/v1/planning/revisions?planId=...
+GET /api/v1/planning/revisions/{id}
+GET /api/v1/planning/nominations?revisionId=...
+GET /api/v1/planning/nominations/{id}
+GET /api/v1/planning/targets?revisionId=...
+GET /api/v1/planning/targets/{id}
 ```
 
-### Backend ownership
+The artifact preserves OpenAPI optionality and publishes `PlanningPeriodView`, `OperationalPlanView`, revision,
+nomination and target views plus paged wrappers. Paging is zero-based with backend defaults and limits.
 
-The `planning` bounded context owns expected operational state. The planning DDD states that telemetry owns actual facts, while planning owns periods, operational plans, revisions, scenarios, nominations, planned targets, expected flow state, operation windows, constraints, approval references, and planning catalogs.
+## HWEB-010-02 — Planning period and plan workspaces
 
-Cross-module references must remain neutral references/snapshots. Planning must not import topology, telemetry, workflow, organization, identity, monitoring, alarm, incident, or maintenance aggregates as owned state.
+Implemented scope:
 
-### Current implemented backend evidence
+- exact-SHA HWEB-010-02 planning OpenAPI slice retained under `openapi/`, containing only period and operational-plan reads used by this task;
+- dedicated Orval planning generation wired into local verification and GitHub Actions;
+- `/planning` route enabled in the application router and navigation registry;
+- planning-period paged list and detail workspace;
+- operational-plan paged list and detail workspace;
+- TanStack Query owns planning server state; React local state owns tab, paging and selected-detail state only;
+- route permissions are looked up from backend route descriptors at runtime and evaluated against effective grants;
+- missing route metadata fails closed;
+- API errors preserve normal HidraAPI error handling, including explicit 403 messaging;
+- component coverage exercises period and plan list/detail reads;
+- Playwright coverage exercises the same published read path.
 
-The planning Java module is structurally present and includes domain/application types. Verified examples include:
-
-- `PlanningPeriodSummaryDto`
-- `OperationalPlanSummaryDto`
-- `FindOperationalPlanByIdQuery`
-- `OperationalPlan`
-- `Nomination`
-- `NominationScheduleLine`
-- `PlanTarget`
-- `ExpectedFlowState`
-- `PlanApprovalReference`
-- `ForecastSeries`
-- `ForecastPoint`
-- `PlanActualReviewSnapshot`
-
-The currently visible summary DTOs are internal application records, not published frontend contracts.
-
-`PlanningPeriodSummaryDto` currently contains:
+### Exact-head frontend validation
 
 ```text
-id
-code
-nameFr
-periodStart
-periodEnd
-timeZone
-status
+Behavioral commit : d711b5014419e6022748d4d3c48c6052e37f5c39
+Pull request      : HidraWEB #20
+CI run            : 34659171158
+Result            : SUCCESS
+Gates             : HWEB-003..HWEB-010 OpenAPI generation; lint; typecheck; unit/component tests; production build; Playwright browser tests
 ```
 
-`OperationalPlanSummaryDto` currently contains:
+A documentation-only evidence commit follows this behavioral head, so the final PR head must independently pass the same exact-head CI before merge.
 
-```text
-id
-periodId
-code
-nameFr
-topologyScopeType
-topologyScopeId
-status
-approvedRevisionId
-```
+### Published DTO fields used by HWEB-010-02
 
-These fields must not be copied into handwritten HidraWEB models unless and until they are published through deterministic OpenAPI.
+Planning periods display only fields published by `PlanningPeriodView`, including identifiers, multilingual names,
+period bounds, timezone, status, period type, actor and timestamps.
 
-### Public contract audit result
+Operational plans display only fields published by `OperationalPlanView`, including period reference, multilingual
+names, topology-scope snapshot/reference fields, status, current/approved revision references, organization reference,
+actor and timestamps.
 
-At HidraAPI `1bfa44ed5fd9fea43e86b8ac7b7ac85c6bdf611b`:
+No handwritten planning DTO replaces generated OpenAPI types.
 
-- `PlanningApi` is an empty marker interface.
-- `PlanningRestApi` only extends `PlanningApi` and declares no operations.
-- no planning REST controller mappings were found.
-- therefore HidraWEB has no usable planning route/DTO/permission slice to generate from the accepted OpenAPI artifact.
+## Ownership boundaries retained
 
-The logical Planning data-definition document is explicitly a target architecture baseline and cannot be treated as a published REST contract.
+Planning owns expected operational state. HidraWEB does not turn topology identifiers, organization identifiers,
+actor identifiers, workflow references, telemetry facts or revision identifiers into frontend-owned aggregates.
 
-### HWEB-010 gap classification
+HWEB-010-02 intentionally does **not** implement:
+
+- create/update planning commands;
+- revision/version presentation beyond displaying published current/approved revision identifiers;
+- revision mutations;
+- workflow approval;
+- planned-vs-actual comparison;
+- nominations or target workspaces;
+- realtime planning events;
+- any frontend planning state machine.
+
+Those remain later HWEB-010 tasks and require their own verified contract evidence.
+
+## Gap status
 
 ```text
 GAP-PLAN-001 — Planning query contract
-Status          : OPEN
+Status          : IMPLEMENTED
 Backend owner   : planning
-Backend issue   : HidraAPI #68
-Frontend impact : Blocks HWEB-010-02 planning period and plan workspaces.
+Backend issue   : HidraAPI #68 — CLOSED
+Backend evidence: merge c9ef4886445479f7b2d88f8fa0d4a8b37cb59e55; OpenAPI artifact 10286503941
+Frontend scope  : HWEB-010-02 consumes planning period and operational-plan list/detail reads.
+Promotion rule  : mark VERIFIED only after exact-head frontend CI, merge, and push-triggered main CI are green.
 ```
 
-Minimum backend acceptance target:
+## Remaining HWEB-010 sequence
 
-- typed paged list/detail for planning periods;
-- typed paged list/detail for operational plans;
-- plan revision list/detail through an explicit published relationship;
-- nomination list/detail through an explicit published relationship;
-- plan-target list/detail through an explicit published relationship;
-- canonical route-permission descriptors using `<module>:<resource>:<action>`;
-- deterministic OpenAPI publication from the exact merge SHA;
-- stable paging/filter semantics and preserved optionality;
-- topology/workflow/actor/organization references only where the owner DTO publishes them;
-- deterministic authorization and not-found/error behavior.
-
-### Explicitly not accepted from current source-only evidence
-
-HidraWEB must not infer or implement any of the following yet:
-
-- planning REST paths;
-- permission codes;
-- plan/revision transition availability;
-- create/update/submit/approve/reject/supersede commands;
-- workflow approval behavior;
-- concurrency/optimistic-lock request fields;
-- planned-vs-actual comparison semantics;
-- nomination mutation lifecycle;
-- target mutation lifecycle;
-- realtime planning events;
-- frontend-owned planning state machine.
-
-### HWEB-010 execution decision
-
-HWEB-010-01 is complete as an inventory task. HWEB-010-02 is blocked until HidraAPI #68 publishes a deterministic planning query contract and the corresponding artifact is accepted by exact SHA/digest.
-
-When that backend gap is closed, the frontend must:
-
-1. pin the exact HidraAPI merge SHA and artifact digest;
-2. extract only the planning OpenAPI slice;
-3. add Orval generation in CI;
-4. derive planning read permissions from backend route descriptors;
-5. implement TanStack Query adapters for published reads only;
-6. keep planning server state out of local/global client stores;
-7. add component and Playwright coverage before marking the gap VERIFIED.
+- HWEB-010-03 implement revisions/version presentation from the already published read contract.
+- HWEB-010-04 integrate workflow approval only from verified workflow/plan contracts.
+- HWEB-010-05 implement planned-vs-actual only where comparable planning and telemetry fields are proven.
+- HWEB-010-06 test version/concurrency behavior only after authoritative mutation/concurrency contracts exist.
