@@ -1,22 +1,28 @@
-# HWEB-006 — Telemetry & Monitoring Readiness
+# HWEB-006 — Telemetry & Monitoring Workspace
 
 ```text
-Phase                  : HWEB-006 readiness gate
-Implementation status  : READY FOR QUERY-FIRST IMPLEMENTATION after reconciliation CI passes
+Phase                  : HWEB-006
+Implementation status  : IMPLEMENTED — branch CI VERIFIED
+Frontend base          : 483f6a21435c7c751cd8ff8632197d496f13a13a / main
+Implementation branch  : hweb-006-telemetry-monitoring-workspace-v2
+Verified branch commit : ac74c2bb0353483439f9faa186d0fc5c0a21fd46
 Backend source branch  : HidraAPI main
 Backend source commit  : af4c3b4723619a25dd9a94f4d27f5a36adab982e
 Contract artifact      : hidra-api-openapi-af4c3b4723619a25dd9a94f4d27f5a36adab982e
 Artifact digest        : sha256:64a187d362725d7cfd674f5f130d1345f97f88e9151e65d4d5d29d74e76d932a
-Realtime posture       : query/polling first; business-domain event publishers are not yet verified
+Branch CI              : run 34606659029 — SUCCESS
+Realtime posture       : query/polling first; business-domain event publishers remain unverified
 ```
 
-## Readiness decision
+## Completion decision
 
-HidraAPI now provides typed, backend-verified telemetry and monitoring query contracts and publishes them through its deterministic OpenAPI artifact. HidraWEB has added a dedicated artifact-derived HWEB-006 contract slice and Orval generation gate. This readiness work does not implement HWEB-006 screens yet; it freezes the exact backend contract that the implementation may consume.
+HWEB-006 now implements the query-first Telemetry & Monitoring workspace at `/operations` using only the artifact-derived HidraAPI contract. The feature is capability-aware, keeps server state in TanStack Query, keeps point/time/filter/presentation state local to React, and does not create a competing topology or telemetry domain model.
 
-`GAP-REALTIME-001` remains `DEFERRED`. The backend reports realtime transport as configured but does not publish verified business-domain event families. HWEB-006 must therefore be correct using HTTP query refresh/polling. It must not invent SSE/STOMP event names, destinations, payloads, ordering guarantees or recovery semantics beyond the backend capability response.
+The backend does not currently publish a telemetry-point discovery endpoint for this phase. HidraWEB therefore accepts a known `pointId` rather than inventing discovery semantics. Future topology-to-telemetry navigation may preselect a point only when an exact backend-supported linkage contract is available.
 
-## Telemetry query endpoints
+`GAP-REALTIME-001` remains `DEFERRED`. HTTP query refresh/polling is the supported HWEB-006 operating mode. No SSE/STOMP event names, destinations, payloads, ordering guarantees, or domain-event semantics were invented.
+
+## Consumed telemetry contracts
 
 ```text
 GET /api/v1/telemetry/points/{pointId}/readings
@@ -26,41 +32,19 @@ GET /api/v1/telemetry/reference/reading-states
 GET /api/v1/telemetry/reference/quality-codes
 ```
 
-The exact latest-reading route is `/points/{pointId}/readings/latest`; older roadmap wording that omitted `/readings` is not authoritative.
+The authoritative latest-reading route is `/api/v1/telemetry/points/{pointId}/readings/latest`.
 
-### Reading history parameters
+The workspace supports:
 
-```text
-pointId : required path string
-from    : optional date-time
-to      : optional date-time
-state   : optional string
-page    : optional integer, default 0
-size    : optional integer, default 100
-```
+- known telemetry point selection by `pointId`;
+- latest reading display;
+- bounded history query with optional from/to/state filters;
+- numeric trend rendering from returned readings without inventing value semantics;
+- backend-owned reading-state and quality-code reference catalogs;
+- explicit empty, forbidden, reference-unavailable, and generic-error states;
+- HTTP refresh, with the latest reading periodically refreshed without claiming realtime event delivery.
 
-Response: `PageReadingView`.
-
-### Latest reading
-
-```text
-pointId : required path string
-```
-
-Response: `ReadingView`.
-
-### Trend parameters
-
-```text
-pointId : required path string
-from    : optional date-time
-to      : optional date-time
-limit   : optional integer, default 1000
-```
-
-Response: `ReadingView[]`.
-
-## Monitoring query endpoints
+## Consumed monitoring contracts
 
 ```text
 GET /api/v1/monitoring/rules
@@ -69,102 +53,15 @@ GET /api/v1/monitoring/deviations
 GET /api/v1/monitoring/deviations/{id}
 ```
 
-### Rule list parameters
+The workspace lists monitoring rules and deviations independently of telemetry-point selection. Backend-returned topology asset identifiers/codes are displayed as linkage metadata only; topology remains the owner of graph and geospatial truth. Contextual inspectors display backend fields without synthesizing monitoring lifecycle or topology relationships and preserve the `/operations` route.
 
-```text
-status           : optional string
-topologyAssetId  : optional string
-telemetryPointId : optional string
-page             : optional integer, default 0
-size             : optional integer, default 50
-```
+## DTO and semantic rules
 
-Response: `PageMonitoringRuleView`.
+HWEB-006 consumes generated `ReadingView`, `PageReadingView`, `QualityCodeView`, `MonitoringRuleView`, `DeviationView`, `PageMonitoringRuleView`, and `PageDeviationView` types from the published contract slice.
 
-### Deviation list parameters
-
-```text
-status           : optional string
-severity         : optional string
-topologyAssetId  : optional string
-telemetryPointId : optional string
-from             : optional date-time
-to               : optional date-time
-page             : optional integer, default 0
-size             : optional integer, default 50
-```
-
-Response: `PageDeviationView`.
-
-## DTOs frozen from the published artifact
-
-### ReadingView
-
-```text
-id
-pointId
-numericValue
-textValue
-booleanValue
-unitId
-qualityCodeId
-state
-sourceTimestamp
-receivedAt
-correlationId
-rejectionReason
-```
-
-The frontend must not infer which of the value fields is authoritative beyond what the returned reading contains. Units, quality codes and reading states remain backend-owned semantics.
-
-### PageReadingView
-
-```text
-content
-page
-size
-totalElements
-totalPages
-hasNext
-```
-
-### QualityCodeView
-
-```text
-id
-code
-translations
-sortOrder
-systemDefined
-active
-```
-
-`translations` values use `TranslationView(locale, name, description)`.
-
-### MonitoringRuleView
-
-The contract exposes identifiers/status and monitoring linkage including `telemetryPointId`, `topologyAssetId`, `topologyAssetCode`, `topologyAssetType`, rule type, evaluation frequency, planning target type and audit timestamps/actor identifiers. HidraWEB must display only fields actually present in the generated model.
-
-### DeviationView
-
-The contract exposes deviation identity/status/severity, actual/expected/difference values, telemetry point and topology asset linkage, unit, timestamps, evaluation/plan/expected-flow references and backend reason code/message. HidraWEB must not synthesize deviation lifecycle states or topology relationships.
-
-### PageMonitoringRuleView / PageDeviationView
-
-Both expose the backend page envelope:
-
-```text
-content
-page
-size
-totalElements
-totalPages
-hasNext
-```
+For readings, HidraWEB does not infer which of `numericValue`, `textValue`, or `booleanValue` is authoritative beyond what the returned reading actually contains. Units, reading states, quality codes, monitoring rule types, deviation states, severities, reasons, and topology relationships remain backend-owned semantics.
 
 ## Backend-enforced permissions
-
-The canonical permission format is `<module>:<resource>:<action>`. For the published HWEB-006 GET routes, the exact derived grants are:
 
 ```text
 telemetry:points:read
@@ -173,47 +70,50 @@ monitoring:rules:read
 monitoring:deviations:read
 ```
 
-HidraWEB must use the principal-specific effective grants returned by `GET /api/v1/identity/me/permissions`; the route catalog is metadata, not the user's grant set. HidraAPI remains the final authorization boundary.
+HidraWEB consumes principal-specific effective grants from `GET /api/v1/identity/me/permissions`. The route catalog remains metadata only, and HidraAPI remains the final authorization boundary. Telemetry and monitoring grants are evaluated independently so monitoring remains usable when telemetry access is absent.
 
-## State ownership for implementation
+## State ownership
 
-When HWEB-006 begins:
+- TanStack Query owns latest readings, history, trends, reference catalogs, rules, and deviations.
+- React local state owns point input/selection, time window, state filter, and presentation state.
+- Topology owns graph/geospatial truth; monitoring topology asset fields are references only.
+- No Zustand server-state mirror or giant global feature store was introduced.
 
-- TanStack Query owns reading history, latest values, trends, reading-state/quality catalogs, monitoring rules and deviations.
-- React local state owns point selection, time window, table/chart presentation, filters and inspector selection.
-- Topology remains the owner of graph/geospatial truth. `topologyAssetId/code/type` in monitoring responses are links to topology identity, not permission for telemetry/monitoring code to create a parallel topology model.
-- No giant Zustand store or duplicated server-state cache is permitted.
+## Verification evidence
 
-## Error and degradation requirements
-
-HWEB-006 must explicitly handle:
-
-- missing effective telemetry/monitoring grant;
-- backend 403;
-- point with no readings/latest value;
-- empty trend/history window;
-- unavailable quality/reference catalogs;
-- monitoring rule/deviation empty results;
-- generic backend/query failure;
-- realtime unavailable or unverified, while HTTP refresh continues to work.
-
-## Contract-generation gate
-
-The reconciliation adds:
+HWEB-006 adds:
 
 ```text
-openapi/hidra-telemetry-monitoring-af4c3b4723619a25dd9a94f4d27f5a36adab982e.json
-orval.telemetry-monitoring.config.ts
-npm run api:generate:telemetry-monitoring
+src/features/telemetry-monitoring/TelemetryMonitoringPage.tsx
+src/features/telemetry-monitoring/api/telemetryMonitoringApi.ts
+src/features/telemetry-monitoring/api/telemetryMonitoringPermissions.ts
+src/features/telemetry-monitoring/model/telemetryPresentation.ts
+src/features/telemetry-monitoring/components/BackendObjectInspector.tsx
+src/features/telemetry-monitoring/i18n/telemetryMonitoringTranslations.ts
+src/features/telemetry-monitoring/api/telemetryMonitoringApi.test.ts
+src/features/telemetry-monitoring/TelemetryMonitoringPage.test.tsx
+tests/e2e/operations.spec.ts
 ```
 
-HidraWEB CI runs this generation before lint/typecheck/tests/build. HWEB-006 UI implementation may start only after this reconciliation branch is green and merged.
+CI run `34606659029` at `ac74c2bb0353483439f9faa186d0fc5c0a21fd46` completed successfully with:
 
-## Gap posture
+- HWEB-003/004/005/006 OpenAPI generation;
+- lint;
+- typecheck;
+- unit and component tests;
+- production build;
+- Playwright Chromium installation;
+- E2E browser tests.
+
+The E2E suite verifies the full telemetry/monitoring-grant path and a monitoring-only-grant path. Component/API tests verify the workspace behavior and exact published telemetry/monitoring routes.
+
+## Gap posture after HWEB-006
 
 ```text
-GAP-TEL-001     : IMPLEMENTED — contract frozen; not VERIFIED until HWEB-006 consumes/tests it
-GAP-TEL-002     : IMPLEMENTED — contract frozen; not VERIFIED until HWEB-006 consumes/tests it
-GAP-MON-001     : IMPLEMENTED — contract frozen; not VERIFIED until HWEB-006 consumes/tests it
+GAP-TEL-001     : VERIFIED — generated contract consumed and frontend-tested
+GAP-TEL-002     : VERIFIED — backend reference catalogs consumed and frontend-tested
+GAP-MON-001     : VERIFIED — rules/deviations consumed and frontend-tested
 GAP-REALTIME-001: DEFERRED — no verified business-domain event publishers
 ```
+
+HWEB-006 is ready for PR review/merge. HWEB-007 must not begin from this branch until HWEB-006 is merged and post-merge `main` CI is green.
