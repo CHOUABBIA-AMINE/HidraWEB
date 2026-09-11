@@ -49,6 +49,9 @@ jobs:
       - name: Generate HWEB-008 alarm OpenAPI client
         run: npm run api:generate:alarm
 
+      - name: Generate HWEB-009 events OpenAPI client
+        run: npm run api:generate:events
+
       - name: Lint
         run: npm run lint
 
