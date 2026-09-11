@@ -7,6 +7,7 @@ import { OverviewPage } from '@/app/pages/OverviewPage';
 import { IdentityAdministrationPage } from '@/features/context/IdentityAdministrationPage';
 import { OrganizationAdministrationPage } from '@/features/context/OrganizationAdministrationPage';
 import { PermissionBootstrapBoundary } from '@/features/permissions/PermissionBootstrapBoundary';
+import { TelemetryMonitoringPage } from '@/features/telemetry-monitoring/TelemetryMonitoringPage';
 import { NetworkTopologyPage } from '@/features/topology/NetworkTopologyPage';
 import { OperationalWorkbenchPage } from '@/features/workbench/OperationalWorkbenchPage';
 import { AppShell } from '@/shell/AppShell';
@@ -26,6 +27,7 @@ export const router = createBrowserRouter([
       { index: true, element: <Navigate replace to="/overview" /> },
       { path: 'overview', element: <OverviewPage /> },
       { path: 'network', element: <NetworkTopologyPage /> },
+      { path: 'operations', element: <TelemetryMonitoringPage /> },
       { path: 'workbench', element: <OperationalWorkbenchPage /> },
       { path: 'administration/organization', element: <OrganizationAdministrationPage /> },
       { path: 'administration/users', element: <IdentityAdministrationPage /> },
