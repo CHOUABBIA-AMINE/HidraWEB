@@ -26,7 +26,7 @@ Owner model            : HidraAPI owns business/security truth; HidraWEB records
 
 HidraAPI `main` at `af4c3b47…` is the current accepted backend baseline. Its post-remediation CI passes compile, tests and clean verification, boots the application, retrieves `/v3/api-docs`, deterministically sorts the document and uploads the SHA-named OpenAPI artifact above.
 
-HidraWEB consumes artifact-derived contract slices for HWEB-003 workbench, HWEB-004 identity/organization, HWEB-005 topology, and HWEB-006 telemetry/monitoring. The obsolete hand/source-derived snapshots have been retired. Springdoc optionality is preserved: HidraWEB normalizes optional response fields at its presentation/API boundary rather than falsifying the published schema.
+HidraWEB consumes artifact-derived contract slices for HWEB-003 workbench, HWEB-004 identity/organization, HWEB-005 topology, HWEB-006 telemetry/monitoring, and HWEB-007 workflow. The obsolete hand/source-derived snapshots have been retired. Springdoc optionality is preserved: HidraWEB normalizes optional response fields at its presentation/API boundary rather than falsifying the published schema.
 
 Backend route authorization is enforced with canonical `<module>:<resource>:<action>` permissions. HidraWEB obtains principal-specific effective grants from `GET /api/v1/identity/me/permissions`; the route catalog is metadata, not the current user's grant set. HidraAPI remains the final authorization boundary.
 
@@ -66,7 +66,7 @@ Verification gap: Live permitted/forbidden identity integration evidence is stil
 ```text
 Status          : VERIFIED
 Backend evidence: HidraAPI CI publishes hidra-api-openapi-${github.sha}; accepted artifact/digest are recorded above.
-Frontend evidence: HWEB-003/004/005/006 Orval inputs use slices extracted from that published artifact. CI regenerates all four slices before lint/typecheck/tests/build.
+Frontend evidence: HWEB-003/004/005/006/007 Orval inputs use slices extracted from that published artifact. CI regenerates all five slices before lint/typecheck/tests/build.
 Retired         : Source-derived workbench, identity/organization and topology snapshots.
 ```
 
@@ -202,29 +202,52 @@ HWEB-006 state rule: TanStack Query owns server state; React local state owns po
 
 ## HWEB-007 workflow
 
+HWEB-007 is implemented at `/work/tasks` for the published query/action-visibility contract. Behavioral branch CI run `34609250694` at `b95c88f1d9ad140009b22fcf2bb9324a41feed9e` passed all five OpenAPI generation gates, lint, typecheck, 17/17 unit/component tests, production build, and 12/12 Playwright tests.
+
+Canonical HWEB-007 read grants:
+
+```text
+workflow:tasks:read
+workflow:instances:read
+```
+
 ### GAP-WF-001 — Task inbox/query
 
 ```text
-Status          : IMPLEMENTED
-Evidence        : GET /api/v1/workflow/tasks and GET /api/v1/workflow/tasks/{id} are published and backend-verified.
-Frontend state  : Not yet consumed.
+Status          : VERIFIED
+Routes          : GET /api/v1/workflow/tasks
+                  GET /api/v1/workflow/tasks/{id}
+Frontend evidence: HWEB-007 exposes an assigned-task inbox plus task detail using generated TaskView/PageTaskView contracts. Effective workflow grants control workspace access, and component/E2E tests cover the consumed routes.
 ```
 
 ### GAP-WF-002 — Instance/timeline history
 
 ```text
-Status          : IMPLEMENTED
-Evidence        : GET /api/v1/workflow/instances/{id} and GET /api/v1/workflow/instances/{id}/timeline are published.
-Frontend state  : Not yet consumed.
+Status          : VERIFIED
+Routes          : GET /api/v1/workflow/instances/{id}
+                  GET /api/v1/workflow/instances/{id}/timeline
+Frontend evidence: Selecting a task with an instanceId loads the backend instance and timeline through TanStack Query. Timeline action/decision/actor/comment fields are displayed without synthesizing lifecycle semantics, and automated tests cover the behavior.
 ```
 
 ### GAP-WF-003 — Backend-provided available actions
 
 ```text
-Status          : IMPLEMENTED
-Evidence        : GET /api/v1/workflow/tasks/{id}/available-actions is published and evaluates effective backend permissions.
-Frontend rule   : Never infer workflow transitions locally; consume backend-provided available actions.
+Status          : VERIFIED
+Route           : GET /api/v1/workflow/tasks/{id}/available-actions
+Frontend evidence: HWEB-007 displays only backend-returned AvailableActionView values, including permitted, reasonRequired, commentRequired and requiredPermissionCode metadata. Tests prove an available APPROVE decision is visible without being converted into a locally inferred executable transition.
+Frontend rule   : Never infer workflow transitions locally; available actions are backend-authoritative visibility metadata.
 ```
+
+### GAP-WF-004 — Workflow transition execution contract
+
+```text
+Status          : OPEN
+Backend evidence: The accepted artifact exposes POST /api/v1/workflow/actions, but backend source verification shows WorkflowApplicationService.recordWorkflowAction persists an action/audit record; it does not prove or expose a task-transition execution operation that advances the workflow from an AvailableActionView transition.
+Frontend state  : HWEB-007 intentionally renders available actions as informational, non-clickable workflow choices. It does not call POST /workflow/actions as a substitute transition endpoint.
+Completion gate : HidraAPI publishes and tests an explicit transition/action execution contract that accepts the backend-selected transition/decision, validates required reason/comment input, applies authorization/concurrency rules, advances task/instance state, and returns the authoritative result.
+```
+
+HWEB-007 state rule: TanStack Query owns task/detail/action/instance/timeline server state; React local state owns selected-task/presentation state. HidraWEB does not maintain a client workflow state machine.
 
 ---
 
@@ -262,4 +285,4 @@ Before every HWEB phase:
 
 ## Current next phase decision
 
-HWEB-006 is implementation-complete and branch-CI verified. After its PR is merged and post-merge `main` CI is green, the next frontend phase is HWEB-007 Workflow. HWEB-007 must begin with a fresh current-source/OpenAPI reconciliation of workflow routes, DTOs, permissions and available-action semantics; realtime business-event publication remains deferred.
+HWEB-007 is implementation-complete for the backend-supported task inbox/detail, instance/timeline and available-action visibility scope. `GAP-WF-004` remains OPEN and explicitly blocks workflow transition execution; this does not justify inventing frontend mutations. After HWEB-007 is merged and post-merge `main` CI is green, the next frontend phase is HWEB-008 Alarms, beginning with a fresh contract reconciliation of alarm queries and lifecycle commands.

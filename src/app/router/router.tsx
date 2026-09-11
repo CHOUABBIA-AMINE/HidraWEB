@@ -10,6 +10,7 @@ import { PermissionBootstrapBoundary } from '@/features/permissions/PermissionBo
 import { TelemetryMonitoringPage } from '@/features/telemetry-monitoring/TelemetryMonitoringPage';
 import { NetworkTopologyPage } from '@/features/topology/NetworkTopologyPage';
 import { OperationalWorkbenchPage } from '@/features/workbench/OperationalWorkbenchPage';
+import { WorkflowTasksPage } from '@/features/workflow/WorkflowTasksPage';
 import { AppShell } from '@/shell/AppShell';
 
 export const router = createBrowserRouter([
@@ -28,6 +29,7 @@ export const router = createBrowserRouter([
       { path: 'overview', element: <OverviewPage /> },
       { path: 'network', element: <NetworkTopologyPage /> },
       { path: 'operations', element: <TelemetryMonitoringPage /> },
+      { path: 'work/tasks', element: <WorkflowTasksPage /> },
       { path: 'workbench', element: <OperationalWorkbenchPage /> },
       { path: 'administration/organization', element: <OrganizationAdministrationPage /> },
       { path: 'administration/users', element: <IdentityAdministrationPage /> },

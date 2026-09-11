@@ -42,7 +42,7 @@ export const navigationSections: readonly NavigationSection[] = [
     { id: 'reports', labelKey: 'nav.reports', path: '/intelligence/reports', capabilityModules: ['reporting'], icon: 'reports', implemented: false, deliveryTask: 'HWEB-013' },
   ] },
   { id: 'work', labelKey: 'nav.groups.work', items: [
-    { id: 'tasks', labelKey: 'nav.tasks', path: '/work/tasks', capabilityModules: ['workflow'], icon: 'tasks', implemented: false, deliveryTask: 'HWEB-007' },
+    { id: 'tasks', labelKey: 'nav.tasks', path: '/work/tasks', capabilityModules: ['workflow'], icon: 'tasks', implemented: true, deliveryTask: 'HWEB-007' },
     { id: 'notifications', labelKey: 'nav.notifications', path: '/work/notifications', capabilityModules: ['notification'], icon: 'notifications', implemented: false, deliveryTask: 'HWEB-014' },
   ] },
   { id: 'administration', labelKey: 'nav.groups.administration', items: [

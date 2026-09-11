@@ -43,6 +43,9 @@ jobs:
       - name: Generate HWEB-006 telemetry/monitoring OpenAPI client
         run: npm run api:generate:telemetry-monitoring
 
+      - name: Generate HWEB-007 workflow OpenAPI client
+        run: npm run api:generate:workflow
+
       - name: Lint
         run: npm run lint
 
