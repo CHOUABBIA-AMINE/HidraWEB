@@ -118,7 +118,7 @@ export function OrganizationCommandPanel() {
           <TextField label={t('context.fields.status')} onChange={(event) => setUnit({ ...unit, status: event.target.value })} select size="small" value={unit.status}>
             {UNIT_STATUSES.map((value) => <MenuItem key={value} value={value}>{value}</MenuItem>)}
           </TextField>
-          <TextField InputLabelProps={{ shrink: true }} label={t('context.fields.validFrom')} onChange={(event) => setUnit({ ...unit, validFrom: event.target.value })} size="small" type="datetime-local" value={unit.validFrom} />
+          <TextField slotProps={{ inputLabel: { shrink: true } }} label={t('context.fields.validFrom')} onChange={(event) => setUnit({ ...unit, validFrom: event.target.value })} size="small" type="datetime-local" value={unit.validFrom} />
         </Box>
         <Button disabled={!permissions.can(IDENTITY_ORGANIZATION_PERMISSIONS.createOrganizationUnit) || createUnitMutation.isPending} onClick={() => createUnitMutation.mutate()} sx={{ mt: 2 }} variant="contained">{t('context.organization.createUnit')}</Button>
         {createUnitMutation.error ? <Alert severity="error" sx={{ mt: 2 }}>{String(createUnitMutation.error)}</Alert> : null}
@@ -162,8 +162,8 @@ export function OrganizationCommandPanel() {
           <TextField label={t('context.fields.operationalScopeId')} onChange={(event) => setAssignment({ ...assignment, operationalScopeId: event.target.value })} size="small" value={assignment.operationalScopeId} />
           <TextField label={t('context.fields.operationalScopeCode')} onChange={(event) => setAssignment({ ...assignment, operationalScopeCode: event.target.value })} size="small" value={assignment.operationalScopeCode} />
           <TextField label={t('context.fields.operationalScopeName')} onChange={(event) => setAssignment({ ...assignment, operationalScopeName: event.target.value })} size="small" value={assignment.operationalScopeName} />
-          <TextField InputLabelProps={{ shrink: true }} label={t('context.fields.validFrom')} onChange={(event) => setAssignment({ ...assignment, validFrom: event.target.value })} size="small" type="datetime-local" value={assignment.validFrom} />
-          <TextField InputLabelProps={{ shrink: true }} label={t('context.fields.validTo')} onChange={(event) => setAssignment({ ...assignment, validTo: event.target.value })} size="small" type="datetime-local" value={assignment.validTo} />
+          <TextField slotProps={{ inputLabel: { shrink: true } }} label={t('context.fields.validFrom')} onChange={(event) => setAssignment({ ...assignment, validFrom: event.target.value })} size="small" type="datetime-local" value={assignment.validFrom} />
+          <TextField slotProps={{ inputLabel: { shrink: true } }} label={t('context.fields.validTo')} onChange={(event) => setAssignment({ ...assignment, validTo: event.target.value })} size="small" type="datetime-local" value={assignment.validTo} />
         </Box>
         <Button disabled={!employeeCommandAvailable || assignEmployeeMutation.isPending} onClick={() => assignEmployeeMutation.mutate()} sx={{ mt: 2 }} variant="outlined">{t('context.organization.assignEmployee')}</Button>
         {assignEmployeeMutation.error ? <Alert severity="error" sx={{ mt: 2 }}>{String(assignEmployeeMutation.error)}</Alert> : null}
