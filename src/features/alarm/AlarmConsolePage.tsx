@@ -238,8 +238,8 @@ export function AlarmConsolePage() {
                   </TextField>
                   <TextField label={t('alarm.severity')} onChange={(event) => setDraftFilters({ ...draftFilters, severityId: event.target.value })} size="small" value={draftFilters.severityId} />
                   <TextField label={t('alarm.topologyAssetId')} onChange={(event) => setDraftFilters({ ...draftFilters, topologyAssetId: event.target.value })} size="small" value={draftFilters.topologyAssetId} />
-                  <TextField InputLabelProps={{ shrink: true }} label={t('alarm.from')} onChange={(event) => setDraftFilters({ ...draftFilters, from: event.target.value })} size="small" type="datetime-local" value={draftFilters.from} />
-                  <TextField InputLabelProps={{ shrink: true }} label={t('alarm.to')} onChange={(event) => setDraftFilters({ ...draftFilters, to: event.target.value })} size="small" type="datetime-local" value={draftFilters.to} />
+                  <TextField label={t('alarm.from')} onChange={(event) => setDraftFilters({ ...draftFilters, from: event.target.value })} size="small" slotProps={{ inputLabel: { shrink: true } }} type="datetime-local" value={draftFilters.from} />
+                  <TextField label={t('alarm.to')} onChange={(event) => setDraftFilters({ ...draftFilters, to: event.target.value })} size="small" slotProps={{ inputLabel: { shrink: true } }} type="datetime-local" value={draftFilters.to} />
                 </Box>
                 <Stack direction="row" spacing={1}>
                   <Button onClick={() => { setFilters(draftFilters); setPage(0); }} variant="contained">{t('alarm.apply')}</Button>
@@ -335,7 +335,7 @@ export function AlarmConsolePage() {
                           <Typography component="h4" variant="subtitle2">{t('alarm.shelving')}</Typography>
                           <Box sx={{ display: 'grid', gap: 1, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, mt: 1 }}>
                             <TextField label={t('alarm.shelvingReasonId')} onChange={(e) => setShelveForm({ ...shelveForm, shelvingReasonId: e.target.value })} required size="small" value={shelveForm.shelvingReasonId} />
-                            <TextField InputLabelProps={{ shrink: true }} label={t('alarm.shelvedUntil')} onChange={(e) => setShelveForm({ ...shelveForm, shelvedUntil: e.target.value })} size="small" type="datetime-local" value={shelveForm.shelvedUntil} />
+                            <TextField label={t('alarm.shelvedUntil')} onChange={(e) => setShelveForm({ ...shelveForm, shelvedUntil: e.target.value })} size="small" slotProps={{ inputLabel: { shrink: true } }} type="datetime-local" value={shelveForm.shelvedUntil} />
                             <TextField label={t('alarm.reasonText')} multiline onChange={(e) => setShelveForm({ ...shelveForm, reasonText: e.target.value })} size="small" value={shelveForm.reasonText} />
                           </Box>
                           <Button disabled={mutationBusy || !shelveForm.shelvingReasonId.trim()} onClick={() => shelveMutation.mutate()} sx={{ mt: 1 }} variant="outlined">{t('alarm.shelve')}</Button>
