@@ -14,6 +14,14 @@ const fixtures = vi.hoisted(() => {
       route: '/api/v1/workflow/tasks', methods: ['GET'], module: 'workflow', resource: 'tasks', action: 'read',
       permission: 'HIDRA_WORKFLOW_TASKS_READ', enforcementStatus: 'metadata-published; route-specific authorization annotations unavailable from current HidraAPI evidence',
     },
+    {
+      route: '/api/v1/identity/users', methods: ['POST'], module: 'identity', resource: 'users', action: 'execute',
+      permission: 'HIDRA_IDENTITY_USERS_EXECUTE', enforcementStatus: 'metadata-published',
+    },
+    {
+      route: '/api/v1/organization/units', methods: ['POST'], module: 'organization', resource: 'units', action: 'execute',
+      permission: 'HIDRA_ORGANIZATION_UNITS_EXECUTE', enforcementStatus: 'metadata-published',
+    },
   ];
   return {
     routes,
@@ -35,8 +43,8 @@ vi.mock('@/api/client/hidraHttpClient', () => ({
   }),
 }));
 
-describe('HWEB-002 application shell', () => {
-  it('authenticates in Basic mode and renders only backend-evidenced navigation capabilities', async () => {
+describe('HWEB-002 / HWEB-004 capability-driven application shell', () => {
+  it('authenticates and enables only implemented navigation backed by published module capabilities', async () => {
     render(<AppProviders><App /></AppProviders>);
 
     expect(await screen.findByRole('heading', { name: 'Connexion de développement' })).toBeInTheDocument();
@@ -47,6 +55,8 @@ describe('HWEB-002 application shell', () => {
     expect(await screen.findByRole('heading', { name: /Vue d/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Réseau' })).toHaveAttribute('aria-disabled', 'true');
     expect(document.querySelector('[role="button"][aria-label="Mes tâches"][aria-disabled="true"]')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Organisation' })).not.toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('button', { name: 'Identité & accès' })).not.toHaveAttribute('aria-disabled', 'true');
     expect(screen.queryByRole('button', { name: 'Planification' })).not.toBeInTheDocument();
 
     const navigationToggle = screen.getByRole('button', { name: 'Réduire la navigation' });

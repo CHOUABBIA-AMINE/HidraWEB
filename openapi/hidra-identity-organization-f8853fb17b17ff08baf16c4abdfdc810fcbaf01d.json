@@ -1,0 +1,173 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "HidraAPI HWEB-004 identity and organization contract snapshot",
+    "version": "f8853fb17b17ff08baf16c4abdfdc810fcbaf01d",
+    "description": "Source-derived snapshot of canonical identity and organization endpoints verified for HWEB-004. HidraAPI remains the source of truth."
+  },
+  "paths": {
+    "/api/v1/identity/users": {
+      "post": {
+        "operationId": "createIdentityUser",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/CreateUserRequest"}}}},
+        "responses": {"200": {"description": "User created", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/UserResponse"}}}}}
+      }
+    },
+    "/api/v1/identity/permissions/evaluations": {
+      "post": {
+        "operationId": "evaluateIdentityPermission",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/EvaluatePermissionRequest"}}}},
+        "responses": {"200": {"description": "Permission decision", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/PermissionDecisionResponse"}}}}}
+      }
+    },
+    "/api/v1/organization/units": {
+      "post": {
+        "operationId": "createOrganizationUnit",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/CreateOrganizationUnitRequest"}}}},
+        "responses": {"200": {"description": "Organization unit created", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/OrganizationUnitResponse"}}}}}
+      }
+    },
+    "/api/v1/organization/employees": {
+      "post": {
+        "operationId": "registerEmployee",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/RegisterEmployeeRequest"}}}},
+        "responses": {"200": {"description": "Employee registered", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/EmployeeResponse"}}}}}
+      }
+    },
+    "/api/v1/organization/employees/assignments": {
+      "post": {
+        "operationId": "assignEmployee",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/AssignEmployeeRequest"}}}},
+        "responses": {"200": {"description": "Assignment result", "content": {"text/plain": {"schema": {"type": "string"}}}}}
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UserType": {"type": "string", "enum": ["HUMAN", "SERVICE", "SYSTEM", "INTEGRATION", "BREAK_GLASS"]},
+      "ScopeType": {"type": "string", "enum": ["GLOBAL", "ORGANIZATION_UNIT", "PIPELINE_SYSTEM", "PIPELINE", "FACILITY", "EQUIPMENT", "CUSTOM"]},
+      "OrganizationUnitStatus": {"type": "string", "enum": ["ACTIVE", "INACTIVE", "MERGED", "CLOSED"]},
+      "EmployeeType": {"type": "string", "enum": ["PERMANENT", "TEMPORARY", "CONTRACTUAL", "INTERN", "CONSULTANT"]},
+      "AssignmentType": {"type": "string", "enum": ["PRIMARY", "SECONDARY", "TEMPORARY", "ACTING"]},
+      "AuthorizationScope": {
+        "type": "object",
+        "properties": {
+          "scopeType": {"$ref": "#/components/schemas/ScopeType"},
+          "scopeReferenceId": {"type": "string", "nullable": true},
+          "scopeCodeSnapshot": {"type": "string", "nullable": true}
+        }
+      },
+      "CreateUserRequest": {
+        "type": "object",
+        "properties": {
+          "username": {"type": "string", "nullable": true},
+          "emailAddress": {"type": "string", "nullable": true},
+          "displayName": {"type": "string", "nullable": true},
+          "userType": {"$ref": "#/components/schemas/UserType"},
+          "employeeReferenceId": {"type": "string", "nullable": true}
+        }
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string", "nullable": true},
+          "username": {"type": "string", "nullable": true},
+          "emailAddress": {"type": "string", "nullable": true},
+          "displayName": {"type": "string", "nullable": true},
+          "userType": {"type": "string", "nullable": true},
+          "status": {"type": "string", "nullable": true}
+        }
+      },
+      "EvaluatePermissionRequest": {
+        "type": "object",
+        "properties": {
+          "userId": {"type": "string", "nullable": true},
+          "permissionCode": {"type": "string", "nullable": true},
+          "resourceType": {"type": "string", "nullable": true},
+          "resourceReferenceId": {"type": "string", "nullable": true},
+          "scope": {"$ref": "#/components/schemas/AuthorizationScope"}
+        }
+      },
+      "PermissionDecisionResponse": {
+        "type": "object",
+        "properties": {
+          "permitted": {"type": "boolean"},
+          "decision": {"type": "string", "nullable": true},
+          "reasonCode": {"type": "string", "nullable": true},
+          "reasonMessage": {"type": "string", "nullable": true},
+          "evaluatedAt": {"type": "string", "format": "date-time", "nullable": true}
+        }
+      },
+      "CreateOrganizationUnitRequest": {
+        "type": "object",
+        "properties": {
+          "code": {"type": "string", "nullable": true},
+          "nameAr": {"type": "string", "nullable": true},
+          "nameFr": {"type": "string", "nullable": true},
+          "nameEn": {"type": "string", "nullable": true},
+          "unitTypeId": {"type": "string", "nullable": true},
+          "parentUnitId": {"type": "string", "nullable": true},
+          "status": {"$ref": "#/components/schemas/OrganizationUnitStatus"},
+          "validFrom": {"type": "string", "format": "date-time", "nullable": true}
+        }
+      },
+      "OrganizationUnitResponse": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string", "nullable": true},
+          "code": {"type": "string", "nullable": true},
+          "nameAr": {"type": "string", "nullable": true},
+          "nameFr": {"type": "string", "nullable": true},
+          "nameEn": {"type": "string", "nullable": true},
+          "unitTypeId": {"type": "string", "nullable": true},
+          "parentUnitId": {"type": "string", "nullable": true},
+          "status": {"type": "string", "nullable": true}
+        }
+      },
+      "RegisterEmployeeRequest": {
+        "type": "object",
+        "properties": {
+          "employeeNumber": {"type": "string", "nullable": true},
+          "firstNameAr": {"type": "string", "nullable": true},
+          "lastNameAr": {"type": "string", "nullable": true},
+          "firstNameLt": {"type": "string", "nullable": true},
+          "lastNameLt": {"type": "string", "nullable": true},
+          "displayNameAr": {"type": "string", "nullable": true},
+          "displayNameLt": {"type": "string", "nullable": true},
+          "emailAddress": {"type": "string", "nullable": true},
+          "mobileNumber": {"type": "string", "nullable": true},
+          "employeeType": {"$ref": "#/components/schemas/EmployeeType"},
+          "identityUserReference": {"type": "string", "nullable": true}
+        }
+      },
+      "EmployeeResponse": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string", "nullable": true},
+          "employeeNumber": {"type": "string", "nullable": true},
+          "displayNameAr": {"type": "string", "nullable": true},
+          "displayNameLt": {"type": "string", "nullable": true},
+          "emailAddress": {"type": "string", "nullable": true},
+          "employeeType": {"type": "string", "nullable": true},
+          "status": {"type": "string", "nullable": true},
+          "identityUserReference": {"type": "string", "nullable": true}
+        }
+      },
+      "AssignEmployeeRequest": {
+        "type": "object",
+        "properties": {
+          "employeeId": {"type": "string", "nullable": true},
+          "organizationUnitId": {"type": "string", "nullable": true},
+          "positionId": {"type": "string", "nullable": true},
+          "assignmentType": {"$ref": "#/components/schemas/AssignmentType"},
+          "operationalScopeType": {"type": "string", "nullable": true},
+          "operationalScopeId": {"type": "string", "nullable": true},
+          "operationalScopeCode": {"type": "string", "nullable": true},
+          "operationalScopeName": {"type": "string", "nullable": true},
+          "validFrom": {"type": "string", "format": "date-time", "nullable": true},
+          "validTo": {"type": "string", "format": "date-time", "nullable": true}
+        }
+      }
+    }
+  }
+}

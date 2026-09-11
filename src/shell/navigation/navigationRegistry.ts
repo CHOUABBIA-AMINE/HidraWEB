@@ -46,8 +46,8 @@ export const navigationSections: readonly NavigationSection[] = [
     { id: 'notifications', labelKey: 'nav.notifications', path: '/work/notifications', capabilityModules: ['notification'], icon: 'notifications', implemented: false, deliveryTask: 'HWEB-014' },
   ] },
   { id: 'administration', labelKey: 'nav.groups.administration', items: [
-    { id: 'organization', labelKey: 'nav.organization', path: '/administration/organization', capabilityModules: ['organization'], icon: 'organization', implemented: false, deliveryTask: 'HWEB-004' },
-    { id: 'identity', labelKey: 'nav.identity', path: '/administration/users', capabilityModules: ['identity', 'security'], icon: 'identity', implemented: false, deliveryTask: 'HWEB-004' },
+    { id: 'organization', labelKey: 'nav.organization', path: '/administration/organization', capabilityModules: ['organization'], icon: 'organization', implemented: true, deliveryTask: 'HWEB-004' },
+    { id: 'identity', labelKey: 'nav.identity', path: '/administration/users', capabilityModules: ['identity', 'security'], icon: 'identity', implemented: true, deliveryTask: 'HWEB-004' },
     { id: 'configuration', labelKey: 'nav.configuration', path: '/administration/configuration', capabilityModules: ['configuration'], icon: 'configuration', implemented: false, deliveryTask: 'HWEB-014' },
     { id: 'audit', labelKey: 'nav.audit', path: '/administration/audit', capabilityModules: ['audit'], icon: 'audit', implemented: false, deliveryTask: 'HWEB-014' },
     { id: 'documents', labelKey: 'nav.documents', path: '/administration/documents', capabilityModules: ['documents'], icon: 'documents', implemented: false, deliveryTask: 'HWEB-014' },
