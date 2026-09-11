@@ -55,6 +55,18 @@ Implemented scope:
 - component coverage exercises period and plan list/detail reads;
 - Playwright coverage exercises the same published read path.
 
+### Exact-head frontend validation
+
+```text
+Behavioral commit : d711b5014419e6022748d4d3c48c6052e37f5c39
+Pull request      : HidraWEB #20
+CI run            : 34659171158
+Result            : SUCCESS
+Gates             : HWEB-003..HWEB-010 OpenAPI generation; lint; typecheck; unit/component tests; production build; Playwright browser tests
+```
+
+A documentation-only evidence commit follows this behavioral head, so the final PR head must independently pass the same exact-head CI before merge.
+
 ### Published DTO fields used by HWEB-010-02
 
 Planning periods display only fields published by `PlanningPeriodView`, including identifiers, multilingual names,
