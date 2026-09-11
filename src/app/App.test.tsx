@@ -15,6 +15,10 @@ const fixtures = vi.hoisted(() => {
       permission: 'workflow:tasks:read', enforcementStatus: 'backend-enforced',
     },
     {
+      route: '/api/v1/workflow/instances/{id}', methods: ['GET'], module: 'workflow', resource: 'instances', action: 'read',
+      permission: 'workflow:instances:read', enforcementStatus: 'backend-enforced',
+    },
+    {
       route: '/api/v1/identity/users', methods: ['POST'], module: 'identity', resource: 'users', action: 'execute',
       permission: 'identity:users:execute', enforcementStatus: 'backend-enforced',
     },
@@ -25,6 +29,8 @@ const fixtures = vi.hoisted(() => {
   ];
   const effectivePermissions = [
     'topology:map:read',
+    'workflow:tasks:read',
+    'workflow:instances:read',
     'identity:users:execute',
     'organization:units:execute',
   ];
@@ -43,17 +49,13 @@ const fixtures = vi.hoisted(() => {
 
 vi.mock('@/api/client/hidraHttpClient', () => ({
   hidraHttpClient: vi.fn(async (config: { url?: string }) => {
-    if (config.url?.endsWith('/catalog')) {
-      return fixtures.catalog;
-    }
-    if (config.url?.endsWith('/identity/me/permissions')) {
-      return fixtures.effectivePermissions;
-    }
+    if (config.url?.endsWith('/catalog')) return fixtures.catalog;
+    if (config.url?.endsWith('/identity/me/permissions')) return fixtures.effectivePermissions;
     return fixtures.routes;
   }),
 }));
 
-describe('HWEB-002 / HWEB-004 / HWEB-005 capability-driven application shell', () => {
+describe('HWEB-002 / HWEB-004 / HWEB-005 / HWEB-007 capability-driven application shell', () => {
   it('authenticates and enables only implemented navigation backed by effective grants', async () => {
     render(<AppProviders><App /></AppProviders>);
 
@@ -64,7 +66,7 @@ describe('HWEB-002 / HWEB-004 / HWEB-005 capability-driven application shell', (
 
     expect(await screen.findByRole('heading', { name: /Vue d/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Réseau' })).not.toHaveAttribute('aria-disabled', 'true');
-    expect(screen.getByRole('button', { name: 'Mes tâches' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Mes tâches' })).not.toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByRole('button', { name: 'Organisation' })).not.toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByRole('button', { name: 'Identité & accès' })).not.toHaveAttribute('aria-disabled', 'true');
     expect(screen.queryByRole('button', { name: 'Planification' })).not.toBeInTheDocument();
