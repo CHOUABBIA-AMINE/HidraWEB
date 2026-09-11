@@ -39,7 +39,7 @@ export interface DeviationParams extends MonitoringRuleParams {
   to?: string;
 }
 
-function compactParams(params: Record<string, unknown>): Record<string, unknown> {
+function compactParams<T extends object>(params: T): Record<string, unknown> {
   return Object.fromEntries(Object.entries(params).filter(([, value]) => value !== undefined && value !== ''));
 }
 
