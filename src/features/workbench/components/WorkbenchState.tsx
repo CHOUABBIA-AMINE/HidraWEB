@@ -50,7 +50,7 @@ export function WorkbenchErrorState({ error, onRetry }: WorkbenchErrorStateProps
       action={onRetry ? <Button color="inherit" onClick={onRetry} size="small">{t('status.retry')}</Button> : undefined}
       severity={normalized.status === 403 ? 'warning' : 'error'}
     >
-      <Typography fontWeight={700}>{title}</Typography>
+      <Typography sx={{ fontWeight: 700 }}>{title}</Typography>
       <Typography variant="body2">{detail}</Typography>
       {normalized.correlationId ? <Typography variant="caption">{t('status.correlation', { id: normalized.correlationId })}</Typography> : null}
     </Alert>
