@@ -26,7 +26,7 @@ Owner model            : HidraAPI owns business/security truth; HidraWEB records
 
 HidraAPI `main` at `af4c3b47…` is the current accepted backend baseline. Its post-remediation CI passes compile, tests and clean verification, boots the application, retrieves `/v3/api-docs`, deterministically sorts the document and uploads the SHA-named OpenAPI artifact above.
 
-HidraWEB now consumes artifact-derived contract slices for HWEB-003 workbench, HWEB-004 identity/organization, HWEB-005 topology, and the HWEB-006 telemetry/monitoring readiness gate. The obsolete hand/source-derived snapshots have been retired. Springdoc optionality is preserved: HidraWEB normalizes optional response fields at its presentation/API boundary rather than falsifying the published schema.
+HidraWEB consumes artifact-derived contract slices for HWEB-003 workbench, HWEB-004 identity/organization, HWEB-005 topology, and HWEB-006 telemetry/monitoring. The obsolete hand/source-derived snapshots have been retired. Springdoc optionality is preserved: HidraWEB normalizes optional response fields at its presentation/API boundary rather than falsifying the published schema.
 
 Backend route authorization is enforced with canonical `<module>:<resource>:<action>` permissions. HidraWEB obtains principal-specific effective grants from `GET /api/v1/identity/me/permissions`; the route catalog is metadata, not the current user's grant set. HidraAPI remains the final authorization boundary.
 
@@ -66,7 +66,7 @@ Verification gap: Live permitted/forbidden identity integration evidence is stil
 ```text
 Status          : VERIFIED
 Backend evidence: HidraAPI CI publishes hidra-api-openapi-${github.sha}; accepted artifact/digest are recorded above.
-Frontend evidence: HWEB-003/004/005 Orval inputs and HWEB-006 readiness generation now use slices extracted from that published artifact. CI regenerates all four slices before lint/typecheck/tests/build.
+Frontend evidence: HWEB-003/004/005/006 Orval inputs use slices extracted from that published artifact. CI regenerates all four slices before lint/typecheck/tests/build.
 Retired         : Source-derived workbench, identity/organization and topology snapshots.
 ```
 
@@ -151,16 +151,18 @@ topology:map:search
 
 ## HWEB-006 telemetry and monitoring
 
-The HWEB-006 contract is frozen in `docs/roadmap/HWEB-006-Telemetry-Monitoring-Readiness.md` and generated from the accepted backend artifact. This is a readiness gate only; the HWEB-006 operational UI has not yet been implemented.
+HWEB-006 is implemented at `/operations` from the accepted artifact-derived telemetry/monitoring slice. Branch CI run `34606659029` at `ac74c2bb0353483439f9faa186d0fc5c0a21fd46` passed OpenAPI generation, lint, typecheck, unit/component tests, production build, and E2E tests.
+
+The backend does not currently expose a telemetry-point discovery API for this phase, so HidraWEB accepts a known `pointId` rather than inventing discovery semantics. Realtime remains query/polling first under `GAP-REALTIME-001`.
 
 ### GAP-TEL-001 — Reading/history/latest/trend queries
 
 ```text
-Status          : IMPLEMENTED
+Status          : VERIFIED
 Routes          : GET /api/v1/telemetry/points/{pointId}/readings
                   GET /api/v1/telemetry/points/{pointId}/readings/latest
                   GET /api/v1/telemetry/points/{pointId}/trend
-Frontend state  : Contract generation passes; promote to VERIFIED when HWEB-006 consumes and tests it.
+Frontend evidence: HWEB-006 consumes the generated ReadingView/PageReadingView contracts for latest, bounded history and trend presentation; exact route coverage exists in telemetryMonitoringApi.test.ts and workspace/component/E2E coverage passes.
 ```
 
 The authoritative latest-reading path is `/api/v1/telemetry/points/{pointId}/readings/latest`; earlier roadmap text omitting `/readings` is superseded.
@@ -168,21 +170,21 @@ The authoritative latest-reading path is `/api/v1/telemetry/points/{pointId}/rea
 ### GAP-TEL-002 — Quality/state reference catalogs
 
 ```text
-Status          : IMPLEMENTED
+Status          : VERIFIED
 Routes          : GET /api/v1/telemetry/reference/reading-states
                   GET /api/v1/telemetry/reference/quality-codes
-Frontend state  : Contract generation passes; HidraWEB must consume backend-owned semantics rather than hard-coding SCADA quality/state meaning.
+Frontend evidence: HWEB-006 loads backend reference catalogs and uses returned reading-state/quality identifiers without hard-coding SCADA semantics. Reference-unavailable degradation is handled explicitly.
 ```
 
 ### GAP-MON-001 — Monitoring rules and deviations queries
 
 ```text
-Status          : IMPLEMENTED
+Status          : VERIFIED
 Routes          : GET /api/v1/monitoring/rules
                   GET /api/v1/monitoring/rules/{id}
                   GET /api/v1/monitoring/deviations
                   GET /api/v1/monitoring/deviations/{id}
-Frontend state  : Contract generation passes; promote to VERIFIED only after HWEB-006 UI consumption/tests.
+Frontend evidence: HWEB-006 lists rules/deviations, supports independent monitoring-only grants, displays backend topology linkage metadata without duplicating topology truth, and provides contextual backend-field inspectors. Component/API/E2E tests pass.
 ```
 
 HWEB-006 canonical read grants:
@@ -194,7 +196,7 @@ monitoring:rules:read
 monitoring:deviations:read
 ```
 
-HWEB-006 state rule: TanStack Query owns server state; React local state owns filters/time window/selection/presentation; topology remains owner of graph/geospatial truth; no giant Zustand server-state mirror is permitted.
+HWEB-006 state rule: TanStack Query owns server state; React local state owns point/time/filter/selection/presentation state; topology remains owner of graph/geospatial truth; no giant Zustand server-state mirror is permitted.
 
 ---
 
@@ -260,4 +262,4 @@ Before every HWEB phase:
 
 ## Current next phase decision
 
-HWEB-005 is complete and rebaselined on the remediated backend artifact. HWEB-006 is contract-ready for **query-first Telemetry & Monitoring implementation** once this reconciliation branch is green and merged. Realtime business-event publication remains deferred and must not block the HTTP-first HWEB-006 implementation.
+HWEB-006 is implementation-complete and branch-CI verified. After its PR is merged and post-merge `main` CI is green, the next frontend phase is HWEB-007 Workflow. HWEB-007 must begin with a fresh current-source/OpenAPI reconciliation of workflow routes, DTOs, permissions and available-action semantics; realtime business-event publication remains deferred.
