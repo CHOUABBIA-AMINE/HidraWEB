@@ -13,7 +13,15 @@ export function ContextualDrawer() {
       anchor="right"
       onClose={drawer.closeDrawer}
       open={drawer.open}
-      slotProps={{ paper: { sx: { width: { xs: '100%', sm: 420 } } } }}
+      slotProps={{
+        paper: {
+          sx: {
+            height: 'calc(100% - 64px)',
+            top: 64,
+            width: { xs: '100%', sm: 420 },
+          },
+        },
+      }}
     >
       <Box sx={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', minHeight: 64, px: 2 }}>
         <Typography component="h2" variant="h6">{drawer.title ?? t('shell.contextDrawer')}</Typography>
