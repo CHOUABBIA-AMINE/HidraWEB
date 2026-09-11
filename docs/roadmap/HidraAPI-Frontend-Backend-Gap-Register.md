@@ -26,7 +26,7 @@ Owner model            : HidraAPI owns business/security truth; HidraWEB records
 
 HidraAPI `main` at `af4c3b47…` is the current accepted backend baseline. Its post-remediation CI passes compile, tests and clean verification, boots the application, retrieves `/v3/api-docs`, deterministically sorts the document and uploads the SHA-named OpenAPI artifact above.
 
-HidraWEB consumes artifact-derived contract slices for HWEB-003 workbench, HWEB-004 identity/organization, HWEB-005 topology, HWEB-006 telemetry/monitoring, and HWEB-007 workflow. The obsolete hand/source-derived snapshots have been retired. Springdoc optionality is preserved: HidraWEB normalizes optional response fields at its presentation/API boundary rather than falsifying the published schema.
+HidraWEB consumes artifact-derived contract slices for HWEB-003 workbench, HWEB-004 identity/organization, HWEB-005 topology, HWEB-006 telemetry/monitoring, HWEB-007 workflow, and HWEB-008 alarm. The obsolete hand/source-derived snapshots have been retired. Springdoc optionality is preserved: HidraWEB normalizes optional response fields at its presentation/API boundary rather than falsifying the published schema.
 
 Backend route authorization is enforced with canonical `<module>:<resource>:<action>` permissions. HidraWEB obtains principal-specific effective grants from `GET /api/v1/identity/me/permissions`; the route catalog is metadata, not the current user's grant set. HidraAPI remains the final authorization boundary.
 
@@ -66,7 +66,7 @@ Verification gap: Live permitted/forbidden identity integration evidence is stil
 ```text
 Status          : VERIFIED
 Backend evidence: HidraAPI CI publishes hidra-api-openapi-${github.sha}; accepted artifact/digest are recorded above.
-Frontend evidence: HWEB-003/004/005/006/007 Orval inputs use slices extracted from that published artifact. CI regenerates all five slices before lint/typecheck/tests/build.
+Frontend evidence: HWEB-003/004/005/006/007/008 Orval inputs use slices extracted from that published artifact. CI regenerates all six slices before lint/typecheck/tests/build.
 Retired         : Source-derived workbench, identity/organization and topology snapshots.
 ```
 
@@ -253,21 +253,64 @@ HWEB-007 state rule: TanStack Query owns task/detail/action/instance/timeline se
 
 ## HWEB-008 alarms
 
+HWEB-008 is implemented at `/alarms` from the accepted artifact-derived alarm slice. Final behavioral branch CI run `34613930912` at `4e9e308c219b23fa5e93e1b4a2fa27e774017276` passed all six OpenAPI generation gates, lint, typecheck, 20/20 unit/component tests, production build, and 13/13 Playwright tests.
+
+Canonical HWEB-008 grants:
+
+```text
+alarm:alarms:read
+alarm:alarms:execute
+```
+
 ### GAP-ALARM-001 — Active/history/detail queries
 
 ```text
-Status          : IMPLEMENTED
-Evidence        : GET /api/v1/alarm/alarms and GET /api/v1/alarm/alarms/{id} are present in the published contract.
-Frontend state  : Not yet consumed.
+Status          : VERIFIED
+Routes          : GET /api/v1/alarm/alarms
+                  GET /api/v1/alarm/alarms/{id}
+Frontend evidence: HWEB-008 provides active/history views with backend-owned state/severity/topology/time filters, bounded paging, detail inspection, and generated-contract API/component/E2E coverage.
 ```
 
-### GAP-ALARM-002 — Shelving/suppression lifecycle
+### GAP-ALARM-002 — Shelving lifecycle
 
 ```text
-Status          : IMPLEMENTED
-Evidence        : Alarm shelving query/command and unshelve operations are backend-verified and represented by the published OpenAPI artifact.
-Frontend rule   : Use exact generated operation paths/DTOs; do not infer alarm lifecycle semantics.
+Status          : VERIFIED
+Routes          : GET  /api/v1/alarm/alarms/{id}/shelvings
+                  POST /api/v1/alarm/alarms/{id}/shelvings
+                  POST /api/v1/alarm/alarms/{id}/shelvings/{shelvingId}/unshelve
+Frontend evidence: HWEB-008 displays shelving history and executes only the published shelve/unshelve contracts behind alarm:alarms:execute. Successful commands invalidate/refetch backend alarm state, and a shared pending-state guard prevents concurrent alarm lifecycle submissions from the selected-alarm workspace.
+Frontend rule   : Do not infer shelving or alarm state transitions locally; HidraAPI remains authoritative.
 ```
+
+### GAP-ALARM-003 — Acknowledgement and closure commands
+
+```text
+Status          : VERIFIED
+Routes          : POST /api/v1/alarm/alarms/acknowledgements
+                  POST /api/v1/alarm/alarms/closures
+Frontend evidence: HWEB-008 consumes the exact AcknowledgeAlarmRequest and CloseAlarmRequest contracts behind alarm:alarms:execute. API/component/E2E tests prove command wiring and authoritative post-command refetch behavior.
+Constraint      : Verification here covers the published command contract, not trustworthiness of client-supplied actor attribution; that is tracked separately by GAP-ALARM-005.
+```
+
+### GAP-ALARM-004 — Suppression mutation contract
+
+```text
+Status          : OPEN
+Backend evidence: AlarmState contains SUPPRESSED, but the accepted OpenAPI artifact exposes no suppression command route/request/result contract.
+Frontend state  : HWEB-008 deliberately renders no suppression mutation and explicitly communicates that suppression is unavailable through the accepted backend contract.
+Completion gate : HidraAPI defines suppression business semantics, authorization, request fields, lifecycle validation, audit/result/error behavior and automated tests, then publishes the operation in the repository OpenAPI artifact.
+```
+
+### GAP-ALARM-005 — Trusted actor attribution for acknowledgement/closure
+
+```text
+Status          : IN_PROGRESS
+Backend evidence: Shelving/unshelving resolve actor identity server-side through CurrentActorResolver. AcknowledgeAlarmRequest and CloseAlarmRequest currently carry actor-reference fields supplied by the client, and source verification does not establish authoritative replacement/validation from the authenticated principal before persistence.
+Frontend state  : HWEB-008 uses the accepted request fields but does not claim they are trusted server-derived identity; the UI warns about the current client-supplied attribution contract.
+Completion gate : HidraAPI derives the acknowledgement/closure actor from the authenticated principal (preferred) or strictly validates the supplied reference against that principal, removes browser-controlled impersonation risk, tests Basic/JWT behavior, and republishes OpenAPI.
+```
+
+Alarm realtime publication remains covered by `GAP-REALTIME-001` and is DEFERRED until verified domain publishers/event families exist.
 
 ---
 
@@ -285,4 +328,4 @@ Before every HWEB phase:
 
 ## Current next phase decision
 
-HWEB-007 is implementation-complete for the backend-supported task inbox/detail, instance/timeline and available-action visibility scope. `GAP-WF-004` remains OPEN and explicitly blocks workflow transition execution; this does not justify inventing frontend mutations. After HWEB-007 is merged and post-merge `main` CI is green, the next frontend phase is HWEB-008 Alarms, beginning with a fresh contract reconciliation of alarm queries and lifecycle commands.
+HWEB-008 is implementation-complete for the backend-supported alarm query, acknowledgement/closure, and shelving lifecycle scope. `GAP-ALARM-004` suppression, `GAP-ALARM-005` trusted actor attribution, `GAP-WF-004` workflow transition execution, and `GAP-REALTIME-001` domain realtime publication remain backend-owned constraints. After HWEB-008 is merged and post-merge `main` CI is green, prioritize HidraAPI hardening for trusted actor attribution and workflow transition execution before consuming any new frontend mutation contract. Suppression semantics should be decided and implemented only if the alarm domain requires a capability distinct from shelving.
