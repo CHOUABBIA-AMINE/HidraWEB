@@ -545,7 +545,6 @@ export function PlanningWorkspacePage() {
                                             setDecisionNote('');
                                             setCorrelationId('');
                                             setApprovalSuccess('');
-                                            approvalMutation.reset();
                                           }}
                                           size="small"
                                           variant={selected ? 'contained' : 'outlined'}
