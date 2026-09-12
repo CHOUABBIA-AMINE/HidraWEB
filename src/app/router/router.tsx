@@ -7,6 +7,7 @@ import { OverviewPage } from '@/app/pages/OverviewPage';
 import { AlarmConsolePage } from '@/features/alarm/AlarmConsolePage';
 import { IdentityAdministrationPage } from '@/features/context/IdentityAdministrationPage';
 import { OrganizationAdministrationPage } from '@/features/context/OrganizationAdministrationPage';
+import { EngineeringIntegrityPage } from '@/features/integrity/EngineeringIntegrityPage';
 import { IncidentWorkspacePage } from '@/features/incident/IncidentWorkspacePage';
 import { PermissionBootstrapBoundary } from '@/features/permissions/PermissionBootstrapBoundary';
 import { PlanningWorkspacePage } from '@/features/planning/PlanningWorkspacePage';
@@ -35,6 +36,7 @@ export const router = createBrowserRouter([
       { path: 'alarms', element: <AlarmConsolePage /> },
       { path: 'events', element: <IncidentWorkspacePage /> },
       { path: 'planning', element: <PlanningWorkspacePage /> },
+      { path: 'engineering', element: <EngineeringIntegrityPage /> },
       { path: 'work/tasks', element: <WorkflowTasksPage /> },
       { path: 'workbench', element: <OperationalWorkbenchPage /> },
       { path: 'administration/organization', element: <OrganizationAdministrationPage /> },
