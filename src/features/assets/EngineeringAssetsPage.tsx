@@ -7,6 +7,7 @@ import { useMemo, useState, type Dispatch, type ReactNode, type SetStateAction }
 import { Link as RouterLink } from 'react-router';
 
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
+import { AssetConcurrencyPanel } from '@/features/assets/AssetConcurrencyPanel';
 import { AssetHistoryTimeline } from '@/features/assets/AssetHistoryTimeline';
 import {
   createMaintenanceWorkOrder,
@@ -260,6 +261,13 @@ export function EngineeringAssetsPage({ renderSelectedContext }: EngineeringAsse
                 <Box component="pre" sx={{ whiteSpace: 'pre-wrap', overflowX: 'auto', m: 0 }}>{detailQuery.data ? JSON.stringify(detailQuery.data.attributes, null, 2) : 'Loading…'}</Box>
               )}
             </Paper>
+            {selectedIsMaintainableAsset && detailQuery.data && (
+              <AssetConcurrencyPanel
+                assetId={selectedId}
+                resource={effectiveResource}
+                attributes={detailQuery.data.attributes}
+              />
+            )}
             {selectedIsMaintainableAsset && (
               <AssetHistoryTimeline
                 maintainableAssetId={selectedId}
