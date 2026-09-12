@@ -7,15 +7,16 @@ const routes = [
   { route: '/api/v1/planning/operational-plans/{id}', methods: ['GET'], module: 'planning', resource: 'operational-plans', action: 'read', permission: 'planning:operational-plans:read', enforcementStatus: 'backend-enforced' },
   { route: '/api/v1/planning/revisions', methods: ['GET'], module: 'planning', resource: 'revisions', action: 'read', permission: 'planning:revisions:read', enforcementStatus: 'backend-enforced' },
   { route: '/api/v1/planning/revisions/{id}', methods: ['GET'], module: 'planning', resource: 'revisions', action: 'read', permission: 'planning:revisions:read', enforcementStatus: 'backend-enforced' },
+  { route: '/api/v1/planning/revisions/{revisionId}', methods: ['PATCH'], module: 'planning', resource: 'revisions', action: 'update', permission: 'planning:revisions:update', enforcementStatus: 'backend-enforced' },
   { route: '/api/v1/planning/targets', methods: ['GET'], module: 'planning', resource: 'targets', action: 'read', permission: 'planning:targets:read', enforcementStatus: 'backend-enforced' },
   { route: '/api/v1/monitoring/deviations', methods: ['GET'], module: 'monitoring', resource: 'deviations', action: 'read', permission: 'monitoring:deviations:read', enforcementStatus: 'backend-enforced' },
   { route: '/api/v1/planning/revisions/{revisionId}/approval', methods: ['GET'], module: 'planning', resource: 'revisions', action: 'read', permission: 'planning:revisions:read', enforcementStatus: 'backend-enforced' },
   { route: '/api/v1/planning/revisions/{revisionId}/approval/actions/{transitionId}/execute', methods: ['POST'], module: 'planning', resource: 'revisions', action: 'execute', permission: 'planning:revisions:execute', enforcementStatus: 'backend-enforced' },
 ];
-const effectivePermissions = ['planning:periods:read', 'planning:operational-plans:read', 'planning:revisions:read', 'planning:targets:read', 'monitoring:deviations:read', 'planning:revisions:execute', 'planning:revisions:approve'];
+const effectivePermissions = ['planning:periods:read', 'planning:operational-plans:read', 'planning:revisions:read', 'planning:revisions:update', 'planning:targets:read', 'monitoring:deviations:read', 'planning:revisions:execute', 'planning:revisions:approve'];
 const period = { id: 'period-1', code: 'PLN-2026-Q4', nameFr: 'Planification T4 2026', periodStart: '2026-10-01T00:00:00Z', periodEnd: '2026-12-31T23:59:59Z', timeZone: 'Africa/Algiers', status: 'OPEN', periodTypeId: 'QUARTER', createdByActorId: 'planner-1' };
 const plan = { id: 'plan-1', periodId: 'period-1', code: 'OP-2026-Q4-NORTH', nameFr: 'Plan Nord T4', topologyScopeType: 'PIPELINE', topologyScopeId: 'pipe-1', topologyScopeCode: 'PL-NORTH', topologyScopeNameSnapshot: 'Pipeline Nord', status: 'DRAFT', currentRevisionId: 'rev-2', approvedRevisionId: 'rev-1', responsibleOrganizationUnitId: 'org-trc', createdByActorId: 'planner-1' };
-const revision = { id: 'rev-2', planId: 'plan-1', revisionNumber: 2, revisionCode: 'R02', baseRevisionId: 'rev-1', status: 'SUBMITTED', changeReasonCodeId: 'OPS_CHANGE', changeReasonText: 'Updated throughput assumptions', submittedAt: '2026-09-12T10:00:00Z', submittedByActorId: 'planner-2', workflowInstanceId: 'wf-plan-2' };
+const revision = { id: 'rev-2', planId: 'plan-1', revisionNumber: 2, revisionCode: 'R02', baseRevisionId: 'rev-1', status: 'SUBMITTED', changeReasonCodeId: 'OPS_CHANGE', changeReasonText: 'Updated throughput assumptions', submittedAt: '2026-09-12T10:00:00Z', submittedByActorId: 'planner-2', workflowInstanceId: 'wf-plan-2', updatedAt: '2026-09-12T10:10:00Z' };
 const approval = {
   revisionId: 'rev-2',
   revisionStatus: 'SUBMITTED',
@@ -29,6 +30,9 @@ const target = { id: 'target-1', revisionId: 'rev-2', telemetryPointId: 'point-1
 const deviation = { id: 'dev-1', planTargetId: 'target-1', trustedTelemetryReadingId: 'reading-9', actualValue: 105, expectedValue: 100, differenceValue: 5, differencePercent: 5, unitId: 'm3/h', severity: 'HIGH', status: 'OPEN', detectedAt: '2026-09-12T10:30:00Z' };
 
 async function mockPlanning(page: Page) {
+  let currentRevision = { ...revision };
+  let patchAttempts = 0;
+
   await page.route('**/api/v1/security/permissions/routes', (route) => route.fulfill({ json: routes }));
   await page.route('**/api/v1/security/permissions/catalog', (route) => route.fulfill({ json: { strategy: 'derived-route-permission-catalog', enforcement: 'backend-enforced', permissionFormat: '<module>:<resource>:<action>', routes } }));
   await page.route('**/api/v1/identity/me/permissions', (route) => route.fulfill({ json: effectivePermissions }));
@@ -36,8 +40,49 @@ async function mockPlanning(page: Page) {
   await page.route('**/api/v1/planning/periods/period-1', (route) => route.fulfill({ json: period }));
   await page.route('**/api/v1/planning/operational-plans?**', (route) => route.fulfill({ json: { content: [plan], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false } }));
   await page.route('**/api/v1/planning/operational-plans/plan-1', (route) => route.fulfill({ json: plan }));
-  await page.route('**/api/v1/planning/revisions?**', (route) => route.fulfill({ json: { content: [revision], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false } }));
-  await page.route('**/api/v1/planning/revisions/rev-2', (route) => route.fulfill({ json: revision }));
+  await page.route('**/api/v1/planning/revisions?**', (route) => route.fulfill({ json: { content: [currentRevision], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false } }));
+  await page.route('**/api/v1/planning/revisions/rev-2', async (route) => {
+    const request = route.request();
+    if (request.method() !== 'PATCH') {
+      await route.fulfill({ json: currentRevision });
+      return;
+    }
+
+    patchAttempts += 1;
+    const body = await request.postDataJSON();
+    if (patchAttempts === 1) {
+      expect(body).toEqual({
+        expectedUpdatedAt: '2026-09-12T10:10:00Z',
+        changeReasonCodeId: 'OPS_REBASE',
+        changeReasonText: 'First stale attempt',
+      });
+      currentRevision = {
+        ...currentRevision,
+        changeReasonCodeId: 'SERVER_CHANGE',
+        changeReasonText: 'Changed by another planner',
+        updatedAt: '2026-09-12T10:20:00Z',
+      };
+      await route.fulfill({
+        status: 409,
+        contentType: 'application/problem+json',
+        json: { status: 409, title: 'Conflict', detail: 'Refetch the revision before retrying.', code: 'PLANNING_REVISION_CONFLICT' },
+      });
+      return;
+    }
+
+    expect(body).toEqual({
+      expectedUpdatedAt: '2026-09-12T10:20:00Z',
+      changeReasonCodeId: 'OPS_REBASE',
+      changeReasonText: 'Reviewed after refetch',
+    });
+    currentRevision = {
+      ...currentRevision,
+      changeReasonCodeId: 'OPS_REBASE',
+      changeReasonText: 'Reviewed after refetch',
+      updatedAt: '2026-09-12T10:25:00Z',
+    };
+    await route.fulfill({ json: currentRevision });
+  });
   await page.route('**/api/v1/planning/targets?**', async (route) => {
     const requestUrl = new URL(route.request().url());
     expect(requestUrl.searchParams.get('revisionId')).toBe('rev-2');
@@ -60,6 +105,8 @@ async function mockPlanning(page: Page) {
     });
     await route.fulfill({ json: { revisionId: 'rev-2', revisionStatus: 'APPROVED', workflowInstanceId: 'wf-plan-2', workflowInstanceStatus: 'COMPLETED', transitionId: 'transition-approve', decision: 'APPROVE', executedAt: '2026-09-12T10:06:00Z' } });
   });
+
+  return { patchAttempts: () => patchAttempts };
 }
 
 async function signIn(page: Page) {
@@ -106,4 +153,27 @@ test('HWEB-010-05 requests and renders monitoring-owned planned-vs-actual values
   await expect(comparison).toContainText('HIGH');
   await expect(comparison).toContainText('OPEN');
   await expect(comparison).toContainText('reading-9');
+});
+
+test('HWEB-010-06 refetches after stale revision conflict and retries only with the refreshed backend token', async ({ page }) => {
+  const mock = await mockPlanning(page);
+  await signIn(page);
+  await openRevision(page);
+
+  await expect(page.getByRole('heading', { name: 'Revision metadata update' })).toBeVisible();
+  await expect(page.getByText('Authoritative version: 2026-09-12T10:10:00Z')).toBeVisible();
+  await page.getByLabel('Change reason code').fill('OPS_REBASE');
+  await page.getByLabel('Change reason', { exact: true }).fill('First stale attempt');
+  await page.getByRole('button', { name: 'Save revision metadata' }).click();
+
+  await expect(page.getByText(/rejected a stale revision/i)).toBeVisible();
+  await expect(page.getByText('Authoritative version: 2026-09-12T10:20:00Z')).toBeVisible();
+  expect(mock.patchAttempts()).toBe(1);
+
+  await page.getByLabel('Change reason code').fill('OPS_REBASE');
+  await page.getByLabel('Change reason', { exact: true }).fill('Reviewed after refetch');
+  await page.getByRole('button', { name: 'Save revision metadata' }).click();
+
+  await expect(page.getByText(/New version: 2026-09-12T10:25:00Z/)).toBeVisible();
+  expect(mock.patchAttempts()).toBe(2);
 });
