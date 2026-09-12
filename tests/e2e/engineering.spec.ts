@@ -109,7 +109,7 @@ async function signIn(page: Page) {
 test('HWEB-011-02 discovers integrity resources, reads backend records, and creates an assessment through published contracts', async ({ page }) => {
   await mockEngineering(page);
   await signIn(page);
-  await page.goto('/engineering');
+  await page.getByRole('button', { name: 'Intégrité & maintenance' }).click();
 
   await expect(page.getByRole('heading', { name: 'Integrity & Maintenance' })).toBeVisible();
   await expect(page.getByText('Backend resource: integrity-assessment')).toBeVisible();
