@@ -1,20 +1,20 @@
 # HWEB-010 — Planning
 
-Status: HWEB-010-05 COMPLETE / VERIFIED; HWEB-010-06 BLOCKED ON GAP-PLAN-004
+Status: HWEB-010 COMPLETE / VERIFIED
 
 ## Accepted repository baselines
 
 ```text
 HidraWEB audit base            : d547bc261009acd07f94a615cb58f0c80526ff49
-HidraWEB current product merge : 706d2f1415510a91105318a682ff33cb43d0a529
-HidraAPI accepted main SHA     : df8c012be9034886e53f2ec64c28946f18f67b31
-Backend artifact               : hidra-api-openapi-df8c012be9034886e53f2ec64c28946f18f67b31
-Artifact id                    : 10297106684
-Artifact digest                : sha256:5d01f56b83c829ded2fce4bede553f33cff74590e5df946e8f3251a5ae1bf537
+HidraWEB current product merge : 6a72fab3d7bcb221cc8181eac9c0a29e42715fcf
+HidraAPI accepted main SHA     : 7bbdb49dbc40c5637d93a05863e69f9576a2edba
+Backend artifact               : hidra-api-openapi-7bbdb49dbc40c5637d93a05863e69f9576a2edba
+Artifact id                    : 10298289002
+Artifact digest                : sha256:87d8248b2b25ca0bd684a8c7a98b33d79b52014a45c4992c71a456f2f5e95eec
 Backend query issue            : CHOUABBIA-AMINE/HidraAPI#68 — CLOSED
 Backend approval issue         : CHOUABBIA-AMINE/HidraAPI#70 — CLOSED
 Backend comparison issue       : CHOUABBIA-AMINE/HidraAPI#71 — CLOSED / COMPLETED
-Backend concurrency issue      : CHOUABBIA-AMINE/HidraAPI#72 — OPEN
+Backend concurrency issue      : CHOUABBIA-AMINE/HidraAPI#72 — CLOSED / COMPLETED
 Frontend inventory issue       : CHOUABBIA-AMINE/HidraWEB#18 — CLOSED
 ```
 
@@ -192,30 +192,63 @@ HidraWEB must continue to avoid selecting a latest/average/sum telemetry reading
 
 ## HWEB-010-06 — Version/concurrency behavior
 
-Contract audit completed. General frontend planning mutation/concurrency behavior remains blocked because no authoritative planning mutation concurrency contract is published for a general planning write surface.
+Complete and verified from the authoritative PLN-004 planning mutation contract.
 
-The PLN-002 approval bridge has its own explicit task concurrency precondition (`currentTaskUpdatedAt` -> `expectedTaskUpdatedAt`). HWEB-010-04 consumes only that published approval-specific semantic. This does not authorize HidraWEB to generalize `updatedAt`, `revisionNumber`, `baseRevisionId` or other read metadata into a concurrency token for unrelated planning mutations.
+### Backend contract
+
+```text
+PATCH /api/v1/planning/revisions/{revisionId}
+```
+
+The published mutation is intentionally narrow: it updates only the current revision's change-reason metadata. `PlanRevisionView.updatedAt` is explicitly defined by HidraAPI as the `expectedUpdatedAt` write precondition for this PATCH only. HidraAPI locks/reloads the revision, verifies the parent operational plan still identifies it as `currentRevisionId`, compares the token exactly, and returns the refreshed revision with a new `updatedAt` after a successful write. A stale or non-current request returns deterministic HTTP 409 `PLANNING_REVISION_CONFLICT` and requires refetch before a new user-initiated retry.
+
+Accepted backend evidence:
+
+```text
+Roadmap task       : PLN-004
+Backend issue      : HidraAPI #72 — CLOSED / COMPLETED
+Backend merge SHA  : 7bbdb49dbc40c5637d93a05863e69f9576a2edba
+Post-merge CI      : 34694623511 — SUCCESS
+OpenAPI artifact   : hidra-api-openapi-7bbdb49dbc40c5637d93a05863e69f9576a2edba
+Artifact id        : 10298289002
+Artifact digest    : sha256:87d8248b2b25ca0bd684a8c7a98b33d79b52014a45c4992c71a456f2f5e95eec
+```
+
+### Frontend behavior
+
+HidraWEB now:
+
+- pins the planning OpenAPI slice to the exact PLN-004 merge artifact;
+- resolves PATCH authorization from the backend route descriptor and effective grants and fails closed if route metadata or permission is unavailable;
+- exposes the mutation only when the selected revision is the operational plan's backend-published `currentRevisionId`;
+- sends the selected revision's `updatedAt` unchanged as `expectedUpdatedAt`;
+- allows only the backend-published change-reason fields on this mutation surface;
+- on HTTP 409, refetches the authoritative revision, replaces the local form with backend-returned values, and requires deliberate user resubmission;
+- never auto-retries a stale write and does not synthesize a version number, ETag, rebase algorithm, lifecycle transition, or generalized planning concurrency model.
+
+### HWEB-010-06 verification evidence
+
+```text
+Final frontend PR head : 5db09cb52ad6f499f57e656efeb4c8ec57964ceb
+Final exact-head CI    : 34702207063 — SUCCESS
+Pull request           : HidraWEB #31 — MERGED
+Product merge SHA      : 6a72fab3d7bcb221cc8181eac9c0a29e42715fcf
+Post-merge product CI  : 34702329951 — SUCCESS
+Verified gates         : HWEB-003..HWEB-010 OpenAPI generation; lint; typecheck; unit/component tests; production build; Playwright browser tests
+Browser evidence       : planning.spec.ts proves stale PATCH rejection, authoritative refetch, no automatic retry, and explicit resubmission using the refreshed backend updatedAt token
+```
 
 ### GAP-PLAN-004 — Planning mutation concurrency contract
 
 ```text
-Status          : OPEN / BLOCKING HWEB-010-06
-Backend owner   : planning public mutation contract
-Backend issue   : HidraAPI #72 — OPEN
-Frontend action : no synthetic version token, stale-write test, retry/rebase flow, or general concurrency UI until the gap closes
+Status           : VERIFIED
+Backend owner    : planning public mutation contract
+Backend issue    : HidraAPI #72 — CLOSED / COMPLETED
+Backend evidence : PLN-004 merge 7bbdb49dbc40c5637d93a05863e69f9576a2edba; post-merge CI 34694623511; OpenAPI artifact 10298289002
+Frontend evidence: HWEB-010-06 PR #31; merge 6a72fab3d7bcb221cc8181eac9c0a29e42715fcf; post-merge CI 34702329951
 ```
 
-Required backend evidence before HWEB-010-06 can proceed:
-
-- an intentionally supported planning mutation published through deterministic OpenAPI;
-- an explicit backend-owned version/precondition mechanism for that mutation;
-- authoritative current token returned by the applicable read/mutation response;
-- deterministic stale-write conflict semantics;
-- canonical route permissions;
-- backend tests proving current-token success and stale-token conflict;
-- exact merge-SHA OpenAPI artifact and green compile/test/acceptance/OpenAPI gates.
-
-HidraWEB must not infer general version semantics from `revisionNumber`, `baseRevisionId`, `updatedAt`, status strings, or persistence implementation details.
+The `updatedAt -> expectedUpdatedAt` semantic is authoritative only for the published revision metadata PATCH. HidraWEB must not generalize it to other planning resources, approval tasks, nominations, targets, or future mutations unless HidraAPI explicitly publishes that contract.
 
 ## Explicit exclusions retained
 
@@ -224,7 +257,7 @@ HidraWEB still does not implement or infer:
 - direct revision lifecycle commands not published through an authoritative planning contract;
 - generic workflow inbox scanning or transition-name/status inference for planning approval;
 - frontend-owned planned-vs-actual arithmetic or severity classification;
-- general planning concurrency/version tokens or retry/rebase semantics while GAP-PLAN-004 is open;
+- generalized concurrency/version semantics beyond the exact PLN-004 revision metadata PATCH;
 - nomination/target mutation workspaces;
 - realtime planning events;
 - a frontend planning or revision state machine.
@@ -251,14 +284,12 @@ Backend evidence : PLN-003 merge df8c012be9034886e53f2ec64c28946f18f67b31; post-
 Frontend evidence: HWEB-010-05 PR #29; merge 706d2f1415510a91105318a682ff33cb43d0a529; post-merge CI 34692023707.
 
 GAP-PLAN-004 — Planning mutation concurrency contract
-Status           : OPEN
-Backend issue    : HidraAPI #72 — OPEN
-Frontend evidence: no general planning mutation publishes an authoritative version/precondition token and stale-write conflict behavior. Approval-specific task concurrency in PLN-002 does not establish general planning concurrency semantics.
+Status           : VERIFIED
+Backend issue    : HidraAPI #72 — CLOSED / COMPLETED
+Backend evidence : PLN-004 merge 7bbdb49dbc40c5637d93a05863e69f9576a2edba; post-merge CI 34694623511; OpenAPI artifact 10298289002
+Frontend evidence: HWEB-010-06 PR #31; merge 6a72fab3d7bcb221cc8181eac9c0a29e42715fcf; post-merge CI 34702329951.
 ```
 
 ## Remaining HWEB-010 sequence
 
-- HWEB-010-05 is complete and verified.
-- Next backend task is to close GAP-PLAN-004 / HidraAPI #72 with an authoritative planning mutation concurrency contract.
-- HWEB-010-06 resumes only after that exact backend merge-SHA contract and artifact are verified.
-- HWEB-010 closes only after HWEB-010-06 is implemented, merged and post-merge verified.
+HWEB-010 is complete and verified. All four planning backend gaps used by this frontend roadmap are closed and verified. Future planning work must start from a new explicit roadmap task and may not generalize the approval, monitoring-comparison, or revision-concurrency semantics beyond their published backend contracts.
