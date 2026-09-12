@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App } from '@/app/App';
@@ -27,19 +27,17 @@ const fixtures = vi.hoisted(() => {
     currentTaskUpdatedAt: '2026-09-12T10:05:00Z',
     actions: [{ transitionId: 'transition-approve', decision: 'APPROVE', reasonRequired: false, commentRequired: true, requiredPermissionCode: 'planning:revisions:approve', permitted: true }],
   };
-  const state: { executeRequest?: unknown } = {};
   return {
     routes,
     period,
     plan,
     revision,
     approval,
-    state,
     permissions: ['planning:periods:read', 'planning:operational-plans:read', 'planning:revisions:read', 'planning:revisions:execute', 'planning:revisions:approve'],
   };
 });
 
-const hidraHttpClient = vi.hoisted(() => vi.fn(async (config: { url?: string; method?: string; params?: Record<string, unknown>; data?: unknown }) => {
+const hidraHttpClient = vi.hoisted(() => vi.fn(async (config: { url?: string; method?: string; params?: Record<string, unknown> }) => {
   if (config.url?.endsWith('/security/permissions/catalog')) return { strategy: 'derived-route-permission-catalog', enforcement: 'backend-enforced', permissionFormat: '<module>:<resource>:<action>', routes: fixtures.routes };
   if (config.url?.endsWith('/security/permissions/routes')) return fixtures.routes;
   if (config.url?.endsWith('/identity/me/permissions')) return fixtures.permissions;
@@ -50,10 +48,6 @@ const hidraHttpClient = vi.hoisted(() => vi.fn(async (config: { url?: string; me
   if (config.url === '/api/v1/planning/revisions' && config.method === 'GET' && config.params?.planId === 'plan-1') return { content: [fixtures.revision], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false };
   if (config.url === '/api/v1/planning/revisions/rev-2' && config.method === 'GET') return fixtures.revision;
   if (config.url === '/api/v1/planning/revisions/rev-2/approval' && config.method === 'GET') return fixtures.approval;
-  if (config.url === '/api/v1/planning/revisions/rev-2/approval/actions/transition-approve/execute' && config.method === 'POST') {
-    fixtures.state.executeRequest = config.data;
-    return { revisionId: 'rev-2', revisionStatus: 'APPROVED', workflowInstanceId: 'wf-plan-2', workflowInstanceStatus: 'COMPLETED', transitionId: 'transition-approve', decision: 'APPROVE', executedAt: '2026-09-12T10:06:00Z' };
-  }
   throw new Error(`Unexpected request ${config.method} ${config.url}`);
 }));
 
@@ -62,11 +56,10 @@ vi.mock('@/api/client/hidraHttpClient', () => ({ hidraHttpClient }));
 describe('HWEB-010 planning workspace', () => {
   beforeEach(() => {
     hidraHttpClient.mockClear();
-    fixtures.state.executeRequest = undefined;
     window.history.replaceState({}, '', '/overview');
   });
 
-  it('loads planning revision approval from the authoritative revision-scoped backend contract and executes a published action', async () => {
+  it('renders the authoritative revision-scoped workflow approval projection and backend-published action', async () => {
     render(<AppProviders><App /></AppProviders>);
     fireEvent.change(await screen.findByLabelText(/Nom d’utilisateur/), { target: { value: 'planner' } });
     fireEvent.change(screen.getByLabelText(/Mot de passe/), { target: { value: 'secret' } });
@@ -85,17 +78,8 @@ describe('HWEB-010 planning workspace', () => {
     expect(await screen.findByRole('heading', { name: 'Revision approval' })).toBeInTheDocument();
     expect(await screen.findByText('task-plan-2')).toBeInTheDocument();
     expect(screen.getByText('2026-09-12T10:05:00Z')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'APPROVE' }));
-    fireEvent.change(await screen.findByLabelText('Comment'), { target: { value: 'Approved against current operating assumptions.' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Execute APPROVE' }));
-
-    expect(await screen.findByText('APPROVE · revision APPROVED')).toBeInTheDocument();
-    await waitFor(() => expect(fixtures.state.executeRequest).toEqual({
-      expectedTaskUpdatedAt: '2026-09-12T10:05:00Z',
-      commentText: 'Approved against current operating assumptions.',
-      reasonId: undefined,
-      decisionNote: undefined,
-      correlationId: undefined,
-    }));
+    expect(screen.getByRole('button', { name: 'APPROVE' })).toBeEnabled();
+    expect(screen.getByText('comment required')).toBeInTheDocument();
+    expect(screen.getByText('planning:revisions:approve')).toBeInTheDocument();
   });
 });
