@@ -3,7 +3,7 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography,
 } from '@mui/material';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useMemo, useState, type Dispatch, type SetStateAction } from 'react';
+import { useMemo, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
 import { Link as RouterLink } from 'react-router';
 
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
@@ -22,7 +22,6 @@ import {
   fetchWorkbenchResources,
   workbenchQueryKeys,
 } from '@/features/workbench/api/workbenchApi';
-import { EngineeringContextPanel } from '@/processes/engineering/EngineeringContextPanel';
 
 const MODULE = 'assets';
 const PAGE_SIZE = 25;
@@ -34,6 +33,10 @@ const CREATE_WORK_ORDER_ROUTE = '/api/v1/assets/maintenance-work-orders';
 
 type RouteMethod = 'GET' | 'POST';
 type FormState = Record<string, string>;
+
+export interface EngineeringAssetsPageProps {
+  renderSelectedContext?: (attributes?: Record<string, unknown>) => ReactNode;
+}
 
 function permissionForRoute(
   routes: ReturnType<typeof usePermissions>['routes'], route: string, method: RouteMethod,
@@ -56,7 +59,7 @@ function errorMessage(error: unknown, resource: string): string {
   return normalized.message || `${resource} could not be loaded.`;
 }
 
-export function EngineeringAssetsPage() {
+export function EngineeringAssetsPage({ renderSelectedContext }: EngineeringAssetsPageProps = {}) {
   const permissions = usePermissions();
   const queryClient = useQueryClient();
   const [resource, setResource] = useState('');
@@ -248,7 +251,7 @@ export function EngineeringAssetsPage() {
                 <Box component="pre" sx={{ whiteSpace: 'pre-wrap', overflowX: 'auto', m: 0 }}>{detailQuery.data ? JSON.stringify(detailQuery.data.attributes, null, 2) : 'Loading…'}</Box>
               )}
             </Paper>
-            <EngineeringContextPanel attributes={detailQuery.data?.attributes} />
+            {renderSelectedContext?.(detailQuery.data?.attributes)}
           </>
         )}
 
