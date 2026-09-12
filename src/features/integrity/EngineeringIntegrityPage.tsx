@@ -19,11 +19,11 @@ import {
   Typography,
 } from '@mui/material';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
-import { usePermissions } from '@/features/permissions/usePermissions';
 import { createIntegrityAssessment } from '@/features/integrity/api/integrityApi';
+import { usePermissions } from '@/features/permissions/usePermissions';
 import {
   fetchWorkbenchRecord,
   fetchWorkbenchRecords,
@@ -82,25 +82,18 @@ export function EngineeringIntegrityPage() {
     enabled: canRead,
   });
 
-  useEffect(() => {
-    if (!resource && resourcesQuery.data?.length) setResource(resourcesQuery.data[0].resource);
-  }, [resource, resourcesQuery.data]);
-
-  useEffect(() => {
-    setPage(0);
-    setSelectedId('');
-  }, [resource]);
+  const effectiveResource = resource || resourcesQuery.data?.[0]?.resource || '';
 
   const listQuery = useQuery({
-    queryKey: workbenchQueryKeys.list(MODULE, resource, page, PAGE_SIZE, query),
-    queryFn: () => fetchWorkbenchRecords({ module: MODULE, resource, page, size: PAGE_SIZE, query }),
-    enabled: canRead && Boolean(resource),
+    queryKey: workbenchQueryKeys.list(MODULE, effectiveResource, page, PAGE_SIZE, query),
+    queryFn: () => fetchWorkbenchRecords({ module: MODULE, resource: effectiveResource, page, size: PAGE_SIZE, query }),
+    enabled: canRead && Boolean(effectiveResource),
   });
 
   const detailQuery = useQuery({
-    queryKey: workbenchQueryKeys.detail(MODULE, resource, selectedId),
-    queryFn: () => fetchWorkbenchRecord(MODULE, resource, selectedId),
-    enabled: canRead && Boolean(resource && selectedId),
+    queryKey: workbenchQueryKeys.detail(MODULE, effectiveResource, selectedId),
+    queryFn: () => fetchWorkbenchRecord(MODULE, effectiveResource, selectedId),
+    enabled: canRead && Boolean(effectiveResource && selectedId),
   });
 
   const assessmentMutation = useMutation({
@@ -115,8 +108,8 @@ export function EngineeringIntegrityPage() {
   });
 
   const selectedDescriptor = useMemo(
-    () => resourcesQuery.data?.find((item) => item.resource === resource),
-    [resource, resourcesQuery.data],
+    () => resourcesQuery.data?.find((item) => item.resource === effectiveResource),
+    [effectiveResource, resourcesQuery.data],
   );
 
   if (permissions.status !== 'ready') {
@@ -146,9 +139,13 @@ export function EngineeringIntegrityPage() {
                 <InputLabel id="integrity-resource-label">Integrity resource</InputLabel>
                 <Select
                   labelId="integrity-resource-label"
-                  value={resource}
+                  value={effectiveResource}
                   label="Integrity resource"
-                  onChange={(event) => setResource(event.target.value)}
+                  onChange={(event) => {
+                    setResource(event.target.value);
+                    setPage(0);
+                    setSelectedId('');
+                  }}
                 >
                   {(resourcesQuery.data ?? []).map((item) => (
                     <MenuItem key={item.resource} value={item.resource}>{item.entityName || item.resource}</MenuItem>
@@ -159,7 +156,7 @@ export function EngineeringIntegrityPage() {
                 size="small"
                 label="Search"
                 value={query}
-                onChange={(event) => { setQuery(event.target.value); setPage(0); }}
+                onChange={(event) => { setQuery(event.target.value); setPage(0); setSelectedId(''); }}
                 helperText="Uses HidraAPI workbench text search."
               />
             </Stack>
@@ -197,9 +194,9 @@ export function EngineeringIntegrityPage() {
         </TableContainer>
 
         <Stack direction="row" spacing={1} alignItems="center">
-          <Button disabled={page === 0} onClick={() => setPage((value) => Math.max(0, value - 1))}>Previous</Button>
+          <Button disabled={page === 0} onClick={() => { setPage((value) => Math.max(0, value - 1)); setSelectedId(''); }}>Previous</Button>
           <Typography>Page {page + 1}</Typography>
-          <Button disabled={!listQuery.data || page + 1 >= listQuery.data.totalPages} onClick={() => setPage((value) => value + 1)}>Next</Button>
+          <Button disabled={!listQuery.data || page + 1 >= listQuery.data.totalPages} onClick={() => { setPage((value) => value + 1); setSelectedId(''); }}>Next</Button>
         </Stack>
 
         {selectedId && (
