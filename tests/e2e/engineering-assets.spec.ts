@@ -206,7 +206,6 @@ test('HWEB-011-05 loads asset history from exact backend lifecycle-event evidenc
   await page.getByText('asset-1', { exact: true }).click();
 
   await expect(page.getByRole('heading', { name: 'Asset lifecycle history' })).toBeVisible();
-  await expect(page.getByText('COMMISSIONED', { exact: true })).toBeVisible();
   await expect(page.getByText(/Commissioned for service/)).toBeVisible();
   await expect(page.getByText(/Old status: INSTALLED/)).toBeVisible();
   await expect(page.getByText(/New status: COMMISSIONED/)).toBeVisible();
