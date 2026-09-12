@@ -163,7 +163,7 @@ test('HWEB-010-06 refetches after stale revision conflict and retries only with 
   await expect(page.getByRole('heading', { name: 'Revision metadata update' })).toBeVisible();
   await expect(page.getByText('Authoritative version: 2026-09-12T10:10:00Z')).toBeVisible();
   await page.getByLabel('Change reason code').fill('OPS_REBASE');
-  await page.getByLabel('Change reason').fill('First stale attempt');
+  await page.getByLabel('Change reason', { exact: true }).fill('First stale attempt');
   await page.getByRole('button', { name: 'Save revision metadata' }).click();
 
   await expect(page.getByText(/rejected a stale revision/i)).toBeVisible();
@@ -171,7 +171,7 @@ test('HWEB-010-06 refetches after stale revision conflict and retries only with 
   expect(mock.patchAttempts()).toBe(1);
 
   await page.getByLabel('Change reason code').fill('OPS_REBASE');
-  await page.getByLabel('Change reason').fill('Reviewed after refetch');
+  await page.getByLabel('Change reason', { exact: true }).fill('Reviewed after refetch');
   await page.getByRole('button', { name: 'Save revision metadata' }).click();
 
   await expect(page.getByText(/New version: 2026-09-12T10:25:00Z/)).toBeVisible();
