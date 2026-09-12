@@ -3,6 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 const routes = [
   { route: '/api/v1/workbench/{module}/{resource}', methods: ['GET'], module: 'workbench', resource: 'resources', action: 'read', permission: 'workbench:resources:read', enforcementStatus: 'backend-enforced' },
   { route: '/api/v1/workbench/{module}/{resource}/{id}', methods: ['GET'], module: 'workbench', resource: 'resources', action: 'read', permission: 'workbench:resources:read', enforcementStatus: 'backend-enforced' },
+  { route: '/api/v1/workbench/{module}/{resource}/search', methods: ['POST'], module: 'workbench', resource: 'resources', action: 'search', permission: 'workbench:resources:search', enforcementStatus: 'backend-enforced' },
   { route: '/api/v1/assets/maintainable-assets', methods: ['POST'], module: 'assets', resource: 'maintainable-assets', action: 'create', permission: 'assets:maintainable-assets:create', enforcementStatus: 'backend-enforced' },
   { route: '/api/v1/assets/asset-conditions', methods: ['POST'], module: 'assets', resource: 'asset-conditions', action: 'create', permission: 'assets:asset-conditions:create', enforcementStatus: 'backend-enforced' },
   { route: '/api/v1/assets/maintenance-work-orders', methods: ['POST'], module: 'assets', resource: 'maintenance-work-orders', action: 'create', permission: 'assets:maintenance-work-orders:create', enforcementStatus: 'backend-enforced' },
@@ -10,12 +11,32 @@ const routes = [
 
 const effectivePermissions = [
   'workbench:resources:read',
+  'workbench:resources:search',
   'assets:maintainable-assets:create',
   'assets:asset-conditions:create',
   'assets:maintenance-work-orders:create',
 ];
 
-async function mockAssets(page: Page) {
+const lifecycleItems = [
+  {
+    module: 'assets', resource: 'asset-lifecycle-events', id: 'event-2',
+    attributes: {
+      maintainableAssetId: 'asset-1', eventType: 'COMMISSIONED', oldStatus: 'INSTALLED', newStatus: 'COMMISSIONED',
+      eventReasonId: 'reason-commissioning', eventComment: 'Commissioned for service', actorId: 'actor-7',
+      eventAt: '2026-09-12T17:00:00Z', correlationId: 'corr-22', createdAt: '2026-09-12T17:00:01Z',
+    },
+  },
+  {
+    module: 'assets', resource: 'asset-lifecycle-events', id: 'event-1',
+    attributes: {
+      maintainableAssetId: 'asset-1', eventType: 'INSTALLED', oldStatus: null, newStatus: 'INSTALLED',
+      eventComment: 'Installed on north station', actorId: 'actor-5', eventAt: '2026-09-10T08:00:00Z',
+      correlationId: 'corr-10', createdAt: '2026-09-10T08:00:01Z',
+    },
+  },
+];
+
+async function mockAssets(page: Page, historyItems = lifecycleItems) {
   await page.route('**/api/v1/security/permissions/routes', (route) => route.fulfill({ json: routes }));
   await page.route('**/api/v1/security/permissions/catalog', (route) => route.fulfill({
     json: { strategy: 'derived-route-permission-catalog', enforcement: 'backend-enforced', permissionFormat: '<module>:<resource>:<action>', routes },
@@ -29,6 +50,15 @@ async function mockAssets(page: Page) {
         tableName: 'hidra_assets_maintainable_asset', idField: 'id', searchableFields: ['assetNumber', 'assetCode', 'assetName'],
         listEndpoint: '/api/v1/workbench/assets/maintainable-asset', detailEndpoint: '/api/v1/workbench/assets/maintainable-asset/{id}',
         searchEndpoint: '/api/v1/workbench/assets/maintainable-asset/search',
+      },
+      {
+        module: 'assets', resource: 'asset-lifecycle-events', entityName: 'AssetLifecycleEvent',
+        javaType: 'dz.sh.hidra.modules.assets.infrastructure.persistence.entity.AssetLifecycleEventJpaEntity',
+        tableName: 'hidra_asset_lifecycle_event', idField: 'id',
+        searchableFields: ['actorId', 'correlationId', 'eventComment', 'eventReasonId', 'id', 'maintainableAssetId'],
+        listEndpoint: '/api/v1/workbench/assets/asset-lifecycle-events',
+        detailEndpoint: '/api/v1/workbench/assets/asset-lifecycle-events/{id}',
+        searchEndpoint: '/api/v1/workbench/assets/asset-lifecycle-events/search',
       },
       {
         module: 'assets', resource: 'maintenance-work-order', entityName: 'MaintenanceWorkOrder', javaType: 'MaintenanceWorkOrderJpaEntity',
@@ -66,6 +96,23 @@ async function mockAssets(page: Page) {
       },
     },
   }));
+
+  await page.route('**/api/v1/workbench/assets/asset-lifecycle-events/search', async (route) => {
+    expect(route.request().method()).toBe('POST');
+    expect(await route.request().postDataJSON()).toEqual({
+      filters: { maintainableAssetId: 'asset-1' },
+      page: 0,
+      size: 200,
+      sortBy: 'eventAt',
+      sortDirection: 'desc',
+    });
+    await route.fulfill({
+      json: {
+        module: 'assets', resource: 'asset-lifecycle-events', page: 0, size: 200,
+        totalElements: historyItems.length, totalPages: historyItems.length ? 1 : 0, items: historyItems,
+      },
+    });
+  });
 
   await page.route('**/api/v1/assets/maintainable-assets', async (route) => {
     expect(await route.request().postDataJSON()).toEqual({
@@ -149,4 +196,30 @@ test('HWEB-011-03 reads assets from workbench and uses backend-owned create cont
   await page.getByRole('textbox', { name: 'assignedOrganizationUnitId', exact: true }).fill('org-maintenance');
   await page.getByRole('button', { name: 'Create maintenance work order' }).click();
   await expect(page.getByText(/Maintenance work order created/)).toBeVisible();
+});
+
+test('HWEB-011-05 loads asset history from exact backend lifecycle-event evidence', async ({ page }) => {
+  await mockAssets(page);
+  await signIn(page);
+  await navigateInApp(page, '/engineering/assets');
+
+  await page.getByText('asset-1', { exact: true }).click();
+
+  await expect(page.getByRole('heading', { name: 'Asset lifecycle history' })).toBeVisible();
+  await expect(page.getByText(/Commissioned for service/)).toBeVisible();
+  await expect(page.getByText(/Old status: INSTALLED/)).toBeVisible();
+  await expect(page.getByText(/New status: COMMISSIONED/)).toBeVisible();
+  await expect(page.getByText(/Correlation ID: corr-22/)).toBeVisible();
+  await expect(page.getByText('2026-09-12T17:00:00Z', { exact: true })).toBeVisible();
+});
+
+test('HWEB-011-05 does not reconstruct history when the backend returns no lifecycle events', async ({ page }) => {
+  await mockAssets(page, []);
+  await signIn(page);
+  await navigateInApp(page, '/engineering/assets');
+
+  await page.getByText('asset-1', { exact: true }).click();
+
+  await expect(page.getByRole('heading', { name: 'Asset lifecycle history' })).toBeVisible();
+  await expect(page.getByText('No backend lifecycle events were returned for this maintainable asset.')).toBeVisible();
 });

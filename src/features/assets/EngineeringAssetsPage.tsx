@@ -7,6 +7,7 @@ import { useMemo, useState, type Dispatch, type ReactNode, type SetStateAction }
 import { Link as RouterLink } from 'react-router';
 
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
+import { AssetHistoryTimeline } from '@/features/assets/AssetHistoryTimeline';
 import {
   createMaintenanceWorkOrder,
   recordAssetCondition,
@@ -27,6 +28,7 @@ const MODULE = 'assets';
 const PAGE_SIZE = 25;
 const WORKBENCH_LIST_ROUTE = '/api/v1/workbench/{module}/{resource}';
 const WORKBENCH_DETAIL_ROUTE = '/api/v1/workbench/{module}/{resource}/{id}';
+const WORKBENCH_SEARCH_ROUTE = '/api/v1/workbench/{module}/{resource}/search';
 const REGISTER_ASSET_ROUTE = '/api/v1/assets/maintainable-assets';
 const RECORD_CONDITION_ROUTE = '/api/v1/assets/asset-conditions';
 const CREATE_WORK_ORDER_ROUTE = '/api/v1/assets/maintenance-work-orders';
@@ -84,10 +86,12 @@ export function EngineeringAssetsPage({ renderSelectedContext }: EngineeringAsse
 
   const listPermission = permissionForRoute(permissions.routes, WORKBENCH_LIST_ROUTE, 'GET');
   const detailPermission = permissionForRoute(permissions.routes, WORKBENCH_DETAIL_ROUTE, 'GET');
+  const searchPermission = permissionForRoute(permissions.routes, WORKBENCH_SEARCH_ROUTE, 'POST');
   const registerPermission = permissionForRoute(permissions.routes, REGISTER_ASSET_ROUTE, 'POST');
   const conditionPermission = permissionForRoute(permissions.routes, RECORD_CONDITION_ROUTE, 'POST');
   const workOrderPermission = permissionForRoute(permissions.routes, CREATE_WORK_ORDER_ROUTE, 'POST');
   const canRead = Boolean(listPermission && detailPermission && permissions.can(listPermission) && permissions.can(detailPermission));
+  const canSearchHistory = Boolean(searchPermission && permissions.can(searchPermission));
   const canRegister = Boolean(registerPermission && permissions.can(registerPermission));
   const canRecordCondition = Boolean(conditionPermission && permissions.can(conditionPermission));
   const canCreateWorkOrder = Boolean(workOrderPermission && permissions.can(workOrderPermission));
@@ -112,6 +116,11 @@ export function EngineeringAssetsPage({ renderSelectedContext }: EngineeringAsse
     () => resourcesQuery.data?.find((item) => item.resource === effectiveResource),
     [effectiveResource, resourcesQuery.data],
   );
+  const lifecycleResource = useMemo(
+    () => resourcesQuery.data?.find((item) => item.javaType.endsWith('AssetLifecycleEventJpaEntity')),
+    [resourcesQuery.data],
+  );
+  const selectedIsMaintainableAsset = Boolean(selectedDescriptor?.javaType.endsWith('MaintainableAssetJpaEntity'));
   const invalidateAssets = () => queryClient.invalidateQueries({ queryKey: ['hidra', 'workbench', MODULE] });
 
   const assetMutation = useMutation({ mutationFn: registerMaintainableAsset, onSuccess: invalidateAssets });
@@ -251,6 +260,14 @@ export function EngineeringAssetsPage({ renderSelectedContext }: EngineeringAsse
                 <Box component="pre" sx={{ whiteSpace: 'pre-wrap', overflowX: 'auto', m: 0 }}>{detailQuery.data ? JSON.stringify(detailQuery.data.attributes, null, 2) : 'Loading…'}</Box>
               )}
             </Paper>
+            {selectedIsMaintainableAsset && (
+              <AssetHistoryTimeline
+                maintainableAssetId={selectedId}
+                lifecycleResource={lifecycleResource}
+                searchPermission={searchPermission}
+                allowed={canSearchHistory}
+              />
+            )}
             {renderSelectedContext?.(detailQuery.data?.attributes)}
           </>
         )}
