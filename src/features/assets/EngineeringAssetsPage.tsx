@@ -22,6 +22,7 @@ import {
   fetchWorkbenchResources,
   workbenchQueryKeys,
 } from '@/features/workbench/api/workbenchApi';
+import { EngineeringContextPanel } from '@/processes/engineering/EngineeringContextPanel';
 
 const MODULE = 'assets';
 const PAGE_SIZE = 25;
@@ -240,12 +241,15 @@ export function EngineeringAssetsPage() {
           <Button disabled={!listQuery.data || page + 1 >= listQuery.data.totalPages} onClick={() => { setPage((value) => value + 1); setSelectedId(''); }}>Next</Button>
         </Stack>
         {selectedId && (
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6">Selected asset record</Typography>
-            {detailQuery.isError ? <Alert severity="error">{errorMessage(detailQuery.error, 'asset record')}</Alert> : (
-              <Box component="pre" sx={{ whiteSpace: 'pre-wrap', overflowX: 'auto', m: 0 }}>{detailQuery.data ? JSON.stringify(detailQuery.data.attributes, null, 2) : 'Loading…'}</Box>
-            )}
-          </Paper>
+          <>
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="h6">Selected asset record</Typography>
+              {detailQuery.isError ? <Alert severity="error">{errorMessage(detailQuery.error, 'asset record')}</Alert> : (
+                <Box component="pre" sx={{ whiteSpace: 'pre-wrap', overflowX: 'auto', m: 0 }}>{detailQuery.data ? JSON.stringify(detailQuery.data.attributes, null, 2) : 'Loading…'}</Box>
+              )}
+            </Paper>
+            <EngineeringContextPanel attributes={detailQuery.data?.attributes} />
+          </>
         )}
 
         <CommandPanel
