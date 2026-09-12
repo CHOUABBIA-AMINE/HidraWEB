@@ -11,6 +11,8 @@ import type {
   PlanningApprovalExecutionResponse,
   PlanningApprovalResponse,
   PlanningPeriodView,
+  Request as UpdatePlanRevisionRequest,
+  Response as UpdatePlanRevisionResponse,
 } from '@/api/generated/planning/model';
 
 export interface PlanningPageParams { page?: number; size?: number; }
@@ -47,6 +49,13 @@ export function fetchPlanRevisions(params: RevisionListParams): Promise<PagePlan
 }
 export function fetchPlanRevision(id: string): Promise<PlanRevisionView> {
   return hidraHttpClient<PlanRevisionView>({ method: 'GET', url: `/api/v1/planning/revisions/${encodeURIComponent(id)}` });
+}
+export function updatePlanRevision(id: string, request: UpdatePlanRevisionRequest): Promise<UpdatePlanRevisionResponse> {
+  return hidraHttpClient<UpdatePlanRevisionResponse>({
+    method: 'PATCH',
+    url: `/api/v1/planning/revisions/${encodeURIComponent(id)}`,
+    data: request,
+  });
 }
 export function fetchPlanTargets(params: TargetListParams): Promise<PagePlanTargetView> {
   return hidraHttpClient<PagePlanTargetView>({ method: 'GET', url: '/api/v1/planning/targets', params });
