@@ -1,6 +1,6 @@
 # HWEB-011 — Integrity and Maintenance
 
-Status: HWEB-011-05 COMPLETE / HWEB-011-06 NEXT (PARTIALLY BLOCKED) / GAP-ENG-001 OPEN
+Status: HWEB-011-06 PARTIAL — PERMISSION VERIFIED / CONCURRENCY BLOCKED / GAP-ENG-001 OPEN
 
 ## Accepted baselines
 
@@ -269,11 +269,47 @@ Concurrency gap    : GAP-ENG-001 / HidraAPI #79 remains OPEN and untouched
 Conclusion         : SUCCESS
 ```
 
-### HWEB-011-06 — Role/permission and concurrent updates — NEXT / PARTIALLY BLOCKED
+### HWEB-011-06 — Role/permission and concurrent updates — PARTIAL / BLOCKED
 
-Permission tests may proceed against route descriptors/effective grants. Concurrent-update behavior remains blocked by `GAP-ENG-001` / HidraAPI #79 until an authoritative backend mutation contract is published and pinned.
+Permission/role verification is complete. Browser coverage proves that an action requires both its exact backend-published route descriptor and the corresponding effective grant; an effective grant string does not create an action when the route descriptor is absent. Assets commands and lifecycle-history search fail closed without grants, and an HTTP 403 from HidraAPI remains final even when frontend metadata appears to allow the action.
+
+Concurrent-update verification remains blocked by `GAP-ENG-001` / HidraAPI #79. HidraWEB has not synthesized an update route, optimistic-lock token, lifecycle transition, or conflict/retry semantics.
+
+```text
+Permission PR        : #42
+Final permission head: 3d7e6e30347af7eb0b5995bca5338a4c1efd2ede
+Exact-head CI run    : 34722168113 — SUCCESS
+Merge SHA            : 1ae7a257843512b36d966a708480e84412d83d67
+Post-merge CI run    : 34722316390 — SUCCESS
+Frontend routes      : /engineering
+                       /engineering/assets
+Authorization        : GET /api/v1/security/permissions/routes + GET /api/v1/identity/me/permissions
+Backend final auth   : HTTP 403 verified
+OpenAPI status       : unchanged; accepted artifact 10298289002 retained
+Concurrency gap      : GAP-ENG-001 / HidraAPI #79 remains OPEN
+Conclusion           : PERMISSION VERIFIED / CONCURRENCY BLOCKED
+```
 
 ---
+
+## HWEB-011-06 permission verification evidence
+
+```text
+Backend source commit / branch : 9e8a1eb24a99c05749364119ef468f7971939123 / main
+Endpoints and DTOs used         : GET /api/v1/security/permissions/routes; GET /api/v1/security/permissions/catalog; GET /api/v1/identity/me/permissions; existing workbench/integrity/assets contracts only; no integrity/assets update route
+Permissions used                : exact backend route descriptors intersected with effective grants; no permission code inferred from module/resource names
+Frontend routes changed         : none; test-only verification for /engineering and /engineering/assets
+State ownership                 : unchanged; TanStack Query remains server-state owner and React local state remains selection/forms/paging
+Authorization cases             : descriptor without effective grant denied; grant without descriptor denied; assets commands/history search denied without grant; backend HTTP 403 remains final authority
+Tests added                     : tests/e2e/engineering-permissions.spec.ts
+OpenAPI regeneration status     : CI regeneration succeeded; no contract or pin change required for the permission half of HWEB-011-06
+Exact permission head           : 3d7e6e30347af7eb0b5995bca5338a4c1efd2ede
+Exact-head CI                   : 34722168113 — SUCCESS
+Permission merge                : 1ae7a257843512b36d966a708480e84412d83d67
+Post-merge main CI              : 34722316390 — SUCCESS
+Known backend gaps              : GAP-ENG-001 / HidraAPI #79 remains OPEN; no concurrency-protected integrity/assets update mutation exists on audited main
+Conclusion                      : permission half VERIFIED; concurrency half BLOCKED; HWEB-011 remains open and HWEB-012 must not start
+```
 
 ## HWEB-011-05 verification evidence
 
