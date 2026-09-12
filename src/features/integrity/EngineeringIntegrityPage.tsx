@@ -19,7 +19,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
 import { createIntegrityAssessment } from '@/features/integrity/api/integrityApi';
@@ -30,7 +30,6 @@ import {
   fetchWorkbenchResources,
   workbenchQueryKeys,
 } from '@/features/workbench/api/workbenchApi';
-import { EngineeringContextPanel } from '@/processes/engineering/EngineeringContextPanel';
 
 const MODULE = 'integrity';
 const PAGE_SIZE = 25;
@@ -39,6 +38,10 @@ const WORKBENCH_DETAIL_ROUTE = '/api/v1/workbench/{module}/{resource}/{id}';
 const CREATE_ASSESSMENT_ROUTE = '/api/v1/integrity/assessments';
 
 type RouteMethod = 'GET' | 'POST';
+
+export interface EngineeringIntegrityPageProps {
+  renderSelectedContext?: (attributes?: Record<string, unknown>) => ReactNode;
+}
 
 function permissionForRoute(
   routes: ReturnType<typeof usePermissions>['routes'],
@@ -59,7 +62,7 @@ function clean(value: string): string | undefined {
   return normalized || undefined;
 }
 
-export function EngineeringIntegrityPage() {
+export function EngineeringIntegrityPage({ renderSelectedContext }: EngineeringIntegrityPageProps = {}) {
   const permissions = usePermissions();
   const queryClient = useQueryClient();
   const [resource, setResource] = useState('');
@@ -212,7 +215,7 @@ export function EngineeringIntegrityPage() {
                 </Box>
               )}
             </Paper>
-            <EngineeringContextPanel attributes={detailQuery.data?.attributes} />
+            {renderSelectedContext?.(detailQuery.data?.attributes)}
           </>
         )}
 
