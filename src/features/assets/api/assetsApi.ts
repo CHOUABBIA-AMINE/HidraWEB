@@ -50,6 +50,25 @@ export interface CreateMaintenanceWorkOrderRequest {
   createdByActorId?: string;
 }
 
+export interface UpdateMaintainableAssetRequest {
+  expectedUpdatedAt: string;
+  assetName: string;
+}
+
+export interface MaintainableAssetResponse {
+  id?: string;
+  assetNumber?: string;
+  assetCode?: string;
+  assetName?: string;
+  assetTypeId?: string;
+  topologyAssetTypeCode?: string;
+  topologyAssetId?: string;
+  status?: string;
+  criticalityId?: string;
+  registeredAt?: string;
+  updatedAt?: string;
+}
+
 export function registerMaintainableAsset(request: RegisterMaintainableAssetRequest): Promise<Record<string, unknown>> {
   return hidraHttpClient<Record<string, unknown>>({ method: 'POST', url: '/api/v1/assets/maintainable-assets', data: request });
 }
@@ -60,4 +79,12 @@ export function recordAssetCondition(request: RecordAssetConditionRequest): Prom
 
 export function createMaintenanceWorkOrder(request: CreateMaintenanceWorkOrderRequest): Promise<Record<string, unknown>> {
   return hidraHttpClient<Record<string, unknown>>({ method: 'POST', url: '/api/v1/assets/maintenance-work-orders', data: request });
+}
+
+export function updateMaintainableAsset(assetId: string, request: UpdateMaintainableAssetRequest): Promise<MaintainableAssetResponse> {
+  return hidraHttpClient<MaintainableAssetResponse>({
+    method: 'PATCH',
+    url: `/api/v1/assets/maintainable-assets/${encodeURIComponent(assetId)}`,
+    data: request,
+  });
 }
