@@ -1,6 +1,6 @@
 # HWEB-011 — Integrity and Maintenance
 
-Status: HWEB-011-03 COMPLETE / HWEB-011-04 NEXT / GAP-ENG-001 OPEN
+Status: HWEB-011-04 COMPLETE / HWEB-011-05 NEXT / GAP-ENG-001 OPEN
 
 ## Accepted baselines
 
@@ -219,11 +219,34 @@ Concurrency gap    : GAP-ENG-001 / HidraAPI #79 remains OPEN and untouched
 Conclusion         : SUCCESS
 ```
 
-### HWEB-011-04 — Cross-module engineering context — NEXT
+### HWEB-011-04 — Cross-module engineering context — COMPLETE
 
-Compose topology, document, risk and incident context in `src/processes` only from already-published public contracts and neutral references. Do not import or mirror another module's persistence/domain ownership. Missing relationship evidence must fail closed or be registered as a new backend gap.
+Composes topology, document, risk and incident context at the `src/processes` boundary only from already-published neutral references in the selected backend workbench record. The process does not scan foreign module collections, infer relationships, or import another business feature's persistence/domain ownership. Records with no supported published relationship fail closed with an explicit no-context state.
 
-### HWEB-011-05 — Asset history/timeline — PENDING
+```text
+Product PR         : #38
+Final product head : 274cebc55ccd9a05612f9b9ff9260e9c3243eed0
+Exact-head CI run  : 34713913319 — SUCCESS
+Merge SHA          : 16aa6cced5cba33f64dca5b0fc917970e5f1c237
+Post-merge CI run  : 34714053565 — SUCCESS
+Frontend routes    : /engineering
+                     /engineering/assets
+Composition layer  : src/processes/engineering
+Direct references  : topologyAssetId
+                     documentReferenceId
+                     riskAssessmentId
+                     sourceIncidentId
+Qualified refs     : sourceModule + sourceReferenceId
+                     targetModule + targetReferenceId
+Allowed modules    : topology, documents, risk, incident
+Authorization      : existing runtime workbench route descriptors + effective grants
+State ownership    : TanStack Query server state; React local state only selection/forms
+OpenAPI status     : unchanged; accepted artifact 10298289002 retained
+Concurrency gap    : GAP-ENG-001 / HidraAPI #79 remains OPEN and untouched
+Conclusion         : SUCCESS
+```
+
+### HWEB-011-05 — Asset history/timeline — NEXT
 
 Use backend lifecycle-event evidence only. Do not derive history from current status or reconstruct events client-side.
 
@@ -232,6 +255,26 @@ Use backend lifecycle-event evidence only. Do not derive history from current st
 Permission tests may proceed against route descriptors/effective grants. Concurrent-update behavior remains blocked by `GAP-ENG-001` / HidraAPI #79 until an authoritative backend mutation contract is published and pinned.
 
 ---
+
+## HWEB-011-04 verification evidence
+
+```text
+Backend source commit / branch : 9e8a1eb24a99c05749364119ef468f7971939123 / main
+Endpoints and DTOs used         : existing platform workbench resource discovery/list/detail only; no new HWEB-011-04 backend route
+Permissions used                : existing runtime workbench route descriptors + GET /api/v1/identity/me/permissions effective grants
+Frontend routes changed         : /engineering and /engineering/assets now route through the engineering process boundary
+State ownership                 : TanStack Query retains server state; React local state remains selection/paging/forms
+Relationship ownership          : backend-published neutral IDs only; no names/status/timestamps/local state used to infer relationships
+Fail-closed behavior            : unsupported/missing relationship evidence renders explicit no-context state; no foreign collection scan
+Tests added                     : engineering context unit tests plus browser assertions for topology composition and missing-context failure
+OpenAPI regeneration status     : CI regeneration succeeded; no contract or pin change required for HWEB-011-04
+Exact product head              : 274cebc55ccd9a05612f9b9ff9260e9c3243eed0
+Exact-head CI                   : 34713913319 — SUCCESS
+Product merge                   : 16aa6cced5cba33f64dca5b0fc917970e5f1c237
+Post-merge main CI              : 34714053565 — SUCCESS
+Known backend gaps              : GAP-ENG-001 / HidraAPI #79 remains OPEN for HWEB-011-06
+Conclusion                      : HWEB-011-04 VERIFIED; HWEB-011-05 is next
+```
 
 ## HWEB-011-01 inventory evidence
 
