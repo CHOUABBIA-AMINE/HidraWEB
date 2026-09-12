@@ -5,10 +5,8 @@ import { LoginPage } from '@/app/pages/LoginPage';
 import { NotFoundPage } from '@/app/pages/NotFoundPage';
 import { OverviewPage } from '@/app/pages/OverviewPage';
 import { AlarmConsolePage } from '@/features/alarm/AlarmConsolePage';
-import { EngineeringAssetsPage } from '@/features/assets/EngineeringAssetsPage';
 import { IdentityAdministrationPage } from '@/features/context/IdentityAdministrationPage';
 import { OrganizationAdministrationPage } from '@/features/context/OrganizationAdministrationPage';
-import { EngineeringIntegrityPage } from '@/features/integrity/EngineeringIntegrityPage';
 import { IncidentWorkspacePage } from '@/features/incident/IncidentWorkspacePage';
 import { PermissionBootstrapBoundary } from '@/features/permissions/PermissionBootstrapBoundary';
 import { PlanningWorkspacePage } from '@/features/planning/PlanningWorkspacePage';
@@ -16,6 +14,7 @@ import { TelemetryMonitoringPage } from '@/features/telemetry-monitoring/Telemet
 import { NetworkTopologyPage } from '@/features/topology/NetworkTopologyPage';
 import { OperationalWorkbenchPage } from '@/features/workbench/OperationalWorkbenchPage';
 import { WorkflowTasksPage } from '@/features/workflow/WorkflowTasksPage';
+import { EngineeringAssetsProcessPage, EngineeringIntegrityProcessPage } from '@/processes/engineering';
 import { AppShell } from '@/shell/AppShell';
 
 export const router = createBrowserRouter([
@@ -37,8 +36,8 @@ export const router = createBrowserRouter([
       { path: 'alarms', element: <AlarmConsolePage /> },
       { path: 'events', element: <IncidentWorkspacePage /> },
       { path: 'planning', element: <PlanningWorkspacePage /> },
-      { path: 'engineering', element: <EngineeringIntegrityPage /> },
-      { path: 'engineering/assets', element: <EngineeringAssetsPage /> },
+      { path: 'engineering', element: <EngineeringIntegrityProcessPage /> },
+      { path: 'engineering/assets', element: <EngineeringAssetsProcessPage /> },
       { path: 'work/tasks', element: <WorkflowTasksPage /> },
       { path: 'workbench', element: <OperationalWorkbenchPage /> },
       { path: 'administration/organization', element: <OrganizationAdministrationPage /> },
