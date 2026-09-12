@@ -34,6 +34,7 @@ export interface MonitoringRuleParams {
 }
 
 export interface DeviationParams extends MonitoringRuleParams {
+  planTargetId?: string;
   severity?: string;
   from?: string;
   to?: string;

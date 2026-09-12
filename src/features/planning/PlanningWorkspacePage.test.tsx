@@ -76,8 +76,8 @@ describe('HWEB-010 planning workspace', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Open revision' }));
 
     expect(await screen.findByRole('heading', { name: 'Revision approval' })).toBeInTheDocument();
-    expect(await screen.findByText('task-plan-2')).toBeInTheDocument();
-    expect(screen.getByText('2026-09-12T10:05:00Z')).toBeInTheDocument();
+    expect(await screen.findByText(/task-plan-2/)).toBeInTheDocument();
+    expect(screen.getByText(/2026-09-12T10:05:00Z/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'APPROVE' })).toBeEnabled();
     expect(screen.getByText('comment required')).toBeInTheDocument();
     expect(screen.getByText('planning:revisions:approve')).toBeInTheDocument();

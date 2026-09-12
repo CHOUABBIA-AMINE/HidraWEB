@@ -1,0 +1,263 @@
+openapi: 3.1.0
+info:
+  title: HidraAPI HWEB-010-05 Planning Slice
+  version: df8c012be9034886e53f2ec64c28946f18f67b31
+paths:
+  /api/v1/planning/periods:
+    get:
+      operationId: periods
+      tags: [planning-query-controller]
+      parameters:
+        - { in: query, name: page, required: false, schema: { type: integer, format: int32, default: 0 } }
+        - { in: query, name: size, required: false, schema: { type: integer, format: int32, default: 50 } }
+      responses:
+        '200': { description: OK, content: { '*/*': { schema: { $ref: '#/components/schemas/PagePlanningPeriodView' } } } }
+  /api/v1/planning/periods/{id}:
+    get:
+      operationId: period
+      tags: [planning-query-controller]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string } }
+      responses:
+        '200': { description: OK, content: { '*/*': { schema: { $ref: '#/components/schemas/PlanningPeriodView' } } } }
+  /api/v1/planning/operational-plans:
+    get:
+      operationId: operationalPlans
+      tags: [planning-query-controller]
+      parameters:
+        - { in: query, name: page, required: false, schema: { type: integer, format: int32, default: 0 } }
+        - { in: query, name: size, required: false, schema: { type: integer, format: int32, default: 50 } }
+      responses:
+        '200': { description: OK, content: { '*/*': { schema: { $ref: '#/components/schemas/PageOperationalPlanView' } } } }
+  /api/v1/planning/operational-plans/{id}:
+    get:
+      operationId: operationalPlan
+      tags: [planning-query-controller]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string } }
+      responses:
+        '200': { description: OK, content: { '*/*': { schema: { $ref: '#/components/schemas/OperationalPlanView' } } } }
+  /api/v1/planning/revisions:
+    get:
+      operationId: revisions
+      tags: [planning-query-controller]
+      parameters:
+        - { in: query, name: planId, required: true, schema: { type: string } }
+        - { in: query, name: page, required: false, schema: { type: integer, format: int32, default: 0 } }
+        - { in: query, name: size, required: false, schema: { type: integer, format: int32, default: 50 } }
+      responses:
+        '200': { description: OK, content: { '*/*': { schema: { $ref: '#/components/schemas/PagePlanRevisionView' } } } }
+  /api/v1/planning/revisions/{id}:
+    get:
+      operationId: revision
+      tags: [planning-query-controller]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string } }
+      responses:
+        '200': { description: OK, content: { '*/*': { schema: { $ref: '#/components/schemas/PlanRevisionView' } } } }
+  /api/v1/planning/targets:
+    get:
+      operationId: targets
+      tags: [planning-query-controller]
+      parameters:
+        - { in: query, name: revisionId, required: true, schema: { type: string } }
+        - { in: query, name: page, required: false, schema: { type: integer, format: int32, default: 0 } }
+        - { in: query, name: size, required: false, schema: { type: integer, format: int32, default: 50 } }
+      responses:
+        '200': { description: OK, content: { '*/*': { schema: { $ref: '#/components/schemas/PagePlanTargetView' } } } }
+  /api/v1/planning/targets/{id}:
+    get:
+      operationId: target
+      tags: [planning-query-controller]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string } }
+      responses:
+        '200': { description: OK, content: { '*/*': { schema: { $ref: '#/components/schemas/PlanTargetView' } } } }
+  /api/v1/planning/revisions/{revisionId}/approval:
+    get:
+      operationId: approval
+      tags: [Planning Approval]
+      parameters:
+        - { in: path, name: revisionId, required: true, schema: { type: string } }
+      responses:
+        '200': { description: OK, content: { '*/*': { schema: { $ref: '#/components/schemas/PlanningApprovalResponse' } } } }
+  /api/v1/planning/revisions/{revisionId}/approval/actions/{transitionId}/execute:
+    post:
+      operationId: execute_1
+      tags: [Planning Approval]
+      parameters:
+        - { in: path, name: revisionId, required: true, schema: { type: string } }
+        - { in: path, name: transitionId, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ExecutePlanningApprovalActionRequest' }
+      responses:
+        '200': { description: OK, content: { '*/*': { schema: { $ref: '#/components/schemas/PlanningApprovalExecutionResponse' } } } }
+components:
+  schemas:
+    PlanningPeriodView:
+      type: object
+      properties:
+        id: { type: string }
+        code: { type: string }
+        nameFr: { type: string }
+        nameEn: { type: string }
+        nameAr: { type: string }
+        periodStart: { type: string, format: date-time }
+        periodEnd: { type: string, format: date-time }
+        timeZone: { type: string }
+        status: { type: string }
+        periodTypeId: { type: string }
+        createdByActorId: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    OperationalPlanView:
+      type: object
+      properties:
+        id: { type: string }
+        periodId: { type: string }
+        code: { type: string }
+        nameFr: { type: string }
+        nameEn: { type: string }
+        nameAr: { type: string }
+        planTypeId: { type: string }
+        productTypeId: { type: string }
+        topologyScopeType: { type: string }
+        topologyScopeId: { type: string }
+        topologyScopeCode: { type: string }
+        topologyScopeNameSnapshot: { type: string }
+        responsibleOrganizationUnitId: { type: string }
+        status: { type: string }
+        currentRevisionId: { type: string }
+        approvedRevisionId: { type: string }
+        createdByActorId: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    PlanRevisionView:
+      type: object
+      properties:
+        id: { type: string }
+        planId: { type: string }
+        revisionNumber: { type: integer, format: int32 }
+        revisionCode: { type: string }
+        baseRevisionId: { type: string }
+        status: { type: string }
+        changeReasonCodeId: { type: string }
+        changeReasonText: { type: string }
+        submittedAt: { type: string, format: date-time }
+        submittedByActorId: { type: string }
+        approvedAt: { type: string, format: date-time }
+        approvedByActorId: { type: string }
+        workflowInstanceId: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    PlanTargetView:
+      type: object
+      properties:
+        id: { type: string }
+        revisionId: { type: string }
+        nominationId: { type: string }
+        scenarioId: { type: string }
+        targetTypeId: { type: string }
+        topologyAssetType: { type: string }
+        topologyAssetId: { type: string }
+        topologyAssetCode: { type: string }
+        topologyAssetNameSnapshot: { type: string }
+        telemetryPointId: { type: string }
+        telemetryPointCodeSnapshot: { type: string }
+        targetValue: { type: number }
+        targetTextValue: { type: string }
+        unitId: { type: string }
+        toleranceLow: { type: number }
+        toleranceHigh: { type: number }
+        validFrom: { type: string, format: date-time }
+        validTo: { type: string, format: date-time }
+        priority: { type: integer, format: int32 }
+        status: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    Action:
+      type: object
+      properties:
+        transitionId: { type: string }
+        decision: { type: string }
+        reasonRequired: { type: boolean }
+        commentRequired: { type: boolean }
+        requiredPermissionCode: { type: string }
+        permitted: { type: boolean }
+    PlanningApprovalResponse:
+      type: object
+      properties:
+        revisionId: { type: string }
+        revisionStatus: { type: string }
+        workflowInstanceId: { type: string }
+        workflowInstanceStatus: { type: string }
+        currentTaskId: { type: string }
+        currentTaskUpdatedAt: { type: string, format: date-time }
+        actions:
+          type: array
+          items: { $ref: '#/components/schemas/Action' }
+    ExecutePlanningApprovalActionRequest:
+      type: object
+      required: [expectedTaskUpdatedAt]
+      properties:
+        expectedTaskUpdatedAt: { type: string, format: date-time }
+        reasonId: { type: string }
+        commentText: { type: string }
+        decisionNote: { type: string }
+        correlationId: { type: string }
+    PlanningApprovalExecutionResponse:
+      type: object
+      properties:
+        revisionId: { type: string }
+        revisionStatus: { type: string }
+        workflowInstanceId: { type: string }
+        workflowInstanceStatus: { type: string }
+        transitionId: { type: string }
+        decision: { type: string }
+        nextTaskId: { type: string }
+        executedAt: { type: string, format: date-time }
+    PagePlanningPeriodView:
+      type: object
+      properties:
+        content: { type: array, items: { $ref: '#/components/schemas/PlanningPeriodView' } }
+        page: { type: integer, format: int32 }
+        size: { type: integer, format: int32 }
+        totalElements: { type: integer, format: int64 }
+        totalPages: { type: integer, format: int32 }
+        hasNext: { type: boolean }
+    PageOperationalPlanView:
+      type: object
+      properties:
+        content: { type: array, items: { $ref: '#/components/schemas/OperationalPlanView' } }
+        page: { type: integer, format: int32 }
+        size: { type: integer, format: int32 }
+        totalElements: { type: integer, format: int64 }
+        totalPages: { type: integer, format: int32 }
+        hasNext: { type: boolean }
+    PagePlanRevisionView:
+      type: object
+      properties:
+        content: { type: array, items: { $ref: '#/components/schemas/PlanRevisionView' } }
+        page: { type: integer, format: int32 }
+        size: { type: integer, format: int32 }
+        totalElements: { type: integer, format: int64 }
+        totalPages: { type: integer, format: int32 }
+        hasNext: { type: boolean }
+    PagePlanTargetView:
+      type: object
+      properties:
+        content: { type: array, items: { $ref: '#/components/schemas/PlanTargetView' } }
+        page: { type: integer, format: int32 }
+        size: { type: integer, format: int32 }
+        totalElements: { type: integer, format: int64 }
+        totalPages: { type: integer, format: int32 }
+        hasNext: { type: boolean }
+x-hidra-contract-source:
+  repository: CHOUABBIA-AMINE/HidraAPI
+  commit: df8c012be9034886e53f2ec64c28946f18f67b31
+  artifact: hidra-api-openapi-df8c012be9034886e53f2ec64c28946f18f67b31
+  artifactDigest: sha256:5d01f56b83c829ded2fce4bede553f33cff74590e5df946e8f3251a5ae1bf537
+  extractedTags: [planning-query-controller, Planning Approval]
