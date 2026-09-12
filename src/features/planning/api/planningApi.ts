@@ -4,8 +4,10 @@ import type {
   OperationalPlanView,
   PageOperationalPlanView,
   PagePlanRevisionView,
+  PagePlanTargetView,
   PagePlanningPeriodView,
   PlanRevisionView,
+  PlanTargetView,
   PlanningApprovalExecutionResponse,
   PlanningApprovalResponse,
   PlanningPeriodView,
@@ -13,6 +15,7 @@ import type {
 
 export interface PlanningPageParams { page?: number; size?: number; }
 export interface RevisionListParams extends PlanningPageParams { planId: string; }
+export interface TargetListParams extends PlanningPageParams { revisionId: string; }
 
 export const planningQueryKeys = {
   all: ['hidra', 'planning'] as const,
@@ -22,6 +25,8 @@ export const planningQueryKeys = {
   plan: (id: string) => ['hidra', 'planning', 'operational-plans', id] as const,
   revisions: (params: RevisionListParams) => ['hidra', 'planning', 'revisions', params] as const,
   revision: (id: string) => ['hidra', 'planning', 'revisions', id] as const,
+  targets: (params: TargetListParams) => ['hidra', 'planning', 'targets', params] as const,
+  target: (id: string) => ['hidra', 'planning', 'targets', id] as const,
   approval: (revisionId: string) => ['hidra', 'planning', 'revisions', revisionId, 'approval'] as const,
 };
 
@@ -42,6 +47,12 @@ export function fetchPlanRevisions(params: RevisionListParams): Promise<PagePlan
 }
 export function fetchPlanRevision(id: string): Promise<PlanRevisionView> {
   return hidraHttpClient<PlanRevisionView>({ method: 'GET', url: `/api/v1/planning/revisions/${encodeURIComponent(id)}` });
+}
+export function fetchPlanTargets(params: TargetListParams): Promise<PagePlanTargetView> {
+  return hidraHttpClient<PagePlanTargetView>({ method: 'GET', url: '/api/v1/planning/targets', params });
+}
+export function fetchPlanTarget(id: string): Promise<PlanTargetView> {
+  return hidraHttpClient<PlanTargetView>({ method: 'GET', url: `/api/v1/planning/targets/${encodeURIComponent(id)}` });
 }
 export function fetchPlanningApproval(revisionId: string): Promise<PlanningApprovalResponse> {
   return hidraHttpClient<PlanningApprovalResponse>({ method: 'GET', url: `/api/v1/planning/revisions/${encodeURIComponent(revisionId)}/approval` });
