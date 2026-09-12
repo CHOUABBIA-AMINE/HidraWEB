@@ -1,6 +1,6 @@
 # HWEB-011 — Integrity and Maintenance
 
-Status: HWEB-011-01 CONTRACT INVENTORY STARTED / BACKEND GAP REGISTERED
+Status: HWEB-011-03 COMPLETE / HWEB-011-04 NEXT / GAP-ENG-001 OPEN
 
 ## Accepted baselines
 
@@ -183,31 +183,57 @@ No additional backend read gap is opened at inventory time because the generic w
 
 ---
 
-## Remaining execution order
+## Execution status
 
-### HWEB-011-02 — Condition/integrity assessment workspaces
+### HWEB-011-02 — Condition/integrity assessment workspaces — COMPLETE
 
-Use workbench discovery/list/detail/search for integrity read state and the dedicated integrity create contracts where actions are intentionally exposed. Present backend status/type identifiers without a frontend lifecycle state machine.
+Uses workbench discovery/list/detail for integrity read state and the dedicated integrity assessment create contract. Backend status/type identifiers are presented without a frontend lifecycle state machine.
 
-### HWEB-011-03 — Maintainable asset and work-order workspaces
+```text
+Product PR         : #34
+Merge SHA          : 0dc2cee05ee1c1f833c223c26ed0d5c1a75f679e
+Post-merge CI run  : 34710922077 — SUCCESS
+Frontend route     : /engineering
+Read contract      : runtime workbench discovery/list/detail for module integrity
+Mutation contract  : POST /api/v1/integrity/assessments
+Authorization      : runtime route descriptors + effective grants
+```
 
-Use workbench discovery/list/detail/search for assets read state and dedicated create contracts for maintainable assets, asset conditions and work orders. Preserve topology references as neutral identifiers.
+### HWEB-011-03 — Maintainable asset and work-order workspaces — COMPLETE
 
-### HWEB-011-04 — Cross-module engineering context
+Uses workbench discovery/list/detail for assets read state and the published assets create contracts for maintainable assets, asset conditions and maintenance work orders. Topology, organization, party, recommendation and workflow references remain neutral IDs/snapshots.
+
+```text
+Product PR         : #36
+Final product head : e82b5ce22d5be68da423322122b74978299c23b9
+Exact-head CI run  : 34711498232 — SUCCESS
+Merge SHA          : 8bf45c256ce6a2d44645501571517ed9b5e4013f
+Post-merge CI run  : 34711637995 — SUCCESS
+Frontend route     : /engineering/assets
+Read contract      : runtime workbench discovery/list/detail for module assets
+Mutation contracts : POST /api/v1/assets/maintainable-assets
+                     POST /api/v1/assets/asset-conditions
+                     POST /api/v1/assets/maintenance-work-orders
+Authorization      : runtime route descriptors + effective grants
+Concurrency gap    : GAP-ENG-001 / HidraAPI #79 remains OPEN and untouched
+Conclusion         : SUCCESS
+```
+
+### HWEB-011-04 — Cross-module engineering context — NEXT
 
 Compose topology, document, risk and incident context in `src/processes` only from already-published public contracts and neutral references. Do not import or mirror another module's persistence/domain ownership. Missing relationship evidence must fail closed or be registered as a new backend gap.
 
-### HWEB-011-05 — Asset history/timeline
+### HWEB-011-05 — Asset history/timeline — PENDING
 
 Use backend lifecycle-event evidence only. Do not derive history from current status or reconstruct events client-side.
 
-### HWEB-011-06 — Role/permission and concurrent updates
+### HWEB-011-06 — Role/permission and concurrent updates — PARTIALLY BLOCKED
 
 Permission tests may proceed against route descriptors/effective grants. Concurrent-update behavior remains blocked by `GAP-ENG-001` / HidraAPI #79 until an authoritative backend mutation contract is published and pinned.
 
 ---
 
-## HWEB-011-01 completion evidence required before merge
+## HWEB-011-01 inventory evidence
 
 ```text
 Backend source commit / branch : 9e8a1eb24a99c05749364119ef468f7971939123 / main
@@ -217,9 +243,7 @@ Frontend routes changed         : none in inventory task
 State ownership                 : documented only; TanStack Query server state / local React selection-form state
 Error states                    : no UI change in inventory task
 Tests added                     : none; documentation-only inventory
-OpenAPI regeneration status     : no frontend contract slice added yet
+OpenAPI regeneration status     : no frontend contract slice added in inventory task
 Known backend gaps              : GAP-ENG-001 / HidraAPI #79
-CI result                       : pending
+Conclusion                      : inventory accepted; later product tasks must retain these ownership boundaries
 ```
-
-HWEB-011-01 is an inventory task only. It must not implement HWEB-011-02 or later UI behavior early.
