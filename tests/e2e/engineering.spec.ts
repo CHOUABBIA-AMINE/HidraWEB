@@ -117,6 +117,7 @@ test('HWEB-011-02 discovers integrity resources, reads backend records, and crea
 
   await page.getByText('assessment-1', { exact: true }).click();
   await expect(page.locator('pre').filter({ hasText: 'North line integrity assessment' })).toBeVisible();
+  await expect(page.getByText(/does not publish a topology, document, risk, or incident relationship/)).toBeVisible();
 
   await page.getByLabel('programId').fill('program-1');
   await page.getByLabel('assessmentNumber').fill('IA-2026-002');
