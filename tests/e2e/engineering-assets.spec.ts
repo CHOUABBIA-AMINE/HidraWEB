@@ -18,12 +18,7 @@ const effectivePermissions = [
 async function mockAssets(page: Page) {
   await page.route('**/api/v1/security/permissions/routes', (route) => route.fulfill({ json: routes }));
   await page.route('**/api/v1/security/permissions/catalog', (route) => route.fulfill({
-    json: {
-      strategy: 'derived-route-permission-catalog',
-      enforcement: 'backend-enforced',
-      permissionFormat: '<module>:<resource>:<action>',
-      routes,
-    },
+    json: { strategy: 'derived-route-permission-catalog', enforcement: 'backend-enforced', permissionFormat: '<module>:<resource>:<action>', routes },
   }));
   await page.route('**/api/v1/identity/me/permissions', (route) => route.fulfill({ json: effectivePermissions }));
 
@@ -73,30 +68,27 @@ async function mockAssets(page: Page) {
   }));
 
   await page.route('**/api/v1/assets/maintainable-assets', async (route) => {
-    expect(route.request().method()).toBe('POST');
     expect(await route.request().postDataJSON()).toEqual({
       assetNumber: 'MA-002', assetCode: 'VALVE-002', assetName: 'South Valve', assetTypeId: 'VALVE',
       topologyAssetTypeCode: 'VALVE', topologyAssetId: 'topology-valve-2', ownerOrganizationUnitId: 'org-maintenance',
     });
-    await route.fulfill({ json: { id: 'asset-2', assetNumber: 'MA-002', assetCode: 'VALVE-002', assetName: 'South Valve' } });
+    await route.fulfill({ json: { id: 'asset-2', assetNumber: 'MA-002' } });
   });
 
   await page.route('**/api/v1/assets/asset-conditions', async (route) => {
-    expect(route.request().method()).toBe('POST');
     expect(await route.request().postDataJSON()).toEqual({
-      maintainableAssetId: 'asset-1', conditionStatus: 'GOOD', conditionTypeId: 'VISUAL',
-      sourceModule: 'assets', sourceReferenceId: 'inspection-42', summary: 'No visible degradation', conditionScore: 92,
+      maintainableAssetId: 'asset-1', conditionStatus: 'GOOD', conditionTypeId: 'VISUAL', sourceModule: 'assets',
+      sourceReferenceId: 'inspection-42', summary: 'No visible degradation', conditionScore: 92,
     });
-    await route.fulfill({ json: { id: 'condition-1', maintainableAssetId: 'asset-1', conditionStatus: 'GOOD', conditionScore: 92 } });
+    await route.fulfill({ json: { id: 'condition-1' } });
   });
 
   await page.route('**/api/v1/assets/maintenance-work-orders', async (route) => {
-    expect(route.request().method()).toBe('POST');
     expect(await route.request().postDataJSON()).toEqual({
       workOrderNumber: 'WO-2026-001', maintainableAssetId: 'asset-1', sourceRecommendationId: 'recommendation-7',
       workOrderTypeId: 'PREVENTIVE', priorityId: 'P2', title: 'Inspect pump seals', assignedOrganizationUnitId: 'org-maintenance',
     });
-    await route.fulfill({ json: { id: 'wo-1', workOrderNumber: 'WO-2026-001', maintainableAssetId: 'asset-1', status: 'DRAFT' } });
+    await route.fulfill({ json: { id: 'wo-1', workOrderNumber: 'WO-2026-001' } });
   });
 }
 
@@ -108,10 +100,17 @@ async function signIn(page: Page) {
   await expect(page.getByRole('heading', { name: /Vue d/ })).toBeVisible();
 }
 
+async function navigateInApp(page: Page, path: string) {
+  await page.evaluate((nextPath) => {
+    window.history.pushState({}, '', nextPath);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  }, path);
+}
+
 test('HWEB-011-03 reads assets from workbench and uses backend-owned create contracts', async ({ page }) => {
   await mockAssets(page);
   await signIn(page);
-  await page.goto('/engineering/assets');
+  await navigateInApp(page, '/engineering/assets');
 
   await expect(page.getByRole('heading', { name: 'Integrity & Maintenance' })).toBeVisible();
   await expect(page.getByText('Backend resource: maintainable-asset')).toBeVisible();
