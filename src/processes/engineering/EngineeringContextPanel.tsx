@@ -9,7 +9,7 @@ export interface EngineeringContextReference {
   sourceField: string;
 }
 
-const FIELD_RULES: ReadonlyArray<{
+const DIRECT_FIELD_RULES: ReadonlyArray<{
   kind: EngineeringContextKind;
   idFields: readonly string[];
   labelFields: readonly string[];
@@ -17,7 +17,7 @@ const FIELD_RULES: ReadonlyArray<{
   {
     kind: 'Topology',
     idFields: ['topologyAssetId'],
-    labelFields: ['topologyAssetNameSnapshot', 'topologyAssetCodeSnapshot', 'topologyAssetTypeCode'],
+    labelFields: ['topologyAssetNameSnapshot', 'topologyAssetCodeSnapshot', 'topologyAssetCode', 'topologyAssetTypeCode'],
   },
   {
     kind: 'Document',
@@ -26,14 +26,29 @@ const FIELD_RULES: ReadonlyArray<{
   },
   {
     kind: 'Risk',
-    idFields: ['riskAssessmentId', 'riskId'],
+    idFields: ['riskAssessmentId'],
     labelFields: ['riskAssessmentTitleSnapshot', 'riskCodeSnapshot'],
   },
   {
     kind: 'Incident',
-    idFields: ['incidentId'],
-    labelFields: ['incidentNumberSnapshot', 'incidentTitleSnapshot'],
+    idFields: ['sourceIncidentId'],
+    labelFields: [],
   },
+];
+
+const MODULE_CONTEXT_KIND: Readonly<Record<string, EngineeringContextKind>> = {
+  topology: 'Topology',
+  documents: 'Document',
+  risk: 'Risk',
+  incident: 'Incident',
+};
+
+const QUALIFIED_REFERENCE_RULES: ReadonlyArray<{
+  moduleField: string;
+  idField: string;
+}> = [
+  { moduleField: 'sourceModule', idField: 'sourceReferenceId' },
+  { moduleField: 'targetModule', idField: 'targetReferenceId' },
 ];
 
 function text(attributes: Record<string, unknown>, field: string): string | undefined {
@@ -43,8 +58,8 @@ function text(attributes: Record<string, unknown>, field: string): string | unde
   return normalized || undefined;
 }
 
-export function collectEngineeringContext(attributes: Record<string, unknown>): EngineeringContextReference[] {
-  return FIELD_RULES.flatMap((rule) => {
+function directReferences(attributes: Record<string, unknown>): EngineeringContextReference[] {
+  return DIRECT_FIELD_RULES.flatMap((rule) => {
     const idField = rule.idFields.find((field) => text(attributes, field));
     if (!idField) return [];
 
@@ -56,6 +71,33 @@ export function collectEngineeringContext(attributes: Record<string, unknown>): 
       sourceField: idField,
     }];
   });
+}
+
+function qualifiedReferences(attributes: Record<string, unknown>): EngineeringContextReference[] {
+  return QUALIFIED_REFERENCE_RULES.flatMap((rule) => {
+    const module = text(attributes, rule.moduleField);
+    const id = text(attributes, rule.idField);
+    const kind = module ? MODULE_CONTEXT_KIND[module] : undefined;
+    if (!kind || !id) return [];
+
+    return [{
+      kind,
+      id,
+      sourceField: `${rule.moduleField}/${rule.idField}`,
+    }];
+  });
+}
+
+export function collectEngineeringContext(attributes: Record<string, unknown>): EngineeringContextReference[] {
+  const references = [...directReferences(attributes), ...qualifiedReferences(attributes)];
+  const unique = new Map<string, EngineeringContextReference>();
+
+  references.forEach((reference) => {
+    const key = `${reference.kind}:${reference.id}`;
+    if (!unique.has(key)) unique.set(key, reference);
+  });
+
+  return Array.from(unique.values());
 }
 
 interface EngineeringContextPanelProps {
