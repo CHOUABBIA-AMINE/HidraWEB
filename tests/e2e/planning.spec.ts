@@ -7,11 +7,22 @@ const routes = [
   { route: '/api/v1/planning/operational-plans/{id}', methods: ['GET'], module: 'planning', resource: 'operational-plans', action: 'read', permission: 'planning:operational-plans:read', enforcementStatus: 'backend-enforced' },
   { route: '/api/v1/planning/revisions', methods: ['GET'], module: 'planning', resource: 'revisions', action: 'read', permission: 'planning:revisions:read', enforcementStatus: 'backend-enforced' },
   { route: '/api/v1/planning/revisions/{id}', methods: ['GET'], module: 'planning', resource: 'revisions', action: 'read', permission: 'planning:revisions:read', enforcementStatus: 'backend-enforced' },
+  { route: '/api/v1/planning/revisions/{revisionId}/approval', methods: ['GET'], module: 'planning', resource: 'revisions', action: 'read', permission: 'planning:revisions:read', enforcementStatus: 'backend-enforced' },
+  { route: '/api/v1/planning/revisions/{revisionId}/approval/actions/{transitionId}/execute', methods: ['POST'], module: 'planning', resource: 'revisions', action: 'execute', permission: 'planning:revisions:execute', enforcementStatus: 'backend-enforced' },
 ];
-const effectivePermissions = ['planning:periods:read', 'planning:operational-plans:read', 'planning:revisions:read'];
+const effectivePermissions = ['planning:periods:read', 'planning:operational-plans:read', 'planning:revisions:read', 'planning:revisions:execute', 'planning:revisions:approve'];
 const period = { id: 'period-1', code: 'PLN-2026-Q4', nameFr: 'Planification T4 2026', periodStart: '2026-10-01T00:00:00Z', periodEnd: '2026-12-31T23:59:59Z', timeZone: 'Africa/Algiers', status: 'OPEN', periodTypeId: 'QUARTER', createdByActorId: 'planner-1' };
 const plan = { id: 'plan-1', periodId: 'period-1', code: 'OP-2026-Q4-NORTH', nameFr: 'Plan Nord T4', topologyScopeType: 'PIPELINE', topologyScopeId: 'pipe-1', topologyScopeCode: 'PL-NORTH', topologyScopeNameSnapshot: 'Pipeline Nord', status: 'DRAFT', currentRevisionId: 'rev-2', approvedRevisionId: 'rev-1', responsibleOrganizationUnitId: 'org-trc', createdByActorId: 'planner-1' };
 const revision = { id: 'rev-2', planId: 'plan-1', revisionNumber: 2, revisionCode: 'R02', baseRevisionId: 'rev-1', status: 'SUBMITTED', changeReasonCodeId: 'OPS_CHANGE', changeReasonText: 'Updated throughput assumptions', submittedAt: '2026-09-12T10:00:00Z', submittedByActorId: 'planner-2', workflowInstanceId: 'wf-plan-2' };
+const approval = {
+  revisionId: 'rev-2',
+  revisionStatus: 'SUBMITTED',
+  workflowInstanceId: 'wf-plan-2',
+  workflowInstanceStatus: 'IN_PROGRESS',
+  currentTaskId: 'task-plan-2',
+  currentTaskUpdatedAt: '2026-09-12T10:05:00Z',
+  actions: [{ transitionId: 'transition-approve', decision: 'APPROVE', reasonRequired: false, commentRequired: true, requiredPermissionCode: 'planning:revisions:approve', permitted: true }],
+};
 
 async function mockPlanning(page: Page) {
   await page.route('**/api/v1/security/permissions/routes', (route) => route.fulfill({ json: routes }));
@@ -23,6 +34,16 @@ async function mockPlanning(page: Page) {
   await page.route('**/api/v1/planning/operational-plans/plan-1', (route) => route.fulfill({ json: plan }));
   await page.route('**/api/v1/planning/revisions?**', (route) => route.fulfill({ json: { content: [revision], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false } }));
   await page.route('**/api/v1/planning/revisions/rev-2', (route) => route.fulfill({ json: revision }));
+  await page.route('**/api/v1/planning/revisions/rev-2/approval', (route) => route.fulfill({ json: approval }));
+  await page.route('**/api/v1/planning/revisions/rev-2/approval/actions/transition-approve/execute', async (route) => {
+    const request = route.request();
+    expect(request.method()).toBe('POST');
+    expect(await request.postDataJSON()).toEqual({
+      expectedTaskUpdatedAt: '2026-09-12T10:05:00Z',
+      commentText: 'Approved in browser test.',
+    });
+    await route.fulfill({ json: { revisionId: 'rev-2', revisionStatus: 'APPROVED', workflowInstanceId: 'wf-plan-2', workflowInstanceStatus: 'COMPLETED', transitionId: 'transition-approve', decision: 'APPROVE', executedAt: '2026-09-12T10:06:00Z' } });
+  });
 }
 
 async function signIn(page: Page) {
@@ -33,7 +54,7 @@ async function signIn(page: Page) {
   await expect(page.getByRole('heading', { name: /Vue d/ })).toBeVisible();
 }
 
-test('HWEB-010-03 exposes backend-published planning revision history and detail', async ({ page }) => {
+test('HWEB-010-04 executes only backend-published revision approval actions with the authoritative task version', async ({ page }) => {
   await mockPlanning(page);
   await signIn(page);
   await page.getByRole('button', { name: 'Planification' }).click();
@@ -41,9 +62,11 @@ test('HWEB-010-03 exposes backend-published planning revision history and detail
   await expect(page.getByText('OP-2026-Q4-NORTH')).toBeVisible();
   await page.getByRole('button', { name: 'Open' }).click();
   await expect(page.getByRole('heading', { name: 'Revision history' })).toBeVisible();
-  await expect(page.getByText('R02')).toBeVisible();
-  await expect(page.getByText('Updated throughput assumptions')).toBeVisible();
   await page.getByRole('button', { name: 'Open revision' }).click();
-  await expect(page.getByText('wf-plan-2')).toBeVisible();
-  await expect(page.getByText('planner-2')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Revision approval' })).toBeVisible();
+  await expect(page.getByText('task-plan-2')).toBeVisible();
+  await page.getByRole('button', { name: 'APPROVE' }).click();
+  await page.getByLabel('Comment').fill('Approved in browser test.');
+  await page.getByRole('button', { name: 'Execute APPROVE' }).click();
+  await expect(page.getByText('APPROVE · revision APPROVED')).toBeVisible();
 });
