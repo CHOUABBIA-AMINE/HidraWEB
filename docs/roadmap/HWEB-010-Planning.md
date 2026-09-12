@@ -1,17 +1,17 @@
 # HWEB-010 — Planning
 
-Status: HWEB-010-03 IMPLEMENTATION COMPLETE — final merge/post-merge verification pending
+Status: HWEB-010-03 COMPLETE
 
 ## Accepted repository baselines
 
 ```text
-HidraWEB current base         : 271b40c2c87b2648ce0d97df8e86ea4e35130660
-HidraAPI accepted main SHA    : c9ef4886445479f7b2d88f8fa0d4a8b37cb59e55
-Backend artifact              : hidra-api-openapi-c9ef4886445479f7b2d88f8fa0d4a8b37cb59e55
-Artifact id                   : 10286503941
-Artifact digest               : sha256:cadc680414407bb3c388a093a3f8fa8fc5406a6b63b3760708f54576eff4b781
-Backend issue                 : CHOUABBIA-AMINE/HidraAPI#68 — CLOSED
-Frontend inventory issue      : CHOUABBIA-AMINE/HidraWEB#18 — CLOSED
+HidraWEB product merge       : 74e557413b3dd267da7a2cec3f9578a5d3b8bf89
+HidraAPI accepted main SHA   : c9ef4886445479f7b2d88f8fa0d4a8b37cb59e55
+Backend artifact             : hidra-api-openapi-c9ef4886445479f7b2d88f8fa0d4a8b37cb59e55
+Artifact id                  : 10286503941
+Artifact digest              : sha256:cadc680414407bb3c388a093a3f8fa8fc5406a6b63b3760708f54576eff4b781
+Backend issue                : CHOUABBIA-AMINE/HidraAPI#68 — CLOSED
+Frontend inventory issue     : CHOUABBIA-AMINE/HidraWEB#18 — CLOSED
 ```
 
 ## HWEB-010-01 — Contract inventory
@@ -41,7 +41,7 @@ Verification main CI   : 34659784398 — SUCCESS
 
 ## HWEB-010-03 — Revision/version presentation
 
-Implemented from the already-published PLN-001 read contract only.
+Complete and verified from the already-published PLN-001 read contract only.
 
 Published routes consumed:
 
@@ -81,17 +81,18 @@ Frontend behavior:
 - no lifecycle transition is inferred from status values;
 - component and Playwright tests cover the published list/detail reads.
 
-### HWEB-010-03 exact-head validation
+### HWEB-010-03 verification evidence
 
 ```text
-Behavioral commit : 76396b5ed313045ea20d5cd719ae2f258c840af9
-Pull request      : HidraWEB #22
-CI run            : 34677837690
-Result            : SUCCESS
-Gates             : HWEB-003..HWEB-010 OpenAPI generation; lint; typecheck; unit/component tests; production build; Playwright browser tests
+Behavioral commit      : 76396b5ed313045ea20d5cd719ae2f258c840af9
+Behavioral CI          : 34677837690 — SUCCESS
+Final PR head          : 9bb19eb1a7cffbfae9deba8ab93c9ca5309e2878
+Final exact-head CI    : 34677956817 — SUCCESS
+Pull request           : HidraWEB #22 — MERGED
+Product merge SHA      : 74e557413b3dd267da7a2cec3f9578a5d3b8bf89
+Post-merge product CI  : 34678043417 — SUCCESS
+Verified gates         : HWEB-003..HWEB-010 OpenAPI generation; lint; typecheck; unit/component tests; production build; Playwright browser tests
 ```
-
-A documentation-only evidence commit follows this behavioral head. The final PR head must independently pass the same exact-head CI before merge.
 
 ## Explicit HWEB-010-03 exclusions
 
@@ -114,7 +115,7 @@ Status          : VERIFIED
 Backend owner   : planning
 Backend issue   : HidraAPI #68 — CLOSED
 Backend evidence: merge c9ef4886445479f7b2d88f8fa0d4a8b37cb59e55; OpenAPI artifact 10286503941
-Frontend evidence: HWEB-010-02 verifies period/plan reads; HWEB-010-03 now consumes and tests revision list/detail reads from the same accepted contract.
+Frontend evidence: HWEB-010-02 verifies period/plan reads; HWEB-010-03 verifies revision list/detail reads from the same accepted contract.
 ```
 
 ## Remaining HWEB-010 sequence
