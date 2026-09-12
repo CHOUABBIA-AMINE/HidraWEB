@@ -1,6 +1,6 @@
 # HWEB-011 — Integrity and Maintenance
 
-Status: HWEB-011-04 COMPLETE / HWEB-011-05 NEXT / GAP-ENG-001 OPEN
+Status: HWEB-011-05 COMPLETE / HWEB-011-06 NEXT (PARTIALLY BLOCKED) / GAP-ENG-001 OPEN
 
 ## Accepted baselines
 
@@ -246,15 +246,55 @@ Concurrency gap    : GAP-ENG-001 / HidraAPI #79 remains OPEN and untouched
 Conclusion         : SUCCESS
 ```
 
-### HWEB-011-05 — Asset history/timeline — NEXT
+### HWEB-011-05 — Asset history/timeline — COMPLETE
 
-Use backend lifecycle-event evidence only. Do not derive history from current status or reconstruct events client-side.
+Uses only backend `AssetLifecycleEvent` evidence discovered through the assets workbench and filtered by the exact selected `maintainableAssetId`. The frontend does not derive history from current asset status, timestamps, work orders, conditions or local state.
 
-### HWEB-011-06 — Role/permission and concurrent updates — PARTIALLY BLOCKED
+```text
+Product PR         : #40
+Final product head : cee0095bfd3bdb142b9e1d7ac04d675cfaafa5de
+Exact-head CI run  : 34721254939 — SUCCESS
+Merge SHA          : 92c1f768998c54280fac7b00cd874e19271f92d9
+Post-merge CI run  : 34721464399 — SUCCESS
+Frontend route     : /engineering/assets
+Read contract      : runtime workbench resource discovery + POST /api/v1/workbench/{module}/{resource}/search
+Exact filter       : maintainableAssetId = selected maintainable asset id
+Backend ordering   : eventAt desc
+Evidence fields    : eventType, oldStatus, newStatus, eventReasonId, eventComment, actorId, eventAt, correlationId, createdAt
+Authorization      : runtime workbench search route descriptor + effective grants
+State ownership    : TanStack Query lifecycle-event server state; React local state only selection/forms/paging
+Fail-closed states : lifecycle resource missing, route permission missing, grant missing, backend error, or empty backend history
+OpenAPI status     : unchanged; accepted artifact 10298289002 retained
+Concurrency gap    : GAP-ENG-001 / HidraAPI #79 remains OPEN and untouched
+Conclusion         : SUCCESS
+```
+
+### HWEB-011-06 — Role/permission and concurrent updates — NEXT / PARTIALLY BLOCKED
 
 Permission tests may proceed against route descriptors/effective grants. Concurrent-update behavior remains blocked by `GAP-ENG-001` / HidraAPI #79 until an authoritative backend mutation contract is published and pinned.
 
 ---
+
+## HWEB-011-05 verification evidence
+
+```text
+Backend source commit / branch : 9e8a1eb24a99c05749364119ef468f7971939123 / main
+Endpoints and DTOs used         : GET /api/v1/workbench/{module}/resources; POST /api/v1/workbench/{module}/{resource}/search; OperationalResourceDescriptor, OperationalSearchRequest, OperationalPageResponse/record attributes
+Permissions used                : runtime workbench search descriptor from GET /api/v1/security/permissions/routes intersected with GET /api/v1/identity/me/permissions effective grants
+Frontend routes changed         : /engineering/assets only
+State ownership                 : TanStack Query owns lifecycle history server state; React local state remains selection/forms/paging
+Evidence ownership              : assets backend AssetLifecycleEvent only; no current-status/timestamp/work-order/condition reconstruction
+Error states                    : missing lifecycle resource, missing route permission, missing effective grant, backend search error, and empty backend history all fail closed explicitly
+Tests added                     : lifecycle evidence mapping unit tests; Playwright exact maintainableAssetId filter/eventAt ordering/evidence rendering/empty-history tests
+OpenAPI regeneration status     : CI regeneration succeeded; no contract or pin change required for HWEB-011-05
+Initial CI correction           : 34721069457 failed only on an ambiguous Playwright exact-text locator; no product or contract behavior changed
+Exact product head              : cee0095bfd3bdb142b9e1d7ac04d675cfaafa5de
+Exact-head CI                   : 34721254939 — SUCCESS
+Product merge                   : 92c1f768998c54280fac7b00cd874e19271f92d9
+Post-merge main CI              : 34721464399 — SUCCESS
+Known backend gaps              : GAP-ENG-001 / HidraAPI #79 remains OPEN for HWEB-011-06 concurrency verification
+Conclusion                      : HWEB-011-05 VERIFIED; HWEB-011-06 is next and partially blocked
+```
 
 ## HWEB-011-04 verification evidence
 
