@@ -1,10 +1,13 @@
 import { hidraHttpClient } from '@/api/client/hidraHttpClient';
 import type {
+  ExecutePlanningApprovalActionRequest,
   OperationalPlanView,
   PageOperationalPlanView,
   PagePlanRevisionView,
   PagePlanningPeriodView,
   PlanRevisionView,
+  PlanningApprovalExecutionResponse,
+  PlanningApprovalResponse,
   PlanningPeriodView,
 } from '@/api/generated/planning/model';
 
@@ -19,6 +22,7 @@ export const planningQueryKeys = {
   plan: (id: string) => ['hidra', 'planning', 'operational-plans', id] as const,
   revisions: (params: RevisionListParams) => ['hidra', 'planning', 'revisions', params] as const,
   revision: (id: string) => ['hidra', 'planning', 'revisions', id] as const,
+  approval: (revisionId: string) => ['hidra', 'planning', 'revisions', revisionId, 'approval'] as const,
 };
 
 export function fetchPlanningPeriods(params: PlanningPageParams): Promise<PagePlanningPeriodView> {
@@ -38,4 +42,18 @@ export function fetchPlanRevisions(params: RevisionListParams): Promise<PagePlan
 }
 export function fetchPlanRevision(id: string): Promise<PlanRevisionView> {
   return hidraHttpClient<PlanRevisionView>({ method: 'GET', url: `/api/v1/planning/revisions/${encodeURIComponent(id)}` });
+}
+export function fetchPlanningApproval(revisionId: string): Promise<PlanningApprovalResponse> {
+  return hidraHttpClient<PlanningApprovalResponse>({ method: 'GET', url: `/api/v1/planning/revisions/${encodeURIComponent(revisionId)}/approval` });
+}
+export function executePlanningApprovalAction(
+  revisionId: string,
+  transitionId: string,
+  request: ExecutePlanningApprovalActionRequest,
+): Promise<PlanningApprovalExecutionResponse> {
+  return hidraHttpClient<PlanningApprovalExecutionResponse>({
+    method: 'POST',
+    url: `/api/v1/planning/revisions/${encodeURIComponent(revisionId)}/approval/actions/${encodeURIComponent(transitionId)}/execute`,
+    data: request,
+  });
 }
