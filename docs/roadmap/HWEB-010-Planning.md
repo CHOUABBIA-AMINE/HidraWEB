@@ -1,29 +1,26 @@
 # HWEB-010 — Planning
 
-Status: HWEB-010-04 COMPLETE / VERIFIED; HWEB-010-05 BLOCKED ON GAP-PLAN-003; HWEB-010-06 BLOCKED ON GAP-PLAN-004
+Status: HWEB-010-05 COMPLETE / VERIFIED; HWEB-010-06 BLOCKED ON GAP-PLAN-004
 
 ## Accepted repository baselines
 
 ```text
-HidraWEB audit base          : d547bc261009acd07f94a615cb58f0c80526ff49
-HidraWEB current product merge: f60bc4e45dcdacf90d942b7969190f4b93a70df3
-HidraAPI accepted main SHA   : 6ef581f557e42e8d96b03ccf429562e646f2e321
-Backend artifact             : hidra-api-openapi-6ef581f557e42e8d96b03ccf429562e646f2e321
-Artifact id                  : 10293549730
-Artifact digest              : sha256:422cc6f37a7e5a6674a77d32be5ee1325bb9a8a8ad682075094a5699d3a9f243
-Backend query issue          : CHOUABBIA-AMINE/HidraAPI#68 — CLOSED
-Backend approval issue       : CHOUABBIA-AMINE/HidraAPI#70 — CLOSED
-Backend comparison issue     : CHOUABBIA-AMINE/HidraAPI#71 — OPEN
-Backend concurrency issue    : CHOUABBIA-AMINE/HidraAPI#72 — OPEN
-Frontend inventory issue     : CHOUABBIA-AMINE/HidraWEB#18 — CLOSED
+HidraWEB audit base            : d547bc261009acd07f94a615cb58f0c80526ff49
+HidraWEB current product merge : 706d2f1415510a91105318a682ff33cb43d0a529
+HidraAPI accepted main SHA     : df8c012be9034886e53f2ec64c28946f18f67b31
+Backend artifact               : hidra-api-openapi-df8c012be9034886e53f2ec64c28946f18f67b31
+Artifact id                    : 10297106684
+Artifact digest                : sha256:5d01f56b83c829ded2fce4bede553f33cff74590e5df946e8f3251a5ae1bf537
+Backend query issue            : CHOUABBIA-AMINE/HidraAPI#68 — CLOSED
+Backend approval issue         : CHOUABBIA-AMINE/HidraAPI#70 — CLOSED
+Backend comparison issue       : CHOUABBIA-AMINE/HidraAPI#71 — CLOSED / COMPLETED
+Backend concurrency issue      : CHOUABBIA-AMINE/HidraAPI#72 — OPEN
+Frontend inventory issue       : CHOUABBIA-AMINE/HidraWEB#18 — CLOSED
 ```
 
 ## HWEB-010-01 — Contract inventory
 
-Completed. HidraAPI PLN-001 published and merged a deterministic read-only planning contract at
-`c9ef4886445479f7b2d88f8fa0d4a8b37cb59e55`.
-
-Accepted public reads include periods, operational plans, revisions, nominations and targets. Paging is zero-based; default size is 50 and the backend owns request validation, authorization and not-found behavior.
+Completed. HidraAPI PLN-001 published and merged deterministic read-only planning contracts at `c9ef4886445479f7b2d88f8fa0d4a8b37cb59e55` for periods, operational plans, revisions, nominations and targets. Paging is zero-based; default size is 50 and the backend owns request validation, authorization and not-found behavior.
 
 ## HWEB-010-02 — Planning period and operational-plan workspaces
 
@@ -86,8 +83,6 @@ Complete and verified from the authoritative PLN-002 planning/workflow bridge pu
 
 ### Backend contract
 
-Accepted backend merge:
-
 ```text
 HidraAPI merge SHA : 6ef581f557e42e8d96b03ccf429562e646f2e321
 Roadmap task       : PLN-002
@@ -104,33 +99,9 @@ GET  /api/v1/planning/revisions/{revisionId}/approval
 POST /api/v1/planning/revisions/{revisionId}/approval/actions/{transitionId}/execute
 ```
 
-The approval projection resolves the planning revision to the backend-owned workflow state without generic inbox scanning. It publishes the revision/workflow identity and status, the current task identity and `currentTaskUpdatedAt`, and backend-defined actions including transition id, decision, reason/comment requirements, required permission code and `permitted`.
+The approval projection resolves the planning revision to backend-owned workflow state without generic inbox scanning. It publishes revision/workflow identity and status, authoritative current task identity and `currentTaskUpdatedAt`, and backend-defined actions including transition id, decision, reason/comment requirements, required permission code and `permitted`.
 
-The execute request publishes `expectedTaskUpdatedAt` as the stale-task precondition together with optional reason/comment/decision/correlation inputs. HidraAPI owns transition authorization, workflow execution, conflict handling and the resulting planning revision lifecycle effect.
-
-### Frontend behavior
-
-HidraWEB:
-
-- retains only the verified planning reads plus the revision-scoped approval GET/POST operations;
-- loads approval data only for the selected revision and never scans the generic workflow inbox to infer a task;
-- resolves approval read/execute permissions from backend route descriptors and effective grants and fails closed when metadata/grants are unavailable;
-- renders only backend-returned actions and exposes execution only when `permitted === true`, the transition id exists, execute permission is effective and the backend publishes `currentTaskUpdatedAt`;
-- sends the backend-published `currentTaskUpdatedAt` unchanged as `expectedTaskUpdatedAt`;
-- collects reason/comment only according to backend-published requirements;
-- invalidates the approval projection and revision queries after a successful action;
-- does not define a planning/workflow state machine or infer transitions from status/decision strings.
-
-The Playwright test proves the browser posts only the published `transition-approve` action and sends:
-
-```json
-{
-  "expectedTaskUpdatedAt": "2026-09-12T10:05:00Z",
-  "commentText": "Approved in browser test."
-}
-```
-
-The mocked backend response returns the resulting revision/workflow statuses; HidraWEB displays that response rather than computing lifecycle state locally.
+HidraWEB renders only backend-returned actions, executes only permitted transitions, sends `currentTaskUpdatedAt` unchanged as `expectedTaskUpdatedAt`, invalidates/refetches approval/revision state after success, and defines no planning/workflow state machine.
 
 ### HWEB-010-04 verification evidence
 
@@ -148,100 +119,101 @@ Verified gates         : HWEB-003..HWEB-010 OpenAPI generation; lint; typecheck;
 ### GAP-PLAN-002 — Planning/workflow approval bridge
 
 ```text
-Status          : VERIFIED
-Backend owner   : planning + workflow public contracts
-Backend issue   : HidraAPI #70 — CLOSED
-Backend evidence: PLN-002 merge 6ef581f557e42e8d96b03ccf429562e646f2e321; OpenAPI artifact 10293549730
+Status           : VERIFIED
+Backend owner    : planning + workflow public contracts
+Backend issue    : HidraAPI #70 — CLOSED
+Backend evidence : PLN-002 merge 6ef581f557e42e8d96b03ccf429562e646f2e321; OpenAPI artifact 10293549730
 Frontend evidence: HWEB-010-04 PR #27; merge f60bc4e45dcdacf90d942b7969190f4b93a70df3; post-merge CI 34682342319
 ```
 
-HidraWEB still must not infer approval semantics from revision status strings, workflow transition names, `targetModuleCallback`, or architecture documentation alone. Only the revision-scoped backend projection/action contract is authoritative.
-
 ## HWEB-010-05 — Planned-vs-actual
 
-Contract audit completed. Frontend implementation remains blocked on deterministic target-scoped monitoring reads.
+Complete and verified from the authoritative PLN-003 monitoring contract.
 
-The accepted backend contracts prove the ownership and field compatibility:
+### Backend contract
 
-### Planning expected state
-
-`PlanTargetView` publishes expected-value metadata including revision relation, target type, topology/telemetry references, target values, unit, tolerances, validity and status.
-
-The planning DDD defines:
+HidraAPI PLN-003 extended the existing monitoring deviation collection with an exact target-scoped filter while preserving monitoring ownership of comparison semantics:
 
 ```text
-PlanTarget = expected value
-TrustedTelemetryReading = actual fact
-MonitoringDeviation = comparison result
+GET /api/v1/monitoring/deviations?planTargetId={planTargetId}&status={status}&severity={severity}&topologyAssetId={topologyAssetId}&telemetryPointId={telemetryPointId}&from={from}&to={to}&page={page}&size={size}
 ```
 
-### Telemetry actual facts
-
-`ReadingView` publishes point/value/unit/quality/timestamp/state data, but HidraWEB must not decide which reading or aggregation is the authoritative actual for a plan target.
-
-### Monitoring comparison result
-
-`MonitoringQueryUseCase.DeviationView` already publishes backend-owned expected, actual, difference, percentage, unit, severity and status together with `planTargetId` and source references.
-
-Published monitoring routes include:
+Accepted backend evidence:
 
 ```text
-GET /api/v1/monitoring/deviations
-GET /api/v1/monitoring/deviations/{id}
+Roadmap task       : PLN-003
+Backend issue      : HidraAPI #71 — CLOSED / COMPLETED
+Backend merge SHA  : df8c012be9034886e53f2ec64c28946f18f67b31
+Post-merge CI      : 34689500217 — SUCCESS
+OpenAPI artifact   : hidra-api-openapi-df8c012be9034886e53f2ec64c28946f18f67b31
+Artifact id        : 10297106684
+Artifact digest    : sha256:5d01f56b83c829ded2fce4bede553f33cff74590e5df946e8f3251a5ae1bf537
 ```
 
-However, the collection endpoint cannot be queried deterministically by `planTargetId`, and a selected `PlanTarget` does not publish a deviation id. HidraWEB therefore cannot safely retrieve the authoritative comparison for one selected target without scanning/paging unrelated monitoring data.
+Monitoring remains owner of the returned comparison fields: `planTargetId`, `trustedTelemetryReadingId`, `telemetryPointId`, `actualValue`, `expectedValue`, `differenceValue`, `differencePercent`, `unitId`, `severity`, `status`, timestamps and reason metadata. Planning remains owner of target/expected state and telemetry remains owner of actual readings.
 
-HidraWEB also must not calculate deviation, percentage, tolerance classification or severity from raw telemetry because monitoring owns the comparison result.
+### Frontend behavior
+
+HidraWEB now:
+
+- pins planning and telemetry/monitoring slices to the exact accepted backend merge/artifact;
+- loads `GET /api/v1/planning/targets?revisionId=...` for the selected revision;
+- stores only the selected target id locally;
+- queries `GET /api/v1/monitoring/deviations` with the exact selected `planTargetId`;
+- resolves both target-read and monitoring-deviation permissions from backend route descriptors plus effective grants and fails closed when unavailable;
+- displays backend-provided expected, actual, difference, difference percentage, unit, severity, status and trusted-reading reference values verbatim;
+- treats an empty target-scoped deviation page as no authoritative comparison rows rather than deriving a fallback;
+- does not fetch raw telemetry to reconstruct the comparison;
+- performs no expected/actual arithmetic, tolerance classification, severity mapping or client comparison state machine.
+
+### HWEB-010-05 verification evidence
+
+```text
+Final frontend PR head : fd9bfd4fe41e39722ea82547be0d81bc48f423d6
+Final exact-head CI    : 34691908323 — SUCCESS
+Pull request           : HidraWEB #29 — MERGED
+Product merge SHA      : 706d2f1415510a91105318a682ff33cb43d0a529
+Post-merge product CI  : 34692023707 — SUCCESS
+Verified gates         : HWEB-003..HWEB-010 OpenAPI generation; lint; typecheck; unit/component tests; production build; Playwright browser tests
+Browser evidence       : planning.spec.ts asserts revisionId target lookup, exact planTargetId monitoring query and verbatim backend comparison presentation
+```
 
 ### GAP-PLAN-003 — Target-scoped planned-vs-actual projection
 
 ```text
-Status          : OPEN / BLOCKING HWEB-010-05
-Backend owner   : monitoring read contract, using neutral planning target reference
-Backend issue   : HidraAPI #71
-Frontend action : no planned-vs-actual calculation/projection until the gap closes
-Audit PR        : HidraWEB #25 — MERGED
-Audit merge SHA : 82aeed74003d5b4efd356b93b5a06091389015d7
-Audit main CI   : 34679373105 — SUCCESS
+Status           : VERIFIED
+Backend owner    : monitoring read contract using neutral planning target reference
+Backend issue    : HidraAPI #71 — CLOSED / COMPLETED
+Backend evidence : PLN-003 merge df8c012be9034886e53f2ec64c28946f18f67b31; post-merge CI 34689500217; OpenAPI artifact 10297106684
+Frontend evidence: HWEB-010-05 PR #29; merge 706d2f1415510a91105318a682ff33cb43d0a529; post-merge CI 34692023707
 ```
 
-Required evidence before HWEB-010-05 can proceed:
-
-- deterministic monitoring read scoped directly by `planTargetId`, or equivalent backend-owned target comparison projection;
-- authoritative expected/actual/difference/unit/severity/status fields from monitoring;
-- canonical route permissions and deterministic OpenAPI;
-- tests proving exact plan-target scoping and empty/not-found behavior;
-- exact merge-SHA OpenAPI artifact and green acceptance gates.
-
-HidraWEB must not select a latest/average/sum telemetry reading by convention, calculate deviations itself, or scan unrelated deviation pages hoping to find a target match.
+HidraWEB must continue to avoid selecting a latest/average/sum telemetry reading by convention, calculating deviations itself, or scanning unrelated deviation pages hoping to find a target match.
 
 ## HWEB-010-06 — Version/concurrency behavior
 
 Contract audit completed. General frontend planning mutation/concurrency behavior remains blocked because no authoritative planning mutation concurrency contract is published for a general planning write surface.
 
-The PLN-002 approval bridge has its own explicit task concurrency precondition (`currentTaskUpdatedAt` -> `expectedTaskUpdatedAt`), and HWEB-010-04 consumes only that published approval-specific semantic. This does not authorize HidraWEB to generalize `updatedAt`, `revisionNumber`, `baseRevisionId` or any other read metadata into a concurrency token for unrelated planning mutations.
-
-For general planning mutation concurrency, the backend must explicitly publish which token/precondition protects which mutation, how stale writes fail, and what refetch/retry/rebase behavior is authoritative.
+The PLN-002 approval bridge has its own explicit task concurrency precondition (`currentTaskUpdatedAt` -> `expectedTaskUpdatedAt`). HWEB-010-04 consumes only that published approval-specific semantic. This does not authorize HidraWEB to generalize `updatedAt`, `revisionNumber`, `baseRevisionId` or other read metadata into a concurrency token for unrelated planning mutations.
 
 ### GAP-PLAN-004 — Planning mutation concurrency contract
 
 ```text
 Status          : OPEN / BLOCKING HWEB-010-06
 Backend owner   : planning public mutation contract
-Backend issue   : HidraAPI #72
+Backend issue   : HidraAPI #72 — OPEN
 Frontend action : no synthetic version token, stale-write test, retry/rebase flow, or general concurrency UI until the gap closes
 ```
 
-Required evidence before HWEB-010-06 can proceed:
+Required backend evidence before HWEB-010-06 can proceed:
 
-- an intentionally supported planning mutation is published through deterministic OpenAPI;
-- its read/mutation contract exposes an explicit backend-owned version or precondition mechanism;
-- deterministic conflict semantics are published for stale requests;
-- canonical route permissions are available;
-- backend tests prove current-token success and stale-token conflict behavior;
-- exact merge-SHA OpenAPI artifact and acceptance gates are green;
-- HidraWEB can then test the published behavior without defining concurrency policy itself.
+- an intentionally supported planning mutation published through deterministic OpenAPI;
+- an explicit backend-owned version/precondition mechanism for that mutation;
+- authoritative current token returned by the applicable read/mutation response;
+- deterministic stale-write conflict semantics;
+- canonical route permissions;
+- backend tests proving current-token success and stale-token conflict;
+- exact merge-SHA OpenAPI artifact and green compile/test/acceptance/OpenAPI gates.
 
 HidraWEB must not infer general version semantics from `revisionNumber`, `baseRevisionId`, `updatedAt`, status strings, or persistence implementation details.
 
@@ -249,9 +221,9 @@ HidraWEB must not infer general version semantics from `revisionNumber`, `baseRe
 
 HidraWEB still does not implement or infer:
 
-- direct revision lifecycle commands that are not published through an authoritative planning contract;
+- direct revision lifecycle commands not published through an authoritative planning contract;
 - generic workflow inbox scanning or transition-name/status inference for planning approval;
-- frontend-owned planned-vs-actual arithmetic or severity classification while GAP-PLAN-003 is open;
+- frontend-owned planned-vs-actual arithmetic or severity classification;
 - general planning concurrency/version tokens or retry/rebase semantics while GAP-PLAN-004 is open;
 - nomination/target mutation workspaces;
 - realtime planning events;
@@ -261,30 +233,32 @@ HidraWEB still does not implement or infer:
 
 ```text
 GAP-PLAN-001 — Planning query contract
-Status          : VERIFIED
-Backend issue   : HidraAPI #68 — CLOSED
-Backend evidence: merge c9ef4886445479f7b2d88f8fa0d4a8b37cb59e55; OpenAPI artifact 10286503941
+Status           : VERIFIED
+Backend issue    : HidraAPI #68 — CLOSED
+Backend evidence : merge c9ef4886445479f7b2d88f8fa0d4a8b37cb59e55; OpenAPI artifact 10286503941
 Frontend evidence: HWEB-010-02 verifies period/plan reads; HWEB-010-03 verifies revision list/detail reads.
 
 GAP-PLAN-002 — Planning/workflow approval bridge
-Status          : VERIFIED
-Backend issue   : HidraAPI #70 — CLOSED
-Backend evidence: PLN-002 merge 6ef581f557e42e8d96b03ccf429562e646f2e321; OpenAPI artifact 10293549730
+Status           : VERIFIED
+Backend issue    : HidraAPI #70 — CLOSED
+Backend evidence : PLN-002 merge 6ef581f557e42e8d96b03ccf429562e646f2e321; OpenAPI artifact 10293549730
 Frontend evidence: HWEB-010-04 PR #27; merge f60bc4e45dcdacf90d942b7969190f4b93a70df3; post-merge CI 34682342319.
 
 GAP-PLAN-003 — Target-scoped planned-vs-actual projection
-Status          : OPEN
-Backend issue   : HidraAPI #71 — OPEN
-Frontend evidence: planning target and monitoring deviation fields are compatible, but monitoring cannot be queried deterministically by planTargetId and frontend-owned comparison semantics are forbidden.
+Status           : VERIFIED
+Backend issue    : HidraAPI #71 — CLOSED / COMPLETED
+Backend evidence : PLN-003 merge df8c012be9034886e53f2ec64c28946f18f67b31; post-merge CI 34689500217; OpenAPI artifact 10297106684
+Frontend evidence: HWEB-010-05 PR #29; merge 706d2f1415510a91105318a682ff33cb43d0a529; post-merge CI 34692023707.
 
 GAP-PLAN-004 — Planning mutation concurrency contract
-Status          : OPEN
-Backend issue   : HidraAPI #72 — OPEN
+Status           : OPEN
+Backend issue    : HidraAPI #72 — OPEN
 Frontend evidence: no general planning mutation publishes an authoritative version/precondition token and stale-write conflict behavior. Approval-specific task concurrency in PLN-002 does not establish general planning concurrency semantics.
 ```
 
 ## Remaining HWEB-010 sequence
 
-- HWEB-010-04 is complete and verified.
-- HWEB-010-05 resumes only after GAP-PLAN-003 closes with deterministic target-scoped monitoring evidence.
-- HWEB-010-06 resumes only after GAP-PLAN-004 closes with deterministic general planning mutation/concurrency evidence.
+- HWEB-010-05 is complete and verified.
+- Next backend task is to close GAP-PLAN-004 / HidraAPI #72 with an authoritative planning mutation concurrency contract.
+- HWEB-010-06 resumes only after that exact backend merge-SHA contract and artifact are verified.
+- HWEB-010 closes only after HWEB-010-06 is implemented, merged and post-merge verified.
