@@ -1,11 +1,11 @@
 import { Alert, Box, Button, Paper, Stack, TextField, Typography } from '@mui/material';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
 import type { PlanRevisionView } from '@/api/generated/planning/model';
 import { usePermissions } from '@/features/permissions/usePermissions';
-import { planningQueryKeys, updatePlanRevision } from '@/features/planning/api/planningApi';
+import { fetchPlanRevision, planningQueryKeys, updatePlanRevision } from '@/features/planning/api/planningApi';
 
 const REVISION_UPDATE_ROUTE = '/api/v1/planning/revisions/{revisionId}';
 
@@ -24,13 +24,6 @@ export function RevisionConcurrencyPanel({ revision, currentRevisionId }: {
   const [changeReasonText, setChangeReasonText] = useState(revision.changeReasonText ?? '');
   const [success, setSuccess] = useState('');
   const [conflict, setConflict] = useState('');
-
-  useEffect(() => {
-    setChangeReasonCodeId(revision.changeReasonCodeId ?? '');
-    setChangeReasonText(revision.changeReasonText ?? '');
-    setSuccess('');
-    setConflict('');
-  }, [revision.id, revision.changeReasonCodeId, revision.changeReasonText]);
 
   const updatePermission = useMemo(
     () => routes.find((descriptor) => descriptor.route === REVISION_UPDATE_ROUTE && descriptor.methods.includes('PATCH'))?.permission,
@@ -62,8 +55,13 @@ export function RevisionConcurrencyPanel({ revision, currentRevisionId }: {
       const normalized = normalizeHidraApiError(error);
       setSuccess('');
       if (normalized.status === 409 && revision.id) {
+        const refreshed = await queryClient.fetchQuery({
+          queryKey: planningQueryKeys.revision(revision.id),
+          queryFn: () => fetchPlanRevision(revision.id ?? ''),
+        });
+        setChangeReasonCodeId(refreshed.changeReasonCodeId ?? '');
+        setChangeReasonText(refreshed.changeReasonText ?? '');
         setConflict('HidraAPI rejected a stale revision. The revision has been refetched; review the authoritative values before submitting again.');
-        await queryClient.refetchQueries({ queryKey: planningQueryKeys.revision(revision.id), exact: true });
       }
     },
   });
