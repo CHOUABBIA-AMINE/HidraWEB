@@ -86,7 +86,7 @@ describe('HWEB-010 planning workspace', () => {
     expect(await screen.findByText('task-plan-2')).toBeInTheDocument();
     expect(screen.getByText('2026-09-12T10:05:00Z')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'APPROVE' }));
-    fireEvent.change(screen.getByLabelText('Comment'), { target: { value: 'Approved against current operating assumptions.' } });
+    fireEvent.change(await screen.findByLabelText('Comment'), { target: { value: 'Approved against current operating assumptions.' } });
     fireEvent.click(screen.getByRole('button', { name: 'Execute APPROVE' }));
 
     expect(await screen.findByText('APPROVE · revision APPROVED')).toBeInTheDocument();
