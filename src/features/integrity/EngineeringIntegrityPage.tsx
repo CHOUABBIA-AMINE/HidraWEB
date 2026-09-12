@@ -193,7 +193,7 @@ export function EngineeringIntegrityPage() {
           </Table>
         </TableContainer>
 
-        <Stack direction="row" spacing={1} alignItems="center">
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
           <Button disabled={page === 0} onClick={() => { setPage((value) => Math.max(0, value - 1)); setSelectedId(''); }}>Previous</Button>
           <Typography>Page {page + 1}</Typography>
           <Button disabled={!listQuery.data || page + 1 >= listQuery.data.totalPages} onClick={() => { setPage((value) => value + 1); setSelectedId(''); }}>Next</Button>
@@ -219,7 +219,7 @@ export function EngineeringIntegrityPage() {
             {createPermission && !canCreateAssessment && <Alert severity="info">Your effective grants do not permit assessment creation.</Alert>}
             {assessmentMutation.isError && <Alert severity="error">{errorMessage(assessmentMutation.error, 'integrity assessment')}</Alert>}
             {assessmentMutation.isSuccess && <Alert severity="success">Assessment created. Integrity reads were invalidated for refresh.</Alert>}
-            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} flexWrap="wrap" useFlexGap>
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} useFlexGap sx={{ flexWrap: 'wrap' }}>
               {Object.entries(form).map(([field, value]) => (
                 <TextField
                   key={field}
