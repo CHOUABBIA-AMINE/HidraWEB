@@ -1,6 +1,6 @@
 # HWEB-011 — Integrity and Maintenance
 
-Status: HWEB-011-01 CONTRACT INVENTORY STARTED / BACKEND GAP REGISTERED
+Status: HWEB-011-02 COMPLETE / VERIFIED — HWEB-011-03 NEXT
 
 ## Accepted baselines
 
@@ -185,9 +185,26 @@ No additional backend read gap is opened at inventory time because the generic w
 
 ## Remaining execution order
 
-### HWEB-011-02 — Condition/integrity assessment workspaces
+### HWEB-011-02 — Condition/integrity assessment workspaces — COMPLETE / VERIFIED
 
-Use workbench discovery/list/detail/search for integrity read state and the dedicated integrity create contracts where actions are intentionally exposed. Present backend status/type identifiers without a frontend lifecycle state machine.
+The `/engineering` route now uses runtime workbench discovery/list/detail/search for module `integrity` and the dedicated `POST /api/v1/integrity/assessments` contract for intentionally exposed assessment creation. Resource names are discovered from HidraAPI rather than maintained as a competing frontend catalog. Route authorization is resolved from backend route descriptors intersected with effective grants. Server state remains in TanStack Query and selection, paging, search and create-form fields remain local React state. No integrity lifecycle state machine was introduced.
+
+Verification evidence:
+
+```text
+Product PR                    : #34
+Final product head            : 0e947ba30d95ee7d155495507f3e0f75a23a827a
+Exact-head CI                 : 34709966944 — SUCCESS
+Product merge SHA             : 0dc2cee05ee1c1f833c223c26ed0d5c1a75f679e
+Post-merge CI                 : 34710102967 — SUCCESS
+Frontend route                : /engineering
+Read source                   : runtime workbench discovery/list/detail for module integrity
+Create mutation               : POST /api/v1/integrity/assessments
+Authorization                 : runtime route descriptors + effective grants
+Focused browser proof         : tests/e2e/engineering.spec.ts
+Scope exclusions              : assets/work orders, cross-module context, timeline reconstruction, concurrency
+Conclusion                    : SUCCESS
+```
 
 ### HWEB-011-03 — Maintainable asset and work-order workspaces
 
