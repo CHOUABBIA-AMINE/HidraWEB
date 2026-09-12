@@ -19,7 +19,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
 import { createIntegrityAssessment } from '@/features/integrity/api/integrityApi';
@@ -38,6 +38,10 @@ const WORKBENCH_DETAIL_ROUTE = '/api/v1/workbench/{module}/{resource}/{id}';
 const CREATE_ASSESSMENT_ROUTE = '/api/v1/integrity/assessments';
 
 type RouteMethod = 'GET' | 'POST';
+
+export interface EngineeringIntegrityPageProps {
+  renderSelectedContext?: (attributes?: Record<string, unknown>) => ReactNode;
+}
 
 function permissionForRoute(
   routes: ReturnType<typeof usePermissions>['routes'],
@@ -58,7 +62,7 @@ function clean(value: string): string | undefined {
   return normalized || undefined;
 }
 
-export function EngineeringIntegrityPage() {
+export function EngineeringIntegrityPage({ renderSelectedContext }: EngineeringIntegrityPageProps = {}) {
   const permissions = usePermissions();
   const queryClient = useQueryClient();
   const [resource, setResource] = useState('');
@@ -200,16 +204,19 @@ export function EngineeringIntegrityPage() {
         </Stack>
 
         {selectedId && (
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6">Selected record</Typography>
-            {detailQuery.isError ? (
-              <Alert severity="error">{errorMessage(detailQuery.error, 'integrity record')}</Alert>
-            ) : (
-              <Box component="pre" sx={{ whiteSpace: 'pre-wrap', overflowX: 'auto', m: 0 }}>
-                {detailQuery.data ? JSON.stringify(detailQuery.data.attributes, null, 2) : 'Loading…'}
-              </Box>
-            )}
-          </Paper>
+          <>
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="h6">Selected record</Typography>
+              {detailQuery.isError ? (
+                <Alert severity="error">{errorMessage(detailQuery.error, 'integrity record')}</Alert>
+              ) : (
+                <Box component="pre" sx={{ whiteSpace: 'pre-wrap', overflowX: 'auto', m: 0 }}>
+                  {detailQuery.data ? JSON.stringify(detailQuery.data.attributes, null, 2) : 'Loading…'}
+                </Box>
+              )}
+            </Paper>
+            {renderSelectedContext?.(detailQuery.data?.attributes)}
+          </>
         )}
 
         <Paper sx={{ p: 2 }}>
