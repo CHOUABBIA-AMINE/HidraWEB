@@ -1,20 +1,22 @@
 # HWEB-011 — Integrity and Maintenance
 
-Status: HWEB-011-06 PARTIAL — PERMISSION VERIFIED / CONCURRENCY BLOCKED / GAP-ENG-001 OPEN
+Status: HWEB-011 COMPLETE / HWEB-012 NEXT / GAP-ENG-001 CLOSED
 
 ## Accepted baselines
 
 ```text
-HidraWEB phase base          : 10921c1eaf61febae92171bdc93cc663f35ef613
-HidraAPI audited main        : 9e8a1eb24a99c05749364119ef468f7971939123
-Accepted functional artifact : hidra-api-openapi-7bbdb49dbc40c5637d93a05863e69f9576a2edba
-Artifact id                  : 10298289002
-Artifact digest              : sha256:87d8248b2b25ca0bd684a8c7a98b33d79b52014a45c4992c71a456f2f5e95eec
-Backend owners               : integrity, assets
-Concurrency gap issue        : CHOUABBIA-AMINE/HidraAPI#79 — OPEN
+HidraWEB phase base             : 10921c1eaf61febae92171bdc93cc663f35ef613
+HidraAPI inventory baseline     : 9e8a1eb24a99c05749364119ef468f7971939123
+HidraAPI concurrency merge      : 2e6f93c14e330c8cc839a5de75ecc7b893f9872c
+HidraAPI verified main          : 0c8643c17b2648e8be85c658854f57ea0faab765
+Accepted concurrency artifact   : hidra-api-openapi-2e6f93c14e330c8cc839a5de75ecc7b893f9872c
+Artifact id                     : 10307945855
+Artifact digest                 : sha256:20b15395d1b2feec853167e88b2b6357650f51c03fb7811ffe60fd1362544c7f
+Backend owners                  : integrity, assets
+Concurrency gap issue           : CHOUABBIA-AMINE/HidraAPI#79 — CLOSED
 ```
 
-HidraAPI `9e8a1eb...` is a documentation-only successor of the accepted PLN-004 functional merge. HWEB-011 inventory therefore audits current source at `9e8a1eb...` while retaining the exact accepted OpenAPI artifact from functional merge `7bbdb49...` until HWEB-011 produces a newer backend contract artifact.
+HWEB-011 began from HidraAPI inventory baseline `9e8a1eb...`. GAP-ENG-001 was later resolved by the assets-owned concurrency contract merged at `2e6f93c...`, with deterministic OpenAPI artifact `10307945855`. Backend documentation verification subsequently merged at `0c8643c...` and final backend main CI remained green. The frontend concurrency implementation is pinned to the product merge artifact rather than inferring semantics from later documentation-only commits.
 
 ## HWEB-011 scope
 
@@ -28,7 +30,7 @@ HWEB-011 keeps `/engineering` as one user process while preserving backend owner
 - incident remains owner of incident truth;
 - HidraWEB process composition must use neutral identifiers and public contracts only.
 
-TanStack Query owns server state. React local state may own selection, paging, filters and forms. HWEB-011 must not introduce a frontend integrity/maintenance state machine.
+TanStack Query owns server state. React local state may own selection, paging, filters and forms. HWEB-011 does not introduce a frontend integrity/maintenance state machine.
 
 ---
 
@@ -36,7 +38,7 @@ TanStack Query owns server state. React local state may own selection, paging, f
 
 ### Dedicated integrity commands
 
-Current `SpringIntegrityController` publishes:
+At the inventory baseline, `SpringIntegrityController` published:
 
 ```text
 GET  /api/v1/integrity/capabilities
@@ -45,9 +47,9 @@ POST /api/v1/integrity/programs
 POST /api/v1/integrity/cases
 ```
 
-Legacy command aliases also exist (`/create-integrity-assessment`, `/create-integrity-program`, `/open-integrity-case`) but HWEB-011 should prefer the resource-oriented routes above.
+Legacy command aliases also existed, but HWEB-011 prefers the resource-oriented routes above.
 
-Published response shapes include:
+Published response shapes included:
 
 ```text
 IntegrityAssessmentResponse
@@ -81,11 +83,11 @@ IntegrityCaseResponse
 - closedAt
 ```
 
-The dedicated integrity controller currently exposes create operations only; it does not publish dedicated integrity list/detail/update/lifecycle routes.
+The dedicated integrity controller exposed create operations only at inventory time; dedicated integrity list/detail/update/lifecycle routes were not published.
 
 ### Dedicated assets commands
 
-Current `SpringAssetsController` publishes:
+At the inventory baseline, `SpringAssetsController` published:
 
 ```text
 GET  /api/v1/assets/capabilities
@@ -94,43 +96,17 @@ POST /api/v1/assets/asset-conditions
 POST /api/v1/assets/maintainable-assets
 ```
 
-Legacy command aliases also exist, but HWEB-011 should prefer the resource-oriented routes.
-
-Published response shapes include:
+GAP-ENG-001 later added the intentionally narrow update contract:
 
 ```text
-MaintainableAssetResponse
-- id
-- assetNumber
-- assetCode
-- assetName
-- assetTypeId
-- topologyAssetTypeCode
-- topologyAssetId
-- status
-- criticalityId
-- registeredAt
-
-AssetConditionResponse
-- id
-- maintainableAssetId
-- conditionStatus
-- conditionScore
-- observedAt
-
-MaintenanceWorkOrderResponse
-- id
-- workOrderNumber
-- maintainableAssetId
-- sourceRecommendationId
-- workOrderTypeId
-- status
-- title
-- plannedStartAt
-- completedAt
+PATCH /api/v1/assets/maintainable-assets/{assetId}
+Request : expectedUpdatedAt + assetName
+Response: MaintainableAssetResponse including refreshed updatedAt
+Conflict: HTTP 409 / ASSETS_MAINTAINABLE_ASSET_CONFLICT
+Retry   : refetch authoritative asset before a new user-initiated retry
 ```
 
-The dedicated assets controller currently exposes create operations only; it does not publish dedicated assets list/detail/update/lifecycle routes.
+The PATCH mutates `assetName` only. It does not mutate lifecycle status, topology references, ownership/manufacturer references, installation/commissioning/retirement timestamps, or other asset semantics.
 
 ### Authoritative generic read contract
 
@@ -144,42 +120,29 @@ GET  /api/v1/workbench/{module}/{resource}/{id}
 POST /api/v1/workbench/{module}/{resource}/search
 ```
 
-The workbench derives resources from the backend metamodel. HWEB-011 must discover `integrity` and `assets` resources from `GET /api/v1/workbench/{module}/resources` instead of maintaining a competing frontend resource catalog.
+The workbench derives resources from the backend metamodel. HWEB-011 discovers `integrity` and `assets` resources from `GET /api/v1/workbench/{module}/resources` instead of maintaining a competing frontend resource catalog.
 
-The workbench supports:
+The workbench supports zero-based paging, text search across backend-discovered string fields, exact filters over existing entity fields, optional sorting over existing entity fields, and generic list/detail record responses.
 
-- zero-based paging;
-- default size 50, capped at 200;
-- text search across backend-discovered string fields;
-- exact filters over existing entity fields;
-- optional sorting over existing entity fields;
-- generic list/detail record responses.
-
-This read contract means HWEB-011-02 through HWEB-011-05 are not blocked on basic resource retrieval even though dedicated query controllers are absent.
-
-### Resource evidence relevant to later tasks
-
-Current persistence evidence includes, among other resources, integrity assessment/program/case and inspection/defect/corrosion/cathodic-protection records, plus assets maintainable-asset, asset-condition, work-order, document-reference and lifecycle-event records.
-
-`AssetLifecycleEvent` is explicitly keyed by `maintainableAssetId` and publishes backend event type, old/new status, reason/comment, actor, event time, correlation id and creation time. HWEB-011-05 may use the workbench filter on `maintainableAssetId` as the authoritative evidence source; it must not fabricate missing lifecycle events.
+`AssetLifecycleEvent` is explicitly keyed by `maintainableAssetId` and publishes backend event type, old/new status, reason/comment, actor, event time, correlation id and creation time. HWEB-011-05 uses this backend evidence only and does not reconstruct history from current state.
 
 ### Authorization rule
 
-HWEB-011 must resolve route permissions from `GET /api/v1/security/permissions/routes` and intersect them with effective grants from `GET /api/v1/identity/me/permissions`. Backend authorization remains final. No permission code should be guessed from module/resource names in feature code.
+HWEB-011 resolves route permissions from `GET /api/v1/security/permissions/routes` and intersects them with effective grants from `GET /api/v1/identity/me/permissions`. Backend authorization remains final. No permission code is guessed from module/resource names in feature code.
 
-### Known gap discovered by HWEB-011-01
-
-`GAP-ENG-001 — Integrity/assets concurrent update contract`
+### GAP-ENG-001 — CLOSED
 
 ```text
-Status        : OPEN
+Status        : CLOSED
 Backend issue : CHOUABBIA-AMINE/HidraAPI#79
-Reason        : HWEB-011-06 requires concurrent-update verification, but current integrity/assets REST contracts publish create commands only and no update mutation exposes an explicit stale-write precondition/token.
-Frontend rule : Do not infer concurrency from timestamps, status enums or workbench fields. Do not synthesize PATCH/PUT semantics or client-side lifecycle transitions.
-Completion    : HidraAPI publishes and verifies one intentionally supported concurrency-protected integrity/assets update mutation with deterministic conflict behavior and OpenAPI evidence.
+Owner         : assets
+Mutation      : PATCH /api/v1/assets/maintainable-assets/{assetId}
+Mutable field : assetName only
+Precondition  : expectedUpdatedAt, sourced from authoritative MaintainableAsset updatedAt
+Conflict      : HTTP 409 / ASSETS_MAINTAINABLE_ASSET_CONFLICT
+Retry rule    : refetch/review before a new user-initiated retry; no automatic retry
+Artifact      : 10307945855 / sha256:20b15395d1b2feec853167e88b2b6357650f51c03fb7811ffe60fd1362544c7f
 ```
-
-No additional backend read gap is opened at inventory time because the generic workbench already publishes list/detail/search for JPA-backed integrity/assets resources. If a later specialized workspace requires semantics that the generic read contract cannot safely express, that requirement must become a separate explicit backend gap before implementation.
 
 ---
 
@@ -215,7 +178,7 @@ Mutation contracts : POST /api/v1/assets/maintainable-assets
                      POST /api/v1/assets/asset-conditions
                      POST /api/v1/assets/maintenance-work-orders
 Authorization      : runtime route descriptors + effective grants
-Concurrency gap    : GAP-ENG-001 / HidraAPI #79 remains OPEN and untouched
+Historical gap     : GAP-ENG-001 was still open at this milestone
 Conclusion         : SUCCESS
 ```
 
@@ -241,8 +204,6 @@ Qualified refs     : sourceModule + sourceReferenceId
 Allowed modules    : topology, documents, risk, incident
 Authorization      : existing runtime workbench route descriptors + effective grants
 State ownership    : TanStack Query server state; React local state only selection/forms
-OpenAPI status     : unchanged; accepted artifact 10298289002 retained
-Concurrency gap    : GAP-ENG-001 / HidraAPI #79 remains OPEN and untouched
 Conclusion         : SUCCESS
 ```
 
@@ -264,51 +225,85 @@ Evidence fields    : eventType, oldStatus, newStatus, eventReasonId, eventCommen
 Authorization      : runtime workbench search route descriptor + effective grants
 State ownership    : TanStack Query lifecycle-event server state; React local state only selection/forms/paging
 Fail-closed states : lifecycle resource missing, route permission missing, grant missing, backend error, or empty backend history
-OpenAPI status     : unchanged; accepted artifact 10298289002 retained
-Concurrency gap    : GAP-ENG-001 / HidraAPI #79 remains OPEN and untouched
 Conclusion         : SUCCESS
 ```
 
-### HWEB-011-06 — Role/permission and concurrent updates — PARTIAL / BLOCKED
+### HWEB-011-06 — Role/permission and concurrent updates — COMPLETE
 
-Permission/role verification is complete. Browser coverage proves that an action requires both its exact backend-published route descriptor and the corresponding effective grant; an effective grant string does not create an action when the route descriptor is absent. Assets commands and lifecycle-history search fail closed without grants, and an HTTP 403 from HidraAPI remains final even when frontend metadata appears to allow the action.
+Permission/role verification proves that an action requires both its exact backend-published route descriptor and the corresponding effective grant. An effective grant string does not create an action when the route descriptor is absent. Assets commands and lifecycle-history search fail closed without grants, and an HTTP 403 from HidraAPI remains final even when frontend metadata appears to allow the action.
 
-Concurrent-update verification remains blocked by `GAP-ENG-001` / HidraAPI #79. HidraWEB has not synthesized an update route, optimistic-lock token, lifecycle transition, or conflict/retry semantics.
+Concurrency verification consumes only the backend-published assets contract from HidraAPI merge `2e6f93c...`. The selected maintainable asset's backend `updatedAt` is sent unchanged as `expectedUpdatedAt` for the PATCH route only. On deterministic HTTP 409 conflict, HidraWEB refetches the authoritative workbench detail, replaces local name/token with backend values, and requires a new explicit user submit. It does not automatically retry or generalize `updatedAt` into a lock token for any other resource.
 
 ```text
-Permission PR        : #42
-Final permission head: 3d7e6e30347af7eb0b5995bca5338a4c1efd2ede
-Exact-head CI run    : 34722168113 — SUCCESS
-Merge SHA            : 1ae7a257843512b36d966a708480e84412d83d67
-Post-merge CI run    : 34722316390 — SUCCESS
-Frontend routes      : /engineering
-                       /engineering/assets
-Authorization        : GET /api/v1/security/permissions/routes + GET /api/v1/identity/me/permissions
-Backend final auth   : HTTP 403 verified
-OpenAPI status       : unchanged; accepted artifact 10298289002 retained
-Concurrency gap      : GAP-ENG-001 / HidraAPI #79 remains OPEN
-Conclusion           : PERMISSION VERIFIED / CONCURRENCY BLOCKED
+Permission PR          : #42
+Permission head        : 3d7e6e30347af7eb0b5995bca5338a4c1efd2ede
+Permission exact CI    : 34722168113 — SUCCESS
+Permission merge       : 1ae7a257843512b36d966a708480e84412d83d67
+Permission post CI     : 34722316390 — SUCCESS
+Concurrency PR         : #44
+Final concurrency head : 3d5e726d0909510d26a2c742cd418f11c58b14d2
+Exact-head CI run      : 34725640515 — SUCCESS
+Concurrency merge      : 5f95c363160c131ae725d66c16ffc057d0c83878
+Post-merge CI run      : 34725772754 — SUCCESS
+Frontend route         : /engineering/assets
+Authorization          : GET /api/v1/security/permissions/routes + GET /api/v1/identity/me/permissions
+Mutation               : PATCH /api/v1/assets/maintainable-assets/{assetId}
+Mutable field           : assetName only
+Precondition            : selected authoritative updatedAt -> expectedUpdatedAt
+Conflict                : HTTP 409 -> authoritative refetch; no automatic retry
+Backend final auth      : HTTP 403 remains final authority
+OpenAPI pin             : HidraAPI merge 2e6f93c14e330c8cc839a5de75ecc7b893f9872c
+Artifact id             : 10307945855
+Artifact digest         : sha256:20b15395d1b2feec853167e88b2b6357650f51c03fb7811ffe60fd1362544c7f
+GAP-ENG-001             : CLOSED / HidraAPI #79 CLOSED
+Conclusion              : SUCCESS — HWEB-011 COMPLETE
 ```
 
 ---
+
+## HWEB-011-06 completion verification evidence
+
+```text
+Backend product merge            : 2e6f93c14e330c8cc839a5de75ecc7b893f9872c
+Backend verification merge       : 0c8643c17b2648e8be85c658854f57ea0faab765
+Backend product exact-head CI    : 34724457582 — SUCCESS
+Backend product post-merge CI    : 34724675473 — SUCCESS
+Backend final-main CI            : 34725277170 — SUCCESS
+Backend OpenAPI artifact         : 10307945855
+Backend OpenAPI digest           : sha256:20b15395d1b2feec853167e88b2b6357650f51c03fb7811ffe60fd1362544c7f
+Backend gap issue                : CHOUABBIA-AMINE/HidraAPI#79 — CLOSED
+Endpoints and DTOs used          : PATCH /api/v1/assets/maintainable-assets/{assetId}; UpdateMaintainableAssetRequest; MaintainableAssetResponse; workbench detail refetch
+Permissions used                 : exact PATCH route descriptor intersected with effective grants; no inferred permission code
+Frontend route changed           : /engineering/assets only
+State ownership                  : TanStack Query owns backend server state; React local state owns edited name and current displayed token only
+Concurrency token                : MaintainableAsset.updatedAt explicitly promoted by HidraAPI for this PATCH only
+Mutable business field           : assetName only
+Stale conflict behavior          : deterministic HTTP 409 causes authoritative workbench detail refetch and local replacement of name/token
+Retry behavior                   : no automatic retry; user must review/refill and submit again using refreshed token
+Tests added                      : Playwright verifies exact expectedUpdatedAt request, 409 refetch, authoritative replacement, and second user submit with refreshed token
+Initial frontend CI correction   : 34725576777 failed only on react-hooks/set-state-in-effect lint; the effect was removed without contract/behavior change
+Exact frontend product head      : 3d5e726d0909510d26a2c742cd418f11c58b14d2
+Exact-head frontend CI           : 34725640515 — SUCCESS
+Frontend product merge           : 5f95c363160c131ae725d66c16ffc057d0c83878
+Frontend product post-merge CI   : 34725772754 — SUCCESS
+Conclusion                       : HWEB-011-06 VERIFIED; HWEB-011 COMPLETE; HWEB-012 is next and was not started by this task
+```
 
 ## HWEB-011-06 permission verification evidence
 
 ```text
 Backend source commit / branch : 9e8a1eb24a99c05749364119ef468f7971939123 / main
-Endpoints and DTOs used         : GET /api/v1/security/permissions/routes; GET /api/v1/security/permissions/catalog; GET /api/v1/identity/me/permissions; existing workbench/integrity/assets contracts only; no integrity/assets update route
+Endpoints and DTOs used         : GET /api/v1/security/permissions/routes; GET /api/v1/security/permissions/catalog; GET /api/v1/identity/me/permissions; existing workbench/integrity/assets contracts only
 Permissions used                : exact backend route descriptors intersected with effective grants; no permission code inferred from module/resource names
 Frontend routes changed         : none; test-only verification for /engineering and /engineering/assets
 State ownership                 : unchanged; TanStack Query remains server-state owner and React local state remains selection/forms/paging
 Authorization cases             : descriptor without effective grant denied; grant without descriptor denied; assets commands/history search denied without grant; backend HTTP 403 remains final authority
 Tests added                     : tests/e2e/engineering-permissions.spec.ts
-OpenAPI regeneration status     : CI regeneration succeeded; no contract or pin change required for the permission half of HWEB-011-06
 Exact permission head           : 3d7e6e30347af7eb0b5995bca5338a4c1efd2ede
 Exact-head CI                   : 34722168113 — SUCCESS
 Permission merge                : 1ae7a257843512b36d966a708480e84412d83d67
 Post-merge main CI              : 34722316390 — SUCCESS
-Known backend gaps              : GAP-ENG-001 / HidraAPI #79 remains OPEN; no concurrency-protected integrity/assets update mutation exists on audited main
-Conclusion                      : permission half VERIFIED; concurrency half BLOCKED; HWEB-011 remains open and HWEB-012 must not start
+Historical conclusion           : permission half VERIFIED; concurrency was blocked at this milestone and was later completed by PR #44
 ```
 
 ## HWEB-011-05 verification evidence
@@ -322,14 +317,12 @@ State ownership                 : TanStack Query owns lifecycle history server s
 Evidence ownership              : assets backend AssetLifecycleEvent only; no current-status/timestamp/work-order/condition reconstruction
 Error states                    : missing lifecycle resource, missing route permission, missing effective grant, backend search error, and empty backend history all fail closed explicitly
 Tests added                     : lifecycle evidence mapping unit tests; Playwright exact maintainableAssetId filter/eventAt ordering/evidence rendering/empty-history tests
-OpenAPI regeneration status     : CI regeneration succeeded; no contract or pin change required for HWEB-011-05
 Initial CI correction           : 34721069457 failed only on an ambiguous Playwright exact-text locator; no product or contract behavior changed
 Exact product head              : cee0095bfd3bdb142b9e1d7ac04d675cfaafa5de
 Exact-head CI                   : 34721254939 — SUCCESS
 Product merge                   : 92c1f768998c54280fac7b00cd874e19271f92d9
 Post-merge main CI              : 34721464399 — SUCCESS
-Known backend gaps              : GAP-ENG-001 / HidraAPI #79 remains OPEN for HWEB-011-06 concurrency verification
-Conclusion                      : HWEB-011-05 VERIFIED; HWEB-011-06 is next and partially blocked
+Conclusion                      : HWEB-011-05 VERIFIED
 ```
 
 ## HWEB-011-04 verification evidence
@@ -343,13 +336,11 @@ State ownership                 : TanStack Query retains server state; React loc
 Relationship ownership          : backend-published neutral IDs only; no names/status/timestamps/local state used to infer relationships
 Fail-closed behavior            : unsupported/missing relationship evidence renders explicit no-context state; no foreign collection scan
 Tests added                     : engineering context unit tests plus browser assertions for topology composition and missing-context failure
-OpenAPI regeneration status     : CI regeneration succeeded; no contract or pin change required for HWEB-011-04
 Exact product head              : 274cebc55ccd9a05612f9b9ff9260e9c3243eed0
 Exact-head CI                   : 34713913319 — SUCCESS
 Product merge                   : 16aa6cced5cba33f64dca5b0fc917970e5f1c237
 Post-merge main CI              : 34714053565 — SUCCESS
-Known backend gaps              : GAP-ENG-001 / HidraAPI #79 remains OPEN for HWEB-011-06
-Conclusion                      : HWEB-011-04 VERIFIED; HWEB-011-05 is next
+Conclusion                      : HWEB-011-04 VERIFIED
 ```
 
 ## HWEB-011-01 inventory evidence
@@ -362,7 +353,14 @@ Frontend routes changed         : none in inventory task
 State ownership                 : documented only; TanStack Query server state / local React selection-form state
 Error states                    : no UI change in inventory task
 Tests added                     : none; documentation-only inventory
-OpenAPI regeneration status     : no frontend contract slice added in inventory task
-Known backend gaps              : GAP-ENG-001 / HidraAPI #79
-Conclusion                      : inventory accepted; later product tasks must retain these ownership boundaries
+Known backend gap at inventory  : GAP-ENG-001 / HidraAPI #79 — later closed by backend PR #81
+Conclusion                      : inventory accepted; completed product tasks retained these ownership boundaries
 ```
+
+---
+
+## Phase conclusion
+
+HWEB-011 is complete. The engineering workspace now has backend-authoritative integrity/assets reads, create commands, cross-module context composition, lifecycle history, fail-closed authorization verification, and a single explicitly published concurrency-protected maintainable-asset update path. No frontend lifecycle state machine, inferred relationship, invented permission, generalized lock token, or automatic stale-write retry was introduced.
+
+The next legal phase is **HWEB-012 — Metering and Custody**. HWEB-012 was not started as part of HWEB-011-06 completion.
