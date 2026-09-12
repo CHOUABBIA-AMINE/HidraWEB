@@ -32,7 +32,7 @@ export const navigationSections: readonly NavigationSection[] = [
     { id: 'planning', labelKey: 'nav.planning', path: '/planning', capabilityModules: ['planning'], icon: 'planning', implemented: true, deliveryTask: 'HWEB-010' },
   ] },
   { id: 'engineering', labelKey: 'nav.groups.engineering', items: [
-    { id: 'integrity', labelKey: 'nav.integrity', path: '/engineering', capabilityModules: ['integrity', 'assets'], icon: 'engineering', implemented: false, deliveryTask: 'HWEB-011' },
+    { id: 'integrity', labelKey: 'nav.integrity', path: '/engineering', capabilityModules: ['integrity', 'assets'], icon: 'engineering', implemented: true, deliveryTask: 'HWEB-011' },
     { id: 'custody', labelKey: 'nav.custody', path: '/custody', capabilityModules: ['custody', 'party'], icon: 'custody', implemented: false, deliveryTask: 'HWEB-012' },
   ] },
   { id: 'intelligence', labelKey: 'nav.groups.intelligence', items: [
