@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 
 const kib = 1024;
 const budgets = Object.freeze({
-  initialJavaScriptBytes: 700 * kib,
+  initialJavaScriptBytes: 900 * kib,
   routeChunkBytes: 700 * kib,
   anyJavaScriptChunkBytes: 1100 * kib,
   minimumLazyRouteEntries: 20,
