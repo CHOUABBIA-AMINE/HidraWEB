@@ -73,6 +73,9 @@ jobs:
       - name: Generate HWEB-013 simulation OpenAPI client
         run: npm run api:generate:simulation
 
+      - name: Generate HWEB-013 reporting OpenAPI client
+        run: npm run api:generate:reporting
+
       - name: Lint
         run: npm run lint
 
