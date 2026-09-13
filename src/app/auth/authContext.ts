@@ -17,6 +17,8 @@ export interface AuthContextValue {
   error?: string;
   authenticateBasic: (username: string, password: string) => Promise<void>;
   authenticateJwt: (accessToken: string) => Promise<void>;
+  beginOidcSignIn: (returnTo?: string) => Promise<void>;
+  completeOidcSignIn: (search: string) => Promise<string>;
   signOut: () => void;
 }
 
