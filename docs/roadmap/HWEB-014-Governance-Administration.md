@@ -1,15 +1,16 @@
 # HWEB-014 — Governance and Administration Completion
 
-Status: HWEB-014-02 COMPLETE / HWEB-014-03 NEXT
+Status: HWEB-014-02 COMPLETE / HWEB-014-03 BLOCKED
 
 ## Accepted starting point
 
 ```text
-HidraWEB verified main       : ba80b3186d5600b2b10d306b256c0fdba1c9a7cd
-HWEB-014-01 exact-main CI    : 34760750153 — SUCCESS
+HidraWEB verified main       : ab209cc3105efca2239f78041422c4cb3a59c37d
+HWEB-014-02 exact-main CI    : 34762472996 — SUCCESS
 HidraAPI audited main        : 0c8643c17b2648e8be85c658854f57ea0faab765
 Current completed task       : HWEB-014-02 — configuration/feature-flag administration
-Next task                    : HWEB-014-03 — document upload/download/version evidence
+Current blocked task         : HWEB-014-03 — document upload/download/version evidence
+Backend blocker              : HidraAPI issue #83
 ```
 
 ## HWEB-014-01 — audit search/export UI — COMPLETE
@@ -355,4 +356,62 @@ Known backend gaps              : no toggle/update/delete/promotion/rollback/inh
 Final verification              : roadmap-inclusive exact-head full CI, independent PR-head CI, guarded merge, exact merge-SHA main CI required
 ```
 
-HWEB-014-03 must not begin until the roadmap-inclusive HWEB-014-02 head passes full CI, its exact PR head is independently verified, the guarded merge succeeds, and exact merge-SHA `main` CI is accepted.
+## HWEB-014-03 — document upload/download/version evidence — BLOCKED
+
+### Backend audit
+
+HWEB-014-03 was audited against HidraAPI `main` commit:
+
+```text
+0c8643c17b2648e8be85c658854f57ea0faab765
+```
+
+`SpringDocumentsController` publishes only these canonical resource operations:
+
+```text
+GET  /api/v1/documents/capabilities
+POST /api/v1/documents/target-links
+POST /api/v1/documents/documents
+POST /api/v1/documents/document-versions
+```
+
+`POST /api/v1/documents/document-versions` accepts `UploadDocumentVersionRequest` as JSON metadata. Its fields include a client-supplied `storageObjectId`, MIME type, original filename, file size, checksum metadata, dates, language, and uploader snapshots. It does not accept file bytes or a multipart part.
+
+Repository-wide source audit found no `MultipartFile` contract and no documents content retrieval endpoint using `Resource`, `InputStreamResource`, `ByteArrayResource`, `StreamingResponseBody`, or equivalent streaming/file-body semantics.
+
+### Blocking contract gap
+
+HWEB-014-03 requires actual upload/download/version evidence using published multipart/stream contracts only. The accepted backend currently has no such file-transfer contract. Therefore HidraWEB must not invent:
+
+```text
+file picker -> JSON metadata substitution
+client-generated storageObjectId semantics
+direct object-store URLs
+storage URL synthesis
+download buttons without a retrieval route
+browser-side checksum/file-size authority presented as backend truth
+range/stream behavior
+content-disposition/filename behavior
+```
+
+Metadata registration alone does not satisfy the HWEB-014-03 task definition.
+
+### Backend tracking
+
+```text
+HidraAPI issue : #83 — documents: expose multipart upload and streaming download contracts for HWEB-014-03
+```
+
+The issue requests:
+
+- canonical multipart document-version upload;
+- canonical version content retrieval/download;
+- authoritative storageObjectId ownership semantics;
+- validation, authorization, deterministic errors, media type and filename behavior;
+- deterministic OpenAPI publication and backend tests.
+
+### Completion gate
+
+HWEB-014-03 remains blocked until HidraAPI publishes and verifies the required file-transfer contracts in deterministic OpenAPI. Once available, re-audit the exact backend SHA/artifact, consume only the published multipart/stream semantics, add strict route-permission gating, and validate with full CI.
+
+HWEB-014-04 must not begin while HWEB-014-03 remains blocked unless the roadmap is explicitly reprioritized.
