@@ -59,7 +59,7 @@ export async function downloadDocumentVersionContent(versionId: string): Promise
     responseType: 'blob',
   });
   const contentDisposition = headerString(response.headers.get('content-disposition'));
-  const contentType = headerString(response.headers.get('content-type')) ?? response.data.type || 'application/octet-stream';
+  const contentType = headerString(response.headers.get('content-type')) ?? (response.data.type || 'application/octet-stream');
   const filename = decodeContentDispositionFilename(contentDisposition);
   if (!filename) {
     throw new Error('HidraAPI download response did not publish an attachment filename.');
