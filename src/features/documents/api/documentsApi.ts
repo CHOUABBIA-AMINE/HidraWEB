@@ -51,16 +51,20 @@ export async function downloadDocumentVersionContent(versionId: string): Promise
   const response = await hidraAxios.get<Blob>(`/api/v1/documents/document-versions/${encodeURIComponent(versionId)}/content`, {
     responseType: 'blob',
   });
-  const contentDisposition = response.headers['content-disposition'];
-  const contentType = response.headers['content-type'];
-  const filename = decodeContentDispositionFilename(typeof contentDisposition === 'string' ? contentDisposition : undefined);
+  const contentDispositionHeader = response.headers['content-disposition'];
+  const contentTypeHeader = response.headers['content-type'];
+  const contentDisposition = typeof contentDispositionHeader === 'string' ? contentDispositionHeader : undefined;
+  const contentType = typeof contentTypeHeader === 'string'
+    ? contentTypeHeader
+    : response.data.type || 'application/octet-stream';
+  const filename = decodeContentDispositionFilename(contentDisposition);
   if (!filename) {
     throw new Error('HidraAPI download response did not publish an attachment filename.');
   }
   return {
     blob: response.data,
     filename,
-    contentType: typeof contentType === 'string' ? contentType : response.data.type || 'application/octet-stream',
+    contentType,
   };
 }
 
