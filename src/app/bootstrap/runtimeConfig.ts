@@ -2,8 +2,12 @@ import { z } from 'zod';
 
 const optionalUrl = z.preprocess((value) => (value === '' ? undefined : value), z.string().url().optional());
 
+const apiBaseUrlSchema = z.union([z.literal('/'), z.string().url()]);
+
+export const parseApiBaseUrl = (value: string) => apiBaseUrlSchema.parse(value);
+
 const runtimeConfigSchema = z.object({
-  apiBaseUrl: z.string().url(),
+  apiBaseUrl: apiBaseUrlSchema,
   authMode: z.enum(['basic', 'jwt', 'disabled']),
   environment: z.string().trim().min(1),
   defaultLocale: z.enum(['fr', 'en', 'ar']),
