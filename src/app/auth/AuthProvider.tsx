@@ -26,8 +26,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
       : undefined,
   );
   const [error, setError] = useState<string>();
-  const expiryTimer = useRef<ReturnType<typeof setTimeout>>();
-  const logoutUri = useRef<string>();
+  const expiryTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const logoutUri = useRef<string | undefined>(undefined);
 
   const clearExpiryTimer = useCallback(() => {
     if (expiryTimer.current) {
