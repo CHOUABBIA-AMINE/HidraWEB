@@ -1,6 +1,20 @@
 {
   "components": {
     "schemas": {
+      "CreateCustodyTransferTicketRequest": {
+        "properties": {
+          "agreementId": { "type": "string" },
+          "batchId": { "type": "string" },
+          "issuedByActorId": { "type": "string" },
+          "measurementPeriodId": { "type": "string" },
+          "quantityCalculationId": { "type": "string" },
+          "ticketDate": { "format": "date-time", "type": "string" },
+          "ticketNumber": { "type": "string" },
+          "transferPointId": { "type": "string" },
+          "workflowInstanceId": { "type": "string" }
+        },
+        "type": "object"
+      },
       "CustodyMeasurementPeriodResponse": {
         "properties": {
           "agreementId": { "type": "string" },
@@ -12,6 +26,22 @@
             "enum": ["OPEN", "LOCKED", "CALCULATED", "APPROVED", "CLOSED", "REOPENED", "CANCELLED"],
             "type": "string"
           },
+          "transferPointId": { "type": "string" }
+        },
+        "type": "object"
+      },
+      "CustodyTransferTicketResponse": {
+        "properties": {
+          "agreementId": { "type": "string" },
+          "approvedAt": { "format": "date-time", "type": "string" },
+          "id": { "type": "string" },
+          "measurementPeriodId": { "type": "string" },
+          "status": {
+            "enum": ["DRAFT", "SUBMITTED", "UNDER_REVIEW", "APPROVED", "REJECTED", "CANCELLED", "CLOSED"],
+            "type": "string"
+          },
+          "ticketDate": { "format": "date-time", "type": "string" },
+          "ticketNumber": { "type": "string" },
           "transferPointId": { "type": "string" }
         },
         "type": "object"
@@ -52,6 +82,30 @@
             "content": {
               "*/*": {
                 "schema": { "$ref": "#/components/schemas/CustodyMeasurementPeriodResponse" }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": ["spring-custody-controller"]
+      }
+    },
+    "/api/v1/custody/transfer-tickets": {
+      "post": {
+        "operationId": "createTransferTicket",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateCustodyTransferTicketRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/CustodyTransferTicketResponse" }
               }
             },
             "description": "OK"
