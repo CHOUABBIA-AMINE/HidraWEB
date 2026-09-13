@@ -62,12 +62,14 @@ export function HidraSidebar({ collapsed }: HidraSidebarProps) {
   const renderItem = (item: NavigationItem) => {
     const label = t(item.labelKey);
     const plannedTitle = t('nav.planned', { task: item.deliveryTask });
+    const selected = item.implemented && location.pathname === item.path;
     const button = (
       <ListItemButton
+        aria-current={selected ? 'page' : undefined}
         aria-label={label}
         disabled={!item.implemented}
         onClick={item.implemented ? () => navigate(item.path) : undefined}
-        selected={item.implemented && location.pathname === item.path}
+        selected={selected}
         sx={{ minHeight: 46, px: collapsed ? 2.5 : 2 }}
       >
         <ListItemIcon sx={{ minWidth: collapsed ? 0 : 40, justifyContent: 'center' }}>{iconFor(item.icon)}</ListItemIcon>
@@ -99,7 +101,7 @@ export function HidraSidebar({ collapsed }: HidraSidebarProps) {
         },
       }}
     >
-      <List disablePadding sx={{ py: 1 }}>
+      <List aria-label={t('shell.sidebar')} component="nav" disablePadding sx={{ py: 1 }}>
         {visibleSections.map((section, sectionIndex) => (
           <div key={section.id}>
             {sectionIndex > 0 ? <Divider sx={{ my: 0.75 }} /> : null}

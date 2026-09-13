@@ -1,15 +1,15 @@
 # HWEB-015 — Production Hardening
 
-Status: HWEB-015-05 COMPLETE / HWEB-015-06 NEXT
+Status: HWEB-015-06 COMPLETE / HWEB-015-07 NEXT
 
 ## Accepted starting point
 
 ```text
-HidraWEB verified main       : 97876cab44dbb956ab5c2a26468eb8f7fb047abb
-HWEB-015-04 exact-main CI    : 34776455174 — SUCCESS
+HidraWEB verified main       : 2bd0798ba90a35d868c1438e17176f2d3e1d8fdb
+HWEB-015-05 exact-main CI    : 34777849602 — SUCCESS
 HidraAPI audited main        : 725a451ae4880ccb4f2ec508709241f88cd4aea7
-Current completed task       : HWEB-015-05 — frontend observability, structured technical error reporting and correlation IDs
-Next task                    : HWEB-015-06 — WCAG 2.2 AA audit including keyboard-only control-room workflows
+Current completed task       : HWEB-015-06 — WCAG 2.2 AA audit including keyboard-only control-room workflows
+Next task                    : HWEB-015-07 — bundle analysis and route-level lazy loading budgets
 ```
 
 ## HWEB-015-01 — freeze supported enterprise authentication mode and IdP contract — COMPLETE
@@ -355,4 +355,54 @@ Product branch CI               : 34777158465 — SUCCESS
 Final verification              : roadmap-inclusive exact-head CI, independent PR CI, guarded merge, exact merge-SHA main CI required
 ```
 
-HWEB-015-06 must not begin until the roadmap-inclusive HWEB-015-05 head passes full CI, its exact PR head is independently verified, the guarded merge succeeds, and exact merge-SHA `main` CI is accepted.
+HWEB-015-06 was authorized only after HWEB-015-05 had been independently verified, guarded-merged, and accepted on exact merge-SHA `main` CI.
+
+## HWEB-015-06 — WCAG 2.2 AA audit including keyboard-only control-room workflows — COMPLETE
+
+### Scope
+
+HWEB-015-06 audits and hardens existing HidraWEB operator surfaces for WCAG 2.2 AA and keyboard-only use. It does not start HWEB-015-07 bundle analysis or any later performance milestone, and it does not alter HidraAPI authorization or business-state ownership.
+
+### Audit findings and hardening
+
+The authenticated shell now exposes a focus-revealed bypass link that moves keyboard focus directly to the programmatically focusable `main` landmark without adding the landmark to sequential tab order.
+
+Primary navigation now exposes the exact active route using `aria-current="page"`, while authorization visibility continues to be governed by the existing backend route-descriptor and effective-permission intersection.
+
+The shared Material UI baseline adds a three-pixel `:focus-visible` outline with an offset so keyboard focus is not suppressed by individual operator controls.
+
+Destructive administration confirmation dialogs explicitly associate title, description, and confirmation instructions and initially focus the safe Cancel action. Material UI Dialog retains modal focus containment and focus restoration.
+
+### Non-text and data-intensive surfaces
+
+The MapLibre map remains a named spatial visualization rather than an independent source of business truth. The topology workspace already renders the same backend feature window through `TopologyFeatureList`, whose ordinary Inspect buttons provide keyboard access to feature inspection without pointer-only map interaction.
+
+The generic workbench already uses semantic Material UI table elements and ordinary buttons for row inspection and pagination. Accessibility hardening does not derive frontend resource identifiers or business meaning from backend Java entity names.
+
+### Documentation and tests
+
+`docs/deployment/Accessibility-WCAG-2.2-AA.md` records the audited surfaces, keyboard workflow, focus/dialog rules, textual-alternative policy, external-IdP boundary, and regression rules. `README.md` links this production accessibility contract.
+
+`tests/e2e/accessibility-keyboard.spec.ts` verifies a keyboard-only authenticated-shell path: focus and activate the bypass link, confirm focus on the main landmark, verify current-page semantics, focus another backend-authorized navigation action, activate it with Enter, and verify `aria-current` follows the route.
+
+No new axe/scanner dependency was added; the milestone uses the repository's existing Playwright/Vitest/React Testing Library toolchain plus the documented manual audit boundary.
+
+### Completion record
+
+```text
+Backend source commit / branch : 725a451ae4880ccb4f2ec508709241f88cd4aea7 / main
+Endpoints and DTOs used         : none added or changed; existing permission/topology/workbench contracts only
+Permissions used                : no permission introduced or changed
+Frontend routes created/changed : none
+State ownership                 : no new server or business state; focus remains transient browser presentation state
+Tests added/changed             : tests/e2e/accessibility-keyboard.spec.ts
+Documentation                   : docs/deployment/Accessibility-WCAG-2.2-AA.md; README.md
+OpenAPI regeneration status     : no API contract changed; all deterministic generators passed product-head CI
+Known external boundary         : enterprise IdP accessibility remains owned by the external IdP UI; HidraWEB does not claim compliance for another origin
+Product branch                  : hweb-015-06-wcag-keyboard
+Product head                    : 0c8e1e9540c4ba370ece01112704071690ad2b01
+Product branch CI               : 34780453891 — SUCCESS
+Final verification              : roadmap-inclusive exact-head CI, independent PR CI, guarded exact-head merge, exact merge-SHA main CI required
+```
+
+HWEB-015-07 must not begin until the roadmap-inclusive HWEB-015-06 head passes full CI, its exact PR head is independently verified, the guarded merge succeeds, and exact merge-SHA `main` CI is accepted.

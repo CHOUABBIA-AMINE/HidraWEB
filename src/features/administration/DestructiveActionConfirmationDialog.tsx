@@ -1,5 +1,5 @@
 import { Alert, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Stack, TextField, Typography } from '@mui/material';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 
 interface DestructiveActionConfirmationDialogProps {
   open: boolean;
@@ -23,6 +23,9 @@ export function DestructiveActionConfirmationDialog({
   auditReference,
 }: DestructiveActionConfirmationDialogProps) {
   const [confirmation, setConfirmation] = useState('');
+  const titleId = useId();
+  const descriptionId = useId();
+  const confirmationInstructionId = useId();
   const confirmed = confirmation === confirmationPhrase;
 
   const resetAndCancel = () => {
@@ -37,16 +40,25 @@ export function DestructiveActionConfirmationDialog({
   };
 
   return (
-    <Dialog open={open} onClose={resetAndCancel} maxWidth="sm" fullWidth transitionDuration={0}>
-      <DialogTitle>{title}</DialogTitle>
+    <Dialog
+      aria-describedby={descriptionId}
+      aria-labelledby={titleId}
+      fullWidth
+      maxWidth="sm"
+      onClose={resetAndCancel}
+      open={open}
+      transitionDuration={0}
+    >
+      <DialogTitle id={titleId}>{title}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ pt: 1 }}>
           <Alert severity="warning">This action is destructive and requires explicit confirmation.</Alert>
-          <DialogContentText>{description}</DialogContentText>
-          <Typography variant="body2">
+          <DialogContentText id={descriptionId}>{description}</DialogContentText>
+          <Typography id={confirmationInstructionId} variant="body2">
             Type <strong>{confirmationPhrase}</strong> to continue.
           </Typography>
           <TextField
+            aria-describedby={confirmationInstructionId}
             autoComplete="off"
             fullWidth
             label="Confirmation phrase"
@@ -65,7 +77,7 @@ export function DestructiveActionConfirmationDialog({
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={resetAndCancel}>Cancel</Button>
+        <Button autoFocus onClick={resetAndCancel}>Cancel</Button>
         <Button color="error" disabled={!confirmed} onClick={confirm} variant="contained">
           {confirmLabel}
         </Button>

@@ -13,5 +13,13 @@ export const hidraTheme = createTheme({
         disableElevation: true,
       },
     },
+    MuiCssBaseline: {
+      styleOverrides: {
+        '*:focus-visible': {
+          outline: '3px solid currentColor',
+          outlineOffset: '3px',
+        },
+      },
+    },
   },
 });
