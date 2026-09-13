@@ -1,8 +1,28 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { AdministrationGovernanceNotice, DestructiveActionConfirmationDialog } from '@/features/administration';
+
+async function flushReactScheduler() {
+  await new Promise<void>((resolve) => {
+    const setImmediateFn = (globalThis as typeof globalThis & {
+      setImmediate?: (callback: () => void) => unknown;
+    }).setImmediate;
+
+    if (setImmediateFn) {
+      setImmediateFn(resolve);
+      return;
+    }
+
+    globalThis.setTimeout(resolve, 0);
+  });
+}
+
+afterEach(async () => {
+  cleanup();
+  await flushReactScheduler();
+});
 
 describe('HWEB-014-06 administration guardrails', () => {
   it('links administration users to backend-owned audit evidence without synthesizing references', () => {
