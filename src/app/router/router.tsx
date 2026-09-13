@@ -6,6 +6,7 @@ import { NotFoundPage } from '@/app/pages/NotFoundPage';
 import { OverviewPage } from '@/app/pages/OverviewPage';
 import { AlarmConsolePage } from '@/features/alarm/AlarmConsolePage';
 import { AnalyticsWorkspacePage } from '@/features/analytics';
+import { AuditWorkspacePage } from '@/features/audit';
 import { IdentityAdministrationPage } from '@/features/context/IdentityAdministrationPage';
 import { OrganizationAdministrationPage } from '@/features/context/OrganizationAdministrationPage';
 import { CustodyWorkspacePage } from '@/features/custody';
@@ -52,6 +53,7 @@ export const router = createBrowserRouter([
       { path: 'workbench', element: <OperationalWorkbenchPage /> },
       { path: 'administration/organization', element: <OrganizationAdministrationPage /> },
       { path: 'administration/users', element: <IdentityAdministrationPage /> },
+      { path: 'administration/audit', element: <AuditWorkspacePage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

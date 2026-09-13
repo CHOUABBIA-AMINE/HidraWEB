@@ -1,0 +1,87 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "HidraAPI",
+    "version": "v1"
+  },
+  "paths": {
+    "/api/v1/audit/capabilities": {
+      "get": {
+        "tags": ["spring-audit-controller"],
+        "operationId": "capabilities_13",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/audit/exports": {
+      "post": {
+        "tags": ["spring-audit-controller"],
+        "operationId": "requestAuditExport_1",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestAuditExportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditExportRequestResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AuditExportRequestResponse": {
+        "type": "object",
+        "properties": {
+          "completedAt": { "format": "date-time", "type": "string" },
+          "format": { "type": "string" },
+          "id": { "type": "string" },
+          "purposeId": { "type": "string" },
+          "recordCount": { "format": "int32", "type": "integer" },
+          "requestedAt": { "format": "date-time", "type": "string" },
+          "requestedByActorId": { "type": "string" },
+          "status": {
+            "enum": ["REQUESTED", "APPROVED", "REJECTED", "RUNNING", "COMPLETED", "FAILED", "EXPIRED"],
+            "type": "string"
+          }
+        }
+      },
+      "RequestAuditExportRequest": {
+        "type": "object",
+        "properties": {
+          "filterJson": { "type": "string" },
+          "format": { "type": "string" },
+          "purposeId": { "type": "string" },
+          "requestedByActorId": { "type": "string" },
+          "requestedByDisplayNameSnapshot": { "type": "string" },
+          "workflowInstanceId": { "type": "string" }
+        }
+      }
+    }
+  }
+}
