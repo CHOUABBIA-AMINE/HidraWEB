@@ -47,16 +47,19 @@ function decodeContentDispositionFilename(value: string | undefined): string | n
   return quoted ?? null;
 }
 
+function headerString(value: unknown): string | undefined {
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  if (Array.isArray(value)) return value.join(', ');
+  return undefined;
+}
+
 export async function downloadDocumentVersionContent(versionId: string): Promise<DownloadedDocumentVersion> {
   const response = await hidraAxios.get<Blob>(`/api/v1/documents/document-versions/${encodeURIComponent(versionId)}/content`, {
     responseType: 'blob',
   });
-  const contentDispositionHeader = response.headers['content-disposition'];
-  const contentTypeHeader = response.headers['content-type'];
-  const contentDisposition = typeof contentDispositionHeader === 'string' ? contentDispositionHeader : undefined;
-  const contentType = typeof contentTypeHeader === 'string'
-    ? contentTypeHeader
-    : response.data.type || 'application/octet-stream';
+  const contentDisposition = headerString(response.headers.get('content-disposition'));
+  const contentType = headerString(response.headers.get('content-type')) ?? response.data.type || 'application/octet-stream';
   const filename = decodeContentDispositionFilename(contentDisposition);
   if (!filename) {
     throw new Error('HidraAPI download response did not publish an attachment filename.');
