@@ -44,8 +44,8 @@ The manifest is a build artifact and is not a runtime source of authorization or
 
 ```text
 initial static JavaScript      <= 900 KiB
-individual lazy route chunk    <= 700 KiB
-any JavaScript chunk           <= 1100 KiB
+individual lazy route chunk    <= 96 KiB
+any JavaScript chunk           <= 1050 KiB
 lazy route entries             >= 20
 ```
 
@@ -53,9 +53,9 @@ The initial-static budget is calculated from the manifest entry and its synchron
 
 The 900 KiB startup ceiling is calibrated from the HWEB-015-07 split output (869.6 KiB synchronous graph) and remains materially below the pre-split eager bundle. It leaves limited headroom while preventing the route code removed by this milestone from silently returning to startup.
 
-The route-entry count acts as a regression guard: a future refactor that silently restores eager page imports must fail the production build rather than merely emit a warning.
+The 96 KiB route ceiling is deliberately above the measured 39.7 KiB largest lazy route chunk while remaining tight enough to catch route-level regressions. The route-entry count additionally guards against a future refactor that silently restores eager page imports.
 
-The 1100 KiB absolute chunk ceiling acknowledges the existing MapLibre/ECharts dependency weight while still preventing unconstrained growth. Further runtime stress and large-map/chart behavior remain HWEB-015-08 scope.
+The 1050 KiB absolute chunk ceiling narrowly accommodates the measured MapLibre adapter (about 995 KiB in binary KiB) while preventing unconstrained growth. Further runtime stress and large-map/chart behavior remain HWEB-015-08 scope.
 
 ## CI and regression rule
 
