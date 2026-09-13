@@ -5,6 +5,10 @@ server {
     root /usr/share/nginx/html;
     index index.html;
 
+    # Public TLS terminates at the approved ingress/edge before this internal listener.
+    # The edge must redirect HTTP to HTTPS and forward only approved HTTPS traffic here.
+    include /etc/nginx/snippets/hidra-security-headers.conf;
+
     # Exact STOMP/WebSocket transport path. This only forwards the HTTP Upgrade;
     # authentication semantics remain owned by HidraAPI and are not invented here.
     location = /api/v1/realtime/ws {
@@ -36,6 +40,22 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_pass ${HIDRA_API_UPSTREAM};
+    }
+
+    # Vite fingerprinted assets are content-addressed and can be cached long-term.
+    # Re-include the security headers because Nginx add_header inheritance stops when
+    # this location defines its own Cache-Control header.
+    location ^~ /assets/ {
+        include /etc/nginx/snippets/hidra-security-headers.conf;
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+        try_files $uri =404;
+    }
+
+    # The application shell must revalidate so deployments pick up new asset hashes.
+    location = /index.html {
+        include /etc/nginx/snippets/hidra-security-headers.conf;
+        add_header Cache-Control "no-cache" always;
+        try_files $uri =404;
     }
 
     # React Router history fallback for non-API browser routes.

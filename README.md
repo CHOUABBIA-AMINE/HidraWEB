@@ -71,7 +71,7 @@ Generated API files belong only under `src/api/generated/` and must not contain 
 
 The accepted production browser topology uses a same-origin reverse proxy: HidraWEB static assets at `/`, HidraAPI at `/api/*`, and realtime transports on their existing `/api/v1/realtime/*` paths. See [`docs/deployment/Same-Origin-Reverse-Proxy.md`](docs/deployment/Same-Origin-Reverse-Proxy.md) and [`.env.production.example`](.env.production.example).
 
-TLS, CSP, secure headers, and static asset cache policy are intentionally deferred to HWEB-015-04.
+Browser-facing TLS/HSTS, CSP, secure response headers, and static cache policy are defined in [`docs/deployment/Browser-Security-Policy.md`](docs/deployment/Browser-Security-Policy.md) and the checked-in Nginx templates under `deploy/nginx/`.
 
 ## Implemented application surfaces
 
