@@ -119,7 +119,7 @@ describe('HWEB-015-08 production performance budgets', () => {
 
     expect(markup).toContain('row-199');
     expect(markup).toContain('value-199-8');
-    expect(duration).toBeLessThan(4_000);
+    expect(duration).toBeLessThan(1_500);
   });
 
   it('computes bounds for 25,000 topology features within the hosted-CI budget', () => {
@@ -132,9 +132,9 @@ describe('HWEB-015-08 production performance budgets', () => {
     expect(bounds).toBeDefined();
     expect(bounds?.west).toBe(-180);
     expect(bounds?.south).toBe(-90);
-    expect(bounds?.east).toBeGreaterThan(179);
-    expect(bounds?.north).toBeGreaterThan(89);
-    expect(duration).toBeLessThan(1_000);
+    expect(bounds?.east).toBeGreaterThanOrEqual(179);
+    expect(bounds?.north).toBeGreaterThanOrEqual(89);
+    expect(duration).toBeLessThan(500);
   });
 
   it('renders a 10,000-point operational ECharts series within the hosted-CI budget', () => {
@@ -161,6 +161,6 @@ describe('HWEB-015-08 production performance budgets', () => {
     chart.dispose();
 
     expect(svg).toContain('<svg');
-    expect(duration).toBeLessThan(5_000);
+    expect(duration).toBeLessThan(2_000);
   });
 });
