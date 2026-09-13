@@ -1,15 +1,15 @@
 # HWEB-015 — Production Hardening
 
-Status: HWEB-015-06 COMPLETE / HWEB-015-07 NEXT
+Status: HWEB-015-07 COMPLETE / HWEB-015-08 NEXT
 
 ## Accepted starting point
 
 ```text
-HidraWEB verified main       : 2bd0798ba90a35d868c1438e17176f2d3e1d8fdb
-HWEB-015-05 exact-main CI    : 34777849602 — SUCCESS
+HidraWEB verified main       : 15f44543a8f32863762bba908abb6af3c92a4092
+HWEB-015-06 exact-main CI    : 34781152538 — SUCCESS
 HidraAPI audited main        : 725a451ae4880ccb4f2ec508709241f88cd4aea7
-Current completed task       : HWEB-015-06 — WCAG 2.2 AA audit including keyboard-only control-room workflows
-Next task                    : HWEB-015-07 — bundle analysis and route-level lazy loading budgets
+Current completed task       : HWEB-015-07 — bundle analysis and route-level lazy loading budgets
+Next task                    : HWEB-015-08 — large-grid/map/chart performance tests
 ```
 
 ## HWEB-015-01 — freeze supported enterprise authentication mode and IdP contract — COMPLETE
@@ -405,4 +405,57 @@ Product branch CI               : 34780453891 — SUCCESS
 Final verification              : roadmap-inclusive exact-head CI, independent PR CI, guarded exact-head merge, exact merge-SHA main CI required
 ```
 
-HWEB-015-07 must not begin until the roadmap-inclusive HWEB-015-06 head passes full CI, its exact PR head is independently verified, the guarded merge succeeds, and exact merge-SHA `main` CI is accepted.
+HWEB-015-07 was authorized only after HWEB-015-06 had been independently verified, guarded-merged, and accepted on exact merge-SHA `main` CI.
+
+## HWEB-015-07 — bundle analysis and route-level lazy loading budgets — COMPLETE
+
+### Scope
+
+HWEB-015-07 reduces startup JavaScript and freezes measurable bundle regression budgets. It does not start HWEB-015-08 large-grid/map/chart runtime performance testing and does not change any HidraAPI endpoint, DTO, permission, business rule, or route-authorization contract.
+
+### Baseline and route splitting
+
+The accepted HWEB-015-06 production build emitted an eager application chunk of approximately 1,198.17 kB minified plus the existing 1,019.02 kB MapLibre adapter. Vite reported oversized chunks and recommended dynamic imports/code splitting.
+
+`src/app/router/router.tsx` now retains the authentication guard, permission bootstrap boundary, application shell, and router infrastructure in the startup graph while loading implemented page modules through React Router route-level `lazy` functions. Authentication and backend-authoritative permission checks therefore remain unchanged; lazy loading is only a delivery optimization.
+
+The split build emits 24 lazy route entries. The measured largest lazy route chunk is approximately 39.7 KiB, while the principal application chunk fell to approximately 435.09 kB minified. The existing MapLibre adapter remains the largest individual JavaScript chunk at approximately 995.1 KiB when measured in binary KiB.
+
+### Deterministic bundle budgets
+
+Vite now emits `dist/.vite/manifest.json`, and `scripts/check-bundle-budgets.mjs` reads that manifest after every production build. `npm run build` fails if the manifest-based regression budgets are exceeded:
+
+```text
+initial static JavaScript      <= 900 KiB
+individual lazy route chunk    <= 96 KiB
+any JavaScript chunk           <= 1050 KiB
+lazy route entries             >= 20
+```
+
+The startup budget covers the entry and its synchronous import closure only. The route-entry minimum prevents route modules from silently returning to the startup graph. The absolute ceiling narrowly accommodates the existing MapLibre adapter without masking uncontrolled growth.
+
+### Documentation and CI
+
+`docs/deployment/Bundle-Budgets.md` records the accepted baseline, lazy-loading boundary, authorization invariants, manifest analysis, measured output, enforced budgets, and regression rules. `README.md` links the production bundle policy.
+
+The budget checker is part of the normal `npm run build` path, so product-head, roadmap-inclusive, pull-request, and exact-main CI all enforce the same production constraints without a new dependency.
+
+### Completion record
+
+```text
+Backend source commit / branch : 725a451ae4880ccb4f2ec508709241f88cd4aea7 / main
+Endpoints and DTOs used         : none added or changed
+Permissions used                : none introduced or changed; existing authentication/permission boundaries preserved
+Frontend routes created/changed : no URL added or removed; existing page routes converted to React Router lazy modules
+State ownership                 : no new server/business state
+Bundle analysis                 : Vite manifest; 24 lazy route entries; 869.6 KiB synchronous startup graph; ~39.7 KiB largest lazy route chunk
+Enforced budgets                : startup <= 900 KiB; route <= 96 KiB; any JS <= 1050 KiB; lazy routes >= 20
+Documentation                   : docs/deployment/Bundle-Budgets.md; README.md
+OpenAPI regeneration status     : no API contract changed; all deterministic generators passed product-head CI
+Product branch                  : hweb-015-07-bundle-lazy-loading
+Product head                    : afb8660c4127ba93010628c8246b79a24a581ef9
+Product branch CI               : 34784129350 — SUCCESS
+Final verification              : roadmap-inclusive exact-head CI, independent PR CI, guarded exact-head merge, exact merge-SHA main CI required
+```
+
+HWEB-015-08 must not begin until the roadmap-inclusive HWEB-015-07 head passes full CI, its exact PR head is independently verified, the guarded merge succeeds, and exact merge-SHA `main` CI is accepted.
