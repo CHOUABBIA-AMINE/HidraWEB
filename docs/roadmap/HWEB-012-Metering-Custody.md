@@ -1,6 +1,6 @@
 # HWEB-012 — Metering and Custody
 
-Status: HWEB-012-04 COMPLETE / HWEB-012-05 NEXT
+Status: HWEB-012-05 COMPLETE / HWEB-012-06 NEXT
 
 ## Accepted baseline
 
@@ -145,7 +145,8 @@ Runtime-discovered resources used by completed HWEB-012 tasks:
 
 - HWEB-012-02: `CustodyMeasurementPeriodJpaEntity`, `CustodyAgreementJpaEntity`, `CustodyTransferPointJpaEntity`;
 - HWEB-012-03: `CustodyTransferTicketJpaEntity`, `CustodyBatchJpaEntity`, `CustodyQuantityCalculationJpaEntity` plus the HWEB-012-02 references;
-- HWEB-012-04: `CustodyReconciliationJpaEntity` and `CustodyDiscrepancyJpaEntity`.
+- HWEB-012-04: `CustodyReconciliationJpaEntity` and `CustodyDiscrepancyJpaEntity`;
+- HWEB-012-05: `CustodyTransferPointJpaEntity`, `CustodyMeasurementSnapshotJpaEntity`, and `CustodyAgreementPartyJpaEntity` through the custody workbench only.
 
 No completed HWEB-012 task hard-codes workbench resource names or invents a custody catalog.
 
@@ -163,7 +164,7 @@ topologyAssetNameSnapshot
 measurementLocationId
 ```
 
-HWEB-012 may use those explicit references/snapshots. It must not scan topology collections to infer a relationship.
+HWEB-012-05 displays these explicit identifiers and custody-owned snapshots only. It does not scan topology collections to infer relationships or mutate topology state.
 
 ### Telemetry
 
@@ -181,7 +182,7 @@ acceptedForCustody
 qualityFlagSnapshot
 ```
 
-Telemetry remains owner of raw/trusted reading truth. Custody owns the accepted snapshot/evidence used for official transfer decisions. HidraWEB must not recompute custody acceptance from live telemetry.
+Telemetry remains owner of raw/trusted reading truth. Custody owns the accepted snapshot/evidence used for official transfer decisions. HWEB-012-05 displays the custody snapshot plus neutral telemetry references and does not query telemetry collections to reconstruct the relationship or recompute `acceptedForCustody`.
 
 ### Party
 
@@ -195,7 +196,7 @@ POST /api/v1/party/parties
 POST /api/v1/party/roles/assignments
 ```
 
-`PartyResponse` exposes `id`, `code`, `legalName`, `tradeName`, `shortName`, `countryCode`, `status`, and `primaryRoleCodeSnapshot`. HWEB-012 does not register parties or assign party roles; party reads are allowed only when an explicit custody `partyId` requires display context.
+`PartyResponse` exposes `id`, `code`, `legalName`, `tradeName`, `shortName`, `countryCode`, `status`, and `primaryRoleCodeSnapshot`. HWEB-012-05 displays neutral `partyId` plus custody-owned `partyCodeSnapshot`, `partyNameSnapshot`, `partyRoleCodeSnapshot`, and ownership evidence only. It performs no party collection scan or mutation. Any conservative party-master enrichment for an explicit `partyId` remains HWEB-012-06 scope.
 
 ### Workflow / actor references
 
@@ -229,26 +230,54 @@ Implemented a local `/custody` transfer-ticket workspace tab using runtime custo
 
 ### HWEB-012-04 — discrepancy/reconciliation workspace — COMPLETE
 
-Implemented a local `/custody` discrepancy/reconciliation workspace tab with:
+Implemented a local `/custody` discrepancy/reconciliation workspace tab with runtime workbench discovery/list/detail for reconciliation and discrepancies, reconciliation kept read-only, and `POST /api/v1/custody/discrepancies` as the only mutation. Backend status is display-only and no reconciliation/discrepancy lifecycle actions are synthesized.
 
-- runtime workbench discovery/list/detail for `CustodyReconciliationJpaEntity` and `CustodyDiscrepancyJpaEntity`;
-- reconciliation kept strictly read-only because HidraAPI publishes no reconciliation mutation semantics;
-- `POST /api/v1/custody/discrepancies` as the only HWEB-012-04 mutation;
-- reconciliation selector values sourced only from the runtime-discovered custody reconciliation resource;
-- `discrepancyTypeId`, `quantityUnitId`, and `assignedActorId` retained as optional neutral identifiers rather than inferred through foreign-module scans;
-- exact preservation of OpenAPI optional request properties;
-- backend-owned reconciliation/discrepancy status rendered as evidence only;
-- no reconcile, accept, reject, resolve, close, cancel, update, or status-transition actions;
-- TanStack Query owning server state and React local state limited to page/selection/tab/form values;
-- fail-closed handling for missing route metadata/grants/resources and authoritative backend HTTP 403.
+### HWEB-012-05 — topology/telemetry/party references — COMPLETE
 
-### HWEB-012-05 — topology/telemetry/party references — NEXT
+Implemented a local `/custody` `Reference context` tab at the custody process boundary with:
 
-Compose only from explicit backend references and custody-owned snapshots listed above, preferably at the process boundary. Do not import foreign persistence/domain concepts, scan foreign collections to infer links, or recompute telemetry/custody truth in the frontend.
+- runtime discovery/list/detail of custody transfer points, custody measurement snapshots, and custody agreement-party records;
+- topology context rendered exclusively from `CustodyTransferPoint` neutral identifiers and custody-owned asset snapshots;
+- telemetry context rendered exclusively from `CustodyMeasurementSnapshot` accepted evidence plus neutral telemetry reading/point identifiers;
+- party context rendered exclusively from `CustodyAgreementParty` neutral `partyId` plus custody-owned code/name/role snapshots and ownership share;
+- no topology, telemetry, or party collection scans;
+- no foreign-module mutation behavior;
+- no recomputation of custody acceptance from live telemetry;
+- generic workbench list/detail route permissions resolved at runtime and intersected with effective grants;
+- fail-closed handling when workbench route metadata/grants are missing;
+- TanStack Query owning server state and React local state limited to tab/detail selection;
+- no new dedicated custody endpoint or OpenAPI slice because the task uses the existing authoritative generic workbench read contract only.
 
-### HWEB-012-06 — conservative party scope
+### HWEB-012-06 — conservative party scope — NEXT
 
-Party remains master-data owner. The custody process may display party context for explicit `partyId` references but must not create a competing party workspace or duplicate party mutation behavior.
+Party remains master-data owner. The custody process may display party-master context only for an explicit custody `partyId` where an authoritative read is evidenced. It must not scan the party collection to infer associations, create a competing party workspace, or duplicate party mutations.
+
+## HWEB-012-05 verification evidence
+
+```text
+Backend source commit / branch : 0c8643c17b2648e8be85c658854f57ea0faab765 / main
+Functional backend merge       : 2e6f93c14e330c8cc839a5de75ecc7b893f9872c
+Accepted OpenAPI artifact       : 10307945855 / sha256:20b15395d1b2feec853167e88b2b6357650f51c03fb7811ffe60fd1362544c7f
+Endpoints used                  : GET workbench custody resources/list/detail only; no new dedicated mutation/API
+Permissions used                : exact generic workbench list/detail route descriptors intersected with effective grants
+Frontend routes changed         : no new shell route; /custody retained with a local Reference context tab
+State ownership                 : TanStack Query owns workbench server state; React local state owns tab/detail selection only
+Topology ownership              : explicit custody transfer-point topology IDs/code/name snapshots only; no topology collection scan or mutation
+Telemetry ownership             : custody measurement snapshot evidence and neutral telemetry refs only; no telemetry collection scan, mutation, or acceptance recomputation
+Party ownership                 : explicit neutral partyId plus custody party snapshots only; no party collection scan/mutation; party-master enrichment deferred to HWEB-012-06
+Tests added                     : tests/e2e/custody-reference-context.spec.ts
+OpenAPI regeneration status     : no HWEB-012-05 OpenAPI slice change; existing custody/workbench clients remain generated in CI
+Initial product head            : f05f6d251bd8c61b9cc08adf44f7e282da9903c3
+Initial CI                      : 34743275726 — FAILED (new Playwright navigation assertions only; product generation/lint/typecheck/unit/build all green)
+Focused correction              : tests navigate directly to protected /custody route and assert the denial state separately; product/contract semantics unchanged
+Final product head              : 8c9b0813a1a810533d3eb7051a161f9230cdea2a
+Corrected exact-head CI         : 34743494195 — SUCCESS
+Product PR                      : #54
+Product merge                   : 03074f83315def13eda952ad097bdc3f77cca67c
+Post-merge main CI              : 34743613472 — SUCCESS
+Known backend gaps              : no blocker for HWEB-012-06 identified here; party-master enrichment must remain explicit-reference-only and authoritative
+Conclusion                      : HWEB-012-05 VERIFIED; HWEB-012-06 is next; HWEB-012-06 product work not started
+```
 
 ## HWEB-012-04 verification evidence
 
@@ -271,7 +300,7 @@ Product PR                      : #52
 Product merge                   : 73dfd6d51ba11521a0c4b6c18dfbcd1d0260085b
 Post-merge main CI              : 34742632806 — SUCCESS
 Known backend gaps              : reconciliation mutations and discrepancy update/resolve/close/lifecycle actions remain unpublished and must not be invented
-Conclusion                      : HWEB-012-04 VERIFIED; HWEB-012-05 is next; no later HWEB-012 task started
+Conclusion                      : HWEB-012-04 VERIFIED
 ```
 
 ## HWEB-012-03 verification evidence
