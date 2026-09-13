@@ -62,6 +62,7 @@ async function mockDocuments(page: Page, grants = allGrants) {
         'content-disposition': "attachment; filename*=UTF-8''evidence.txt",
         'content-length': '19',
         'accept-ranges': 'none',
+        'access-control-expose-headers': 'Content-Disposition, Content-Type, Content-Length, Accept-Ranges',
       },
     });
   });
