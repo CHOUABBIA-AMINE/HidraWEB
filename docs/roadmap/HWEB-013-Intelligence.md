@@ -1,28 +1,29 @@
 # HWEB-013 — Intelligence
 
-Status: HWEB-013-05 COMPLETE / HWEB-013-06 NEXT
+Status: HWEB-013-06 COMPLETE / HWEB-013-07 NEXT
 
 ## Accepted starting point
 
 ```text
-HidraWEB verified main       : b3cdce250ed259d5ac601693605e6d3402a36bb3
-HWEB-013-04 final-main CI    : 34752210394 — SUCCESS
+HidraWEB verified main       : 073bc794c0fe22ad7d14736112d659320d59a082
+HWEB-013-05 final-main CI    : 34754124781 — SUCCESS
 HidraAPI audited main        : 0c8643c17b2648e8be85c658854f57ea0faab765
 Accepted OpenAPI artifact    : 10307772022
 Accepted artifact digest     : sha256:884ceb8d62bafd5e885287a18eb847356cffc21e8948cc1e937ec02b780ff0ea
 Backend owners               : risk, analytics, simulation, reporting
-Current task                 : HWEB-013-05 — report definition/run/export workspaces COMPLETE
-Next task                    : HWEB-013-06 — read/derive/recommend semantics
-Later UI task                : HWEB-013-07 — NOT STARTED
+Current task                 : HWEB-013-06 — read/derive/recommend semantics COMPLETE
+Next task                    : HWEB-013-07 — performance testing
 ```
 
-HWEB-013-05 starts only from exact accepted main `b3cdce250ed259d5ac601693605e6d3402a36bb3`, whose full main CI `34752210394` succeeded after the guarded HWEB-013-04 merge.
+HWEB-013-06 starts only from exact accepted main `073bc794c0fe22ad7d14736112d659320d59a082`, whose full main CI `34754124781` succeeded after the guarded HWEB-013-05 merge.
 
 ## Intelligence ownership rule
 
 Hidra intelligence may read trusted operational data, create intelligence-owned records, derive analytics, evaluate metrics, run simulations, generate reports, and publish recommendations where HidraAPI explicitly exposes those operations.
 
 It must not silently become the owner of operational source-of-truth state. A status enum, persistence record, analytic result, simulation result, report artifact reference, or recommendation is evidence, not authorization to synthesize lifecycle or operational actions. Frontend action availability must come from an exact published route, exact request contract, and exact permission metadata.
+
+HWEB-013-06 locks this rule as an executable presentation contract across all implemented intelligence workspaces. The cross-workspace E2E visits risk, analytics, simulation, and reporting; verifies the visible read/derive/recommend boundary language; and records any non-read HTTP request to operational owner modules. The accepted expectation is an empty operational-write set.
 
 ## Shared read contract
 
@@ -69,7 +70,7 @@ POST /api/v1/simulation/recommendations
 POST /api/v1/simulation/runs
 ```
 
-Exact DTO evidence is generated; HWEB-013-04 invokes no dedicated simulation mutation.
+Exact DTO evidence is generated; HWEB-013-04 invokes no dedicated simulation mutation. A simulation recommendation is decision-support evidence unless and until an exact owner-published contract explicitly authorizes a separate operational mutation; no such operational application is synthesized by HidraWEB.
 
 ### Reporting
 
@@ -132,7 +133,7 @@ Forbidden:
 
 - scanning foreign collections to infer associations not published by the intelligence record;
 - copying foreign aggregates and treating copies as current owner truth;
-- writing operational state because analytics, simulation, or reporting evidence suggests a change;
+- writing operational state because analytics, simulation, reporting, or recommendation evidence suggests a change;
 - treating timestamps or version-looking fields as concurrency tokens without an explicit contract;
 - inventing approve, publish, activate, close, cancel, queue, rerun, apply, download, or export actions from statuses or reference fields alone.
 
@@ -156,31 +157,25 @@ Implemented `/intelligence/simulation` with runtime-discovered scenario, run, re
 
 ### HWEB-013-05 — report definition/run/export workspaces — COMPLETE
 
-Implemented `/intelligence/reports` with:
+Implemented `/intelligence/reports` with runtime-discovered report-definition, report-request, report-run, and output-artifact metadata views, deterministic reporting OpenAPI generation, fail-closed reads, and no invented download/export or mutation semantics.
 
-- runtime reporting workbench discovery rather than hard-coded resource endpoint names;
-- report-definition views identified by `ReportDefinitionJpaEntity` metadata;
-- report-request views identified by `ReportRequestJpaEntity` metadata;
-- report-run views identified by `ReportRunJpaEntity` metadata;
-- output-artifact metadata views identified by `ReportOutputArtifactJpaEntity` metadata;
-- generic workbench detail reads for explicitly selected records;
-- report request/run statuses rendered as evidence only;
-- exact workbench list/detail route descriptors intersected with effective grants, failing closed when metadata or grants are absent;
-- TanStack Query ownership of runtime resource/list/detail server state and local React state limited to tab/detail selection;
-- deterministic reporting-only OpenAPI generation through `orval.reporting.config.ts` from the accepted HidraAPI artifact;
-- exact definition/request/run/artifact POST DTO contracts generated for evidence while HWEB-013-05 invokes none of those mutations;
-- explicit treatment of output artifact identifiers and storage/document references as metadata only because no retrieval/download GET contract exists in the accepted artifact;
-- no download, export, generate, queue, request, approve, publish, or other inferred reporting action controls;
-- enabled capability-gated shell navigation for the reporting workspace;
-- E2E coverage proving runtime discovery, definitions/requests/runs/artifact rendering, absence of download/export/mutation controls, and fail-closed access.
+### HWEB-013-06 — read/derive/recommend semantics — COMPLETE
 
-### HWEB-013-06 — read/derive/recommend semantics — NEXT
+Enforced the existing intelligence presentation boundary without adding new mutation capability:
 
-Must prove across the implemented intelligence workspaces that read/derive/recommend behavior never silently mutates operational source-of-truth modules. It must not introduce HWEB-013-07 performance work.
+- risk continues to present backend-authoritative, read-only evidence and does not infer lifecycle actions;
+- analytics continues to present analytics-owned derived/read evidence while operational source truth remains with its source modules;
+- simulation continues to present results and recommendations as decision-support evidence rather than operational commands;
+- reporting continues to present reporting-owned metadata while operational facts remain with their source modules and no artifact retrieval semantics are invented;
+- `tests/e2e/intelligence-semantics.spec.ts` visits all four implemented intelligence workspaces under the exact generic workbench read grant;
+- the E2E asserts the visible ownership/decision-support language for each workspace;
+- the E2E monitors non-read requests and fails if any request targets operational owner modules including assets, topology, telemetry, monitoring, planning, custody, integrity, incident, leak detection, HSE, workflow, party, identity, organization, or alarms;
+- HWEB-013-06 adds no dedicated intelligence mutation invocation and no operational mutation route;
+- HWEB-013-07 performance work is not included.
 
-### HWEB-013-07 — performance testing — NOT STARTED
+### HWEB-013-07 — performance testing — NEXT
 
-Must cover charts, large analytic results, and scenario comparisons only after the semantics task is accepted.
+Must cover charts, large analytic results, and scenario comparisons only after HWEB-013-06 is fully accepted.
 
 ## Completion records
 
@@ -227,20 +222,31 @@ Final-main CI                   : 34752210394 — SUCCESS
 Backend source commit / branch : 0c8643c17b2648e8be85c658854f57ea0faab765 / main
 Frontend base                   : b3cdce250ed259d5ac601693605e6d3402a36bb3 / main
 Product branch                  : hweb-013-05-reporting-workspaces
+Product head                    : 0c817eac21fe946833e57692086134421ce1d66e
+Product PR                      : #64
+Product exact-head CI           : 34753969647 — SUCCESS
+Product merge                   : 073bc794c0fe22ad7d14736112d659320d59a082
+Final-main CI                   : 34754124781 — SUCCESS
 Accepted OpenAPI artifact       : 10307772022 / sha256:884ceb8d62bafd5e885287a18eb847356cffc21e8948cc1e937ec02b780ff0ea
-Endpoints used                  : GET reporting workbench resources; GET discovered definition/request/run/output-artifact lists; GET selected discovered reporting record detail
-Dedicated reporting mutations   : none invoked; exact definition/request/run/artifact POST contracts generated for deterministic evidence only
-Artifact retrieval contract     : absent from accepted OpenAPI artifact; no download/export control exposed
-DTO evidence                    : CreateReportDefinitionRequest, GenerateReportArtifactRequest, QueueReportRunRequest, RequestReportRequest, ReportDefinitionResponse, ReportOutputArtifactResponse, ReportRunResponse, ReportRequestResponse
-Permissions used                : exact generic workbench list/detail route descriptors intersected with effective grants; backend HTTP 403 final authority
 Frontend route                  : /intelligence/reports
-State ownership                 : TanStack Query owns workbench server state; local state limited to tab/detail selection
-Ownership semantics             : reporting owns report definitions/requests/runs/artifact metadata; source operational facts remain with their owning modules
-Lifecycle semantics             : statuses/reference fields are evidence only; no create/request/queue/generate/download/export/approve/publish controls invented
-OpenAPI regeneration status     : reporting slice generated by orval.reporting.config.ts and HidraWEB CI
+Dedicated reporting mutations   : none invoked
+Artifact retrieval contract     : absent; no download/export control exposed
 Tests                           : tests/e2e/reporting-workspace.spec.ts
-Product verification CI         : 34753656914 — SUCCESS on pre-roadmap product head c47fb1a958a0a27cf36842c2a47c48b0df506938
+```
+
+### HWEB-013-06
+
+```text
+Backend source commit / branch : 0c8643c17b2648e8be85c658854f57ea0faab765 / main
+Frontend base                   : 073bc794c0fe22ad7d14736112d659320d59a082 / main
+Product branch                  : hweb-013-06-intelligence-semantics
+Product test                    : tests/e2e/intelligence-semantics.spec.ts
+Dedicated intelligence mutations: none invoked
+Operational mutation semantics  : forbidden without exact owner-published route/request/permission contract
+Recommendation semantics        : decision-support evidence; no silent application to operational owners
+First product CI                : 34756425341 — FAILED only in new E2E assertion; generation/lint/typecheck/unit/build green
+Corrected product CI            : 34756610425 — SUCCESS on pre-roadmap product head e9523dd034e68e15e9832ddccd40bc1ac704fc10
 Final verification              : exact-head full CI required after this roadmap commit, then guarded PR merge and exact merge-SHA main CI
 ```
 
-HWEB-013-06 must not begin until HWEB-013-05 exact-head PR verification, guarded merge, and exact merge-SHA main verification are accepted.
+HWEB-013-07 must not begin until HWEB-013-06 exact-head PR verification, guarded merge, and exact merge-SHA main verification are accepted.
