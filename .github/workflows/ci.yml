@@ -74,7 +74,7 @@ jobs:
         run: npm run typecheck
       - name: Unit and component tests
         run: npm run test
-      - name: Intelligence performance tests
+      - name: Performance tests
         run: npm run test:performance
       - name: Production build
         run: npm run build
