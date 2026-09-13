@@ -75,6 +75,8 @@ Browser-facing TLS/HSTS, CSP, secure response headers, and static cache policy a
 
 Frontend correlation/request identifiers and structured technical-error reporting are defined in [`docs/deployment/Frontend-Observability.md`](docs/deployment/Frontend-Observability.md). No remote browser telemetry vendor or ingestion endpoint is assumed by the repository.
 
+WCAG 2.2 AA accessibility, keyboard-only control-room workflow requirements, map/text alternatives, focus behavior, and regression rules are defined in [`docs/deployment/Accessibility-WCAG-2.2-AA.md`](docs/deployment/Accessibility-WCAG-2.2-AA.md).
+
 ## Implemented application surfaces
 
 - `/overview` — authenticated shell overview.
