@@ -58,24 +58,27 @@
       "AuditExportRequestResponse": {
         "type": "object",
         "properties": {
-          "id": { "type": "string" },
-          "requestedByActorId": { "type": "string" },
-          "purposeId": { "type": "string" },
+          "completedAt": { "format": "date-time", "type": "string" },
           "format": { "type": "string" },
-          "status": { "type": "string", "enum": ["REQUESTED", "IN_PROGRESS", "COMPLETED", "FAILED", "CANCELLED"] },
-          "recordCount": { "type": "integer", "format": "int32" },
-          "requestedAt": { "type": "string", "format": "date-time" },
-          "completedAt": { "type": "string", "format": "date-time" }
+          "id": { "type": "string" },
+          "purposeId": { "type": "string" },
+          "recordCount": { "format": "int32", "type": "integer" },
+          "requestedAt": { "format": "date-time", "type": "string" },
+          "requestedByActorId": { "type": "string" },
+          "status": {
+            "enum": ["REQUESTED", "APPROVED", "REJECTED", "RUNNING", "COMPLETED", "FAILED", "EXPIRED"],
+            "type": "string"
+          }
         }
       },
       "RequestAuditExportRequest": {
         "type": "object",
         "properties": {
-          "requestedByActorId": { "type": "string" },
-          "requestedByDisplayNameSnapshot": { "type": "string" },
-          "purposeId": { "type": "string" },
           "filterJson": { "type": "string" },
           "format": { "type": "string" },
+          "purposeId": { "type": "string" },
+          "requestedByActorId": { "type": "string" },
+          "requestedByDisplayNameSnapshot": { "type": "string" },
           "workflowInstanceId": { "type": "string" }
         }
       }
