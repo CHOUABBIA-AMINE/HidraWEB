@@ -1,0 +1,1 @@
+export { DocumentsAdministrationPage } from './DocumentsAdministrationPage';

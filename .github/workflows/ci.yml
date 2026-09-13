@@ -33,72 +33,52 @@ jobs:
 
       - name: Generate HWEB-003 workbench OpenAPI client
         run: npm run api:generate:workbench
-
       - name: Generate HWEB-004 identity/organization OpenAPI client
         run: npm run api:generate:identity-organization
-
       - name: Generate HWEB-005 topology OpenAPI client
         run: npm run api:generate:topology
-
       - name: Generate HWEB-006 telemetry/monitoring OpenAPI client
         run: npm run api:generate:telemetry-monitoring
-
       - name: Generate HWEB-007 workflow OpenAPI client
         run: npm run api:generate:workflow
-
       - name: Generate HWEB-008 alarm OpenAPI client
         run: npm run api:generate:alarm
-
       - name: Generate HWEB-009 incident OpenAPI client
         run: npm run api:generate:incident
-
       - name: Generate HWEB-009 leak OpenAPI client
         run: npm run api:generate:leak
-
       - name: Generate HWEB-009 HSE OpenAPI client
         run: npm run api:generate:hse
-
       - name: Generate HWEB-010 planning OpenAPI client
         run: npm run api:generate:planning
-
       - name: Generate HWEB-012 custody OpenAPI client
         run: npm run api:generate:custody
-
       - name: Generate HWEB-013 risk OpenAPI client
         run: npm run api:generate:risk
-
       - name: Generate HWEB-013 analytics OpenAPI client
         run: npm run api:generate:analytics
-
       - name: Generate HWEB-013 simulation OpenAPI client
         run: npm run api:generate:simulation
-
       - name: Generate HWEB-013 reporting OpenAPI client
         run: npm run api:generate:reporting
-
       - name: Generate HWEB-014 audit OpenAPI client
         run: npm run api:generate:audit
-
       - name: Generate HWEB-014 configuration OpenAPI client
         run: npm run api:generate:configuration
+      - name: Generate HWEB-014 documents OpenAPI client
+        run: npm run api:generate:documents
 
       - name: Lint
         run: npm run lint
-
       - name: Typecheck
         run: npm run typecheck
-
       - name: Unit and component tests
         run: npm run test
-
       - name: Intelligence performance tests
         run: npm run test:performance
-
       - name: Production build
         run: npm run build
-
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
-
       - name: E2E browser tests
         run: npm run test:e2e
