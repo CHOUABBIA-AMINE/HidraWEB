@@ -1,6 +1,7 @@
-import { LngLatBounds, Map, NavigationControl, type GeoJSONSource, type MapLayerMouseEvent } from 'maplibre-gl';
+import { Map, NavigationControl, type GeoJSONSource, type MapLayerMouseEvent } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
+import { getFeatureCollectionBounds } from '@/components/map/mapBounds';
 import type { HidraMapAdapter, HidraMapFeatureCollection, HidraMapSelection } from '@/components/map/mapTypes';
 
 const SOURCE_ID = 'hidra-topology-source';
@@ -10,21 +11,6 @@ const EMPTY_COLLECTION: HidraMapFeatureCollection = { type: 'FeatureCollection',
 
 function asGeoJson(data: HidraMapFeatureCollection): Parameters<GeoJSONSource['setData']>[0] {
   return data as unknown as Parameters<GeoJSONSource['setData']>[0];
-}
-
-function extendBounds(bounds: LngLatBounds, coordinates: unknown): void {
-  if (!Array.isArray(coordinates)) return;
-  if (
-    coordinates.length >= 2
-    && typeof coordinates[0] === 'number'
-    && Number.isFinite(coordinates[0])
-    && typeof coordinates[1] === 'number'
-    && Number.isFinite(coordinates[1])
-  ) {
-    bounds.extend([coordinates[0], coordinates[1]]);
-    return;
-  }
-  coordinates.forEach((value) => extendBounds(bounds, value));
 }
 
 export function createMapLibreAdapter(
@@ -68,10 +54,12 @@ export function createMapLibreAdapter(
 
   const fitInitialData = (data: HidraMapFeatureCollection) => {
     if (fittedInitialData || data.features.length === 0) return;
-    const bounds = new LngLatBounds();
-    data.features.forEach((feature) => extendBounds(bounds, feature.geometry.coordinates));
-    if (!bounds.isEmpty()) {
-      map.fitBounds(bounds, { duration: 0, maxZoom: 12, padding: 48 });
+    const bounds = getFeatureCollectionBounds(data);
+    if (bounds) {
+      map.fitBounds(
+        [[bounds.west, bounds.south], [bounds.east, bounds.north]],
+        { duration: 0, maxZoom: 12, padding: 48 },
+      );
       fittedInitialData = true;
     }
   };
