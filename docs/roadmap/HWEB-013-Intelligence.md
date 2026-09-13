@@ -1,21 +1,21 @@
 # HWEB-013 — Intelligence
 
-Status: HWEB-013-06 COMPLETE / HWEB-013-07 NEXT
+Status: HWEB-013 COMPLETE
 
 ## Accepted starting point
 
 ```text
-HidraWEB verified main       : 073bc794c0fe22ad7d14736112d659320d59a082
-HWEB-013-05 final-main CI    : 34754124781 — SUCCESS
+HidraWEB verified main       : 0b0de291954adce761f829bc5fdf422b99cba025
+HWEB-013-06 final-main CI    : 34757147909 — SUCCESS
 HidraAPI audited main        : 0c8643c17b2648e8be85c658854f57ea0faab765
 Accepted OpenAPI artifact    : 10307772022
 Accepted artifact digest     : sha256:884ceb8d62bafd5e885287a18eb847356cffc21e8948cc1e937ec02b780ff0ea
 Backend owners               : risk, analytics, simulation, reporting
-Current task                 : HWEB-013-06 — read/derive/recommend semantics COMPLETE
-Next task                    : HWEB-013-07 — performance testing
+Current task                 : HWEB-013-07 — performance testing COMPLETE
+Next task                    : HWEB-013 complete; no HWEB-013-08 is defined
 ```
 
-HWEB-013-06 starts only from exact accepted main `073bc794c0fe22ad7d14736112d659320d59a082`, whose full main CI `34754124781` succeeded after the guarded HWEB-013-05 merge.
+HWEB-013-07 starts only from exact accepted main `0b0de291954adce761f829bc5fdf422b99cba025`, whose full main CI `34757147909` succeeded after the HWEB-013-06 merge.
 
 ## Intelligence ownership rule
 
@@ -170,12 +170,19 @@ Enforced the existing intelligence presentation boundary without adding new muta
 - `tests/e2e/intelligence-semantics.spec.ts` visits all four implemented intelligence workspaces under the exact generic workbench read grant;
 - the E2E asserts the visible ownership/decision-support language for each workspace;
 - the E2E monitors non-read requests and fails if any request targets operational owner modules including assets, topology, telemetry, monitoring, planning, custody, integrity, incident, leak detection, HSE, workflow, party, identity, organization, or alarms;
-- HWEB-013-06 adds no dedicated intelligence mutation invocation and no operational mutation route;
-- HWEB-013-07 performance work is not included.
+- HWEB-013-06 adds no dedicated intelligence mutation invocation and no operational mutation route.
 
-### HWEB-013-07 — performance testing — NEXT
+### HWEB-013-07 — performance testing — COMPLETE
 
-Must cover charts, large analytic results, and scenario comparisons only after HWEB-013-06 is fully accepted.
+Added deterministic frontend performance coverage without inventing product behavior:
+
+- `vitest.performance.config.ts` runs the performance suite in a Node environment with a single worker for more stable hosted-CI measurements;
+- `tests/performance/intelligence-performance.perf.ts` renders a 5,000-point line series through the repository's actual ECharts 6.1.0 SVG SSR path and enforces a 3,000 ms hosted-CI budget;
+- the same suite aggregates 100,000 representative analytic result records into 100 metric groups and enforces a 1,500 ms hosted-CI budget;
+- it compares 40 representative scenarios with 1,500 result values each against a baseline and enforces a 1,500 ms hosted-CI budget;
+- `npm run test:performance` is part of `npm run verify` and a dedicated `Intelligence performance tests` GitHub Actions step, so regressions fail the normal branch/PR/main gate;
+- these are synthetic frontend CPU/render regression budgets, not claims about backend latency, network throughput, end-user browser frame timing, or production SLA performance;
+- no new intelligence route, backend operation, mutation, authorization assumption, domain action, or operational source-of-truth ownership was added.
 
 ## Completion records
 
@@ -246,7 +253,29 @@ Operational mutation semantics  : forbidden without exact owner-published route/
 Recommendation semantics        : decision-support evidence; no silent application to operational owners
 First product CI                : 34756425341 — FAILED only in new E2E assertion; generation/lint/typecheck/unit/build green
 Corrected product CI            : 34756610425 — SUCCESS on pre-roadmap product head e9523dd034e68e15e9832ddccd40bc1ac704fc10
+Final branch head               : 67374db566d205758f36fc5d676ccc4e376e5e07
+Final branch CI                 : 34756801229 — SUCCESS
+Product PR                      : #65
+Product exact-head PR CI        : 34756971165 — SUCCESS
+Product merge                   : 0b0de291954adce761f829bc5fdf422b99cba025
+Final-main CI                   : 34757147909 — SUCCESS
+```
+
+### HWEB-013-07
+
+```text
+Backend source commit / branch : 0c8643c17b2648e8be85c658854f57ea0faab765 / main
+Frontend base                   : 0b0de291954adce761f829bc5fdf422b99cba025 / main
+Product branch                  : hweb-013-07-intelligence-performance
+Performance config              : vitest.performance.config.ts
+Performance test                : tests/performance/intelligence-performance.perf.ts
+Chart budget                    : ECharts SVG SSR / 5,000 points / < 3,000 ms
+Large analytics budget          : 100,000 records / 100 metric groups / < 1,500 ms
+Scenario comparison budget      : 40 scenarios x 1,500 values / < 1,500 ms
+Product head                    : 254139751ff00aa4c4fcec433cf0cf1a42de01ed
+Product verification CI         : 34757575104 — SUCCESS
+Domain/API changes              : none
 Final verification              : exact-head full CI required after this roadmap commit, then guarded PR merge and exact merge-SHA main CI
 ```
 
-HWEB-013-07 must not begin until HWEB-013-06 exact-head PR verification, guarded merge, and exact merge-SHA main verification are accepted.
+HWEB-013 is complete when this roadmap-inclusive HWEB-013-07 head passes full CI, the guarded PR merge succeeds, and the exact merge-SHA main CI is accepted.
