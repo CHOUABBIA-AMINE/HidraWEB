@@ -137,7 +137,7 @@ export function DocumentsAdministrationPage() {
     queryFn: () => fetchWorkbenchResources(MODULE),
     enabled: canRead,
   });
-  const resources = resourcesQuery.data ?? [];
+  const resources = useMemo(() => resourcesQuery.data ?? [], [resourcesQuery.data]);
   const documentResource = useMemo(() => resources.find((r) => r.javaType.endsWith('DocumentJpaEntity')), [resources]);
   const versionResource = useMemo(() => resources.find((r) => r.javaType.endsWith('DocumentVersionJpaEntity')), [resources]);
   const linkResource = useMemo(() => resources.find((r) => r.javaType.endsWith('DocumentTargetLinkJpaEntity')), [resources]);
