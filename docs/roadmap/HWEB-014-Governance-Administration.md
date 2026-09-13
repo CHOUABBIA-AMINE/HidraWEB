@@ -1,16 +1,16 @@
 # HWEB-014 — Governance and Administration Completion
 
-Status: HWEB-014-02 COMPLETE / HWEB-014-03 BLOCKED
+Status: HWEB-014-03 COMPLETE / HWEB-014-04 NEXT
 
 ## Accepted starting point
 
 ```text
-HidraWEB verified main       : ab209cc3105efca2239f78041422c4cb3a59c37d
+HidraWEB verified main       : 7fcddfa27ac57041766472dc76425e37fbaee70f
 HWEB-014-02 exact-main CI    : 34762472996 — SUCCESS
-HidraAPI audited main        : 0c8643c17b2648e8be85c658854f57ea0faab765
-Current completed task       : HWEB-014-02 — configuration/feature-flag administration
-Current blocked task         : HWEB-014-03 — document upload/download/version evidence
-Backend blocker              : HidraAPI issue #83
+HidraAPI audited main        : 725a451ae4880ccb4f2ec508709241f88cd4aea7
+Current completed task       : HWEB-014-03 — document upload/download/version evidence
+Next task                    : HWEB-014-04 — integration connector/job/dead-letter monitoring
+Backend prerequisite         : HidraAPI issue #83 resolved by PR #84
 ```
 
 ## HWEB-014-01 — audit search/export UI — COMPLETE
@@ -356,62 +356,176 @@ Known backend gaps              : no toggle/update/delete/promotion/rollback/inh
 Final verification              : roadmap-inclusive exact-head full CI, independent PR-head CI, guarded merge, exact merge-SHA main CI required
 ```
 
-## HWEB-014-03 — document upload/download/version evidence — BLOCKED
+## HWEB-014-03 — document upload/download/version evidence — COMPLETE
 
-### Backend audit
+### Backend source and prerequisite resolution
 
-HWEB-014-03 was audited against HidraAPI `main` commit:
+HWEB-014-03 was re-audited against accepted HidraAPI `main` commit:
 
 ```text
-0c8643c17b2648e8be85c658854f57ea0faab765
+725a451ae4880ccb4f2ec508709241f88cd4aea7
 ```
 
-`SpringDocumentsController` publishes only these canonical resource operations:
+The transfer prerequisite tracked by HidraAPI issue #83 was resolved by backend PR #84 (`FRONTEND-BACKEND-GAP-002`). Exact backend merge-SHA CI `34764890847` is successful.
+
+Accepted deterministic backend OpenAPI evidence:
 
 ```text
-GET  /api/v1/documents/capabilities
-POST /api/v1/documents/target-links
+Artifact id     : 10320386070
+Artifact name   : hidra-api-openapi-725a451ae4880ccb4f2ec508709241f88cd4aea7
+Artifact digest : sha256:4c401ba08e3aeb897be19b5944072f6ada7e08efc85c299683def9175e8d4c38
+```
+
+### Canonical document transfer contracts
+
+HidraAPI now publishes the required canonical transfer operations:
+
+```text
+POST /api/v1/documents/document-versions/upload
+GET  /api/v1/documents/document-versions/{versionId}/content
+```
+
+The multipart upload request contains exactly:
+
+```text
+metadata : UploadDocumentBinaryVersionRequest as application/json
+file     : binary file part
+```
+
+`UploadDocumentBinaryVersionRequest` contains document/version metadata only. HidraWEB does not send or synthesize `storageObjectId`, MIME type, original filename, file size, checksum algorithm, or checksum value as authoritative storage evidence. Those values are derived and owned by HidraAPI.
+
+The backend default maximum upload size is 52,428,800 bytes (50 MiB), configurable server-side with `hidra.documents.upload.max-bytes`. HidraWEB does not invent a different authoritative limit.
+
+### Content retrieval semantics
+
+Version content is retrieved only through:
+
+```text
+GET /api/v1/documents/document-versions/{versionId}/content
+```
+
+HidraWEB consumes the returned binary body and backend-provided response metadata. Attachment filename is read from `Content-Disposition`; content type is read from the response headers/blob. No direct storage URI is exposed or synthesized.
+
+The accepted backend contract explicitly publishes:
+
+```text
+Accept-Ranges: none
+```
+
+Therefore HWEB-014-03 exposes no range request, resume, partial-download, or resumable-upload semantics.
+
+### Existing document metadata operations
+
+HWEB-014-03 retains only the already published canonical document metadata operations needed by this workspace:
+
+```text
 POST /api/v1/documents/documents
-POST /api/v1/documents/document-versions
+POST /api/v1/documents/target-links
 ```
 
-`POST /api/v1/documents/document-versions` accepts `UploadDocumentVersionRequest` as JSON metadata. Its fields include a client-supplied `storageObjectId`, MIME type, original filename, file size, checksum metadata, dates, language, and uploader snapshots. It does not accept file bytes or a multipart part.
+The legacy JSON `POST /api/v1/documents/document-versions` contract remains a backend compatibility operation but is not used as the HWEB-014-03 file upload path.
 
-Repository-wide source audit found no `MultipartFile` contract and no documents content retrieval endpoint using `Resource`, `InputStreamResource`, `ByteArrayResource`, `StreamingResponseBody`, or equivalent streaming/file-body semantics.
+### Runtime read evidence
 
-### Blocking contract gap
-
-HWEB-014-03 requires actual upload/download/version evidence using published multipart/stream contracts only. The accepted backend currently has no such file-transfer contract. Therefore HidraWEB must not invent:
+Read evidence continues to use generic workbench discovery for module `documents`. HidraWEB identifies the following Java types from runtime descriptors and then uses each descriptor's returned `resource` value:
 
 ```text
-file picker -> JSON metadata substitution
-client-generated storageObjectId semantics
-direct object-store URLs
-storage URL synthesis
-download buttons without a retrieval route
-browser-side checksum/file-size authority presented as backend truth
-range/stream behavior
-content-disposition/filename behavior
+DocumentJpaEntity
+DocumentVersionJpaEntity
+DocumentTargetLinkJpaEntity
 ```
 
-Metadata registration alone does not satisfy the HWEB-014-03 task definition.
+Runtime resource names are never derived from Java class names.
 
-### Backend tracking
+### Authorization
+
+All document controls fail closed.
+
+Runtime evidence reads require the exact route descriptor and effective grant for:
 
 ```text
-HidraAPI issue : #83 — documents: expose multipart upload and streaming download contracts for HWEB-014-03
+GET /api/v1/workbench/{module}/{resource}
 ```
 
-The issue requests:
+Each document operation is independently enabled only when its exact route descriptor exists and the current user holds that descriptor's exact permission:
 
-- canonical multipart document-version upload;
-- canonical version content retrieval/download;
-- authoritative storageObjectId ownership semantics;
-- validation, authorization, deterministic errors, media type and filename behavior;
-- deterministic OpenAPI publication and backend tests.
+```text
+POST /api/v1/documents/documents
+POST /api/v1/documents/document-versions/upload
+GET  /api/v1/documents/document-versions/{versionId}/content
+POST /api/v1/documents/target-links
+```
 
-### Completion gate
+Permission strings are not inferred by product code. Backend 403 remains final authority.
 
-HWEB-014-03 remains blocked until HidraAPI publishes and verifies the required file-transfer contracts in deterministic OpenAPI. Once available, re-audit the exact backend SHA/artifact, consume only the published multipart/stream semantics, add strict route-permission gating, and validate with full CI.
+### Frontend route and state ownership
 
-HWEB-014-04 must not begin while HWEB-014-03 remains blocked unless the roadmap is explicitly reprioritized.
+```text
+Frontend route : /administration/documents
+Backend owner  : documents
+Server state   : TanStack Query for runtime evidence reads and mutations
+Local state    : document metadata form, upload metadata/file selection, target-link form, download UI state
+```
+
+### Deterministic OpenAPI evidence
+
+```text
+Backend SHA    : 725a451ae4880ccb4f2ec508709241f88cd4aea7
+OpenAPI slice  : openapi/hidra-documents-725a451ae4880ccb4f2ec508709241f88cd4aea7.json
+Orval config   : orval.documents.config.ts
+Generator      : npm run api:generate:documents
+CI gate        : Generate HWEB-014 documents OpenAPI client
+```
+
+The documents generator is part of both `npm run verify` and the HidraWEB CI workflow.
+
+### Error and fail-closed states
+
+The workspace explicitly handles:
+
+- missing generic workbench route-permission metadata;
+- missing effective workbench read grant;
+- missing runtime document/version/target-link resources;
+- generic evidence read failures;
+- missing exact route metadata or grants for document registration, multipart upload, download, and target linking;
+- upload/download/mutation failures;
+- missing backend attachment filename on content retrieval;
+- backend 403 as final authority.
+
+### Tests
+
+`tests/e2e/documents-administration.spec.ts` verifies:
+
+- runtime discovery and reads for document, version, and target-link evidence;
+- exact multipart POST path and `metadata` + `file` parts;
+- absence of client-supplied `storageObjectId` and checksum authority in multipart payloads;
+- backend-returned filename/checksum evidence after upload;
+- exact version-content GET request and backend attachment filename handling;
+- independent strict route grants for upload and download;
+- fail-closed controls without exact grants;
+- fail-closed evidence reads without the generic workbench grant;
+- no range/resume behavior is invented.
+
+### Completion record
+
+```text
+Backend source commit / branch : 725a451ae4880ccb4f2ec508709241f88cd4aea7 / main
+Backend exact-main CI           : 34764890847 — SUCCESS
+Backend OpenAPI artifact        : 10320386070 / sha256:4c401ba08e3aeb897be19b5944072f6ada7e08efc85c299683def9175e8d4c38
+Frontend base                   : 7fcddfa27ac57041766472dc76425e37fbaee70f / main
+Product branch                  : hweb-014-03-documents-transfer
+Frontend route                  : /administration/documents
+Multipart upload                : POST /api/v1/documents/document-versions/upload
+Content retrieval               : GET /api/v1/documents/document-versions/{versionId}/content
+Storage-object authority        : backend-owned; no client storageObjectId generation
+Checksum/size/MIME/filename     : backend-derived authoritative evidence
+Range/resume semantics          : unsupported; no UI exposed
+Runtime read source             : generic workbench resources for module documents
+Permission model                : exact route descriptors intersected with effective user grants
+OpenAPI regeneration            : deterministic documents generator added to verify/CI
+Tests                           : tests/e2e/documents-administration.spec.ts
+Product branch CI               : 34766346913 — SUCCESS on e0554250dd207f30e9de8a392bb64db921b4a147
+Final verification              : roadmap-inclusive exact-head full CI, independent PR-head CI, guarded merge, exact merge-SHA main CI required
+```
+
+HWEB-014-04 must not begin until the roadmap-inclusive HWEB-014-03 head passes full CI, its exact PR head is independently verified, the guarded merge succeeds, and exact merge-SHA `main` CI is accepted.
