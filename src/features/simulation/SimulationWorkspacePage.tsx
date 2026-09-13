@@ -104,9 +104,10 @@ const VIEWS: ViewDefinition[] = [
     statusKeys: [],
     columns: [
       { key: 'runId', label: 'Run' },
-      { key: 'seriesType', label: 'Series type' },
-      { key: 'seriesReference', label: 'Series reference' },
-      { key: 'storageType', label: 'Storage type' },
+      { key: 'seriesTypeId', label: 'Series type' },
+      { key: 'targetType', label: 'Target type' },
+      { key: 'targetId', label: 'Target' },
+      { key: 'storageLocation', label: 'Storage location' },
       { key: 'createdAt', label: 'Created at' },
     ],
   },
