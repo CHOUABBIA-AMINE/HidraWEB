@@ -77,6 +77,8 @@ Frontend correlation/request identifiers and structured technical-error reportin
 
 WCAG 2.2 AA accessibility, keyboard-only control-room workflow requirements, map/text alternatives, focus behavior, and regression rules are defined in [`docs/deployment/Accessibility-WCAG-2.2-AA.md`](docs/deployment/Accessibility-WCAG-2.2-AA.md).
 
+Production route-level lazy loading, Vite manifest analysis, and enforced JavaScript bundle budgets are defined in [`docs/deployment/Bundle-Budgets.md`](docs/deployment/Bundle-Budgets.md).
+
 ## Implemented application surfaces
 
 - `/overview` — authenticated shell overview.

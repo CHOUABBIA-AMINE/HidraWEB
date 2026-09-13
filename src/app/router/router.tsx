@@ -1,36 +1,18 @@
 import { Navigate, createBrowserRouter } from 'react-router';
 
 import { RequireAuthentication } from '@/app/auth/RequireAuthentication';
-import { LoginPage } from '@/app/pages/LoginPage';
-import { NotFoundPage } from '@/app/pages/NotFoundPage';
-import { OidcCallbackPage } from '@/app/pages/OidcCallbackPage';
-import { OverviewPage } from '@/app/pages/OverviewPage';
-import { AlarmConsolePage } from '@/features/alarm/AlarmConsolePage';
-import { AnalyticsWorkspacePage } from '@/features/analytics';
-import { AuditWorkspacePage } from '@/features/audit';
-import { ConfigurationAdministrationPage } from '@/features/configuration';
-import { IdentityAdministrationPage } from '@/features/context/IdentityAdministrationPage';
-import { OrganizationAdministrationPage } from '@/features/context/OrganizationAdministrationPage';
-import { CustodyWorkspacePage } from '@/features/custody';
-import { DocumentsAdministrationPage } from '@/features/documents';
-import { IncidentWorkspacePage } from '@/features/incident/IncidentWorkspacePage';
-import { IntegrationMonitoringPage } from '@/features/integration';
-import { NotificationCenterPage } from '@/features/notification';
 import { PermissionBootstrapBoundary } from '@/features/permissions/PermissionBootstrapBoundary';
-import { PlanningWorkspacePage } from '@/features/planning/PlanningWorkspacePage';
-import { ReportingWorkspacePage } from '@/features/reporting';
-import { RiskWorkspacePage } from '@/features/risk';
-import { SimulationWorkspacePage } from '@/features/simulation';
-import { TelemetryMonitoringPage } from '@/features/telemetry-monitoring/TelemetryMonitoringPage';
-import { NetworkTopologyPage } from '@/features/topology/NetworkTopologyPage';
-import { OperationalWorkbenchPage } from '@/features/workbench/OperationalWorkbenchPage';
-import { WorkflowTasksPage } from '@/features/workflow/WorkflowTasksPage';
-import { EngineeringAssetsProcessPage, EngineeringIntegrityProcessPage } from '@/processes/engineering';
 import { AppShell } from '@/shell/AppShell';
 
 export const router = createBrowserRouter([
-  { path: '/login', element: <LoginPage /> },
-  { path: '/auth/callback', element: <OidcCallbackPage /> },
+  {
+    path: '/login',
+    lazy: async () => ({ Component: (await import('@/app/pages/LoginPage')).LoginPage }),
+  },
+  {
+    path: '/auth/callback',
+    lazy: async () => ({ Component: (await import('@/app/pages/OidcCallbackPage')).OidcCallbackPage }),
+  },
   {
     path: '/',
     element: (
@@ -42,29 +24,102 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Navigate replace to="/overview" /> },
-      { path: 'overview', element: <OverviewPage /> },
-      { path: 'network', element: <NetworkTopologyPage /> },
-      { path: 'operations', element: <TelemetryMonitoringPage /> },
-      { path: 'alarms', element: <AlarmConsolePage /> },
-      { path: 'events', element: <IncidentWorkspacePage /> },
-      { path: 'planning', element: <PlanningWorkspacePage /> },
-      { path: 'engineering', element: <EngineeringIntegrityProcessPage /> },
-      { path: 'engineering/assets', element: <EngineeringAssetsProcessPage /> },
-      { path: 'custody', element: <CustodyWorkspacePage /> },
-      { path: 'intelligence/risk', element: <RiskWorkspacePage /> },
-      { path: 'intelligence/analytics', element: <AnalyticsWorkspacePage /> },
-      { path: 'intelligence/simulation', element: <SimulationWorkspacePage /> },
-      { path: 'intelligence/reports', element: <ReportingWorkspacePage /> },
-      { path: 'work/tasks', element: <WorkflowTasksPage /> },
-      { path: 'work/notifications', element: <NotificationCenterPage /> },
-      { path: 'workbench', element: <OperationalWorkbenchPage /> },
-      { path: 'administration/organization', element: <OrganizationAdministrationPage /> },
-      { path: 'administration/users', element: <IdentityAdministrationPage /> },
-      { path: 'administration/configuration', element: <ConfigurationAdministrationPage /> },
-      { path: 'administration/audit', element: <AuditWorkspacePage /> },
-      { path: 'administration/documents', element: <DocumentsAdministrationPage /> },
-      { path: 'administration/integrations', element: <IntegrationMonitoringPage /> },
-      { path: '*', element: <NotFoundPage /> },
+      {
+        path: 'overview',
+        lazy: async () => ({ Component: (await import('@/app/pages/OverviewPage')).OverviewPage }),
+      },
+      {
+        path: 'network',
+        lazy: async () => ({ Component: (await import('@/features/topology/NetworkTopologyPage')).NetworkTopologyPage }),
+      },
+      {
+        path: 'operations',
+        lazy: async () => ({
+          Component: (await import('@/features/telemetry-monitoring/TelemetryMonitoringPage')).TelemetryMonitoringPage,
+        }),
+      },
+      {
+        path: 'alarms',
+        lazy: async () => ({ Component: (await import('@/features/alarm/AlarmConsolePage')).AlarmConsolePage }),
+      },
+      {
+        path: 'events',
+        lazy: async () => ({ Component: (await import('@/features/incident/IncidentWorkspacePage')).IncidentWorkspacePage }),
+      },
+      {
+        path: 'planning',
+        lazy: async () => ({ Component: (await import('@/features/planning/PlanningWorkspacePage')).PlanningWorkspacePage }),
+      },
+      {
+        path: 'engineering',
+        lazy: async () => ({ Component: (await import('@/processes/engineering')).EngineeringIntegrityProcessPage }),
+      },
+      {
+        path: 'engineering/assets',
+        lazy: async () => ({ Component: (await import('@/processes/engineering')).EngineeringAssetsProcessPage }),
+      },
+      {
+        path: 'custody',
+        lazy: async () => ({ Component: (await import('@/features/custody')).CustodyWorkspacePage }),
+      },
+      {
+        path: 'intelligence/risk',
+        lazy: async () => ({ Component: (await import('@/features/risk')).RiskWorkspacePage }),
+      },
+      {
+        path: 'intelligence/analytics',
+        lazy: async () => ({ Component: (await import('@/features/analytics')).AnalyticsWorkspacePage }),
+      },
+      {
+        path: 'intelligence/simulation',
+        lazy: async () => ({ Component: (await import('@/features/simulation')).SimulationWorkspacePage }),
+      },
+      {
+        path: 'intelligence/reports',
+        lazy: async () => ({ Component: (await import('@/features/reporting')).ReportingWorkspacePage }),
+      },
+      {
+        path: 'work/tasks',
+        lazy: async () => ({ Component: (await import('@/features/workflow/WorkflowTasksPage')).WorkflowTasksPage }),
+      },
+      {
+        path: 'work/notifications',
+        lazy: async () => ({ Component: (await import('@/features/notification')).NotificationCenterPage }),
+      },
+      {
+        path: 'workbench',
+        lazy: async () => ({ Component: (await import('@/features/workbench/OperationalWorkbenchPage')).OperationalWorkbenchPage }),
+      },
+      {
+        path: 'administration/organization',
+        lazy: async () => ({
+          Component: (await import('@/features/context/OrganizationAdministrationPage')).OrganizationAdministrationPage,
+        }),
+      },
+      {
+        path: 'administration/users',
+        lazy: async () => ({ Component: (await import('@/features/context/IdentityAdministrationPage')).IdentityAdministrationPage }),
+      },
+      {
+        path: 'administration/configuration',
+        lazy: async () => ({ Component: (await import('@/features/configuration')).ConfigurationAdministrationPage }),
+      },
+      {
+        path: 'administration/audit',
+        lazy: async () => ({ Component: (await import('@/features/audit')).AuditWorkspacePage }),
+      },
+      {
+        path: 'administration/documents',
+        lazy: async () => ({ Component: (await import('@/features/documents')).DocumentsAdministrationPage }),
+      },
+      {
+        path: 'administration/integrations',
+        lazy: async () => ({ Component: (await import('@/features/integration')).IntegrationMonitoringPage }),
+      },
+      {
+        path: '*',
+        lazy: async () => ({ Component: (await import('@/app/pages/NotFoundPage')).NotFoundPage }),
+      },
     ],
   },
 ]);
