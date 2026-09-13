@@ -10,8 +10,8 @@ import { parse as parseYaml } from 'yaml';
 const METHODS = new Set(['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace']);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'openapi/compatibility/hidra-api-baseline.json'), 'utf8'));
-const artifactPath = path.join(root, manifest.fullContractGzip);
-const gzipBytes = fs.readFileSync(artifactPath);
+const artifactPath = path.join(root, manifest.fullContractGzipBase64);
+const gzipBytes = Buffer.from(fs.readFileSync(artifactPath, 'utf8').trim(), 'base64');
 const fullBytes = gunzipSync(gzipBytes);
 const backend = JSON.parse(fullBytes.toString('utf8'));
 const errors = [];
@@ -58,7 +58,7 @@ if (errors.length) {
 console.log(`\nOpenAPI compatibility gate passed for ${configs.length} feature contracts against HidraAPI ${manifest.backendCommit}.`);
 
 function checkEvidence() {
-  const required = ['repository', 'backendCommit', 'workflowRunId', 'artifactId', 'artifactName', 'artifactDigest', 'fullSpecSha256', 'fullContractGzip', 'fullContractGzipSha256', 'expectedOrvalContracts'];
+  const required = ['repository', 'backendCommit', 'workflowRunId', 'artifactId', 'artifactName', 'artifactDigest', 'fullSpecSha256', 'fullContractGzipBase64', 'fullContractGzipSha256', 'expectedOrvalContracts'];
   for (const key of required) if (manifest[key] === undefined || manifest[key] === '') errors.push(`baseline manifest missing ${key}`);
   if (manifest.repository !== 'CHOUABBIA-AMINE/HidraAPI') errors.push(`unexpected backend repository ${manifest.repository}`);
   if (manifest.artifactName !== `hidra-api-openapi-${manifest.backendCommit}`) errors.push('artifact name does not match backend commit');
