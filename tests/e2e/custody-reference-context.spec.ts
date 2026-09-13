@@ -96,17 +96,12 @@ async function signIn(page: Page) {
   await expect(page.getByRole('heading', { name: /Vue d/ })).toBeVisible();
 }
 
-async function openReferenceContext(page: Page, useSidebar = true) {
-  if (useSidebar) {
-    await page.getByRole('button', { name: 'Comptage & custody' }).click();
-  } else {
-    await page.evaluate(() => {
-      window.history.pushState({}, '', '/custody');
-      window.dispatchEvent(new PopStateEvent('popstate'));
-    });
-  }
+async function openReferenceContext(page: Page) {
+  await page.evaluate(() => {
+    window.history.pushState({}, '', '/custody');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  });
   await page.getByRole('tab', { name: 'Reference context' }).click();
-  await expect(page.getByRole('heading', { name: 'Custody reference context' })).toBeVisible();
 }
 
 test('HWEB-012-05 renders topology, telemetry, and party context only from custody-owned references', async ({ page }) => {
@@ -114,6 +109,7 @@ test('HWEB-012-05 renders topology, telemetry, and party context only from custo
   await signIn(page);
   await openReferenceContext(page);
 
+  await expect(page.getByRole('heading', { name: 'Custody reference context' })).toBeVisible();
   await expect(page.getByText('PIPELINE_SEGMENT')).toBeVisible();
   await expect(page.getByText('asset-17')).toBeVisible();
   await expect(page.getByText('Pipeline Segment 17')).toBeVisible();
@@ -136,8 +132,9 @@ test('HWEB-012-05 renders topology, telemetry, and party context only from custo
 test('HWEB-012-05 fails closed when custody workbench read grant is absent', async ({ page }) => {
   await mockReferenceContext(page, false);
   await signIn(page);
-  await openReferenceContext(page, false);
+  await openReferenceContext(page);
 
   await expect(page.getByText('Your current HidraAPI grants do not allow custody workbench reads.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Custody reference context' })).toHaveCount(0);
   await expect(page.getByText('Pipeline Segment 17')).toHaveCount(0);
 });
