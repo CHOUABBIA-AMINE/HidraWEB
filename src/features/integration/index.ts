@@ -1,0 +1,1 @@
+export { IntegrationMonitoringPage } from './IntegrationMonitoringPage';

@@ -51,6 +51,6 @@ export const navigationSections: readonly NavigationSection[] = [
     { id: 'configuration', labelKey: 'nav.configuration', path: '/administration/configuration', capabilityModules: ['configuration'], icon: 'configuration', implemented: true, deliveryTask: 'HWEB-014-02' },
     { id: 'audit', labelKey: 'nav.audit', path: '/administration/audit', capabilityModules: ['audit'], icon: 'audit', implemented: true, deliveryTask: 'HWEB-014-01' },
     { id: 'documents', labelKey: 'nav.documents', path: '/administration/documents', capabilityModules: ['documents'], icon: 'documents', implemented: true, deliveryTask: 'HWEB-014-03' },
-    { id: 'integrations', labelKey: 'nav.integrations', path: '/administration/integrations', capabilityModules: ['integration'], icon: 'integrations', implemented: false, deliveryTask: 'HWEB-014' },
+    { id: 'integrations', labelKey: 'nav.integrations', path: '/administration/integrations', capabilityModules: ['integration'], icon: 'integrations', implemented: true, deliveryTask: 'HWEB-014-04' },
   ] },
 ] as const;

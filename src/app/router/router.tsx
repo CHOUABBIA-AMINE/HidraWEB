@@ -13,6 +13,7 @@ import { OrganizationAdministrationPage } from '@/features/context/OrganizationA
 import { CustodyWorkspacePage } from '@/features/custody';
 import { DocumentsAdministrationPage } from '@/features/documents';
 import { IncidentWorkspacePage } from '@/features/incident/IncidentWorkspacePage';
+import { IntegrationMonitoringPage } from '@/features/integration';
 import { PermissionBootstrapBoundary } from '@/features/permissions/PermissionBootstrapBoundary';
 import { PlanningWorkspacePage } from '@/features/planning/PlanningWorkspacePage';
 import { ReportingWorkspacePage } from '@/features/reporting';
@@ -58,6 +59,7 @@ export const router = createBrowserRouter([
       { path: 'administration/configuration', element: <ConfigurationAdministrationPage /> },
       { path: 'administration/audit', element: <AuditWorkspacePage /> },
       { path: 'administration/documents', element: <DocumentsAdministrationPage /> },
+      { path: 'administration/integrations', element: <IntegrationMonitoringPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

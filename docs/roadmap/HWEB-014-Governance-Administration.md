@@ -1,16 +1,16 @@
 # HWEB-014 — Governance and Administration Completion
 
-Status: HWEB-014-03 COMPLETE / HWEB-014-04 NEXT
+Status: HWEB-014-04 COMPLETE / HWEB-014-05 NEXT
 
 ## Accepted starting point
 
 ```text
-HidraWEB verified main       : 7fcddfa27ac57041766472dc76425e37fbaee70f
-HWEB-014-02 exact-main CI    : 34762472996 — SUCCESS
+HidraWEB verified main       : 6c6e943be7ef6091d39d8b28d828c8b80e2270a6
+HWEB-014-03 exact-main CI    : 34766936728 — SUCCESS
 HidraAPI audited main        : 725a451ae4880ccb4f2ec508709241f88cd4aea7
-Current completed task       : HWEB-014-03 — document upload/download/version evidence
-Next task                    : HWEB-014-04 — integration connector/job/dead-letter monitoring
-Backend prerequisite         : HidraAPI issue #83 resolved by PR #84
+Current completed task       : HWEB-014-04 — integration connector/job/dead-letter monitoring
+Next task                    : HWEB-014-05 — notification center/delivery evidence according to actual APIs
+Backend prerequisite         : none beyond accepted integration runtime workbench exposure
 ```
 
 ## HWEB-014-01 — audit search/export UI — COMPLETE
@@ -528,4 +528,114 @@ Product branch CI               : 34766346913 — SUCCESS on e0554250dd207f30e9d
 Final verification              : roadmap-inclusive exact-head full CI, independent PR-head CI, guarded merge, exact merge-SHA main CI required
 ```
 
-HWEB-014-04 must not begin until the roadmap-inclusive HWEB-014-03 head passes full CI, its exact PR head is independently verified, the guarded merge succeeds, and exact merge-SHA `main` CI is accepted.
+HWEB-014-03 final acceptance was completed by PR #71, merge SHA `6c6e943be7ef6091d39d8b28d828c8b80e2270a6`, and exact-main CI `34766936728 — SUCCESS`.
+
+## HWEB-014-04 — integration connector/job/dead-letter monitoring — COMPLETE
+
+### Backend source and published operations
+
+HWEB-014-04 was audited against accepted HidraAPI `main` commit:
+
+```text
+725a451ae4880ccb4f2ec508709241f88cd4aea7
+```
+
+`SpringIntegrationController` publishes only these canonical business mutations:
+
+```text
+POST /api/v1/integration/exchange-messages
+POST /api/v1/integration/external-systems
+POST /api/v1/integration/job-runs
+```
+
+The audited controller publishes no retry, replay, cancel, restart, pause, resume, connector lifecycle, dead-letter disposition, or dead-letter payload-retrieval mutation. HWEB-014-04 therefore does not expose any of those actions.
+
+### Runtime monitoring evidence
+
+Integration monitoring uses the accepted generic workbench contract:
+
+```text
+GET /api/v1/workbench/{module}/resources
+GET /api/v1/workbench/{module}/{resource}?page={page}&size={size}&q={query}
+```
+
+HidraWEB discovers module `integration`, identifies these backend Java types in runtime metadata, and then requests only the actual returned `descriptor.resource` values:
+
+```text
+ConnectorInstanceJpaEntity
+IntegrationJobRunJpaEntity
+IntegrationDeadLetterRecordJpaEntity
+IntegrationRetryAttemptJpaEntity
+IntegrationHealthSnapshotJpaEntity
+```
+
+Runtime resource endpoint names are not synthesized from Java class names.
+
+The workspace presents connector, job-run, dead-letter, retry-attempt, and health-snapshot records as backend-owned evidence only. Status or retry fields in returned records are not treated as authorization or as permission to invent lifecycle controls.
+
+### Authorization
+
+Monitoring is fail-closed. Reads require the exact backend route descriptor and effective grant for:
+
+```text
+GET /api/v1/workbench/{module}/{resource}
+```
+
+HidraWEB intersects the descriptor permission with `GET /api/v1/identity/me/permissions`. If route metadata or the effective grant is absent, the integration monitoring workspace denies evidence reads. Permission strings are not inferred by product code and backend 403 remains final authority.
+
+### Frontend route and state ownership
+
+```text
+Frontend route : /administration/integrations
+Backend owner  : integration
+Server state   : TanStack Query for runtime resource discovery and evidence reads
+Local state    : none for business/server state
+```
+
+The Administration navigation entry is enabled by HWEB-014-04 and remains capability-scoped to module `integration`.
+
+### Deliberately absent operations
+
+Because no matching backend route is published, the UI contains no controls for:
+
+```text
+retry
+replay
+cancel
+restart
+pause/resume
+connector activation/deactivation
+manual dead-letter disposition
+manual dead-letter replay
+```
+
+HWEB-014-04 also does not synthesize schedules, connector health transitions, payload inspection, retry policies, or dead-letter lifecycle semantics from persistence fields.
+
+### Tests
+
+`tests/e2e/integration-monitoring.spec.ts` verifies:
+
+- runtime discovery for connector, job-run, dead-letter, retry-attempt, and health-snapshot evidence;
+- requests use each returned `descriptor.resource` value;
+- the evidence-only monitoring notice is present;
+- retry/replay/cancel/restart/pause controls are absent;
+- the workspace fails closed when the exact generic workbench read grant is absent.
+
+### Completion record
+
+```text
+Backend source commit / branch : 725a451ae4880ccb4f2ec508709241f88cd4aea7 / main
+Frontend base                   : 6c6e943be7ef6091d39d8b28d828c8b80e2270a6 / main
+Product branch                  : hweb-014-04-integration-monitoring
+Product head                    : 182d44b62e751eba9c6b084a7dfa5ef136eb6c26
+Frontend route                  : /administration/integrations
+Monitoring resources            : connector, job run, dead letter, retry attempt, health snapshot via runtime workbench discovery
+Dedicated integration mutations : not used by HWEB-014-04; monitoring remains evidence-only
+Permission model                : exact generic workbench route descriptor intersected with effective user grants
+Tests                           : tests/e2e/integration-monitoring.spec.ts
+Product branch CI               : 34767466875 — SUCCESS on 182d44b62e751eba9c6b084a7dfa5ef136eb6c26
+Known backend gaps              : no retry/replay/cancel/restart/pause/dead-letter lifecycle mutation endpoints published
+Final verification              : roadmap-inclusive exact-head full CI, independent PR-head CI, guarded merge, exact merge-SHA main CI required
+```
+
+HWEB-014-05 must not begin until the roadmap-inclusive HWEB-014-04 head passes full CI, its exact PR head is independently verified, the guarded merge succeeds, and exact merge-SHA `main` CI is accepted.
