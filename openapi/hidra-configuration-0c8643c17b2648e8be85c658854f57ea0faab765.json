@@ -1,0 +1,34 @@
+{
+  "openapi": "3.0.1",
+  "info": { "title": "HidraAPI", "version": "v1" },
+  "paths": {
+    "/api/v1/configuration/capabilities": {
+      "get": { "tags": ["spring-configuration-controller"], "operationId": "configurationCapabilities", "responses": { "200": { "description": "OK", "content": { "*/*": { "schema": { "type": "object", "additionalProperties": {} } } } } } }
+    },
+    "/api/v1/configuration/definitions": {
+      "post": { "tags": ["spring-configuration-controller"], "operationId": "createConfigurationDefinition", "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateConfigurationDefinitionRequest" } } } }, "responses": { "200": { "description": "OK", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ConfigurationDefinitionResponse" } } } } } }
+    },
+    "/api/v1/configuration/feature-flags": {
+      "post": { "tags": ["spring-configuration-controller"], "operationId": "createFeatureFlag", "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateFeatureFlagRequest" } } } }, "responses": { "200": { "description": "OK", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/FeatureFlagResponse" } } } } } }
+    },
+    "/api/v1/configuration/values": {
+      "post": { "tags": ["spring-configuration-controller"], "operationId": "setConfigurationValue", "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SetConfigurationValueRequest" } } } }, "responses": { "200": { "description": "OK", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ConfigurationValueResponse" } } } } } }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ConfigurationValueType": { "type": "string", "enum": ["STRING", "NUMBER", "BOOLEAN", "DATE", "DURATION", "JSON", "REFERENCE", "LIST"] },
+      "ConfigurationSensitivity": { "type": "string", "enum": ["PUBLIC", "INTERNAL", "RESTRICTED", "SECRET_REFERENCE_ONLY"] },
+      "ConfigurationDefinitionStatus": { "type": "string", "enum": ["DRAFT", "ACTIVE", "DEPRECATED", "RETIRED"] },
+      "ConfigurationValueStatus": { "type": "string", "enum": ["DRAFT", "ACTIVE", "SUPERSEDED", "EXPIRED", "REVOKED"] },
+      "FeatureFlagEvaluationStrategy": { "type": "string", "enum": ["BOOLEAN", "PERCENTAGE", "RULE_BASED", "ALLOW_LIST", "DENY_LIST"] },
+      "FeatureFlagStatus": { "type": "string", "enum": ["DRAFT", "ACTIVE", "PAUSED", "RETIRED"] },
+      "CreateConfigurationDefinitionRequest": { "type": "object", "properties": { "namespaceId": { "type": "string" }, "key": { "type": "string" }, "displayNameFr": { "type": "string" }, "displayNameAr": { "type": "string" }, "displayNameEn": { "type": "string" }, "valueType": { "$ref": "#/components/schemas/ConfigurationValueType" }, "sensitivity": { "$ref": "#/components/schemas/ConfigurationSensitivity" }, "scoped": { "type": "boolean" }, "requiresApproval": { "type": "boolean" }, "defaultValue": { "type": "string" }, "description": { "type": "string" } } },
+      "CreateFeatureFlagRequest": { "type": "object", "properties": { "code": { "type": "string" }, "nameFr": { "type": "string" }, "nameAr": { "type": "string" }, "nameEn": { "type": "string" }, "owningModule": { "type": "string" }, "evaluationStrategy": { "$ref": "#/components/schemas/FeatureFlagEvaluationStrategy" }, "defaultEnabled": { "type": "boolean" }, "description": { "type": "string" } } },
+      "SetConfigurationValueRequest": { "type": "object", "properties": { "definitionId": { "type": "string" }, "definitionVersionId": { "type": "string" }, "environment": { "type": "string" }, "rawValue": { "type": "string" }, "jsonValue": { "type": "string" }, "secretReference": { "type": "string" }, "effectiveFrom": { "type": "string", "format": "date-time" }, "effectiveTo": { "type": "string", "format": "date-time" }, "createdByActorId": { "type": "string" } } },
+      "ConfigurationDefinitionResponse": { "type": "object", "properties": { "id": { "type": "string" }, "namespaceId": { "type": "string" }, "key": { "type": "string" }, "displayNameFr": { "type": "string" }, "valueType": { "$ref": "#/components/schemas/ConfigurationValueType" }, "sensitivity": { "$ref": "#/components/schemas/ConfigurationSensitivity" }, "status": { "$ref": "#/components/schemas/ConfigurationDefinitionStatus" }, "scoped": { "type": "boolean" }, "requiresApproval": { "type": "boolean" } } },
+      "FeatureFlagResponse": { "type": "object", "properties": { "id": { "type": "string" }, "code": { "type": "string" }, "nameFr": { "type": "string" }, "owningModule": { "type": "string" }, "status": { "$ref": "#/components/schemas/FeatureFlagStatus" }, "evaluationStrategy": { "$ref": "#/components/schemas/FeatureFlagEvaluationStrategy" }, "defaultEnabled": { "type": "boolean" } } },
+      "ConfigurationValueResponse": { "type": "object", "properties": { "id": { "type": "string" }, "definitionId": { "type": "string" }, "definitionVersionId": { "type": "string" }, "environment": { "type": "string" }, "status": { "$ref": "#/components/schemas/ConfigurationValueStatus" }, "effectiveFrom": { "type": "string", "format": "date-time" }, "effectiveTo": { "type": "string", "format": "date-time" } } }
+    }
+  }
+}
