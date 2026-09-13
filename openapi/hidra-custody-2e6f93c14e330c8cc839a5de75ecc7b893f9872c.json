@@ -1,0 +1,64 @@
+{
+  "components": {
+    "schemas": {
+      "CustodyMeasurementPeriodResponse": {
+        "properties": {
+          "agreementId": { "type": "string" },
+          "id": { "type": "string" },
+          "periodCode": { "type": "string" },
+          "periodEnd": { "format": "date-time", "type": "string" },
+          "periodStart": { "format": "date-time", "type": "string" },
+          "status": {
+            "enum": ["OPEN", "LOCKED", "CALCULATED", "APPROVED", "CLOSED", "REOPENED", "CANCELLED"],
+            "type": "string"
+          },
+          "transferPointId": { "type": "string" }
+        },
+        "type": "object"
+      },
+      "OpenCustodyMeasurementPeriodRequest": {
+        "properties": {
+          "agreementId": { "type": "string" },
+          "periodCode": { "type": "string" },
+          "periodEnd": { "format": "date-time", "type": "string" },
+          "periodStart": { "format": "date-time", "type": "string" },
+          "transferPointId": { "type": "string" }
+        },
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Hydrocarbon Intelligence for Data, Risk, and Analytics",
+    "license": { "name": "MIT License" },
+    "title": "HidraAPI",
+    "version": "v1"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/custody/measurement-periods": {
+      "post": {
+        "operationId": "openMeasurementPeriod_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/OpenCustodyMeasurementPeriodRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/CustodyMeasurementPeriodResponse" }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": ["spring-custody-controller"]
+      }
+    }
+  }
+}
