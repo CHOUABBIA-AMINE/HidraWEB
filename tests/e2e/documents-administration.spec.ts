@@ -54,7 +54,7 @@ test('HWEB-014-03 reads runtime document evidence and submits published metadata
   await mockDocuments(page);
   await signIn(page);
   await openDocuments(page);
-  await expect(page.getByRole('heading', { name: 'Document evidence' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Document evidence', exact: true })).toBeVisible();
   await expect(page.getByText(/no multipart binary upload endpoint/i)).toBeVisible();
   await expect(page.locator('input[type="file"]')).toHaveCount(0);
   await expect(page.getByRole('button', { name: /download/i })).toHaveCount(0);
@@ -104,5 +104,5 @@ test('HWEB-014-03 fails closed when document evidence read grant is absent', asy
   await signIn(page);
   await openDocuments(page);
   await expect(page.getByText('Your current HidraAPI grants do not allow document evidence reads.')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Document evidence' })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Document evidence', exact: true })).toHaveCount(0);
 });
