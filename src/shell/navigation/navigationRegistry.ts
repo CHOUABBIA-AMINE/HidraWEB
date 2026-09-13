@@ -36,7 +36,7 @@ export const navigationSections: readonly NavigationSection[] = [
     { id: 'custody', labelKey: 'nav.custody', path: '/custody', capabilityModules: ['custody', 'party'], icon: 'custody', implemented: true, deliveryTask: 'HWEB-012' },
   ] },
   { id: 'intelligence', labelKey: 'nav.groups.intelligence', items: [
-    { id: 'risk', labelKey: 'nav.risk', path: '/intelligence/risk', capabilityModules: ['risk'], icon: 'risk', implemented: false, deliveryTask: 'HWEB-013' },
+    { id: 'risk', labelKey: 'nav.risk', path: '/intelligence/risk', capabilityModules: ['risk'], icon: 'risk', implemented: true, deliveryTask: 'HWEB-013' },
     { id: 'analytics', labelKey: 'nav.analytics', path: '/intelligence/analytics', capabilityModules: ['analytics'], icon: 'analytics', implemented: false, deliveryTask: 'HWEB-013' },
     { id: 'simulation', labelKey: 'nav.simulation', path: '/intelligence/simulation', capabilityModules: ['simulation'], icon: 'simulation', implemented: false, deliveryTask: 'HWEB-013' },
     { id: 'reports', labelKey: 'nav.reports', path: '/intelligence/reports', capabilityModules: ['reporting'], icon: 'reports', implemented: false, deliveryTask: 'HWEB-013' },

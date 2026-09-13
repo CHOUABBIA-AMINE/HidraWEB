@@ -11,6 +11,7 @@ import { CustodyWorkspacePage } from '@/features/custody';
 import { IncidentWorkspacePage } from '@/features/incident/IncidentWorkspacePage';
 import { PermissionBootstrapBoundary } from '@/features/permissions/PermissionBootstrapBoundary';
 import { PlanningWorkspacePage } from '@/features/planning/PlanningWorkspacePage';
+import { RiskWorkspacePage } from '@/features/risk';
 import { TelemetryMonitoringPage } from '@/features/telemetry-monitoring/TelemetryMonitoringPage';
 import { NetworkTopologyPage } from '@/features/topology/NetworkTopologyPage';
 import { OperationalWorkbenchPage } from '@/features/workbench/OperationalWorkbenchPage';
@@ -40,6 +41,7 @@ export const router = createBrowserRouter([
       { path: 'engineering', element: <EngineeringIntegrityProcessPage /> },
       { path: 'engineering/assets', element: <EngineeringAssetsProcessPage /> },
       { path: 'custody', element: <CustodyWorkspacePage /> },
+      { path: 'intelligence/risk', element: <RiskWorkspacePage /> },
       { path: 'work/tasks', element: <WorkflowTasksPage /> },
       { path: 'workbench', element: <OperationalWorkbenchPage /> },
       { path: 'administration/organization', element: <OrganizationAdministrationPage /> },

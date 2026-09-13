@@ -27,7 +27,8 @@
     "api:generate:hse": "orval --config orval.hse.config.ts",
     "api:generate:planning": "orval --config orval.planning.config.ts",
     "api:generate:custody": "orval --config orval.custody.config.ts",
-    "verify": "npm run api:generate:workbench && npm run api:generate:identity-organization && npm run api:generate:topology && npm run api:generate:telemetry-monitoring && npm run api:generate:workflow && npm run api:generate:alarm && npm run api:generate:incident && npm run api:generate:leak && npm run api:generate:hse && npm run api:generate:planning && npm run api:generate:custody && npm run lint && npm run typecheck && npm run test && npm run build"
+    "api:generate:risk": "orval --config orval.risk.config.ts",
+    "verify": "npm run api:generate:workbench && npm run api:generate:identity-organization && npm run api:generate:topology && npm run api:generate:telemetry-monitoring && npm run api:generate:workflow && npm run api:generate:alarm && npm run api:generate:incident && npm run api:generate:leak && npm run api:generate:hse && npm run api:generate:planning && npm run api:generate:custody && npm run api:generate:risk && npm run lint && npm run typecheck && npm run test && npm run build"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",

@@ -1,16 +1,17 @@
 # HWEB-013 — Intelligence
 
-Status: HWEB-013-01 INVENTORY / HWEB-013-02 NOT STARTED
+Status: HWEB-013-02 COMPLETE / HWEB-013-03 NEXT
 
 ## Accepted starting point
 
 ```text
-HidraWEB verified main       : 2c4a567060ff4548924685b98a76ba48c4845402
-Final HWEB-012 CI            : 34744892854 — SUCCESS
+HidraWEB verified main       : e315610b93f48915b1423c78b487941651191f77
+Final HWEB-013-01 CI         : 34746275714 — SUCCESS
 HidraAPI audited main        : 0c8643c17b2648e8be85c658854f57ea0faab765
 Backend owners               : risk, analytics, simulation, reporting
-Current task                 : HWEB-013-01 — inventory contracts only
-Later UI tasks               : HWEB-013-02 through HWEB-013-07 — NOT STARTED
+Current task                 : HWEB-013-02 — risk views COMPLETE
+Next task                    : HWEB-013-03 — analytics datasets/insights/metrics
+Later UI tasks               : HWEB-013-04 through HWEB-013-07 — NOT STARTED
 ```
 
 ## Intelligence ownership rule
@@ -222,15 +223,17 @@ For every dedicated mutation and generic workbench read:
 4. never guess a permission string from the `<module>:<resource>:<action>` convention;
 5. treat backend HTTP 403 as final authority.
 
-No intelligence permission codes are hard-coded by this inventory task.
+No intelligence permission codes are guessed in feature code.
 
 ## OpenAPI evidence and gap
 
-The audited HidraAPI main exposes the four dedicated intelligence controllers and their request/response classes. HidraWEB's currently committed `openapi/` directory does not contain a dedicated risk, analytics, simulation, or reporting slice.
+The audited HidraAPI main exposes the four dedicated intelligence controllers and their request/response classes.
 
-Therefore HWEB-013-01 does not invent TypeScript request/response shapes. Before a later task calls a dedicated intelligence mutation, it must generate or import the deterministic OpenAPI contract from an accepted HidraAPI artifact and preserve backend optionality exactly.
+HWEB-013-02 adds a deterministic risk-only OpenAPI slice derived from accepted HidraAPI artifact `10307772022`, digest `sha256:884ceb8d62bafd5e885287a18eb847356cffc21e8948cc1e937ec02b780ff0ea`, for audited backend SHA `0c8643c17b2648e8be85c658854f57ea0faab765`. The slice contains only the published risk paths and their referenced request/response schemas and is generated in CI through `orval.risk.config.ts`.
 
-The generic workbench client remains the authoritative typed read mechanism already established by earlier HWEB phases.
+HidraWEB still has no dedicated analytics, simulation, or reporting OpenAPI slice. Those later tasks must import or generate their exact deterministic contracts before calling dedicated mutations.
+
+The generic workbench client remains the authoritative typed read mechanism for HWEB-013-02 risk list/detail views.
 
 ## Cross-module composition constraints
 
@@ -252,19 +255,31 @@ Forbidden:
 
 ## HWEB-013 task boundaries
 
-### HWEB-013-01 — inventory risk/analytics/simulation/reporting contracts — CURRENT
+### HWEB-013-01 — inventory risk/analytics/simulation/reporting contracts — COMPLETE
 
-This task is documentation/evidence only. It records verified backend owners, dedicated controller routes, mutation DTO classes, workbench read strategy, authorization rules, enum/status evidence, and the current OpenAPI gap.
+The inventory records verified backend owners, dedicated controller routes, mutation DTO classes, workbench read strategy, authorization rules, enum/status evidence, and deterministic OpenAPI prerequisites.
 
-No `/intelligence` UI, feature module, process component, route, chart, form, mutation hook, Orval slice, or lifecycle behavior is implemented in HWEB-013-01.
+No `/intelligence` UI, feature module, process component, route, chart, form, mutation hook, Orval slice, or lifecycle behavior was implemented in HWEB-013-01.
 
-### HWEB-013-02 — risk views — NOT STARTED
+### HWEB-013-02 — risk views — COMPLETE
 
-Must begin from runtime risk workbench discovery and an accepted generated risk mutation contract. Returned risk statuses remain display evidence unless exact action routes exist.
+Implemented `/intelligence/risk` with:
 
-### HWEB-013-03 — analytics datasets/insights/metrics — NOT STARTED
+- runtime discovery of risk workbench descriptors rather than hard-coded resource endpoint names;
+- risk-register and risk-assessment list views identified from backend Java type metadata and queried through the discovered resource names;
+- generic workbench detail reads for explicitly selected records;
+- backend status values rendered as evidence only;
+- no inferred approve, activate, retire, cancel, publish, or other lifecycle controls;
+- exact generic workbench list/detail route-permission descriptors intersected with effective grants;
+- fail-closed behavior when route metadata or effective grants are absent, with backend HTTP 403 remaining final authority;
+- TanStack Query ownership of resource/list/detail server state and local React state limited to tab/detail selection;
+- an accepted risk-only OpenAPI slice generated by Orval in CI for deterministic risk mutation DTO evidence, while no dedicated risk mutation is invoked by this read-only task;
+- enabled capability-gated shell navigation for the risk workspace;
+- E2E coverage proving runtime discovery, status-as-evidence behavior, absence of invented lifecycle buttons, and fail-closed access.
 
-Must preserve analytics ownership of derived data and projections while operational modules retain source truth.
+### HWEB-013-03 — analytics datasets/insights/metrics — NEXT
+
+Must preserve analytics ownership of derived data and projections while operational modules retain source truth. It must begin with runtime analytics workbench discovery and an accepted deterministic analytics OpenAPI slice before any dedicated mutation is used.
 
 ### HWEB-013-04 — simulation scenario/run/result workspaces — NOT STARTED
 
@@ -292,10 +307,30 @@ DTO evidence                    : exact dedicated request/response class names r
 Permissions used                : none hard-coded; exact route descriptors + effective grants remain mandatory
 Frontend routes created/changed : none
 State ownership                 : unchanged; no server-state implementation added
-OpenAPI regeneration status     : not performed; no dedicated intelligence slice currently committed in HidraWEB
-Known backend/frontend gaps     : deterministic intelligence OpenAPI slice must be accepted before dedicated mutations are implemented
+OpenAPI regeneration status     : inventory only; deterministic intelligence slices deferred to implementation tasks
+Known backend/frontend gaps     : exact module slice required before each dedicated intelligence mutation is implemented
 Tests added                     : none; inventory task only
-CI result                       : PENDING exact-head CI
+Final product head              : e315610b93f48915b1423c78b487941651191f77
+Final CI                        : 34746275714 — SUCCESS
 ```
 
-HWEB-013-02 must not start until this inventory is reviewed and HWEB-013-01 verification is accepted.
+## HWEB-013-02 completion record
+
+```text
+Backend source commit / branch : 0c8643c17b2648e8be85c658854f57ea0faab765 / main
+Frontend base                   : e315610b93f48915b1423c78b487941651191f77 / main
+Accepted OpenAPI artifact       : 10307772022 / sha256:884ceb8d62bafd5e885287a18eb847356cffc21e8948cc1e937ec02b780ff0ea
+Endpoints used                  : GET risk workbench resources; GET discovered risk register/assessment lists; GET selected discovered risk record detail
+Dedicated risk mutations        : none invoked by HWEB-013-02; exact risk POST contracts generated for deterministic evidence only
+DTO evidence                    : AddRiskEvidenceRequest, CreateRiskAssessmentRequest, CreateRiskRegisterRequest, RiskAssessmentResponse, RiskRegisterResponse
+Permissions used                : exact generic workbench list/detail route descriptors intersected with effective grants; backend HTTP 403 final authority
+Frontend route                  : /intelligence/risk
+State ownership                 : TanStack Query owns workbench server state; local state limited to tab/detail selection
+Lifecycle semantics             : status values display-only; no approve/activate/retire/cancel actions invented
+OpenAPI regeneration status     : risk slice generated by orval.risk.config.ts and HidraWEB CI
+Tests added                     : tests/e2e/risk-workspace.spec.ts
+Known backend gaps              : no exact risk lifecycle action routes beyond published create/evidence operations; therefore no lifecycle controls exposed
+Verification                    : exact-head CI required after this documentation commit before merge
+```
+
+HWEB-013-03 must not begin until HWEB-013-02 exact-head and post-merge verification are accepted.

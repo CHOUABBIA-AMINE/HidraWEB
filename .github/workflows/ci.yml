@@ -64,6 +64,9 @@ jobs:
       - name: Generate HWEB-012 custody OpenAPI client
         run: npm run api:generate:custody
 
+      - name: Generate HWEB-013 risk OpenAPI client
+        run: npm run api:generate:risk
+
       - name: Lint
         run: npm run lint
 
