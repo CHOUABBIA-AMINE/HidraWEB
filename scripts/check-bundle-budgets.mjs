@@ -1,3 +1,4 @@
+import console from 'node:console';
 import { readFile, stat } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
