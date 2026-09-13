@@ -81,6 +81,8 @@ Production route-level lazy loading, Vite manifest analysis, and enforced JavaSc
 
 Hosted-CI large-grid, topology-map preprocessing, and ECharts runtime performance budgets are defined in [`docs/deployment/Runtime-Performance-Budgets.md`](docs/deployment/Runtime-Performance-Budgets.md).
 
+The full Chromium Playwright regression boundary and critical control-room journey coverage are defined in [`docs/deployment/Playwright-Regression-Suite.md`](docs/deployment/Playwright-Regression-Suite.md).
+
 ## Implemented application surfaces
 
 - `/overview` — authenticated shell overview.
