@@ -1,15 +1,15 @@
 # HWEB-015 — Production Hardening
 
-Status: HWEB-015-08 COMPLETE / HWEB-015-09 NEXT
+Status: HWEB-015-09 COMPLETE / HWEB-015-10 NEXT
 
 ## Accepted starting point
 
 ```text
-HidraWEB verified main       : 32cb9594a10d3e1faec576ac1f941b48a9e7e498
-HWEB-015-07 exact-main CI    : 34784849649 — SUCCESS
+HidraWEB verified main       : c9d9115ecd5d2d0b32d5137c2cb0ae2b2001e50a
+HWEB-015-08 exact-main CI    : 34788527098 — SUCCESS
 HidraAPI audited main        : 725a451ae4880ccb4f2ec508709241f88cd4aea7
-Current completed task       : HWEB-015-08 — large-grid/map/chart performance tests
-Next task                    : HWEB-015-09 — full Playwright regression suite for critical operational journeys
+Current completed task       : HWEB-015-09 — full Playwright regression suite for critical operational journeys
+Next task                    : HWEB-015-10 — OpenAPI compatibility gate between HidraAPI and HidraWEB pipelines
 ```
 
 ## HWEB-015-01 — freeze supported enterprise authentication mode and IdP contract — COMPLETE
@@ -532,4 +532,57 @@ Product branch CI               : 34787853123 — SUCCESS
 Final verification              : roadmap-inclusive exact-head CI, independent PR CI, guarded exact-head merge, exact merge-SHA main CI required
 ```
 
-HWEB-015-09 must not begin until the roadmap-inclusive HWEB-015-08 head passes full CI, its exact PR head is independently verified, the guarded merge succeeds, and exact merge-SHA `main` CI is accepted.
+HWEB-015-09 was authorized only after HWEB-015-08 had been independently verified, guarded-merged, and accepted on exact merge-SHA `main` CI `34788527098` at `c9d9115ecd5d2d0b32d5137c2cb0ae2b2001e50a`.
+
+## HWEB-015-09 — full Playwright regression suite for critical operational journeys — COMPLETE
+
+### Scope
+
+HWEB-015-09 freezes the complete browser regression boundary and adds cross-surface control-room journey coverage. It does not start HWEB-015-10 OpenAPI compatibility work and does not change HidraAPI endpoints, DTOs, permissions, business rules, frontend route availability, or backend-owned state.
+
+### Full regression boundary
+
+The normal CI lifecycle continues to execute `npm run test:e2e` against the complete `tests/e2e` directory in Chromium. HWEB-015-09 deliberately does not replace the existing per-feature specifications with a smaller smoke subset. The existing authentication/bootstrap, permission, accessibility, topology, monitoring, alarm, workflow, event, planning, engineering, custody, intelligence, administration, notification, and reporting coverage remains part of the same acceptance gate.
+
+The CI step is named `Full Playwright regression suite` to make that repository contract explicit. The existing CI single-worker behavior, first-retry trace capture, and checked-in Vite development server remain unchanged.
+
+### Critical operational journey
+
+`tests/e2e/critical-operational-journeys.spec.ts` protects the representative operator sequence:
+
+```text
+sign in
+  -> monitoring / telemetry evidence
+  -> alarm investigation and acknowledgement
+  -> workflow task decision
+```
+
+The journey reuses only previously verified HidraAPI-facing contracts and permission descriptors. Monitoring and telemetry values remain backend-provided. Alarm acknowledgement is submitted only through the existing acknowledgement endpoint. The workflow action is shown only when `available-actions` marks the transition permitted, and execution carries the backend task concurrency token `expectedTaskUpdatedAt`.
+
+No frontend-derived alarm state, workflow transition, permission, optimistic-lock value, or business state was introduced.
+
+### Deterministic CI boundary
+
+The browser suite remains self-contained through Playwright route interception and the checked-in Vite development server. Acceptance does not depend on an external HidraAPI environment, external enterprise IdP, production credentials, or internet availability.
+
+`docs/deployment/Playwright-Regression-Suite.md` records the full-suite rule, critical journey, backend-authority invariants, deterministic CI boundary, and regression rules. `README.md` links the contract.
+
+### Completion record
+
+```text
+Backend source commit / branch : 725a451ae4880ccb4f2ec508709241f88cd4aea7 / main
+Endpoints and DTOs used         : none added or changed; existing monitoring/telemetry, alarm and workflow contracts only
+Permissions used                : none introduced or changed
+Frontend routes created/changed : none
+State ownership                 : no new server/business state; all added fixtures are test-only
+Playwright regression           : complete tests/e2e suite remains enforced through npm run test:e2e
+Critical journey                : tests/e2e/critical-operational-journeys.spec.ts
+Documentation                   : docs/deployment/Playwright-Regression-Suite.md; README.md
+OpenAPI regeneration status     : no API contract changed; all deterministic generators passed product-head CI
+Product branch                  : hweb-015-09-playwright-critical-journeys
+Product head                    : 3d47c382649719c3e6fb363f0629ddde489e64fb
+Product branch CI               : 34789020602 — SUCCESS
+Final verification              : roadmap-inclusive exact-head CI, independent PR CI, guarded exact-head merge, exact merge-SHA main CI required
+```
+
+HWEB-015-10 must not begin until the roadmap-inclusive HWEB-015-09 head passes full CI, its exact PR head is independently verified, the guarded merge succeeds, and exact merge-SHA `main` CI is accepted.
