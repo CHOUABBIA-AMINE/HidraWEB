@@ -1,6 +1,6 @@
 # HWEB-012 — Metering and Custody
 
-Status: HWEB-012-02 COMPLETE / HWEB-012-03 NEXT
+Status: HWEB-012-03 COMPLETE / HWEB-012-04 NEXT
 
 ## Accepted baseline
 
@@ -80,6 +80,8 @@ issuedByActorId
 workflowInstanceId
 ```
 
+The accepted OpenAPI artifact publishes these request properties as optional; HidraWEB preserves that optionality and does not introduce frontend-required fields that the backend contract does not require.
+
 Response `CustodyTransferTicketResponse`:
 
 ```text
@@ -93,7 +95,7 @@ ticketDate
 approvedAt
 ```
 
-The route records neutral references to the selected custody period/agreement/transfer point/batch/quantity calculation and a workflow-instance reference. HidraWEB must not derive ticket lifecycle transitions from the returned status enum.
+Published ticket status values are `DRAFT`, `SUBMITTED`, `UNDER_REVIEW`, `APPROVED`, `REJECTED`, `CANCELLED`, and `CLOSED`. The route records neutral references to the selected custody period/agreement/transfer point/batch/quantity calculation and workflow/actor references. HWEB-012-03 renders backend status as evidence only and does not derive approval, cancellation, correction, submission, review or close actions from the returned enum.
 
 ### Discrepancy
 
@@ -137,7 +139,7 @@ POST /api/v1/workbench/{module}/{resource}/search
 
 The frontend discovers custody/party resource names at runtime rather than maintaining a competing entity/resource catalog. Current custody persistence includes JPA-backed resources for agreements, agreement parties, transfer points, measurement periods, batches, metering/measurement snapshots, quantity calculations, transfer tickets, reconciliation, discrepancies, approval references, document references and custody catalogs.
 
-HWEB-012-02 uses runtime-discovered `CustodyMeasurementPeriodJpaEntity`, `CustodyAgreementJpaEntity`, and `CustodyTransferPointJpaEntity` resources for list/detail and form reference choices. It does not hard-code workbench resource names or invent agreement/transfer-point catalogs.
+HWEB-012-02 uses runtime-discovered `CustodyMeasurementPeriodJpaEntity`, `CustodyAgreementJpaEntity`, and `CustodyTransferPointJpaEntity` resources for list/detail and form reference choices. HWEB-012-03 additionally uses runtime-discovered `CustodyTransferTicketJpaEntity`, `CustodyBatchJpaEntity`, and `CustodyQuantityCalculationJpaEntity` resources. Neither task hard-codes workbench resource names or invents custody catalogs.
 
 ## Cross-module evidence
 
@@ -189,7 +191,7 @@ POST /api/v1/party/roles/assignments
 
 ### Workflow / actor references
 
-Transfer-ticket creation accepts `issuedByActorId` and `workflowInstanceId`; discrepancy opening accepts `assignedActorId`. These are references only. HWEB-012 must not duplicate identity/workflow ownership or infer workflow actions from custody status values.
+Transfer-ticket creation accepts `issuedByActorId` and `workflowInstanceId`; discrepancy opening accepts `assignedActorId`. These are references only. HWEB-012 must not duplicate identity/workflow ownership or infer workflow actions from custody status values. HWEB-012-03 therefore accepts the transfer-ticket actor/workflow references as optional neutral IDs and does not scan identity or workflow collections to populate them.
 
 ## Authorization
 
@@ -222,13 +224,23 @@ Implemented `/custody` with:
 - TanStack Query as server-state owner and React local state only for paging, selection, search and form values;
 - fail-closed states for missing route metadata, grants, workbench resources and backend errors.
 
-### HWEB-012-03 — transfer-ticket workspace — NEXT
+### HWEB-012-03 — transfer-ticket workspace — COMPLETE
 
-Use runtime custody reads plus `POST /api/v1/custody/transfer-tickets`. Do not synthesize approval, cancellation, correction or status-transition actions.
+Implemented within the existing `/custody` process route using a local transfer-ticket workspace tab:
 
-### HWEB-012-04 — discrepancy/reconciliation workspace
+- runtime custody workbench discovery/list/detail for transfer tickets;
+- runtime custody measurement-period, agreement, transfer-point, batch and quantity-calculation reference choices;
+- `POST /api/v1/custody/transfer-tickets` only when the exact route descriptor and effective grant permit it;
+- custody OpenAPI generation extended mechanically from accepted artifact `10307945855` and pinned to backend merge `2e6f93c...`;
+- exact preservation of optional request properties;
+- `issuedByActorId` and `workflowInstanceId` retained as optional neutral references with no cross-module collection scan;
+- backend ticket status displayed without approval, cancellation, correction, submit, review or close actions;
+- TanStack Query as server-state owner and React local state only for paging, selection, search, tab and form values;
+- fail-closed handling for missing route metadata/grants/resources and authoritative backend HTTP 403.
 
-Runtime workbench can support reconciliation/discrepancy reads and the dedicated discrepancy-open command. Reconciliation mutation semantics are not published; any future write/action requirement beyond discrepancy opening must become an explicit backend gap before implementation.
+### HWEB-012-04 — discrepancy/reconciliation workspace — NEXT
+
+Runtime workbench can support reconciliation/discrepancy reads and the dedicated discrepancy-open command. Reconciliation mutation semantics are not published; any future write/action requirement beyond discrepancy opening must become an explicit backend gap before implementation. Do not invent reconciliation writes or discrepancy lifecycle actions.
 
 ### HWEB-012-05 — topology/telemetry/party references
 
@@ -237,6 +249,33 @@ Compose only from explicit backend references listed above, preferably at the pr
 ### HWEB-012-06 — conservative party scope
 
 Party remains master-data owner. The custody process may display party context for explicit `partyId` references but must not create a competing party workspace or duplicate party mutation behavior.
+
+## HWEB-012-03 verification evidence
+
+```text
+Backend source commit / branch : 0c8643c17b2648e8be85c658854f57ea0faab765 / main
+Functional backend merge       : 2e6f93c14e330c8cc839a5de75ecc7b893f9872c
+Accepted OpenAPI artifact       : 10307945855 / sha256:20b15395d1b2feec853167e88b2b6357650f51c03fb7811ffe60fd1362544c7f
+Endpoints and DTOs used         : GET workbench custody resources/list/detail; POST /api/v1/custody/transfer-tickets; CreateCustodyTransferTicketRequest; CustodyTransferTicketResponse
+Permissions used                : exact workbench list/detail and custody transfer-ticket POST route descriptors intersected with effective grants
+Frontend routes changed         : no new shell route; /custody retained with local Measurement periods / Transfer tickets workspace tabs
+State ownership                 : TanStack Query owns custody/workbench server state; React local state owns paging/search/selection/tab/form only
+Reference ownership             : period/agreement/transfer-point/batch/quantity choices are runtime-discovered custody resources; actor/workflow remain optional neutral IDs; no foreign-module scan
+Lifecycle ownership             : backend status displayed only; no frontend approval/cancel/correct/submit/review/close state machine
+Error states                    : missing route metadata, grant, resource and backend errors fail closed; backend HTTP 403 remains final authority
+Tests added                     : tests/e2e/custody-transfer-tickets.spec.ts
+OpenAPI regeneration status     : custody Orval slice extended from accepted artifact 10307945855 and generated in CI
+Initial product head            : 2cd18aba1d8bed959768314c489a523db0441b65
+Initial CI                      : 34738999610 — FAILED (Playwright navigation assertion only; shell correctly hid custody navigation without the create grant)
+Focused correction              : permission fail-closed test navigates directly to the protected /custody route after sign-in so page-level behavior is isolated; product/contract semantics unchanged
+Final product head              : 5883bf53c6e54e7a7d1855996715fe67db32ceb7
+Corrected exact-head CI         : 34739586694 — SUCCESS
+Product PR                      : #50
+Product merge                   : b102ddd417093d72f78eed78ec375c8999b929f3
+Post-merge main CI              : 34739711610 — SUCCESS
+Known backend gaps              : reconciliation writes and discrepancy lifecycle/update/resolve/close actions remain unpublished for HWEB-012-04 and must not be invented
+Conclusion                      : HWEB-012-03 VERIFIED; HWEB-012-04 is next; no later HWEB-012 task started
+```
 
 ## HWEB-012-02 verification evidence
 
@@ -259,7 +298,7 @@ Exact-head CI                   : 34727349054 — SUCCESS
 Product merge                   : 30edf16df7368ddf27816eb9d648bce48f8d021a
 Post-merge main CI              : 34727482132 — SUCCESS
 Known backend gaps              : none blocking HWEB-012-03; reconciliation writes/lifecycle actions remain absent for later HWEB-012-04
-Conclusion                      : HWEB-012-02 VERIFIED; HWEB-012-03 is next; no later HWEB-012 task started
+Conclusion                      : HWEB-012-02 VERIFIED; HWEB-012-03 completed by product PR #50
 ```
 
 ## HWEB-012-01 verification evidence
