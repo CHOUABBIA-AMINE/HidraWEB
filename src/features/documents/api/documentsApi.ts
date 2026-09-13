@@ -1,3 +1,5 @@
+import { AxiosHeaders } from 'axios';
+
 import { hidraAxios } from '@/api/client/hidraAxios';
 import { hidraHttpClient } from '@/api/client/hidraHttpClient';
 import type {
@@ -58,8 +60,11 @@ export async function downloadDocumentVersionContent(versionId: string): Promise
   const response = await hidraAxios.get<Blob>(`/api/v1/documents/document-versions/${encodeURIComponent(versionId)}/content`, {
     responseType: 'blob',
   });
-  const contentDisposition = headerString(response.headers.get('content-disposition'));
-  const contentType = headerString(response.headers.get('content-type')) ?? (response.data.type || 'application/octet-stream');
+  const headers: Record<string, unknown> = response.headers instanceof AxiosHeaders
+    ? response.headers.toJSON()
+    : response.headers as Record<string, unknown>;
+  const contentDisposition = headerString(headers['content-disposition']);
+  const contentType = headerString(headers['content-type']) ?? (response.data.type || 'application/octet-stream');
   const filename = decodeContentDispositionFilename(contentDisposition);
   if (!filename) {
     throw new Error('HidraAPI download response did not publish an attachment filename.');
