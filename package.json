@@ -8,7 +8,8 @@
   "packageManager": "npm@11.19.0",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && npm run bundle:check",
+    "bundle:check": "node scripts/check-bundle-budgets.mjs",
     "preview": "vite preview",
     "typecheck": "tsc -b --pretty false",
     "lint": "eslint .",
