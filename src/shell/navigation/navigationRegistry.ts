@@ -33,7 +33,7 @@ export const navigationSections: readonly NavigationSection[] = [
   ] },
   { id: 'engineering', labelKey: 'nav.groups.engineering', items: [
     { id: 'integrity', labelKey: 'nav.integrity', path: '/engineering', capabilityModules: ['integrity', 'assets'], icon: 'engineering', implemented: true, deliveryTask: 'HWEB-011' },
-    { id: 'custody', labelKey: 'nav.custody', path: '/custody', capabilityModules: ['custody', 'party'], icon: 'custody', implemented: false, deliveryTask: 'HWEB-012' },
+    { id: 'custody', labelKey: 'nav.custody', path: '/custody', capabilityModules: ['custody', 'party'], icon: 'custody', implemented: true, deliveryTask: 'HWEB-012' },
   ] },
   { id: 'intelligence', labelKey: 'nav.groups.intelligence', items: [
     { id: 'risk', labelKey: 'nav.risk', path: '/intelligence/risk', capabilityModules: ['risk'], icon: 'risk', implemented: false, deliveryTask: 'HWEB-013' },
