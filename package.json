@@ -14,6 +14,7 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:performance": "vitest run --config vitest.performance.config.ts",
     "test:e2e": "playwright test",
     "api:generate": "orval --config orval.config.ts",
     "api:generate:workbench": "orval --config orval.workbench.config.ts",
@@ -31,7 +32,7 @@
     "api:generate:analytics": "orval --config orval.analytics.config.ts",
     "api:generate:simulation": "orval --config orval.simulation.config.ts",
     "api:generate:reporting": "orval --config orval.reporting.config.ts",
-    "verify": "npm run api:generate:workbench && npm run api:generate:identity-organization && npm run api:generate:topology && npm run api:generate:telemetry-monitoring && npm run api:generate:workflow && npm run api:generate:alarm && npm run api:generate:incident && npm run api:generate:leak && npm run api:generate:hse && npm run api:generate:planning && npm run api:generate:custody && npm run api:generate:risk && npm run api:generate:analytics && npm run api:generate:simulation && npm run api:generate:reporting && npm run lint && npm run typecheck && npm run test && npm run build"
+    "verify": "npm run api:generate:workbench && npm run api:generate:identity-organization && npm run api:generate:topology && npm run api:generate:telemetry-monitoring && npm run api:generate:workflow && npm run api:generate:alarm && npm run api:generate:incident && npm run api:generate:leak && npm run api:generate:hse && npm run api:generate:planning && npm run api:generate:custody && npm run api:generate:risk && npm run api:generate:analytics && npm run api:generate:simulation && npm run api:generate:reporting && npm run lint && npm run typecheck && npm run test && npm run test:performance && npm run build"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",

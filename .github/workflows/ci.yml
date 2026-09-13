@@ -85,6 +85,9 @@ jobs:
       - name: Unit and component tests
         run: npm run test
 
+      - name: Intelligence performance tests
+        run: npm run test:performance
+
       - name: Production build
         run: npm run build
 
