@@ -3,6 +3,7 @@ import { Navigate, createBrowserRouter } from 'react-router';
 import { RequireAuthentication } from '@/app/auth/RequireAuthentication';
 import { LoginPage } from '@/app/pages/LoginPage';
 import { NotFoundPage } from '@/app/pages/NotFoundPage';
+import { OidcCallbackPage } from '@/app/pages/OidcCallbackPage';
 import { OverviewPage } from '@/app/pages/OverviewPage';
 import { AlarmConsolePage } from '@/features/alarm/AlarmConsolePage';
 import { AnalyticsWorkspacePage } from '@/features/analytics';
@@ -29,6 +30,7 @@ import { AppShell } from '@/shell/AppShell';
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
+  { path: '/auth/callback', element: <OidcCallbackPage /> },
   {
     path: '/',
     element: (
