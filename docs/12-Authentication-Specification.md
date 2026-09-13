@@ -1,18 +1,18 @@
 # 12 — Authentication Specification
 
-## HWEB-015-01 enterprise authentication contract freeze
+## Enterprise authentication contract
 
-HWEB-015-01 freezes the supported enterprise production authentication contract against HidraAPI `main` commit `725a451ae4880ccb4f2ec508709241f88cd4aea7`.
+HWEB-015-01 froze the supported enterprise production authentication contract against HidraAPI `main` commit `725a451ae4880ccb4f2ec508709241f88cd4aea7`.
 
 The supported enterprise production mode is **JWT bearer authentication backed by an external OpenID Connect identity provider**.
 
 HidraAPI also implements `basic` and `disabled` authentication modes for bootstrap/development scenarios. HidraWEB must not treat either mode as the supported enterprise production contract.
 
-HWEB-015-01 is a contract-freeze task only. Browser OIDC client integration, redirect/callback handling, token lifecycle hardening, and production session behavior belong to HWEB-015-02.
+HWEB-015-02 implements the browser OIDC integration and token lifecycle defined below.
 
 ## Authoritative browser bootstrap contract
 
-Before authentication, HidraWEB shall obtain repository-owned browser authentication metadata from:
+Before authentication, HidraWEB obtains repository-owned browser authentication metadata from:
 
 ```text
 GET /api/v1/security/oidc
@@ -20,24 +20,26 @@ GET /api/v1/security/oidc
 
 The endpoint is intentionally public in HidraAPI security configuration.
 
-Its response is authoritative for these fields:
+Its response is authoritative for:
 
 ```text
 authenticationMode
- authorizationFlow
- issuerUri
- clientId
- audience
- scopes
- logoutUri
- browserTokenStorage
- repositoryConfigurationComplete
- externalIdpRegistrationRequired
+authorizationFlow
+issuerUri
+clientId
+audience
+scopes
+logoutUri
+browserTokenStorage
+repositoryConfigurationComplete
+externalIdpRegistrationRequired
 ```
 
-HidraWEB must not duplicate or infer runtime issuer, client ID, audience, scopes, logout URI, or token-storage policy from unrelated configuration.
+HidraWEB does not duplicate or infer runtime issuer, client ID, audience, scopes, logout URI, or token-storage policy from unrelated configuration.
 
-## Frozen production flow
+Startup fails closed when the backend contract is not `jwt` + `authorization_code_pkce` + `memory`, when repository configuration is incomplete, when external IdP registration is not required, or when issuer/client metadata is missing.
+
+## Production browser flow
 
 The repository-published browser flow is:
 
@@ -48,50 +50,107 @@ browserTokenStorage = memory
 externalIdpRegistrationRequired = true
 ```
 
-Therefore the production browser contract is:
+The production browser behavior is therefore:
 
-1. External enterprise IdP.
-2. OpenID Connect / OAuth 2.0 Authorization Code flow with PKCE.
-3. Public browser client; no client secret may be embedded in HidraWEB.
-4. Access token presented to HidraAPI as an HTTP `Authorization: Bearer <token>` header.
-5. Browser-held tokens remain in memory under the current backend-published policy.
-6. HidraAPI remains a stateless OAuth2 resource server and does not own the browser login session.
+1. Fetch `/api/v1/security/oidc`.
+2. Discover the issuer's OpenID configuration from `/.well-known/openid-configuration`.
+3. Generate cryptographically random PKCE verifier, state, and nonce values.
+4. Persist only the short-lived authorization transaction in `sessionStorage` so it can survive the IdP redirect.
+5. Redirect to the discovered authorization endpoint using Authorization Code + PKCE (`S256`).
+6. Receive the callback at the deployment-registered redirect URI.
+7. Require exact state matching and reject expired/missing callback transaction state.
+8. Re-fetch the backend OIDC contract and require issuer/client identity to remain unchanged during the transaction.
+9. Exchange the authorization code at the discovered token endpoint using the public client ID and PKCE verifier.
+10. Never send or embed a browser client secret.
+11. If an ID token is returned, require its nonce to match the generated transaction nonce.
+12. Validate the received access token through HidraAPI before committing the frontend session.
+13. Hold the bearer token in React/AuthProvider memory only.
+14. Remove the PKCE transaction from `sessionStorage` when the callback is consumed.
 
-HidraWEB must not add implicit flow, password grant, client-credentials login for browser users, local HidraAPI username/password login, or browser-persisted bearer-token storage unless the authoritative backend contract changes in a later accepted task.
+No implicit flow, password grant, browser client-credentials flow, or local HidraAPI username/password login is added for enterprise users.
 
-## Required repository configuration
+## Redirect URI deployment input
 
-For the repository-published OIDC contract to be complete, HidraAPI requires all of the following:
+HidraAPI does not publish the browser redirect URI because it is an external IdP registration/deployment value.
 
-- `authenticationMode` resolves to `jwt`;
-- `issuerUri` is configured;
-- `clientId` is configured.
+HidraWEB accepts the non-secret deployment input:
 
-The endpoint exposes this result through `repositoryConfigurationComplete`.
+```text
+VITE_HIDRA_OIDC_REDIRECT_URI
+```
 
-If `repositoryConfigurationComplete` is `false`, HidraWEB must fail closed for enterprise OIDC startup rather than invent missing IdP metadata.
+In JWT mode this value must exactly match an approved redirect URI registered for the external enterprise IdP client. HidraWEB does not manufacture a production redirect URI when this value is absent.
 
-The current default audience is `hidra-api` and the current default scopes are `openid,profile`, but HidraWEB must consume the runtime values returned by `/api/v1/security/oidc` rather than hard-code those defaults as enterprise truth.
+The application route used by the current integration is:
 
-## External IdP registration contract
+```text
+/auth/callback
+```
 
-`externalIdpRegistrationRequired = true` means the enterprise IdP registration is an external deployment prerequisite.
+The configured redirect URI must resolve to that route in the deployed application.
 
-The IdP registration must correspond to the runtime metadata returned by HidraAPI, including issuer/client identity, scopes, and API audience. Exact browser redirect URI(s), post-logout redirect URI(s), tenant/domain policy, MFA/conditional-access policy, and IdP vendor are not published by the current HidraAPI contract and must not be invented by HidraWEB.
+## Token storage and lifecycle
 
-Those deployment-specific values must be supplied by the approved enterprise IdP registration and production deployment design.
+The backend-published token-storage policy is `memory`.
 
-## JWT validation and authority contract
+HWEB-015-02 therefore keeps access tokens only inside the active `AuthProvider` process memory. Access tokens are not written to `localStorage`, `sessionStorage`, IndexedDB, source code, or Vite environment variables.
 
-HidraAPI validates JWTs as the resource server. Its JWT configuration supports issuer/JWK validation and an audience contract.
+The authorization-code transaction stored temporarily in `sessionStorage` contains only:
 
-Current authority mapping is backend-owned:
+- state;
+- nonce;
+- PKCE verifier;
+- issuer/client/redirect identifiers required to complete the same transaction;
+- return route;
+- transaction creation time.
+
+It contains no bearer access token or refresh token and is removed when consumed.
+
+## Refresh and renewal decision
+
+HidraAPI publishes no local refresh endpoint and the frozen repository contract does not publish an IdP refresh-token policy.
+
+HWEB-015-02 therefore does **not** persist or use refresh tokens, even if an IdP token response happens to include one. A returned refresh token is ignored.
+
+There is no silent iframe renewal, hidden refresh loop, refresh-token rotation, or automatic retry with a second credential.
+
+Re-authentication through the external IdP is the supported recovery path after expiry or authorization failure until a later authoritative contract explicitly adds another mechanism.
+
+## Expiry and unauthorized handling
+
+HidraWEB derives an expiry deadline from the JWT `exp` claim when available, falling back to the token response `expires_in` value.
+
+A token that is already expired or within the configured safety skew is rejected before session commit. For an active session, HidraWEB clears the bearer header and frontend session before the expiry boundary using a safety skew.
+
+Any HidraAPI HTTP 401 event also clears the current session. HidraWEB does not retry the failed request with stale credentials or manufacture a refresh flow.
+
+Backend HTTP 403 remains an authorization result and does not become a token-refresh signal.
+
+## Login UX boundary
+
+JWT mode no longer presents manual token-entry as the production login UI. `/login` starts enterprise OIDC sign-in and preserves the originally requested application route for post-callback navigation.
+
+The lower-level `authenticateJwt` transport adapter remains inside auth infrastructure for compatibility/testing, but feature code does not acquire or set bearer tokens directly.
+
+## Logout behavior
+
+HidraAPI disables application logout and does not own an authenticated HTTP session.
+
+HidraWEB always clears its in-memory bearer session locally first. If the authoritative `/api/v1/security/oidc` response supplied a `logoutUri`, HidraWEB then navigates to that exact URI.
+
+If no `logoutUri` is supplied, HidraWEB does not synthesize an IdP logout endpoint or post-logout parameters.
+
+## JWT validation and authorization boundary
+
+HidraAPI remains the cryptographic JWT resource-server validator. Browser-side JWT decoding is used only for non-authoritative presentation/expiry scheduling; it does not replace backend signature, issuer, audience, or authorization validation.
+
+Current backend authority mapping remains backend-owned:
 
 - principal claim default: `sub`;
 - roles claim default: `roles`, mapped with the configured role authority prefix (default `ROLE_`);
 - scope claim default: `scope`, mapped with `SCOPE_`.
 
-HidraWEB must not use decoded token roles/scopes as a replacement for the existing fail-closed frontend permission contract. Effective frontend authorization remains the intersection of:
+HidraWEB does not use decoded token roles/scopes as a replacement for the fail-closed frontend permission contract. Effective frontend authorization remains the intersection of:
 
 ```text
 GET /api/v1/security/permissions/routes
@@ -100,59 +159,49 @@ GET /api/v1/identity/me/permissions
 
 Backend authorization and HTTP 403 remain final authority.
 
-## Login flow boundary
-
-HidraAPI exposes no local application login endpoint and disables Spring form login.
-
-For the supported enterprise mode, HidraWEB shall authenticate through the approved external IdP using Authorization Code + PKCE. HWEB-015-02 will implement the concrete browser redirect/callback client behavior.
-
-The current manual JWT-token entry capability in HidraWEB is development/bootstrap infrastructure, not the accepted production enterprise login UX.
-
-## Logout boundary
-
-HidraAPI disables application logout and does not own an authenticated HTTP session.
-
-`logoutUri` is optional repository-published IdP metadata. If absent, HidraWEB must not synthesize an IdP logout endpoint. Exact logout and post-logout behavior is deferred to HWEB-015-02 and must follow the runtime IdP contract.
-
-## Token lifecycle boundary
-
-HidraAPI publishes no local refresh-token endpoint. Refresh/re-authentication behavior is therefore an IdP/browser-client concern.
-
-HWEB-015-01 does not define silent refresh, refresh-token persistence, iframe renewal, token rotation, idle timeout, or retry semantics. Those behaviors require the approved IdP capabilities and belong to HWEB-015-02.
-
-No access token, refresh token, authorization code, PKCE verifier, or client secret may be committed to source or embedded as a Vite build-time secret.
-
 ## Runtime mode compatibility
 
-HidraWEB currently recognizes `basic`, `jwt`, and `disabled` runtime modes because earlier development stages needed all three backend-compatible modes.
+HidraWEB still recognizes `basic`, `jwt`, and `disabled` runtime modes because bootstrap/development compatibility remains required.
 
-The HWEB-015-01 production freeze does not remove those compatibility paths. It establishes that only `jwt` + external OIDC/PKCE is supported for enterprise production deployment.
+Only `jwt` + external OIDC/PKCE is supported for enterprise production deployment.
 
-Removal or further isolation of bootstrap modes, if desired, is a later implementation concern and must not be folded into this contract-freeze task.
+## Multi-tab behavior
 
-## WebSocket authentication
+Because the authoritative browser storage policy is memory-only, HidraWEB does not copy bearer tokens between tabs through web storage or messaging channels. Each tab owns its own in-memory authenticated session.
+
+No token-sharing or persisted cross-tab session mechanism is invented in HWEB-015-02.
+
+## WebSocket authentication evidence gap
 
 The STOMP endpoint remains `/api/v1/realtime/ws`.
 
-Exact production WebSocket bearer propagation/handshake behavior is not defined by the `/api/v1/security/oidc` contract. HWEB-015-01 therefore does not invent a WebSocket token transport rule. Any production WebSocket authentication hardening must be based on separately verified backend handshake behavior.
+The audited HidraAPI source does not publish an authoritative browser STOMP/WebSocket bearer handshake contract, and HidraWEB currently has no accepted production STOMP authentication adapter to bind to this OIDC session.
 
-## HWEB-015-01 frozen decision summary
+HWEB-015-02 therefore does not invent query-string tokens, cookie authentication, subprotocol credentials, or STOMP `Authorization` behavior. Production realtime bearer propagation remains blocked on a verified backend handshake contract.
+
+## HWEB-015-02 decision summary
 
 ```text
 Enterprise production authentication : external OIDC IdP + JWT
-Browser authorization flow            : authorization_code_pkce
+Browser authorization flow            : authorization_code_pkce / S256
 Bootstrap metadata endpoint            : GET /api/v1/security/oidc
-Browser client secret                  : forbidden / not applicable
+Issuer discovery                       : standard OIDC discovery from backend-published issuer
+Browser redirect URI                   : VITE_HIDRA_OIDC_REDIRECT_URI deployment input
+Callback route                         : /auth/callback
+Browser client secret                  : forbidden / not sent
 API credential                         : Bearer access token
-Browser token storage                  : memory
-API session model                      : stateless
+Access-token storage                   : memory only
+PKCE transaction storage               : short-lived sessionStorage; no tokens
+Refresh-token persistence/use          : none
+Expiry handling                        : fail closed / re-authenticate
+HTTP 401 handling                      : clear session / re-authenticate
+HTTP 403 handling                      : backend authorization result; no refresh
 Local HidraAPI login endpoint          : none
 Local HidraAPI logout endpoint         : none
 Local HidraAPI refresh endpoint        : none evidenced
-IdP registration                      : required externally
-IdP vendor / tenant                    : not frozen by repository evidence
-Redirect/logout redirect URIs          : deployment-specific; not invented
+IdP logout                             : exact backend-published logoutUri only, when present
 Frontend effective authorization       : route descriptors ∩ /identity/me/permissions
 Backend authorization                  : final authority
-Next implementation task               : HWEB-015-02
+WebSocket bearer handshake             : not invented; backend evidence gap remains
+Next task                              : HWEB-015-03
 ```
