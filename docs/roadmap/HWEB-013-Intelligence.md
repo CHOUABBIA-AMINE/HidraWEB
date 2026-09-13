@@ -1,17 +1,19 @@
 # HWEB-013 — Intelligence
 
-Status: HWEB-013-02 COMPLETE / HWEB-013-03 NEXT
+Status: HWEB-013-03 COMPLETE / HWEB-013-04 NEXT
 
 ## Accepted starting point
 
 ```text
-HidraWEB verified main       : e315610b93f48915b1423c78b487941651191f77
-Final HWEB-013-01 CI         : 34746275714 — SUCCESS
+HidraWEB verified main       : bbb913cb5494cf62fac68eb0784fabdeab14158f
+HWEB-013-03 product PR       : #60
+HWEB-013-03 product CI       : 34748226645 — SUCCESS
+HWEB-013-03 post-merge CI    : 34748378201 — SUCCESS
 HidraAPI audited main        : 0c8643c17b2648e8be85c658854f57ea0faab765
 Backend owners               : risk, analytics, simulation, reporting
-Current task                 : HWEB-013-02 — risk views COMPLETE
-Next task                    : HWEB-013-03 — analytics datasets/insights/metrics
-Later UI tasks               : HWEB-013-04 through HWEB-013-07 — NOT STARTED
+Current task                 : HWEB-013-03 — analytics datasets/insights/metrics COMPLETE
+Next task                    : HWEB-013-04 — simulation scenario/run/result workspaces
+Later UI tasks               : HWEB-013-05 through HWEB-013-07 — NOT STARTED
 ```
 
 ## Intelligence ownership rule
@@ -35,7 +37,7 @@ POST /api/v1/workbench/{module}/{resource}/search
 
 HidraWEB must discover resource names from `GET /api/v1/workbench/{module}/resources`. It must not build a competing hard-coded catalog from Java class names.
 
-The backend contains substantial JPA-backed intelligence persistence. Verified examples include risk assessment/register/rating/threat/control/scenario/exposure/review/matrix resources and analytics dataset/catalog/access/lineage resources. Later workspace tasks must discover the exact runtime descriptors before issuing list/detail/search reads.
+The backend contains substantial JPA-backed intelligence persistence. Verified examples include risk assessment/register/rating/threat/control/scenario/exposure/review/matrix resources and analytics dataset/insight/metric-definition/metric-evaluation/catalog/access/lineage resources. Workspace tasks must discover the exact runtime descriptors before issuing list/detail/search reads.
 
 ## Dedicated mutation contracts
 
@@ -74,7 +76,7 @@ CreateRiskRegisterRequest
 Verified response classes:
 
 ```text
-String                         // add risk evidence
+String
 RiskAssessmentResponse
 RiskRegisterResponse
 ```
@@ -96,6 +98,15 @@ POST /api/v1/analytics/datasets
 POST /api/v1/analytics/insights
 POST /api/v1/analytics/projections/runs
 POST /api/v1/analytics/metrics/evaluations
+```
+
+Legacy aliases also exist:
+
+```text
+POST /api/v1/analytics/create-analytics-dataset
+POST /api/v1/analytics/create-analytics-insight
+POST /api/v1/analytics/run-projection
+POST /api/v1/analytics/run-metric-evaluation
 ```
 
 Verified request classes:
@@ -229,11 +240,13 @@ No intelligence permission codes are guessed in feature code.
 
 The audited HidraAPI main exposes the four dedicated intelligence controllers and their request/response classes.
 
-HWEB-013-02 adds a deterministic risk-only OpenAPI slice derived from accepted HidraAPI artifact `10307772022`, digest `sha256:884ceb8d62bafd5e885287a18eb847356cffc21e8948cc1e937ec02b780ff0ea`, for audited backend SHA `0c8643c17b2648e8be85c658854f57ea0faab765`. The slice contains only the published risk paths and their referenced request/response schemas and is generated in CI through `orval.risk.config.ts`.
+HWEB-013-02 added a deterministic risk-only OpenAPI slice derived from accepted HidraAPI artifact `10307772022`, digest `sha256:884ceb8d62bafd5e885287a18eb847356cffc21e8948cc1e937ec02b780ff0ea`, for audited backend SHA `0c8643c17b2648e8be85c658854f57ea0faab765`. The risk slice is generated in CI through `orval.risk.config.ts`.
 
-HidraWEB still has no dedicated analytics, simulation, or reporting OpenAPI slice. Those later tasks must import or generate their exact deterministic contracts before calling dedicated mutations.
+HWEB-013-03 adds a deterministic analytics-only OpenAPI slice from that same accepted artifact and audited backend SHA. It contains the published analytics capability and dedicated POST paths plus their referenced request/response schemas, and is generated in CI through `orval.analytics.config.ts`.
 
-The generic workbench client remains the authoritative typed read mechanism for HWEB-013-02 risk list/detail views.
+HidraWEB still has no dedicated simulation or reporting OpenAPI slice. HWEB-013-04 and HWEB-013-05 must import or generate their exact deterministic contracts before calling dedicated mutations.
+
+The generic workbench client remains the authoritative typed read mechanism for the HWEB-013-02 risk and HWEB-013-03 analytics list/detail views.
 
 ## Cross-module composition constraints
 
@@ -263,27 +276,31 @@ No `/intelligence` UI, feature module, process component, route, chart, form, mu
 
 ### HWEB-013-02 — risk views — COMPLETE
 
-Implemented `/intelligence/risk` with:
+Implemented `/intelligence/risk` with runtime discovery of risk workbench descriptors, risk-register and risk-assessment list/detail reads, fail-closed generic workbench authorization, TanStack Query server-state ownership, status-as-evidence semantics, capability-gated navigation, deterministic risk OpenAPI generation, and E2E proof. No dedicated risk mutation or inferred lifecycle action is exposed.
 
-- runtime discovery of risk workbench descriptors rather than hard-coded resource endpoint names;
-- risk-register and risk-assessment list views identified from backend Java type metadata and queried through the discovered resource names;
-- generic workbench detail reads for explicitly selected records;
-- backend status values rendered as evidence only;
-- no inferred approve, activate, retire, cancel, publish, or other lifecycle controls;
+### HWEB-013-03 — analytics datasets/insights/metrics — COMPLETE
+
+Implemented `/intelligence/analytics` with:
+
+- runtime analytics workbench discovery rather than hard-coded resource endpoint names;
+- dataset views identified by `AnalyticsDatasetJpaEntity` metadata and queried through the discovered resource name;
+- insight views identified by `AnalyticsInsightJpaEntity` metadata and queried through the discovered resource name;
+- metric-definition views identified by `MetricDefinitionJpaEntity` metadata and queried through the discovered resource name;
+- metric-evaluation-run views identified by `MetricEvaluationRunJpaEntity` metadata and queried through the discovered resource name;
+- generic workbench detail reads for explicitly selected analytics records;
+- analytics status/quality/run values and metric `active` state rendered as evidence only, with no inferred apply, approve, publish, rerun, activate, cancel, or other lifecycle action;
 - exact generic workbench list/detail route-permission descriptors intersected with effective grants;
 - fail-closed behavior when route metadata or effective grants are absent, with backend HTTP 403 remaining final authority;
-- TanStack Query ownership of resource/list/detail server state and local React state limited to tab/detail selection;
-- an accepted risk-only OpenAPI slice generated by Orval in CI for deterministic risk mutation DTO evidence, while no dedicated risk mutation is invoked by this read-only task;
-- enabled capability-gated shell navigation for the risk workspace;
-- E2E coverage proving runtime discovery, status-as-evidence behavior, absence of invented lifecycle buttons, and fail-closed access.
+- TanStack Query ownership of runtime resource/list/detail server state and local React state limited to tab/detail selection;
+- deterministic analytics-only OpenAPI generation from accepted HidraAPI artifact `10307772022` through `orval.analytics.config.ts`;
+- exact analytics dedicated POST DTO contracts generated for deterministic evidence while HWEB-013-03 invokes no dataset creation, insight creation, projection run, or metric-evaluation mutation;
+- preservation of operational module ownership: analytics-derived records never become authority to write telemetry, monitoring, topology, planning, custody, assets, integrity, incidents, HSE, workflow, party, identity, organization, or other source-truth aggregates;
+- enabled capability-gated shell navigation for the analytics workspace;
+- E2E coverage proving runtime discovery, datasets/insights/metrics rendering, absence of invented action controls, and fail-closed access.
 
-### HWEB-013-03 — analytics datasets/insights/metrics — NEXT
+### HWEB-013-04 — simulation scenario/run/result workspaces — NEXT
 
-Must preserve analytics ownership of derived data and projections while operational modules retain source truth. It must begin with runtime analytics workbench discovery and an accepted deterministic analytics OpenAPI slice before any dedicated mutation is used.
-
-### HWEB-013-04 — simulation scenario/run/result workspaces — NOT STARTED
-
-Must distinguish simulation-owned models/scenarios/runs/results/recommendations from operational changes.
+Must distinguish simulation-owned models/scenarios/runs/results/recommendations from operational changes. It must begin with runtime simulation workbench discovery and an accepted deterministic simulation OpenAPI slice before any dedicated mutation is used.
 
 ### HWEB-013-05 — report definition/run/export workspaces — NOT STARTED
 
@@ -329,8 +346,33 @@ State ownership                 : TanStack Query owns workbench server state; lo
 Lifecycle semantics             : status values display-only; no approve/activate/retire/cancel actions invented
 OpenAPI regeneration status     : risk slice generated by orval.risk.config.ts and HidraWEB CI
 Tests added                     : tests/e2e/risk-workspace.spec.ts
-Known backend gaps              : no exact risk lifecycle action routes beyond published create/evidence operations; therefore no lifecycle controls exposed
-Verification                    : exact-head CI required after this documentation commit before merge
+Final product merge             : 33e4a6f232584f1c2662b8327f7399de0f49de46
+Final product CI                : 34747359160 — SUCCESS
 ```
 
-HWEB-013-03 must not begin until HWEB-013-02 exact-head and post-merge verification are accepted.
+## HWEB-013-03 completion record
+
+```text
+Backend source commit / branch : 0c8643c17b2648e8be85c658854f57ea0faab765 / main
+Frontend base                   : 33e4a6f232584f1c2662b8327f7399de0f49de46 / main
+Product branch                  : hweb-013-03-analytics-views
+Product head                    : 86cc6ac61fbabab5e9003217a5c9ce22bb417f64
+Product PR                      : #60
+Product exact-head CI           : 34748226645 — SUCCESS
+Product merge                   : bbb913cb5494cf62fac68eb0784fabdeab14158f
+Post-merge CI                   : 34748378201 — SUCCESS
+Accepted OpenAPI artifact       : 10307772022 / sha256:884ceb8d62bafd5e885287a18eb847356cffc21e8948cc1e937ec02b780ff0ea
+Endpoints used                  : GET analytics workbench resources; GET discovered dataset/insight/metric-definition/metric-evaluation lists; GET selected discovered analytics record detail
+Dedicated analytics mutations   : none invoked by HWEB-013-03; exact dataset/insight/projection/metric-evaluation POST contracts generated for deterministic evidence only
+DTO evidence                    : CreateAnalyticsDatasetRequest, CreateAnalyticsInsightRequest, RunProjectionRequest, RunMetricEvaluationRequest, AnalyticsDatasetResponse, AnalyticsInsightResponse, AnalyticsProjectionRunResponse, MetricEvaluationRunResponse
+Permissions used                : exact generic workbench list/detail route descriptors intersected with effective grants; backend HTTP 403 final authority
+Frontend route                  : /intelligence/analytics
+State ownership                 : TanStack Query owns workbench server state; local state limited to tab/detail selection
+Ownership semantics             : analytics owns derived evidence; operational source truth remains with operational/master modules
+Lifecycle semantics             : backend statuses/active flags display-only; no apply/approve/publish/rerun/activate/cancel controls invented
+OpenAPI regeneration status     : analytics slice generated by orval.analytics.config.ts and HidraWEB CI
+Tests added                     : tests/e2e/analytics-workspace.spec.ts
+Docs verification               : exact-head CI required on this docs branch before guarded merge; final-main CI required afterward
+```
+
+HWEB-013-04 must not begin until HWEB-013-03 product, post-merge, documentation, and final-main verification are accepted.
