@@ -11,6 +11,7 @@ import { ConfigurationAdministrationPage } from '@/features/configuration';
 import { IdentityAdministrationPage } from '@/features/context/IdentityAdministrationPage';
 import { OrganizationAdministrationPage } from '@/features/context/OrganizationAdministrationPage';
 import { CustodyWorkspacePage } from '@/features/custody';
+import { DocumentsAdministrationPage } from '@/features/documents';
 import { IncidentWorkspacePage } from '@/features/incident/IncidentWorkspacePage';
 import { PermissionBootstrapBoundary } from '@/features/permissions/PermissionBootstrapBoundary';
 import { PlanningWorkspacePage } from '@/features/planning/PlanningWorkspacePage';
@@ -56,6 +57,7 @@ export const router = createBrowserRouter([
       { path: 'administration/users', element: <IdentityAdministrationPage /> },
       { path: 'administration/configuration', element: <ConfigurationAdministrationPage /> },
       { path: 'administration/audit', element: <AuditWorkspacePage /> },
+      { path: 'administration/documents', element: <DocumentsAdministrationPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

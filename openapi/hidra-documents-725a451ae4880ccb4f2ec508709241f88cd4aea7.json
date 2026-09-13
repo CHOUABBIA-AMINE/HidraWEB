@@ -1,0 +1,115 @@
+{
+  "components": {
+    "schemas": {
+      "DocumentResponse": {
+        "properties": {
+          "classificationId": {"type": "string"},
+          "code": {"type": "string"},
+          "confidentialityLevel": {"format": "int32", "type": "integer"},
+          "createdAt": {"format": "date-time", "type": "string"},
+          "currentVersionId": {"type": "string"},
+          "documentTypeId": {"type": "string"},
+          "id": {"type": "string"},
+          "ownerModule": {"type": "string"},
+          "ownerTargetId": {"type": "string"},
+          "status": {"enum": ["DRAFT", "ACTIVE", "UNDER_REVIEW", "APPROVED", "OBSOLETE", "ARCHIVED", "REJECTED", "QUARANTINED", "DELETED_LOGICAL"], "type": "string"},
+          "titleFr": {"type": "string"}
+        },
+        "type": "object"
+      },
+      "DocumentTargetLinkResponse": {
+        "properties": {
+          "active": {"type": "boolean"},
+          "documentId": {"type": "string"},
+          "documentVersionId": {"type": "string"},
+          "id": {"type": "string"},
+          "linkRoleId": {"type": "string"},
+          "linkedAt": {"format": "date-time", "type": "string"},
+          "primaryLink": {"type": "boolean"},
+          "targetId": {"type": "string"},
+          "targetModule": {"type": "string"},
+          "targetTypeCode": {"type": "string"}
+        },
+        "type": "object"
+      },
+      "DocumentVersionResponse": {
+        "properties": {
+          "checksumValue": {"type": "string"},
+          "documentId": {"type": "string"},
+          "fileSizeBytes": {"format": "int64", "type": "integer"},
+          "id": {"type": "string"},
+          "mimeType": {"type": "string"},
+          "originalFilename": {"type": "string"},
+          "uploadedAt": {"format": "date-time", "type": "string"},
+          "versionLabel": {"type": "string"},
+          "versionNumber": {"format": "int32", "type": "integer"},
+          "versionStatus": {"enum": ["DRAFT", "SUBMITTED", "APPROVED", "REJECTED", "CURRENT", "SUPERSEDED", "ARCHIVED"], "type": "string"}
+        },
+        "type": "object"
+      },
+      "LinkDocumentToTargetRequest": {
+        "properties": {
+          "documentId": {"type": "string"},
+          "documentVersionId": {"type": "string"},
+          "linkRoleId": {"type": "string"},
+          "linkedByActorId": {"type": "string"},
+          "primaryLink": {"type": "boolean"},
+          "targetCodeSnapshot": {"type": "string"},
+          "targetId": {"type": "string"},
+          "targetLabelSnapshot": {"type": "string"},
+          "targetModule": {"type": "string"},
+          "targetTypeCode": {"type": "string"}
+        },
+        "type": "object"
+      },
+      "RegisterDocumentRequest": {
+        "properties": {
+          "classificationId": {"type": "string"},
+          "code": {"type": "string"},
+          "confidentialityLevel": {"format": "int32", "type": "integer"},
+          "createdByActorId": {"type": "string"},
+          "createdByDisplayNameSnapshot": {"type": "string"},
+          "documentCategoryId": {"type": "string"},
+          "documentTypeId": {"type": "string"},
+          "ownerModule": {"type": "string"},
+          "ownerTargetCodeSnapshot": {"type": "string"},
+          "ownerTargetId": {"type": "string"},
+          "ownerTargetLabelSnapshot": {"type": "string"},
+          "ownerTargetTypeCode": {"type": "string"},
+          "titleAr": {"type": "string"},
+          "titleEn": {"type": "string"},
+          "titleFr": {"type": "string"}
+        },
+        "type": "object"
+      },
+      "UploadDocumentBinaryVersionRequest": {
+        "properties": {
+          "description": {"type": "string"},
+          "documentDate": {"format": "date", "type": "string"},
+          "documentId": {"minLength": 1, "type": "string"},
+          "effectiveFrom": {"format": "date", "type": "string"},
+          "effectiveTo": {"format": "date", "type": "string"},
+          "languageCode": {"type": "string"},
+          "titleAr": {"type": "string"},
+          "titleEn": {"type": "string"},
+          "titleFr": {"type": "string"},
+          "uploadedByActorId": {"type": "string"},
+          "uploadedByDisplayNameSnapshot": {"type": "string"},
+          "versionLabel": {"type": "string"},
+          "versionNumber": {"format": "int32", "type": "integer"}
+        },
+        "required": ["documentId"],
+        "type": "object"
+      }
+    }
+  },
+  "info": {"title": "HidraAPI Documents HWEB-014-03", "version": "725a451ae4880ccb4f2ec508709241f88cd4aea7"},
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/documents/capabilities": {"get": {"operationId": "capabilities_18", "responses": {"200": {"content": {"*/*": {"schema": {"additionalProperties": {}, "type": "object"}}}, "description": "OK"}}, "tags": ["spring-documents-controller"]}},
+    "/api/v1/documents/document-versions/upload": {"post": {"operationId": "uploadDocumentVersionContent", "requestBody": {"content": {"multipart/form-data": {"schema": {"properties": {"file": {"format": "binary", "type": "string"}, "metadata": {"$ref": "#/components/schemas/UploadDocumentBinaryVersionRequest"}}, "required": ["file", "metadata"], "type": "object"}}}}, "responses": {"200": {"content": {"*/*": {"schema": {"$ref": "#/components/schemas/DocumentVersionResponse"}}}, "description": "OK"}}, "tags": ["spring-documents-controller"]}},
+    "/api/v1/documents/document-versions/{versionId}/content": {"get": {"operationId": "downloadDocumentVersionContent", "parameters": [{"in": "path", "name": "versionId", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"content": {"*/*": {"schema": {"format": "binary", "type": "string"}}}, "description": "OK"}}, "tags": ["spring-documents-controller"]}},
+    "/api/v1/documents/documents": {"post": {"operationId": "registerDocument_1", "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/RegisterDocumentRequest"}}}, "required": true}, "responses": {"200": {"content": {"*/*": {"schema": {"$ref": "#/components/schemas/DocumentResponse"}}}, "description": "OK"}}, "tags": ["spring-documents-controller"]}},
+    "/api/v1/documents/target-links": {"post": {"operationId": "linkDocumentToTarget", "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/LinkDocumentToTargetRequest"}}}, "required": true}, "responses": {"200": {"content": {"*/*": {"schema": {"$ref": "#/components/schemas/DocumentTargetLinkResponse"}}}, "description": "OK"}}, "tags": ["spring-documents-controller"]}}
+  }
+}
