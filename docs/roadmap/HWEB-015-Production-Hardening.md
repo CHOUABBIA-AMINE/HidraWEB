@@ -1,15 +1,15 @@
 # HWEB-015 — Production Hardening
 
-Status: HWEB-015-04 COMPLETE / HWEB-015-05 NEXT
+Status: HWEB-015-05 COMPLETE / HWEB-015-06 NEXT
 
 ## Accepted starting point
 
 ```text
-HidraWEB verified main       : 9b20714ae8250db649799dd39b1e4ff8a1b1b86b
-HWEB-015-03 exact-main CI    : 34775419556 — SUCCESS
+HidraWEB verified main       : 97876cab44dbb956ab5c2a26468eb8f7fb047abb
+HWEB-015-04 exact-main CI    : 34776455174 — SUCCESS
 HidraAPI audited main        : 725a451ae4880ccb4f2ec508709241f88cd4aea7
-Current completed task       : HWEB-015-04 — CSP, TLS, secure headers and static asset cache policy
-Next task                    : HWEB-015-05 — observability, error reporting and correlation IDs
+Current completed task       : HWEB-015-05 — frontend observability, structured technical error reporting and correlation IDs
+Next task                    : HWEB-015-06 — WCAG 2.2 AA audit including keyboard-only control-room workflows
 ```
 
 ## HWEB-015-01 — freeze supported enterprise authentication mode and IdP contract — COMPLETE
@@ -205,17 +205,7 @@ with the exact deployment-owned `HIDRA_OIDC_ORIGIN` substitution before Nginx st
 
 ### Tests
 
-`src/app/bootstrap/reverseProxyConfig.test.ts` now verifies:
-
-- existing API/SSE/WebSocket routing remains intact;
-- Vite `/assets/` receives one-year immutable caching;
-- `/index.html` uses revalidation (`no-cache`);
-- the checked-in security-header template is required;
-- HSTS, CSP, `frame-ancestors`, exact IdP `connect-src`, `upgrade-insecure-requests`, MIME sniffing protection, frame denial, referrer policy, and permissions policy are present.
-
-### Explicitly deferred to HWEB-015-05
-
-HWEB-015-04 does not implement frontend observability, structured error reporting, correlation-ID capture/propagation, telemetry export, logging sinks, or monitoring dashboards. Those belong to HWEB-015-05.
+`src/app/bootstrap/reverseProxyConfig.test.ts` verifies the existing API/SSE/WebSocket routing, immutable Vite asset caching, application-shell revalidation, and the checked-in security-header policy.
 
 ### Completion record
 
@@ -232,7 +222,137 @@ Known deployment inputs         : HIDRA_API_UPSTREAM; exact VITE_HIDRA_OIDC_REDI
 Product branch                  : hweb-015-04-browser-security-policy
 Product head                    : 3daf5dd462cc1ea22e9054c0e3917804adbf3474
 Product branch CI               : 34775803181 — SUCCESS
+PR / final head                 : #78 / 25aaebba6cd33c7cdffa88b92fe95e426e303a82
+Roadmap-inclusive CI            : 34776041879 — SUCCESS
+Independent PR CI               : 34776236857 — SUCCESS
+Merge SHA                       : 97876cab44dbb956ab5c2a26468eb8f7fb047abb
+Exact-main CI                   : 34776455174 — SUCCESS
+```
+
+## HWEB-015-05 — frontend observability, structured technical error reporting and correlation IDs — COMPLETE
+
+### Scope
+
+HWEB-015-05 hardens browser-side diagnostics only. It does not start HWEB-015-06 accessibility auditing or any later production-hardening work.
+
+### Verified HidraAPI diagnostic contract
+
+HidraAPI was re-audited at:
+
+```text
+725a451ae4880ccb4f2ec508709241f88cd4aea7 / main
+```
+
+`HidraRequestContextFilter` proves the implemented HTTP contract:
+
+```text
+X-Correlation-Id
+X-Request-Id
+```
+
+For each inbound request the backend preserves a supplied value or generates a UUID, writes both identifiers into logging/MDC context, and echoes both headers on the response. `HidraGlobalExceptionHandler` additionally publishes `correlationId` and `requestId` on globally handled ProblemDetail responses.
+
+No browser trace/span header contract was found, so HWEB-015-05 does not invent one.
+
+### Central HTTP diagnostic propagation
+
+The central Axios transport now uses the exact backend header names. For every HidraAPI request it preserves caller-provided diagnostic IDs or generates independent UUIDs for correlation and request identity.
+
+`HidraApiError` diagnostic precedence is:
+
+```text
+ProblemDetail body
+  -> echoed response header
+  -> originating request header
+```
+
+The final fallback preserves diagnostic support references even for network failures where no HTTP response exists.
+
+### Structured technical-error reporting
+
+`src/app/observability/technicalErrorReporter.ts` defines a constrained, vendor-neutral report with:
+
+```text
+schemaVersion
+eventId
+occurredAt
+source
+message
+errorName
+route
+correlationId
+requestId
+http.method
+http.path
+http.status
+http.code
+```
+
+Sources are `api`, `react`, `window`, and `unhandled-rejection`.
+
+Browser routes and API URLs are normalized to pathname-only values. Query strings and fragments are excluded. The reporter accepts no request/response body, authorization header, token, browser-storage content, OIDC transaction secret, user identity, role, or permission field.
+
+### Reporting policy
+
+The Axios response interceptor automatically reports only technical transport/server failures:
+
+```text
+network/no-response failure
+HTTP 5xx
+```
+
+Expected application outcomes such as `400`, `401`, `403`, `404`, `409`, and `422` continue through existing application/auth/business handling and are not promoted to automatic technical-error noise.
+
+The React application error boundary reports uncaught render failures, replaces raw exception detail with a safe generic fallback, and gives the operator a generated support event reference.
+
+Global browser `error` and `unhandledrejection` events use stable generic messages plus exception type only; arbitrary runtime exception messages are not copied into the structured report.
+
+### Sink boundary
+
+No repository-approved remote browser telemetry vendor or HidraAPI technical-error ingestion endpoint exists. HWEB-015-05 therefore does not invent one.
+
+Reports are emitted through the local browser event:
+
+```text
+hidra:technical-error
+```
+
+and an exported configurable sink. Without an approved sink, the structured event is logged locally to the browser console.
+
+A future remote sink requires explicit contract/privacy/authentication review and may require a reviewed HWEB-015-04 CSP `connect-src` change.
+
+### Realtime boundary
+
+The HWEB-015-02 WebSocket/STOMP authentication evidence gap remains unchanged. HWEB-015-05 does not invent WebSocket diagnostic headers, STOMP correlation semantics, or distributed trace identifiers.
+
+### Artifacts and tests
+
+- `src/api/client/diagnosticHeaders.ts` centralizes exact header names and case-insensitive diagnostic-header reads.
+- `src/api/client/hidraAxios.ts` preserves/generates correlation and request IDs and reports network/5xx technical failures.
+- `src/api/errors/HidraApiError.ts` retains body/response/request diagnostic identifiers.
+- `src/app/observability/technicalErrorReporter.ts` implements the safe structured reporter and global browser hooks.
+- `src/app/providers/AppErrorBoundary.tsx` reports render failures without exposing raw exception text.
+- `src/main.tsx` installs global technical-error reporting.
+- `docs/deployment/Frontend-Observability.md` records the production diagnostic contract and privacy boundary.
+- Tests cover request ID generation/preservation, diagnostic precedence, network fallback IDs, safe URL normalization, 5xx reporting, global browser failures, and render-boundary reporting.
+
+### Completion record
+
+```text
+Backend source commit / branch : 725a451ae4880ccb4f2ec508709241f88cd4aea7 / main
+Endpoints and DTOs used         : existing HTTP responses/ProblemDetail only; no new endpoint or DTO
+Headers used                    : X-Correlation-Id; X-Request-Id
+Permissions used                : none introduced or changed
+Frontend routes created/changed : none
+State ownership                 : no persistent application state; reporter sink/listeners are process-local only
+Error states                    : network/no-response and HTTP 5xx are technical reports; existing 4xx behavior remains authoritative
+Tests added/changed             : src/api/client/hidraAxios.test.ts; src/api/errors/HidraApiError.test.ts; src/app/observability/technicalErrorReporter.test.ts; src/app/providers/AppErrorBoundary.test.tsx
+OpenAPI regeneration status     : no API contract changed; all deterministic generators passed product-head CI
+Known integration gap           : no approved remote browser telemetry ingestion endpoint/vendor; no browser trace/span contract; realtime auth/diagnostic semantics remain unproven
+Product branch                  : hweb-015-05-observability-correlation
+Product head                    : 043e401cee4473dc8e0b0070adfb49da0b498924
+Product branch CI               : 34777158465 — SUCCESS
 Final verification              : roadmap-inclusive exact-head CI, independent PR CI, guarded merge, exact merge-SHA main CI required
 ```
 
-HWEB-015-05 must not begin until the roadmap-inclusive HWEB-015-04 head passes full CI, its exact PR head is independently verified, the guarded merge succeeds, and exact merge-SHA `main` CI is accepted.
+HWEB-015-06 must not begin until the roadmap-inclusive HWEB-015-05 head passes full CI, its exact PR head is independently verified, the guarded merge succeeds, and exact merge-SHA `main` CI is accepted.
