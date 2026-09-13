@@ -1,6 +1,6 @@
 # HWEB-012 — Metering and Custody
 
-Status: HWEB-012-05 COMPLETE / HWEB-012-06 NEXT
+Status: HWEB-012 COMPLETE / HWEB-013 NEXT
 
 ## Accepted baseline
 
@@ -146,9 +146,10 @@ Runtime-discovered resources used by completed HWEB-012 tasks:
 - HWEB-012-02: `CustodyMeasurementPeriodJpaEntity`, `CustodyAgreementJpaEntity`, `CustodyTransferPointJpaEntity`;
 - HWEB-012-03: `CustodyTransferTicketJpaEntity`, `CustodyBatchJpaEntity`, `CustodyQuantityCalculationJpaEntity` plus the HWEB-012-02 references;
 - HWEB-012-04: `CustodyReconciliationJpaEntity` and `CustodyDiscrepancyJpaEntity`;
-- HWEB-012-05: `CustodyTransferPointJpaEntity`, `CustodyMeasurementSnapshotJpaEntity`, and `CustodyAgreementPartyJpaEntity` through the custody workbench only.
+- HWEB-012-05: `CustodyTransferPointJpaEntity`, `CustodyMeasurementSnapshotJpaEntity`, and `CustodyAgreementPartyJpaEntity` through the custody workbench only;
+- HWEB-012-06: runtime-discovered party `PartyJpaEntity` metadata plus a direct party detail read only for the explicit `partyId` published by a selected custody agreement-party record.
 
-No completed HWEB-012 task hard-codes workbench resource names or invents a custody catalog.
+No completed HWEB-012 task hard-codes workbench resource names or invents a custody or party catalog.
 
 ## Cross-module evidence
 
@@ -196,7 +197,7 @@ POST /api/v1/party/parties
 POST /api/v1/party/roles/assignments
 ```
 
-`PartyResponse` exposes `id`, `code`, `legalName`, `tradeName`, `shortName`, `countryCode`, `status`, and `primaryRoleCodeSnapshot`. HWEB-012-05 displays neutral `partyId` plus custody-owned `partyCodeSnapshot`, `partyNameSnapshot`, `partyRoleCodeSnapshot`, and ownership evidence only. It performs no party collection scan or mutation. Any conservative party-master enrichment for an explicit `partyId` remains HWEB-012-06 scope.
+`PartyResponse` exposes `id`, `code`, `legalName`, `tradeName`, `shortName`, `countryCode`, `status`, and `primaryRoleCodeSnapshot`. HWEB-012-05 displays neutral `partyId` plus custody-owned `partyCodeSnapshot`, `partyNameSnapshot`, `partyRoleCodeSnapshot`, and ownership evidence. HWEB-012-06 may additionally display authoritative party-master detail only after an explicit custody `partyId` is known, using runtime-discovered party workbench metadata plus a direct detail read for that same ID. It performs no party collection list/search, creates no party, assigns no role, and does not create a competing party workspace.
 
 ### Workflow / actor references
 
@@ -216,7 +217,7 @@ and intersect it with effective grants from:
 GET /api/v1/identity/me/permissions
 ```
 
-No custody or party permission code is guessed in feature code. HidraAPI remains final authority; HTTP 403 remains authoritative even when frontend metadata appears permissive.
+No custody or party permission code is guessed in feature code. HidraAPI remains final authority; HTTP 403 remains authoritative even when frontend metadata appears permissive. HWEB-012-06 disables automatic retry for a party-detail HTTP 403 so the backend denial remains final and is not repeatedly retried by the client.
 
 ## Task implications
 
@@ -248,9 +249,47 @@ Implemented a local `/custody` `Reference context` tab at the custody process bo
 - TanStack Query owning server state and React local state limited to tab/detail selection;
 - no new dedicated custody endpoint or OpenAPI slice because the task uses the existing authoritative generic workbench read contract only.
 
-### HWEB-012-06 — conservative party scope — NEXT
+### HWEB-012-06 — conservative party scope — COMPLETE
 
-Party remains master-data owner. The custody process may display party-master context only for an explicit custody `partyId` where an authoritative read is evidenced. It must not scan the party collection to infer associations, create a competing party workspace, or duplicate party mutations.
+Implemented conservative party-master enrichment inside the existing custody reference context with:
+
+- enrichment triggered only after a selected custody agreement-party detail publishes a non-empty explicit `partyId`;
+- runtime discovery of the authoritative party `PartyJpaEntity` workbench descriptor;
+- one direct party detail read using that exact explicit `partyId`;
+- custody-owned snapshots retained alongside party-master detail rather than replaced or reinterpreted;
+- no party collection list or search used to infer associations;
+- no party create, role assignment, update, delete, or other party mutation behavior;
+- no competing party workspace or duplicated party lifecycle/state ownership;
+- exact generic workbench route-permission checks intersected with effective grants;
+- backend HTTP 403 rendered as authoritative and not automatically retried;
+- TanStack Query owning the party resource/detail server state;
+- no dedicated party OpenAPI slice change because the authoritative generic workbench read contract is reused.
+
+HWEB-012 now satisfies its exit condition: custody operations remain under one process area, cross-module context is reference-based, and party ownership remains conservative and authoritative.
+
+## HWEB-012-06 verification evidence
+
+```text
+Backend source commit / branch : 0c8643c17b2648e8be85c658854f57ea0faab765 / main
+Functional backend merge       : 2e6f93c14e330c8cc839a5de75ecc7b893f9872c
+Accepted OpenAPI artifact       : 10307945855 / sha256:20b15395d1b2feec853167e88b2b6357650f51c03fb7811ffe60fd1362544c7f
+Endpoints used                  : GET workbench party resources metadata; GET workbench party detail by explicit custody partyId; no party list/search/mutation
+Permissions used                : exact generic workbench list/detail route descriptors intersected with effective grants; backend HTTP 403 final authority
+Frontend routes changed         : no new shell route; /custody Reference context retained with embedded Party master context
+State ownership                 : TanStack Query owns party resource/detail server state; no frontend party lifecycle state
+Party ownership                 : Party remains master-data owner; custody snapshots remain custody evidence; enrichment is explicit-ID-only
+Collection-scan rule            : zero party list/search calls used to infer associations
+Mutation rule                   : no party create, role assignment, update, delete, or competing party workspace
+Tests extended                  : tests/e2e/custody-reference-context.spec.ts
+OpenAPI regeneration status     : no HWEB-012-06 slice change; existing workbench client remains generated in CI
+Final product head              : c582b364dd7b2638dc87013aaad07df889baaa06
+Exact-head CI                   : 34744371450 — SUCCESS
+Product PR                      : #56
+Product merge                   : 961f519c3c8d7199662bd372a01ff18b9250ef00
+Post-merge main CI              : 34744515616 — SUCCESS
+Known backend gaps              : dedicated party read controller is not published; generic authoritative workbench detail is the validated read surface
+Conclusion                      : HWEB-012-06 VERIFIED; HWEB-012 COMPLETE; HWEB-013 is next
+```
 
 ## HWEB-012-05 verification evidence
 
@@ -276,7 +315,7 @@ Product PR                      : #54
 Product merge                   : 03074f83315def13eda952ad097bdc3f77cca67c
 Post-merge main CI              : 34743613472 — SUCCESS
 Known backend gaps              : no blocker for HWEB-012-06 identified here; party-master enrichment must remain explicit-reference-only and authoritative
-Conclusion                      : HWEB-012-05 VERIFIED; HWEB-012-06 is next; HWEB-012-06 product work not started
+Conclusion                      : HWEB-012-05 VERIFIED; HWEB-012-06 followed as the final custody task
 ```
 
 ## HWEB-012-04 verification evidence
