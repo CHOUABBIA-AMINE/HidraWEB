@@ -1,15 +1,15 @@
 # HWEB-015 — Production Hardening
 
-Status: HWEB-015-07 COMPLETE / HWEB-015-08 NEXT
+Status: HWEB-015-08 COMPLETE / HWEB-015-09 NEXT
 
 ## Accepted starting point
 
 ```text
-HidraWEB verified main       : 15f44543a8f32863762bba908abb6af3c92a4092
-HWEB-015-06 exact-main CI    : 34781152538 — SUCCESS
+HidraWEB verified main       : 32cb9594a10d3e1faec576ac1f941b48a9e7e498
+HWEB-015-07 exact-main CI    : 34784849649 — SUCCESS
 HidraAPI audited main        : 725a451ae4880ccb4f2ec508709241f88cd4aea7
-Current completed task       : HWEB-015-07 — bundle analysis and route-level lazy loading budgets
-Next task                    : HWEB-015-08 — large-grid/map/chart performance tests
+Current completed task       : HWEB-015-08 — large-grid/map/chart performance tests
+Next task                    : HWEB-015-09 — full Playwright regression suite for critical operational journeys
 ```
 
 ## HWEB-015-01 — freeze supported enterprise authentication mode and IdP contract — COMPLETE
@@ -458,4 +458,78 @@ Product branch CI               : 34784129350 — SUCCESS
 Final verification              : roadmap-inclusive exact-head CI, independent PR CI, guarded exact-head merge, exact merge-SHA main CI required
 ```
 
-HWEB-015-08 must not begin until the roadmap-inclusive HWEB-015-07 head passes full CI, its exact PR head is independently verified, the guarded merge succeeds, and exact merge-SHA `main` CI is accepted.
+HWEB-015-08 was authorized only after HWEB-015-07 had been independently verified, guarded-merged, and accepted on exact merge-SHA `main` CI `34784849649` at `32cb9594a10d3e1faec576ac1f941b48a9e7e498`.
+
+## HWEB-015-08 — large-grid/map/chart performance tests — COMPLETE
+
+### Scope
+
+HWEB-015-08 freezes deterministic hosted-CI regression budgets for representative high-volume frontend paths only. It does not start HWEB-015-09 full Playwright journey regression coverage and does not change HidraAPI endpoints, DTOs, permissions, business rules, route availability, or backend-owned operational state.
+
+### Workbench grid performance
+
+The performance suite renders the actual `WorkbenchDataGrid` component at the current supported maximum page size of 200 rows. The representative fixture reports 20,000 total backend records while rendering only the current 200-row page, preserving server-side paging and avoiding any invented client-owned bulk loading behavior.
+
+The frozen hosted-CI budget is:
+
+```text
+WorkbenchDataGrid / 200 rows / 10 displayed data columns + action column < 1500 ms
+```
+
+### Topology map preprocessing performance
+
+The MapLibre adapter now delegates its initial feature-bounds scan to the pure `getFeatureCollectionBounds` helper in `src/components/map/mapBounds.ts`. The adapter still consumes the same `HidraMapFeatureCollection`, uses the same initial fit behavior, and remains the rendering boundary; business feature code does not import MapLibre implementation types.
+
+The deterministic benchmark scans 25,000 mixed Point/LineString features through that production path with a frozen budget of:
+
+```text
+25,000 topology features / bounds scan < 500 ms
+```
+
+Hosted Node CI intentionally does not use GPU/WebGL wall-clock assertions because those timings depend on runner graphics availability and are not stable regression evidence. This milestone therefore guards the large feature preprocessing path while preserving MapLibre as the production renderer.
+
+### Chart performance
+
+The suite renders an actual ECharts 6.1.0 SVG SSR line series with 10,000 points, doubling the earlier HWEB-013 5,000-point chart stress case. The frozen budget is:
+
+```text
+ECharts SVG SSR / 10,000 points < 2000 ms
+```
+
+### Calibration and CI evidence
+
+The first valid hosted-CI benchmark execution measured approximately:
+
+```text
+WorkbenchDataGrid render     270 ms
+25k topology bounds scan      14 ms
+10k ECharts SVG render        72 ms
+```
+
+That run failed only because an expected fixture east bound used `> 179` while the generated collection correctly produced exactly `179`; the performance measurements themselves were within budget. The assertion was corrected to match the fixture and the budgets were tightened from the initial provisional ceilings using those measured results.
+
+`vitest.performance.config.ts` keeps the suite in a Node environment with one worker and an explicit `@` source alias. The normal CI lifecycle runs `npm run test:performance` as the `Performance tests` gate. The production-build step still executes the HWEB-015-07 manifest bundle budgets, so HWEB-015-08 does not weaken bundle hardening.
+
+### Documentation and completion record
+
+`docs/deployment/Runtime-Performance-Budgets.md` records the execution model, workloads, budgets, calibration evidence, browser/GPU boundary, and regression rules. `README.md` links the policy.
+
+```text
+Backend source commit / branch : 725a451ae4880ccb4f2ec508709241f88cd4aea7 / main
+Endpoints and DTOs used         : none added or changed
+Permissions used                : none introduced or changed
+Frontend routes created/changed : none
+State ownership                 : no new server/business state; representative fixtures are test-only
+Performance tests               : tests/performance/production-hardening-performance.perf.ts
+Grid budget                     : WorkbenchDataGrid / 200 rows < 1500 ms
+Map budget                      : 25,000 topology features / bounds scan < 500 ms
+Chart budget                    : ECharts SVG SSR / 10,000 points < 2000 ms
+Documentation                   : docs/deployment/Runtime-Performance-Budgets.md; README.md
+OpenAPI regeneration status     : no API contract changed; all deterministic generators passed product-head CI
+Product branch                  : hweb-015-08-large-grid-map-chart-performance
+Product head                    : 8fd4f9e02ee311a9a434e79e558b939a5b13b35b
+Product branch CI               : 34787853123 — SUCCESS
+Final verification              : roadmap-inclusive exact-head CI, independent PR CI, guarded exact-head merge, exact merge-SHA main CI required
+```
+
+HWEB-015-09 must not begin until the roadmap-inclusive HWEB-015-08 head passes full CI, its exact PR head is independently verified, the guarded merge succeeds, and exact merge-SHA `main` CI is accepted.
