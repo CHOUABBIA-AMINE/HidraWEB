@@ -1,16 +1,16 @@
 # HWEB-014 — Governance and Administration Completion
 
-Status: HWEB-014-05 COMPLETE / HWEB-014-06 NEXT
+Status: HWEB-014 COMPLETE / HWEB-015-01 NEXT
 
 ## Accepted starting point
 
 ```text
-HidraWEB verified main       : 5cc268e8bb4a65b9e9046a89553bdf9575376e10
-HWEB-014-04 exact-main CI    : 34768395203 — SUCCESS
+HidraWEB verified main       : 9b48ee71867e9043b8ac508e370da9c1e0b2baae
+HWEB-014-05 exact-main CI    : 34770041704 — SUCCESS
 HidraAPI audited main        : 725a451ae4880ccb4f2ec508709241f88cd4aea7
-Current completed task       : HWEB-014-05 — notification center/delivery evidence according to actual APIs
-Next task                    : HWEB-014-06 — administration destructive-action confirmations and audit references
-Backend prerequisite         : none; accepted notification runtime workbench evidence is sufficient for HWEB-014-05
+Current completed task       : HWEB-014-06 — administration destructive-action confirmations and audit references
+Next task                    : HWEB-015-01 — freeze supported enterprise authentication mode and IdP contract
+Backend prerequisite         : none; current backend exposes no destructive administration route or explicit mutation audit-reference field
 ```
 
 ## HWEB-014-01 — audit search/export UI — COMPLETE
@@ -760,4 +760,77 @@ Known backend gaps              : no read/unread, archive/dismiss/delete, resend
 Final verification              : roadmap-inclusive exact-head full CI, independent PR-head CI, guarded merge, exact merge-SHA main CI required
 ```
 
-HWEB-014-06 must not begin until the roadmap-inclusive HWEB-014-05 head passes full CI, its exact PR head is independently verified, the guarded merge succeeds, and exact merge-SHA `main` CI is accepted.
+HWEB-014-05 final acceptance was completed by PR #73, merge SHA `9b48ee71867e9043b8ac508e370da9c1e0b2baae`, and exact-main CI `34770041704 — SUCCESS`.
+
+## HWEB-014-06 — administration destructive-action confirmations and audit references — COMPLETE
+
+### Backend audit and scope decision
+
+HWEB-014-06 was audited against HidraAPI `main` commit:
+
+```text
+725a451ae4880ccb4f2ec508709241f88cd4aea7
+```
+
+The accepted administration contracts expose no canonical destructive administration route that HidraWEB currently invokes. In particular, no published administration controller operation was found for delete/remove/revoke/deactivate/archive-style lifecycle actions in the HWEB-014 surfaces, and previously completed HWEB-014 tasks intentionally omit unsupported destructive controls.
+
+The current mutation responses also publish no explicit `auditEventId`, `auditReference`, command audit token, or equivalent backend-owned per-mutation audit reference that HidraWEB can safely surface. HWEB-014-06 therefore does not synthesize an audit identifier from entity IDs, statuses, request IDs, or client correlation values.
+
+### Administration governance notice
+
+Every authenticated `/administration/*` route now renders a common governance notice through `AppShell`.
+
+The notice states that:
+
+- destructive administration actions require explicit confirmation before execution;
+- audit references are displayed only when HidraAPI explicitly returns them;
+- HidraWEB does not derive audit identifiers from unrelated response fields;
+- backend-owned evidence can be inspected through the existing `/administration/audit` workspace.
+
+No new administration route is added.
+
+### Destructive-action confirmation contract
+
+HWEB-014-06 introduces reusable `DestructiveActionConfirmationDialog` infrastructure for future backend-supported destructive commands.
+
+The dialog requires an exact caller-supplied confirmation phrase before the confirm action is enabled. It accepts an optional `auditReference` only for a value already supplied by an authoritative backend contract. When no backend audit reference is supplied, the UI explicitly says so rather than inventing one.
+
+The component is deliberately not wired to any current HWEB-014 mutation because no currently exposed mutation was reclassified as destructive merely to create a confirmation flow.
+
+### Authorization and ownership
+
+HWEB-014-06 does not change route permissions, effective-grant intersection rules, server-state ownership, or backend authorization. Any future destructive operation must still satisfy its own exact backend route descriptor and effective permission before this confirmation component can be relevant. Backend 403 remains final authority.
+
+Audit remains evidence owned by the audit bounded context. The confirmation dialog is a frontend interaction guardrail only; it is not an audit writer and does not create audit records.
+
+### Tests
+
+`src/features/administration/AdministrationGuardrails.test.tsx` verifies:
+
+- administration governance guidance links to `/administration/audit`;
+- the notice explicitly rejects synthesized audit identifiers;
+- destructive confirmation remains disabled until the exact phrase is entered;
+- the destructive callback executes only after exact confirmation;
+- no audit reference is shown as authoritative when the backend did not supply one;
+- a backend-supplied audit reference is displayed without transformation.
+
+### Completion record
+
+```text
+Backend source commit / branch : 725a451ae4880ccb4f2ec508709241f88cd4aea7 / main
+Frontend base                   : 9b48ee71867e9043b8ac508e370da9c1e0b2baae / main
+Product branch                  : hweb-014-06-administration-guardrails
+Product head                    : 2920c2c0a0be265dc8e67e675b71fd9f4c262df6
+Administration routes           : existing /administration/* routes; no new route
+Destructive mutations           : none currently exposed; no unsupported lifecycle action invented
+Confirmation behavior           : reusable exact-phrase destructive-action dialog
+Audit-reference behavior        : backend-supplied values only; no client synthesis
+Audit evidence route            : /administration/audit
+OpenAPI regeneration            : none required; no new backend operation consumed
+Tests                           : src/features/administration/AdministrationGuardrails.test.tsx
+Product branch CI               : 34770467464 — SUCCESS on 2920c2c0a0be265dc8e67e675b71fd9f4c262df6
+Known backend gaps              : no destructive administration route currently consumed and no explicit per-mutation audit-reference field published
+Final verification              : roadmap-inclusive exact-head full CI, independent PR-head CI, guarded merge, exact merge-SHA main CI required
+```
+
+HWEB-015-01 must not begin until the roadmap-inclusive HWEB-014-06 head passes full CI, its exact PR head is independently verified, the guarded merge succeeds, and exact merge-SHA `main` CI is accepted.
