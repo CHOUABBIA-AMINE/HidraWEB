@@ -1,6 +1,7 @@
 import { Box, Tab, Tabs } from '@mui/material';
 import { useState } from 'react';
 
+import { CustodyDiscrepanciesPage } from './CustodyDiscrepanciesPage';
 import { CustodyMeasurementPeriodsPage } from './CustodyMeasurementPeriodsPage';
 import { CustodyTransferTicketsPage } from './CustodyTransferTicketsPage';
 
@@ -17,9 +18,12 @@ export function CustodyWorkspacePage() {
         >
           <Tab label="Measurement periods" />
           <Tab label="Transfer tickets" />
+          <Tab label="Discrepancies & reconciliation" />
         </Tabs>
       </Box>
-      {workspace === 0 ? <CustodyMeasurementPeriodsPage /> : <CustodyTransferTicketsPage />}
+      {workspace === 0 ? <CustodyMeasurementPeriodsPage /> : null}
+      {workspace === 1 ? <CustodyTransferTicketsPage /> : null}
+      {workspace === 2 ? <CustodyDiscrepanciesPage /> : null}
     </Box>
   );
 }

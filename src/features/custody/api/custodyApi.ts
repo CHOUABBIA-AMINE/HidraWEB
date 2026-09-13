@@ -1,8 +1,10 @@
 import { hidraHttpClient } from '@/api/client/hidraHttpClient';
 import type {
   CreateCustodyTransferTicketRequest,
+  CustodyDiscrepancyResponse,
   CustodyMeasurementPeriodResponse,
   CustodyTransferTicketResponse,
+  OpenCustodyDiscrepancyRequest,
   OpenCustodyMeasurementPeriodRequest,
 } from '@/api/generated/custody/model';
 
@@ -26,6 +28,16 @@ export function createCustodyTransferTicket(
   return hidraHttpClient<CustodyTransferTicketResponse>({
     method: 'POST',
     url: '/api/v1/custody/transfer-tickets',
+    data: request,
+  });
+}
+
+export function openCustodyDiscrepancy(
+  request: OpenCustodyDiscrepancyRequest,
+): Promise<CustodyDiscrepancyResponse> {
+  return hidraHttpClient<CustodyDiscrepancyResponse>({
+    method: 'POST',
+    url: '/api/v1/custody/discrepancies',
     data: request,
   });
 }

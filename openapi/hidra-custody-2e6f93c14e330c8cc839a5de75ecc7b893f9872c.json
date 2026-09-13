@@ -15,6 +15,21 @@
         },
         "type": "object"
       },
+      "CustodyDiscrepancyResponse": {
+        "properties": {
+          "differenceQuantity": { "type": "number" },
+          "discrepancyNumber": { "type": "string" },
+          "discrepancyTypeId": { "type": "string" },
+          "id": { "type": "string" },
+          "openedAt": { "format": "date-time", "type": "string" },
+          "reconciliationId": { "type": "string" },
+          "status": {
+            "enum": ["OPEN", "UNDER_REVIEW", "ACCEPTED", "REJECTED", "RESOLVED", "CLOSED", "CANCELLED"],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "CustodyMeasurementPeriodResponse": {
         "properties": {
           "agreementId": { "type": "string" },
@@ -46,6 +61,19 @@
         },
         "type": "object"
       },
+      "OpenCustodyDiscrepancyRequest": {
+        "properties": {
+          "assignedActorId": { "type": "string" },
+          "description": { "type": "string" },
+          "differenceQuantity": { "type": "number" },
+          "discrepancyNumber": { "type": "string" },
+          "discrepancyTypeId": { "type": "string" },
+          "openedAt": { "format": "date-time", "type": "string" },
+          "quantityUnitId": { "type": "string" },
+          "reconciliationId": { "type": "string" }
+        },
+        "type": "object"
+      },
       "OpenCustodyMeasurementPeriodRequest": {
         "properties": {
           "agreementId": { "type": "string" },
@@ -66,6 +94,30 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/custody/discrepancies": {
+      "post": {
+        "operationId": "openDiscrepancy_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/OpenCustodyDiscrepancyRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/CustodyDiscrepancyResponse" }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": ["spring-custody-controller"]
+      }
+    },
     "/api/v1/custody/measurement-periods": {
       "post": {
         "operationId": "openMeasurementPeriod_1",
