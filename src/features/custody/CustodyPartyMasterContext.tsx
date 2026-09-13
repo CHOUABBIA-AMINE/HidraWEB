@@ -33,6 +33,7 @@ export function CustodyPartyMasterContext({ partyId, canRead }: { partyId: strin
     queryKey: workbenchQueryKeys.detail(PARTY_MODULE, partyResource?.resource ?? '', partyId),
     queryFn: () => fetchWorkbenchRecord(PARTY_MODULE, partyResource?.resource ?? '', partyId),
     enabled: canRead && Boolean(partyId && partyResource),
+    retry: (failureCount, error) => normalizeHidraApiError(error).status !== 403 && failureCount < 3,
   });
 
   if (!partyId) return null;
