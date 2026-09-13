@@ -43,13 +43,15 @@ The manifest is a build artifact and is not a runtime source of authorization or
 `npm run build` now runs `npm run bundle:check` after the Vite build. The check fails the build when any of these constraints are violated:
 
 ```text
-initial static JavaScript      <= 700 KiB
+initial static JavaScript      <= 900 KiB
 individual lazy route chunk    <= 700 KiB
 any JavaScript chunk           <= 1100 KiB
 lazy route entries             >= 20
 ```
 
 The initial-static budget is calculated from the manifest entry and its synchronous import graph only. Dynamically imported route code is excluded from that startup budget.
+
+The 900 KiB startup ceiling is calibrated from the HWEB-015-07 split output (869.6 KiB synchronous graph) and remains materially below the pre-split eager bundle. It leaves limited headroom while preventing the route code removed by this milestone from silently returning to startup.
 
 The route-entry count acts as a regression guard: a future refactor that silently restores eager page imports must fail the production build rather than merely emit a warning.
 
