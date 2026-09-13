@@ -69,9 +69,7 @@ async function sha256(value: string): Promise<string> {
 
 async function jsonFetch(url: string, init?: RequestInit): Promise<unknown> {
   const response = await fetch(url, init);
-  if (!response.ok) {
-    throw new Error(`OIDC request failed with HTTP ${response.status}.`);
-  }
+  if (!response.ok) throw new Error(`OIDC request failed with HTTP ${response.status}.`);
   return response.json();
 }
 
@@ -128,9 +126,7 @@ function parseJwtPayload(token: string): Record<string, unknown> | undefined {
 function validateNonce(idToken: string | undefined, expectedNonce: string): void {
   if (!idToken) return;
   const payload = parseJwtPayload(idToken);
-  if (!payload || payload.nonce !== expectedNonce) {
-    throw new Error('OIDC ID-token nonce validation failed.');
-  }
+  if (!payload || payload.nonce !== expectedNonce) throw new Error('OIDC ID-token nonce validation failed.');
 }
 
 function accessTokenExpiry(accessToken: string, expiresIn?: number): number | undefined {
@@ -142,7 +138,7 @@ function accessTokenExpiry(accessToken: string, expiresIn?: number): number | un
   return undefined;
 }
 
-export async function beginOidcAuthorization(returnTo = '/overview'): Promise<never> {
+export async function beginOidcAuthorization(returnTo = '/overview'): Promise<void> {
   if (!runtimeConfig.oidcRedirectUri) {
     throw new Error('VITE_HIDRA_OIDC_REDIRECT_URI is required for enterprise OIDC authentication.');
   }
@@ -173,7 +169,6 @@ export async function beginOidcAuthorization(returnTo = '/overview'): Promise<ne
   authorizationUrl.searchParams.set('code_challenge', await sha256(codeVerifier));
   authorizationUrl.searchParams.set('code_challenge_method', 'S256');
   window.location.assign(authorizationUrl.toString());
-  throw new Error('OIDC redirect did not navigate away from the current document.');
 }
 
 export async function completeOidcAuthorization(search: string): Promise<OidcCallbackResult> {
