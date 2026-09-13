@@ -87,7 +87,7 @@ test('HWEB-013-04 renders runtime-discovered simulation scenarios, runs and resu
   await expect(page.getByText('READY')).toBeVisible();
 
   await page.getByRole('tab', { name: 'Runs' }).click();
-  await expect(page.getByText('COMPLETED')).toBeVisible();
+  await expect(page.getByText('COMPLETED', { exact: true })).toBeVisible();
 
   await page.getByRole('tab', { name: 'Result summaries' }).click();
   await expect(page.getByText('0.97')).toBeVisible();
