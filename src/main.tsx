@@ -2,8 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 
 import { App } from '@/app/App';
+import { installGlobalTechnicalErrorReporting } from '@/app/observability/technicalErrorReporter';
 import { AppProviders } from '@/app/providers/AppProviders';
 import '@/shared/i18n/i18n';
+
+installGlobalTechnicalErrorReporting();
 
 const rootElement = document.getElementById('root');
 
