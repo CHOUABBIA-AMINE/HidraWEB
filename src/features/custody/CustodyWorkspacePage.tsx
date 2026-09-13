@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 import { CustodyDiscrepanciesPage } from './CustodyDiscrepanciesPage';
 import { CustodyMeasurementPeriodsPage } from './CustodyMeasurementPeriodsPage';
+import { CustodyReferenceContextPage } from './CustodyReferenceContextPage';
 import { CustodyTransferTicketsPage } from './CustodyTransferTicketsPage';
 
 export function CustodyWorkspacePage() {
@@ -19,11 +20,13 @@ export function CustodyWorkspacePage() {
           <Tab label="Measurement periods" />
           <Tab label="Transfer tickets" />
           <Tab label="Discrepancies & reconciliation" />
+          <Tab label="Reference context" />
         </Tabs>
       </Box>
       {workspace === 0 ? <CustodyMeasurementPeriodsPage /> : null}
       {workspace === 1 ? <CustodyTransferTicketsPage /> : null}
       {workspace === 2 ? <CustodyDiscrepanciesPage /> : null}
+      {workspace === 3 ? <CustodyReferenceContextPage /> : null}
     </Box>
   );
 }
