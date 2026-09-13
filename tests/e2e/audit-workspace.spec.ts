@@ -115,7 +115,7 @@ test('HWEB-014-01 searches runtime audit evidence and submits only the exact exp
   await openAuditWorkspace(page);
 
   await expect(page.getByRole('heading', { name: 'Audit evidence' })).toBeVisible();
-  await expect(page.getByText('APPROVE', { exact: true })).toBeVisible();
+  await expect(page.getByText('Operator A', { exact: true })).toBeVisible();
 
   await page.getByLabel('Search audit evidence').fill('corr-1');
   await page.getByRole('button', { name: 'Search' }).click();
