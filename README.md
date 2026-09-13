@@ -79,6 +79,8 @@ WCAG 2.2 AA accessibility, keyboard-only control-room workflow requirements, map
 
 Production route-level lazy loading, Vite manifest analysis, and enforced JavaScript bundle budgets are defined in [`docs/deployment/Bundle-Budgets.md`](docs/deployment/Bundle-Budgets.md).
 
+Hosted-CI large-grid, topology-map preprocessing, and ECharts runtime performance budgets are defined in [`docs/deployment/Runtime-Performance-Budgets.md`](docs/deployment/Runtime-Performance-Budgets.md).
+
 ## Implemented application surfaces
 
 - `/overview` — authenticated shell overview.
