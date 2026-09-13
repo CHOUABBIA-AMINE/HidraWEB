@@ -43,7 +43,7 @@ export const navigationSections: readonly NavigationSection[] = [
   ] },
   { id: 'work', labelKey: 'nav.groups.work', items: [
     { id: 'tasks', labelKey: 'nav.tasks', path: '/work/tasks', capabilityModules: ['workflow'], icon: 'tasks', implemented: true, deliveryTask: 'HWEB-007' },
-    { id: 'notifications', labelKey: 'nav.notifications', path: '/work/notifications', capabilityModules: ['notification'], icon: 'notifications', implemented: false, deliveryTask: 'HWEB-014' },
+    { id: 'notifications', labelKey: 'nav.notifications', path: '/work/notifications', capabilityModules: ['notification'], icon: 'notifications', implemented: true, deliveryTask: 'HWEB-014-05' },
   ] },
   { id: 'administration', labelKey: 'nav.groups.administration', items: [
     { id: 'organization', labelKey: 'nav.organization', path: '/administration/organization', capabilityModules: ['organization'], icon: 'organization', implemented: true, deliveryTask: 'HWEB-004' },

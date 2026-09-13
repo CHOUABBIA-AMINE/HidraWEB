@@ -1,16 +1,16 @@
 # HWEB-014 — Governance and Administration Completion
 
-Status: HWEB-014-04 COMPLETE / HWEB-014-05 NEXT
+Status: HWEB-014-05 COMPLETE / HWEB-014-06 NEXT
 
 ## Accepted starting point
 
 ```text
-HidraWEB verified main       : 6c6e943be7ef6091d39d8b28d828c8b80e2270a6
-HWEB-014-03 exact-main CI    : 34766936728 — SUCCESS
+HidraWEB verified main       : 5cc268e8bb4a65b9e9046a89553bdf9575376e10
+HWEB-014-04 exact-main CI    : 34768395203 — SUCCESS
 HidraAPI audited main        : 725a451ae4880ccb4f2ec508709241f88cd4aea7
-Current completed task       : HWEB-014-04 — integration connector/job/dead-letter monitoring
-Next task                    : HWEB-014-05 — notification center/delivery evidence according to actual APIs
-Backend prerequisite         : none beyond accepted integration runtime workbench exposure
+Current completed task       : HWEB-014-05 — notification center/delivery evidence according to actual APIs
+Next task                    : HWEB-014-06 — administration destructive-action confirmations and audit references
+Backend prerequisite         : none; accepted notification runtime workbench evidence is sufficient for HWEB-014-05
 ```
 
 ## HWEB-014-01 — audit search/export UI — COMPLETE
@@ -638,4 +638,126 @@ Known backend gaps              : no retry/replay/cancel/restart/pause/dead-lett
 Final verification              : roadmap-inclusive exact-head full CI, independent PR-head CI, guarded merge, exact merge-SHA main CI required
 ```
 
-HWEB-014-05 must not begin until the roadmap-inclusive HWEB-014-04 head passes full CI, its exact PR head is independently verified, the guarded merge succeeds, and exact merge-SHA `main` CI is accepted.
+HWEB-014-04 final acceptance was completed by PR #72, merge SHA `5cc268e8bb4a65b9e9046a89553bdf9575376e10`, and exact-main CI `34768395203 — SUCCESS`.
+
+## HWEB-014-05 — notification center/delivery evidence — COMPLETE
+
+### Backend source and published operations
+
+HWEB-014-05 was audited against accepted HidraAPI `main` commit:
+
+```text
+725a451ae4880ccb4f2ec508709241f88cd4aea7
+```
+
+`SpringNotificationController` publishes the following canonical notification operations:
+
+```text
+GET  /api/v1/notification/capabilities
+POST /api/v1/notification/messages
+POST /api/v1/notification/requests
+POST /api/v1/notification/delivery-attempts
+```
+
+Legacy POST aliases also exist for creating messages, receiving requests, and recording delivery attempts. HWEB-014-05 does not invoke these POST operations because the notification center task is a read/evidence surface rather than a producer or delivery recorder.
+
+The audited notification API publishes no dedicated endpoint for:
+
+```text
+mark read / unread
+archive
+dismiss
+delete
+resend
+retry
+notification preferences
+notification-center realtime/websocket state
+```
+
+HidraWEB therefore exposes none of those behaviors.
+
+### Runtime notification and delivery evidence
+
+The notification center uses the accepted generic workbench read contract:
+
+```text
+GET /api/v1/workbench/{module}/resources
+GET /api/v1/workbench/{module}/{resource}?page={page}&size={size}&q={query}
+```
+
+HidraWEB discovers module `notification`, identifies these backend Java types in runtime metadata, and then requests only the actual returned `descriptor.resource` values:
+
+```text
+NotificationRequestJpaEntity
+NotificationMessageJpaEntity
+NotificationDeliveryAttemptJpaEntity
+```
+
+Runtime endpoint resource names are never synthesized from the Java class names. Request, message, and delivery-attempt records are presented as backend-owned evidence only; returned status/channel fields do not authorize or imply additional frontend lifecycle operations.
+
+### Authorization
+
+Notification evidence reads are fail-closed and require the exact backend route descriptor and effective grant for:
+
+```text
+GET /api/v1/workbench/{module}/{resource}
+```
+
+HidraWEB intersects the descriptor permission with `GET /api/v1/identity/me/permissions`. If the route descriptor, exact permission, or effective grant is absent, runtime notification resource discovery and record reads do not execute. Permission strings are not inferred and backend 403 remains final authority.
+
+### Frontend route and state ownership
+
+```text
+Frontend route : /work/notifications
+Backend owner  : notification
+Server state   : TanStack Query for runtime resource discovery and evidence reads
+Local state    : none for business/server state
+```
+
+The existing Work navigation notification entry is enabled by HWEB-014-05 and remains capability-scoped to module `notification`.
+
+### Deliberately absent behavior
+
+Because HidraAPI publishes no matching notification-center contract, the UI includes no controls or inferred semantics for:
+
+```text
+mark read / unread
+archive / dismiss / delete
+resend / retry
+preferences
+unread counters
+client-owned delivery transitions
+realtime notification subscriptions
+```
+
+HWEB-014-05 also does not reinterpret persistence evidence as user inbox state or as permission to mutate notification delivery state.
+
+### Tests
+
+`tests/e2e/notification-center.spec.ts` verifies:
+
+- runtime discovery of notification request, message, and delivery-attempt evidence;
+- list requests use the backend-returned `descriptor.resource` values, including deliberately non-derived test resource names;
+- the evidence-only notification-center notice is present;
+- mark-read/unread, archive, dismiss, delete, resend, retry, and preference controls are absent;
+- runtime workbench discovery/read requests do not execute when the exact generic workbench read grant is absent.
+
+### Completion record
+
+```text
+Backend source commit / branch : 725a451ae4880ccb4f2ec508709241f88cd4aea7 / main
+Frontend base                   : 5cc268e8bb4a65b9e9046a89553bdf9575376e10 / main
+Product branch                  : hweb-014-05-notification-evidence
+Product head                    : 748e4a0fe7199a8c271aab616370a545aa3c631e
+Frontend route                  : /work/notifications
+Runtime monitoring resources    : notification request, message, delivery attempt via runtime workbench discovery
+Dedicated notification POSTs    : not used by HWEB-014-05; center remains read-only evidence
+Permission model                : exact generic workbench route descriptor intersected with effective user grants
+OpenAPI regeneration            : none required; existing generic workbench contract only
+Tests                           : tests/e2e/notification-center.spec.ts
+Product branch CI               : 34769297110 — SUCCESS on 748e4a0fe7199a8c271aab616370a545aa3c631e
+Known backend gaps              : no read/unread, archive/dismiss/delete, resend/retry, preferences, or notification-center realtime API
+Final verification              : roadmap-inclusive exact-head full CI, independent PR-head CI, guarded merge, exact merge-SHA main CI required
+```
+
+HWEB-014-06 must not begin until the roadmap-inclusive HWEB-014-05 head passes full CI, its exact PR head is independently verified, the guarded merge succeeds, and exact merge-SHA `main` CI is accepted.
