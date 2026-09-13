@@ -1,0 +1,377 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "HidraAPI Analytics Contract",
+    "version": "v1"
+  },
+  "paths": {
+    "/api/v1/analytics/capabilities": {
+      "get": {
+        "operationId": "capabilities_23",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "additionalProperties": {},
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "spring-analytics-controller"
+        ]
+      }
+    },
+    "/api/v1/analytics/create-analytics-dataset": {
+      "post": {
+        "operationId": "createAnalyticsDataset_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAnalyticsDatasetRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsDatasetResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "spring-analytics-controller"
+        ]
+      }
+    },
+    "/api/v1/analytics/create-analytics-insight": {
+      "post": {
+        "operationId": "createAnalyticsInsight_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAnalyticsInsightRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsInsightResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "spring-analytics-controller"
+        ]
+      }
+    },
+    "/api/v1/analytics/datasets": {
+      "post": {
+        "operationId": "createAnalyticsDataset",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAnalyticsDatasetRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsDatasetResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "spring-analytics-controller"
+        ]
+      }
+    },
+    "/api/v1/analytics/insights": {
+      "post": {
+        "operationId": "createAnalyticsInsight",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAnalyticsInsightRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsInsightResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "spring-analytics-controller"
+        ]
+      }
+    },
+    "/api/v1/analytics/metrics/evaluations": {
+      "post": {
+        "operationId": "runMetricEvaluation_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunMetricEvaluationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricEvaluationRunResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "spring-analytics-controller"
+        ]
+      }
+    },
+    "/api/v1/analytics/projections/runs": {
+      "post": {
+        "operationId": "runProjection_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunProjectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsProjectionRunResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "spring-analytics-controller"
+        ]
+      }
+    },
+    "/api/v1/analytics/run-metric-evaluation": {
+      "post": {
+        "operationId": "runMetricEvaluation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunMetricEvaluationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricEvaluationRunResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "spring-analytics-controller"
+        ]
+      }
+    },
+    "/api/v1/analytics/run-projection": {
+      "post": {
+        "operationId": "runProjection",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunProjectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsProjectionRunResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "spring-analytics-controller"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AnalyticsDatasetResponse": {
+        "properties": {
+          "code": { "type": "string" },
+          "datasetType": { "enum": ["SNAPSHOT", "TIME_SERIES", "AGGREGATE", "FEATURE_SET", "TRAINING_DATASET", "VALIDATION_DATASET", "DASHBOARD_VIEW", "DIGITAL_TWIN_READINESS_VIEW"], "type": "string" },
+          "id": { "type": "string" },
+          "lineageStatus": { "enum": ["DRAFT", "COMPLETE", "PARTIAL", "BROKEN", "UNKNOWN"], "type": "string" },
+          "nameFr": { "type": "string" },
+          "qualityStatus": { "enum": ["UNKNOWN", "READY", "WARNING", "FAILED", "REJECTED"], "type": "string" },
+          "refreshMode": { "enum": ["MANUAL", "SCHEDULED", "EVENT_DRIVEN", "INCREMENTAL", "FULL_REBUILD"], "type": "string" },
+          "subjectAreaId": { "type": "string" }
+        },
+        "type": "object"
+      },
+      "AnalyticsInsightResponse": {
+        "properties": {
+          "confidenceScore": { "type": "number" },
+          "id": { "type": "string" },
+          "insightType": { "type": "string" },
+          "scopeId": { "type": "string" },
+          "scopeType": { "type": "string" },
+          "severityId": { "type": "string" },
+          "status": { "enum": ["DRAFT", "OPEN", "UNDER_REVIEW", "ACCEPTED", "DISMISSED", "ARCHIVED"], "type": "string" },
+          "subjectAreaId": { "type": "string" },
+          "title": { "type": "string" }
+        },
+        "type": "object"
+      },
+      "AnalyticsProjectionRunResponse": {
+        "properties": {
+          "correlationId": { "type": "string" },
+          "id": { "type": "string" },
+          "periodEnd": { "format": "date-time", "type": "string" },
+          "periodStart": { "format": "date-time", "type": "string" },
+          "projectionDefinitionId": { "type": "string" },
+          "runMode": { "enum": ["FULL_REBUILD", "INCREMENTAL", "BACKFILL", "MANUAL_RECOMPUTE", "SCHEDULED"], "type": "string" },
+          "runStatus": { "enum": ["PENDING", "RUNNING", "COMPLETED", "COMPLETED_WITH_WARNINGS", "FAILED", "CANCELLED"], "type": "string" }
+        },
+        "type": "object"
+      },
+      "CreateAnalyticsDatasetRequest": {
+        "properties": {
+          "code": { "type": "string" },
+          "createdFrom": { "type": "string" },
+          "datasetType": { "enum": ["SNAPSHOT", "TIME_SERIES", "AGGREGATE", "FEATURE_SET", "TRAINING_DATASET", "VALIDATION_DATASET", "DASHBOARD_VIEW", "DIGITAL_TWIN_READINESS_VIEW"], "type": "string" },
+          "nameAr": { "type": "string" },
+          "nameEn": { "type": "string" },
+          "nameFr": { "type": "string" },
+          "refreshMode": { "enum": ["MANUAL", "SCHEDULED", "EVENT_DRIVEN", "INCREMENTAL", "FULL_REBUILD"], "type": "string" },
+          "schemaVersion": { "type": "string" },
+          "subjectAreaId": { "type": "string" }
+        },
+        "type": "object"
+      },
+      "CreateAnalyticsInsightRequest": {
+        "properties": {
+          "confidenceScore": { "type": "number" },
+          "insightType": { "type": "string" },
+          "scopeId": { "type": "string" },
+          "scopeType": { "type": "string" },
+          "severityId": { "type": "string" },
+          "sourceModelRunId": { "type": "string" },
+          "sourceProjectionSnapshotId": { "type": "string" },
+          "sourceTrendAnalysisId": { "type": "string" },
+          "subjectAreaId": { "type": "string" },
+          "summary": { "type": "string" },
+          "title": { "type": "string" }
+        },
+        "type": "object"
+      },
+      "MetricEvaluationRunResponse": {
+        "properties": {
+          "correlationId": { "type": "string" },
+          "id": { "type": "string" },
+          "metricDefinitionVersionId": { "type": "string" },
+          "periodEnd": { "format": "date-time", "type": "string" },
+          "periodStart": { "format": "date-time", "type": "string" },
+          "runStatus": { "enum": ["PENDING", "RUNNING", "COMPLETED", "COMPLETED_WITH_WARNINGS", "FAILED", "CANCELLED"], "type": "string" },
+          "scopeId": { "type": "string" },
+          "scopeType": { "type": "string" }
+        },
+        "type": "object"
+      },
+      "RunMetricEvaluationRequest": {
+        "properties": {
+          "correlationId": { "type": "string" },
+          "metricDefinitionVersionId": { "type": "string" },
+          "periodEnd": { "format": "date-time", "type": "string" },
+          "periodStart": { "format": "date-time", "type": "string" },
+          "scopeId": { "type": "string" },
+          "scopeType": { "type": "string" }
+        },
+        "type": "object"
+      },
+      "RunProjectionRequest": {
+        "properties": {
+          "correlationId": { "type": "string" },
+          "periodEnd": { "format": "date-time", "type": "string" },
+          "periodStart": { "format": "date-time", "type": "string" },
+          "projectionDefinitionId": { "type": "string" },
+          "runMode": { "enum": ["FULL_REBUILD", "INCREMENTAL", "BACKFILL", "MANUAL_RECOMPUTE", "SCHEDULED"], "type": "string" }
+        },
+        "type": "object"
+      }
+    }
+  }
+}
