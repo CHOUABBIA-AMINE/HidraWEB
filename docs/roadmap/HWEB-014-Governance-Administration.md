@@ -1,17 +1,15 @@
 # HWEB-014 — Governance and Administration Completion
 
-Status: HWEB-014-01 COMPLETE / HWEB-014-02 NEXT
+Status: HWEB-014-02 COMPLETE / HWEB-014-03 NEXT
 
 ## Accepted starting point
 
 ```text
-HidraWEB verified main       : c5c33ff8dbfed9625449f50f95cbebae583952ff
-HWEB-013-07 final-main CI    : 34758016255 — SUCCESS
+HidraWEB verified main       : ba80b3186d5600b2b10d306b256c0fdba1c9a7cd
+HWEB-014-01 exact-main CI    : 34760750153 — SUCCESS
 HidraAPI audited main        : 0c8643c17b2648e8be85c658854f57ea0faab765
-Accepted OpenAPI artifact    : 10307772022
-Accepted artifact digest     : sha256:884ceb8d62bafd5e885287a18eb847356cffc21e8948cc1e937ec02b780ff0ea
-Current completed task       : HWEB-014-01 — audit search/export UI
-Next task                    : HWEB-014-02 — configuration/feature-flag administration
+Current completed task       : HWEB-014-02 — configuration/feature-flag administration
+Next task                    : HWEB-014-03 — document upload/download/version evidence
 ```
 
 ## HWEB-014-01 — audit search/export UI — COMPLETE
@@ -170,11 +168,191 @@ Dedicated audit search GET      : absent; generic runtime workbench query used
 Export operation                : POST /api/v1/audit/exports request only
 Artifact retrieval/download     : absent; no download semantics exposed
 OpenAPI regeneration            : deterministic audit generator added to verify/CI
-Product head                    : 867fb6553839a8bd5b5e08c203abd7e229bc8eb1
-Product full CI                 : 34760268247 — SUCCESS
 Tests                           : tests/e2e/audit-workspace.spec.ts
 Known backend gap               : no dedicated audit search/read API and no export artifact retrieval/download API
-Final verification              : roadmap-inclusive exact-head full CI, guarded PR merge, exact merge-SHA main CI required
 ```
 
-HWEB-014-02 must not begin until this roadmap-inclusive HWEB-014-01 head passes full CI, its exact PR head is verified, the guarded merge succeeds, and exact merge-SHA `main` CI is accepted.
+## HWEB-014-02 — configuration/feature-flag administration — COMPLETE
+
+### Backend source and exact published operations
+
+HWEB-014-02 was audited against HidraAPI `main` commit:
+
+```text
+0c8643c17b2648e8be85c658854f57ea0faab765
+```
+
+`SpringConfigurationController` publishes these canonical endpoints:
+
+```text
+GET  /api/v1/configuration/capabilities
+POST /api/v1/configuration/definitions
+POST /api/v1/configuration/feature-flags
+POST /api/v1/configuration/values
+```
+
+Legacy POST aliases exist in the backend controller, but HidraWEB uses only the canonical resource endpoints above.
+
+No controller endpoint was found for:
+
+```text
+toggle feature flag
+update feature flag
+delete feature flag
+activate/deactivate feature flag
+publish/promote configuration
+environment promotion
+configuration inheritance
+rollback
+configuration delete
+optimistic-lock/version mutation semantics
+```
+
+HidraWEB therefore exposes none of those actions.
+
+### Exact request/response contracts
+
+Create configuration definition:
+
+```text
+CreateConfigurationDefinitionRequest
+- namespaceId
+- key
+- displayNameFr
+- displayNameAr
+- displayNameEn
+- valueType
+- sensitivity
+- scoped
+- requiresApproval
+- defaultValue
+- description
+```
+
+Create feature flag:
+
+```text
+CreateFeatureFlagRequest
+- code
+- nameFr
+- nameAr
+- nameEn
+- owningModule
+- evaluationStrategy
+- defaultEnabled
+- description
+```
+
+Set configuration value:
+
+```text
+SetConfigurationValueRequest
+- definitionId
+- definitionVersionId
+- environment
+- rawValue
+- jsonValue
+- secretReference
+- effectiveFrom
+- effectiveTo
+- createdByActorId
+```
+
+Returned records are presented as backend evidence only. Status values such as `DRAFT`, `ACTIVE`, `PAUSED`, `DEPRECATED`, `SUPERSEDED`, or `RETIRED` are not treated as authorization or as permission to invent lifecycle actions.
+
+### Read evidence and runtime resources
+
+Read evidence uses the generic workbench contract and runtime discovery for module `configuration`.
+
+HidraWEB identifies these Java types from resource metadata and then uses the returned `descriptor.resource` value for requests:
+
+```text
+ConfigurationDefinitionJpaEntity
+FeatureFlagJpaEntity
+ConfigurationValueJpaEntity
+```
+
+The product does not derive runtime endpoint resource names from Java class names.
+
+### Authorization
+
+All configuration controls are fail-closed.
+
+Read evidence requires the exact permission published for:
+
+```text
+GET /api/v1/workbench/{module}/{resource}
+```
+
+Each mutation is independently enabled only when the route descriptor exists and the current user holds the descriptor's exact permission:
+
+```text
+POST /api/v1/configuration/definitions
+POST /api/v1/configuration/feature-flags
+POST /api/v1/configuration/values
+```
+
+Permission strings are never inferred in product code. Backend 403 remains authoritative.
+
+### Frontend route and state ownership
+
+```text
+Frontend route : /administration/configuration
+Backend owner  : configuration
+Server state   : TanStack Query for runtime workbench reads and mutations
+Local state    : three request-form payloads only
+```
+
+### Deterministic OpenAPI evidence
+
+```text
+Backend SHA    : 0c8643c17b2648e8be85c658854f57ea0faab765
+OpenAPI slice  : openapi/hidra-configuration-0c8643c17b2648e8be85c658854f57ea0faab765.json
+Orval config   : orval.configuration.config.ts
+Generator      : npm run api:generate:configuration
+CI gate        : Generate HWEB-014 configuration OpenAPI client
+```
+
+The slice contains only the accepted configuration capabilities endpoint, the three canonical POST endpoints, their exact request/response fields, and backend-published enum values audited from source.
+
+### Error and fail-closed states
+
+The workspace explicitly handles:
+
+- missing generic workbench route-permission metadata;
+- missing effective workbench read grant;
+- missing runtime definition/flag/value resources;
+- generic evidence read failures;
+- missing mutation route-permission metadata;
+- missing effective grant for each individual POST operation;
+- mutation failures;
+- backend 403 as final authority.
+
+### Tests
+
+`tests/e2e/configuration-administration.spec.ts` verifies:
+
+- runtime discovery and reads for definitions, feature flags, and values;
+- exact POST request bodies for all three published mutations;
+- independent strict route grants;
+- fail-closed mutation controls without grants;
+- no toggle/delete/rollback/activate/deactivate controls.
+
+### Completion record
+
+```text
+Backend source commit / branch : 0c8643c17b2648e8be85c658854f57ea0faab765 / main
+Frontend base                   : ba80b3186d5600b2b10d306b256c0fdba1c9a7cd / main
+Product branch                  : hweb-014-02-configuration-administration
+Frontend route                  : /administration/configuration
+Published mutation endpoints    : definitions, feature-flags, values POST only
+Runtime read source             : generic workbench resources for module configuration
+Permission model                : exact route descriptors intersected with effective user grants
+OpenAPI regeneration            : deterministic configuration generator added to verify/CI
+Tests                           : tests/e2e/configuration-administration.spec.ts
+Product branch CI               : 34761895453 — SUCCESS before completion-doc commit
+Known backend gaps              : no toggle/update/delete/promotion/rollback/inheritance lifecycle APIs published
+Final verification              : roadmap-inclusive exact-head full CI, independent PR-head CI, guarded merge, exact merge-SHA main CI required
+```
+
+HWEB-014-03 must not begin until the roadmap-inclusive HWEB-014-02 head passes full CI, its exact PR head is independently verified, the guarded merge succeeds, and exact merge-SHA `main` CI is accepted.
