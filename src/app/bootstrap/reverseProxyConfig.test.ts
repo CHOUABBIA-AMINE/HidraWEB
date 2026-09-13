@@ -1,10 +1,11 @@
 /// <reference types="node" />
 
 import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-const proxyTemplate = readFileSync(new URL('../../../deploy/nginx/hidraweb.conf.template', import.meta.url), 'utf8');
+const proxyTemplate = readFileSync(join(process.cwd(), 'deploy/nginx/hidraweb.conf.template'), 'utf8');
 
 describe('same-origin reverse proxy template', () => {
   it('forwards the exact HidraAPI and realtime paths without SPA rewriting', () => {
