@@ -53,10 +53,17 @@ async function signIn(page: Page) {
   await expect(page.getByRole('heading', { name: /Vue d/ })).toBeVisible();
 }
 
+async function openRiskWorkspace(page: Page) {
+  await page.evaluate(() => {
+    window.history.pushState({}, '', '/intelligence/risk');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  });
+}
+
 test('HWEB-013-02 renders runtime-discovered risk registers and assessments without invented lifecycle actions', async ({ page }) => {
   await mockRisk(page);
   await signIn(page);
-  await page.goto('/intelligence/risk');
+  await openRiskWorkspace(page);
 
   await expect(page.getByRole('heading', { name: 'Risk intelligence' })).toBeVisible();
   await expect(page.getByText('RR-001')).toBeVisible();
@@ -74,7 +81,7 @@ test('HWEB-013-02 renders runtime-discovered risk registers and assessments with
 test('HWEB-013-02 fails closed without workbench read grants', async ({ page }) => {
   await mockRisk(page, false);
   await signIn(page);
-  await page.goto('/intelligence/risk');
+  await openRiskWorkspace(page);
 
   await expect(page.getByText('Your current HidraAPI grants do not allow risk workbench reads.')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Risk intelligence' })).toHaveCount(0);
