@@ -28,6 +28,8 @@ import {
   type WorkbenchRecord,
 } from '@/features/workbench/api/workbenchApi';
 
+import { CustodyPartyMasterContext } from './CustodyPartyMasterContext';
+
 const MODULE = 'custody';
 const PAGE_SIZE = 25;
 const WORKBENCH_LIST_ROUTE = '/api/v1/workbench/{module}/{resource}';
@@ -90,6 +92,11 @@ function DetailPanel({
     enabled: canRead && Boolean(resource && selectedId),
   });
 
+  const explicitPartyId = title === 'agreement-party detail'
+    && typeof detailQuery.data?.attributes.partyId === 'string'
+    ? detailQuery.data.attributes.partyId
+    : '';
+
   if (!selectedId) return null;
 
   return (
@@ -103,6 +110,7 @@ function DetailPanel({
             {JSON.stringify(detailQuery.data.attributes, null, 2)}
           </Box>
         ) : null}
+        {explicitPartyId ? <CustodyPartyMasterContext partyId={explicitPartyId} canRead={canRead} /> : null}
         <Button onClick={onClose} size="small">Close detail</Button>
       </Stack>
     </Paper>
@@ -284,7 +292,7 @@ export function CustodyReferenceContextPage() {
             <Box>
               <Typography component="h2" variant="h6">Party references from custody agreement parties</Typography>
               <Typography color="text.secondary" variant="body2">
-                Neutral party ID plus custody-owned code/name/role snapshots. Party master-data enrichment remains outside HWEB-012-05.
+                Neutral party ID plus custody-owned snapshots. Opening a custody agreement-party detail may load authoritative party master detail only for that explicit party ID; no party collection scan or mutation is permitted.
               </Typography>
             </Box>
             {!resourcesQuery.isPending && !agreementPartyResource ? <Alert severity="warning">HidraAPI did not publish a custody agreement-party workbench resource.</Alert> : null}
