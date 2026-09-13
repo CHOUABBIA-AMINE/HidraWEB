@@ -7,6 +7,7 @@ import { OverviewPage } from '@/app/pages/OverviewPage';
 import { AlarmConsolePage } from '@/features/alarm/AlarmConsolePage';
 import { IdentityAdministrationPage } from '@/features/context/IdentityAdministrationPage';
 import { OrganizationAdministrationPage } from '@/features/context/OrganizationAdministrationPage';
+import { CustodyMeasurementPeriodsPage } from '@/features/custody';
 import { IncidentWorkspacePage } from '@/features/incident/IncidentWorkspacePage';
 import { PermissionBootstrapBoundary } from '@/features/permissions/PermissionBootstrapBoundary';
 import { PlanningWorkspacePage } from '@/features/planning/PlanningWorkspacePage';
@@ -38,6 +39,7 @@ export const router = createBrowserRouter([
       { path: 'planning', element: <PlanningWorkspacePage /> },
       { path: 'engineering', element: <EngineeringIntegrityProcessPage /> },
       { path: 'engineering/assets', element: <EngineeringAssetsProcessPage /> },
+      { path: 'custody', element: <CustodyMeasurementPeriodsPage /> },
       { path: 'work/tasks', element: <WorkflowTasksPage /> },
       { path: 'workbench', element: <OperationalWorkbenchPage /> },
       { path: 'administration/organization', element: <OrganizationAdministrationPage /> },
