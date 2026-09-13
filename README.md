@@ -73,6 +73,8 @@ The accepted production browser topology uses a same-origin reverse proxy: Hidra
 
 Browser-facing TLS/HSTS, CSP, secure response headers, and static cache policy are defined in [`docs/deployment/Browser-Security-Policy.md`](docs/deployment/Browser-Security-Policy.md) and the checked-in Nginx templates under `deploy/nginx/`.
 
+Frontend correlation/request identifiers and structured technical-error reporting are defined in [`docs/deployment/Frontend-Observability.md`](docs/deployment/Frontend-Observability.md). No remote browser telemetry vendor or ingestion endpoint is assumed by the repository.
+
 ## Implemented application surfaces
 
 - `/overview` — authenticated shell overview.
