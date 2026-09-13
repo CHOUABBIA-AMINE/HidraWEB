@@ -107,8 +107,15 @@ async function signIn(page: Page) {
   await expect(page.getByRole('heading', { name: /Vue d/ })).toBeVisible();
 }
 
-async function openTransferTickets(page: Page) {
-  await page.goto('/custody');
+async function openTransferTickets(page: Page, useSidebar = true) {
+  if (useSidebar) {
+    await page.getByRole('button', { name: 'Comptage & custody' }).click();
+  } else {
+    await page.evaluate(() => {
+      window.history.pushState({}, '', '/custody');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    });
+  }
   await page.getByRole('tab', { name: 'Transfer tickets' }).click();
   await expect(page.getByRole('heading', { name: 'Custody transfer tickets' })).toBeVisible();
 }
@@ -145,7 +152,7 @@ test('HWEB-012-03 reads transfer tickets and creates one from runtime custody re
 test('HWEB-012-03 fails closed when the effective create grant is absent', async ({ page }) => {
   await mockCustody(page, { allowCreate: false });
   await signIn(page);
-  await openTransferTickets(page);
+  await openTransferTickets(page, false);
 
   await expect(page.getByText('Your current HidraAPI grants do not permit transfer-ticket creation.')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Create transfer ticket' })).toBeDisabled();
