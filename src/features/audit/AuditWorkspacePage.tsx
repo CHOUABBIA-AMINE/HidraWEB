@@ -17,7 +17,8 @@ import {
   Typography,
 } from '@mui/material';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FormEvent, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import type { FormEvent } from 'react';
 
 import type { RequestAuditExportRequest } from '@/api/generated/audit/model';
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
