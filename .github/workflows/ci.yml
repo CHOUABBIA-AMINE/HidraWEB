@@ -67,6 +67,9 @@ jobs:
       - name: Generate HWEB-013 risk OpenAPI client
         run: npm run api:generate:risk
 
+      - name: Generate HWEB-013 analytics OpenAPI client
+        run: npm run api:generate:analytics
+
       - name: Lint
         run: npm run lint
 
