@@ -43,7 +43,6 @@ const WORKBENCH_DETAIL_ROUTE = '/api/v1/workbench/{module}/{resource}/{id}';
 const OPEN_DISCREPANCY_ROUTE = '/api/v1/custody/discrepancies';
 
 type RouteMethod = 'GET' | 'POST';
-
 type WorkbenchResource = Awaited<ReturnType<typeof fetchWorkbenchResources>>[number];
 
 function permissionForRoute(
@@ -247,7 +246,7 @@ export function CustodyDiscrepanciesPage() {
                 </TableBody>
               </Table>
             </TableContainer>
-            <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center">
+            <Stack direction="row" spacing={1} sx={{ alignItems: 'center', justifyContent: 'flex-end' }}>
               <Button disabled={reconciliationPage === 0} onClick={() => setReconciliationPage((value) => Math.max(0, value - 1))}>Previous</Button>
               <Typography variant="body2" color="text.secondary">Page {reconciliationPage + 1}</Typography>
               <Button disabled={!reconciliationsQuery.data || reconciliationPage + 1 >= reconciliationsQuery.data.totalPages} onClick={() => setReconciliationPage((value) => value + 1)}>Next</Button>
@@ -299,7 +298,7 @@ export function CustodyDiscrepanciesPage() {
                 </TableBody>
               </Table>
             </TableContainer>
-            <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center">
+            <Stack direction="row" spacing={1} sx={{ alignItems: 'center', justifyContent: 'flex-end' }}>
               <Button disabled={discrepancyPage === 0} onClick={() => setDiscrepancyPage((value) => Math.max(0, value - 1))}>Previous</Button>
               <Typography variant="body2" color="text.secondary">Page {discrepancyPage + 1}</Typography>
               <Button disabled={!discrepanciesQuery.data || discrepancyPage + 1 >= discrepanciesQuery.data.totalPages} onClick={() => setDiscrepancyPage((value) => value + 1)}>Next</Button>
@@ -344,7 +343,7 @@ export function CustodyDiscrepanciesPage() {
             <TextField label="Quantity unit ID" value={quantityUnitId} onChange={(event) => setQuantityUnitId(event.target.value)} />
             <TextField label="Description" multiline minRows={2} value={description} onChange={(event) => setDescription(event.target.value)} />
             <TextField label="Assigned actor ID" value={assignedActorId} onChange={(event) => setAssignedActorId(event.target.value)} />
-            <TextField label="Opened at" type="datetime-local" value={openedAt} onChange={(event) => setOpenedAt(event.target.value)} InputLabelProps={{ shrink: true }} />
+            <TextField label="Opened at" type="datetime-local" value={openedAt} onChange={(event) => setOpenedAt(event.target.value)} slotProps={{ inputLabel: { shrink: true } }} />
             {createMutation.isError ? <Alert severity="error">{errorMessage(createMutation.error, 'discrepancy opening')}</Alert> : null}
             {createMutation.data ? <Alert severity="success">Discrepancy opened by HidraAPI with status {text(createMutation.data.status)}.</Alert> : null}
             <Button variant="contained" disabled={!canCreate || createMutation.isPending} onClick={submit}>Open discrepancy</Button>
