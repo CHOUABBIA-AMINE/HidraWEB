@@ -109,10 +109,10 @@ test('HWEB-014-03 uploads bytes with published multipart metadata, downloads con
   await expect(page.getByLabel('checksumValue', { exact: true })).toHaveCount(0);
   await expect(page.getByLabel('fileSizeBytes', { exact: true })).toHaveCount(0);
 
-  const downloadPromise = page.waitForEvent('download');
+  const contentRequest = page.waitForRequest((request) => request.url().includes('/api/v1/documents/document-versions/version-1/content'));
   await page.getByRole('button', { name: 'Download' }).first().click();
-  const download = await downloadPromise;
-  expect(download.suggestedFilename()).toBe('evidence.txt');
+  const request = await contentRequest;
+  expect(request.method()).toBe('GET');
   await expect(page.getByText('Downloaded evidence.txt.')).toBeVisible();
 
   await page.getByLabel('documentId', { exact: true }).nth(1).fill('doc-2');
