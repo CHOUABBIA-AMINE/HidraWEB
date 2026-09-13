@@ -79,6 +79,9 @@ jobs:
       - name: Generate HWEB-014 audit OpenAPI client
         run: npm run api:generate:audit
 
+      - name: Generate HWEB-014 configuration OpenAPI client
+        run: npm run api:generate:configuration
+
       - name: Lint
         run: npm run lint
 
