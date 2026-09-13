@@ -37,7 +37,7 @@ export function DestructiveActionConfirmationDialog({
   };
 
   return (
-    <Dialog open={open} onClose={resetAndCancel} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={resetAndCancel} maxWidth="sm" fullWidth transitionDuration={0}>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ pt: 1 }}>
