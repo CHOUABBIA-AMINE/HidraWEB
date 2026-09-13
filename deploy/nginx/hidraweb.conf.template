@@ -1,0 +1,45 @@
+server {
+    listen 8080;
+    server_name _;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Exact STOMP/WebSocket transport path. This only forwards the HTTP Upgrade;
+    # authentication semantics remain owned by HidraAPI and are not invented here.
+    location = /api/v1/realtime/ws {
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_pass ${HIDRA_API_UPSTREAM};
+    }
+
+    # SSE must not be buffered by the static/reverse-proxy tier.
+    location = /api/v1/realtime/sse {
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_pass ${HIDRA_API_UPSTREAM};
+    }
+
+    # Preserve the complete HidraAPI path under the same browser origin.
+    location /api/ {
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_pass ${HIDRA_API_UPSTREAM};
+    }
+
+    # React Router history fallback for non-API browser routes.
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
