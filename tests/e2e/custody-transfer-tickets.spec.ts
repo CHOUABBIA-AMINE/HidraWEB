@@ -108,7 +108,7 @@ async function signIn(page: Page) {
 }
 
 async function openTransferTickets(page: Page) {
-  await page.getByRole('button', { name: 'Comptage & custody' }).click();
+  await page.goto('/custody');
   await page.getByRole('tab', { name: 'Transfer tickets' }).click();
   await expect(page.getByRole('heading', { name: 'Custody transfer tickets' })).toBeVisible();
 }
