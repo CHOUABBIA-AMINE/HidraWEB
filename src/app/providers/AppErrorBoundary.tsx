@@ -1,8 +1,11 @@
 import { Alert, Box, Button, Typography } from '@mui/material';
-import { Component, type ErrorInfo, type PropsWithChildren, type ReactNode } from 'react';
+import { Component, type PropsWithChildren, type ReactNode } from 'react';
+
+import { reportTechnicalError } from '@/app/observability/technicalErrorReporter';
 
 interface State {
   error?: Error;
+  eventId?: string;
 }
 
 export class AppErrorBoundary extends Component<PropsWithChildren, State> {
@@ -12,8 +15,13 @@ export class AppErrorBoundary extends Component<PropsWithChildren, State> {
     return { error };
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    console.error('Unhandled HidraWeb error', error, errorInfo);
+  public componentDidCatch(error: Error): void {
+    const report = reportTechnicalError({
+      source: 'react',
+      message: 'Unhandled React render error.',
+      errorName: error.name,
+    });
+    this.setState({ eventId: report.eventId });
   }
 
   public render(): ReactNode {
@@ -25,7 +33,12 @@ export class AppErrorBoundary extends Component<PropsWithChildren, State> {
       <Box sx={{ p: 4 }}>
         <Alert severity="error">
           <Typography variant="h6">HidraWeb encountered an unexpected error.</Typography>
-          <Typography variant="body2">{this.state.error.message}</Typography>
+          <Typography variant="body2">The application could not render this view safely.</Typography>
+          {this.state.eventId ? (
+            <Typography component="div" variant="caption" sx={{ mt: 1 }}>
+              Support reference: {this.state.eventId}
+            </Typography>
+          ) : null}
           <Button sx={{ mt: 2 }} onClick={() => window.location.reload()}>
             Reload application
           </Button>
