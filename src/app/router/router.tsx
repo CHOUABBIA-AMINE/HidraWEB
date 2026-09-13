@@ -5,6 +5,7 @@ import { LoginPage } from '@/app/pages/LoginPage';
 import { NotFoundPage } from '@/app/pages/NotFoundPage';
 import { OverviewPage } from '@/app/pages/OverviewPage';
 import { AlarmConsolePage } from '@/features/alarm/AlarmConsolePage';
+import { AnalyticsWorkspacePage } from '@/features/analytics';
 import { IdentityAdministrationPage } from '@/features/context/IdentityAdministrationPage';
 import { OrganizationAdministrationPage } from '@/features/context/OrganizationAdministrationPage';
 import { CustodyWorkspacePage } from '@/features/custody';
@@ -42,6 +43,7 @@ export const router = createBrowserRouter([
       { path: 'engineering/assets', element: <EngineeringAssetsProcessPage /> },
       { path: 'custody', element: <CustodyWorkspacePage /> },
       { path: 'intelligence/risk', element: <RiskWorkspacePage /> },
+      { path: 'intelligence/analytics', element: <AnalyticsWorkspacePage /> },
       { path: 'work/tasks', element: <WorkflowTasksPage /> },
       { path: 'workbench', element: <OperationalWorkbenchPage /> },
       { path: 'administration/organization', element: <OrganizationAdministrationPage /> },
