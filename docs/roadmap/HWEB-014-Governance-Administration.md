@@ -1,15 +1,15 @@
 # HWEB-014 — Governance and Administration Completion
 
-Status: HWEB-014-02 COMPLETE / HWEB-014-03 NEXT
+Status: HWEB-014-03 COMPLETE / HWEB-014-04 NEXT
 
 ## Accepted starting point
 
 ```text
-HidraWEB verified main       : ba80b3186d5600b2b10d306b256c0fdba1c9a7cd
-HWEB-014-01 exact-main CI    : 34760750153 — SUCCESS
+HidraWEB verified main       : ab209cc3105efca2239f78041422c4cb3a59c37d
+HWEB-014-02 exact-main CI    : 34762472996 — SUCCESS
 HidraAPI audited main        : 0c8643c17b2648e8be85c658854f57ea0faab765
-Current completed task       : HWEB-014-02 — configuration/feature-flag administration
-Next task                    : HWEB-014-03 — document upload/download/version evidence
+Current completed task       : HWEB-014-03 — document metadata/version evidence
+Next task                    : HWEB-014-04 — integration connector/job/dead-letter monitoring
 ```
 
 ## HWEB-014-01 — audit search/export UI — COMPLETE
@@ -355,4 +355,163 @@ Known backend gaps              : no toggle/update/delete/promotion/rollback/inh
 Final verification              : roadmap-inclusive exact-head full CI, independent PR-head CI, guarded merge, exact merge-SHA main CI required
 ```
 
-HWEB-014-03 must not begin until the roadmap-inclusive HWEB-014-02 head passes full CI, its exact PR head is independently verified, the guarded merge succeeds, and exact merge-SHA `main` CI is accepted.
+## HWEB-014-03 — document metadata/version evidence — COMPLETE
+
+### Backend source and exact published operations
+
+HWEB-014-03 was audited against HidraAPI `main` commit:
+
+```text
+0c8643c17b2648e8be85c658854f57ea0faab765
+```
+
+`SpringDocumentsController` publishes only these canonical operations:
+
+```text
+GET  /api/v1/documents/capabilities
+POST /api/v1/documents/documents
+POST /api/v1/documents/document-versions
+POST /api/v1/documents/target-links
+```
+
+Legacy POST aliases exist, but HidraWEB uses only the canonical resource endpoints.
+
+A repository-wide backend audit found no published multipart file-upload endpoint and no document artifact download/stream endpoint. No `MultipartFile` controller contract, attachment response, binary stream route, or retrievable storage URL is published by the accepted backend source.
+
+Consequently, HWEB-014-03 does **not** expose a file picker, binary upload action, synthesized storage URL, or download button.
+
+### Version metadata semantics
+
+Despite its backend use-case name, `POST /api/v1/documents/document-versions` accepts JSON metadata rather than file bytes.
+
+Its `UploadDocumentVersionRequest` publishes:
+
+```text
+documentId
+versionNumber
+versionLabel
+titleAr
+titleFr
+titleEn
+description
+storageObjectId
+mimeType
+originalFilename
+fileExtension
+fileSizeBytes
+checksumAlgorithm
+checksumValue
+languageCode
+documentDate
+effectiveFrom
+effectiveTo
+uploadedByActorId
+uploadedByDisplayNameSnapshot
+```
+
+`storageObjectId` is therefore treated only as an existing storage reference supplied to the published metadata contract. HidraWEB does not infer how that storage object is created, uploaded, authorized, resolved, or downloaded.
+
+### Other exact mutation contracts
+
+Document registration uses `RegisterDocumentRequest` exactly as published by HidraAPI. Target linking uses `LinkDocumentToTargetRequest` exactly as published by HidraAPI. Returned document, version, and target-link statuses are displayed as evidence only and do not authorize invented lifecycle operations.
+
+### Runtime read evidence
+
+Read evidence uses generic workbench discovery for module `documents`. HidraWEB locates the following Java types in runtime descriptors and then uses each descriptor's returned `resource` value:
+
+```text
+DocumentJpaEntity
+DocumentVersionJpaEntity
+DocumentTargetLinkJpaEntity
+```
+
+No runtime endpoint resource name is derived from a Java class name.
+
+### Authorization
+
+All document controls fail closed.
+
+Read evidence requires the exact published permission for:
+
+```text
+GET /api/v1/workbench/{module}/{resource}
+```
+
+Each mutation is independently enabled only when its exact route descriptor exists and the current user holds that descriptor's exact permission:
+
+```text
+POST /api/v1/documents/documents
+POST /api/v1/documents/document-versions
+POST /api/v1/documents/target-links
+```
+
+Permission strings are not inferred by product code. Backend 403 remains final authority.
+
+### Frontend route and state ownership
+
+```text
+Frontend route : /administration/documents
+Backend owner  : documents
+Server state   : TanStack Query for runtime evidence reads and metadata mutations
+Local state    : register-document, version-metadata, and target-link form payloads only
+```
+
+### Deterministic OpenAPI evidence
+
+```text
+Backend SHA    : 0c8643c17b2648e8be85c658854f57ea0faab765
+OpenAPI slice  : openapi/hidra-documents-0c8643c17b2648e8be85c658854f57ea0faab765.json
+Orval config   : orval.documents.config.ts
+Generator      : npm run api:generate:documents
+CI gate        : Generate HWEB-014 documents OpenAPI client
+```
+
+The deterministic slice contains only the accepted documents capabilities endpoint, the three canonical JSON POST endpoints, exact request/response fields, and backend-published status values required by those responses.
+
+### Error and fail-closed states
+
+The workspace explicitly handles:
+
+- missing generic workbench route-permission metadata;
+- missing effective workbench read grant;
+- missing runtime document/version/target-link resources;
+- generic evidence read failures;
+- missing mutation route-permission metadata;
+- missing effective grant for each individual POST operation;
+- metadata mutation failures;
+- backend 403 as final authority.
+
+### Tests
+
+`tests/e2e/documents-administration.spec.ts` verifies:
+
+- runtime discovery and reads for documents, versions, and target links;
+- the exact published JSON metadata request shapes for all three mutations;
+- independent strict route grants and fail-closed controls;
+- fail-closed evidence reads without the generic workbench grant;
+- absence of `<input type="file">` controls;
+- absence of download buttons;
+- explicit user-visible disclosure that no multipart upload or download/stream contract is published.
+
+During development, two Playwright failures were test-locator ambiguities only: the first matched both the main `Document evidence` heading and a target-link section heading; the second used substring label matching for `code`. Both assertions were corrected to exact matching without changing product behavior.
+
+### Completion record
+
+```text
+Backend source commit / branch : 0c8643c17b2648e8be85c658854f57ea0faab765 / main
+Frontend base                   : ab209cc3105efca2239f78041422c4cb3a59c37d / main
+Product branch                  : hweb-014-03-documents-evidence
+Frontend route                  : /administration/documents
+Published mutation endpoints    : documents, document-versions, target-links POST JSON only
+Binary multipart upload         : absent from accepted backend contract; no file picker exposed
+Artifact download/stream        : absent from accepted backend contract; no download exposed
+Runtime read source             : generic workbench resources for module documents
+Permission model                : exact route descriptors intersected with effective user grants
+OpenAPI regeneration            : deterministic documents generator added to verify/CI
+Tests                           : tests/e2e/documents-administration.spec.ts
+Product branch CI               : 34763523988 — SUCCESS on 4014c680caa545f78e41592675a410713d97215f
+Known backend gaps              : no binary upload contract and no document download/stream contract
+Final verification              : roadmap-inclusive exact-head full CI, independent PR-head CI, guarded merge, exact merge-SHA main CI required
+```
+
+HWEB-014-04 must not begin until the roadmap-inclusive HWEB-014-03 head passes full CI, its exact PR head is independently verified, the guarded merge succeeds, and exact merge-SHA `main` CI is accepted.
