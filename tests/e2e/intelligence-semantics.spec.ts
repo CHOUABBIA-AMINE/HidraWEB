@@ -115,8 +115,8 @@ test('HWEB-013-06 preserves read derive recommend semantics without operational 
 
   await navigate(page, '/intelligence/analytics');
   await expect(page.getByRole('heading', { name: 'Analytics intelligence' })).toBeVisible();
-  await expect(page.getByText(/analytics-owned derived evidence/i)).toBeVisible();
-  await expect(page.getByText(/operational source truth stays with its owning modules/i)).toBeVisible();
+  await expect(page.getByText(/analytics-owned read views only/i)).toBeVisible();
+  await expect(page.getByText(/operational source-of-truth data remains owned by its source modules/i)).toBeVisible();
 
   await navigate(page, '/intelligence/simulation');
   await expect(page.getByRole('heading', { name: 'Simulation intelligence' })).toBeVisible();
