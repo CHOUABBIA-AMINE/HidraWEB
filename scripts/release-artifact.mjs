@@ -2,6 +2,7 @@ import console from 'node:console';
 import { createHash } from 'node:crypto';
 import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { basename, join, relative, resolve, sep } from 'node:path';
+import process from 'node:process';
 
 const command = process.argv[2];
 const projectRoot = resolve('.');
