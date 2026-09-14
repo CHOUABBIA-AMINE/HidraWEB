@@ -108,7 +108,7 @@ async function mockAlarm(page: Page) {
   await page.route('**/api/v1/alarm/alarms/alarm-1/shelvings', (route) => route.fulfill({ json: [] }));
   await page.route('**/api/v1/alarm/alarms/alarm-1', (route) => route.fulfill({ json: alarm }));
   await page.route('**/api/v1/alarm/alarms/acknowledgements', async (route) => {
-    expect(route.request().postDataJSON()).toMatchObject({ alarmId: 'alarm-1', acknowledgedByActorId: 'actor-1' });
+    expect(route.request().postDataJSON()).toEqual({ alarmId: 'alarm-1' });
     await route.fulfill({ json: 'ack-1' });
   });
 }
@@ -199,7 +199,8 @@ test('HWEB-015-09 protects the monitor-to-response-to-workflow operator journey'
   await expect(page.getByText('Pression élevée')).toBeVisible();
   await page.getByRole('button', { name: 'Ouvrir' }).click();
   await expect(page.getByText('Pipeline Nord', { exact: true }).last()).toBeVisible();
-  await page.getByLabel('Référence acteur').first().fill('actor-1');
+  await expect(page.getByText(/dérive l’identité de l’acteur/)).toBeVisible();
+  await expect(page.getByLabel('Référence acteur')).toHaveCount(0);
   await page.getByRole('button', { name: 'Acquitter' }).click();
   await expect(page.getByText('Opération enregistrée par HidraAPI.')).toBeVisible();
 
