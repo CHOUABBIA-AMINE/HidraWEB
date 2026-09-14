@@ -10,8 +10,10 @@ import { parse as parseYaml } from 'yaml';
 const METHODS = new Set(['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace']);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'openapi/compatibility/hidra-api-baseline.json'), 'utf8'));
-const artifactPath = path.join(root, manifest.fullContractGzipBase64);
-const gzipBytes = Buffer.from(fs.readFileSync(artifactPath, 'utf8').trim(), 'base64');
+const artifactBase64 = manifest.fullContractGzipBase64Parts
+  .map((part) => fs.readFileSync(path.join(root, part), 'utf8').trim())
+  .join('');
+const gzipBytes = Buffer.from(artifactBase64, 'base64');
 const fullBytes = gunzipSync(gzipBytes);
 const backend = JSON.parse(fullBytes.toString('utf8'));
 const errors = [];
@@ -58,8 +60,9 @@ if (errors.length) {
 console.log(`\nOpenAPI compatibility gate passed for ${configs.length} feature contracts against HidraAPI ${manifest.backendCommit}.`);
 
 function checkEvidence() {
-  const required = ['repository', 'backendCommit', 'workflowRunId', 'artifactId', 'artifactName', 'artifactDigest', 'fullSpecSha256', 'fullContractGzipBase64', 'fullContractGzipSha256', 'expectedOrvalContracts'];
+  const required = ['repository', 'backendCommit', 'workflowRunId', 'artifactId', 'artifactName', 'artifactDigest', 'fullSpecSha256', 'fullContractGzipBase64Parts', 'fullContractGzipSha256', 'expectedOrvalContracts'];
   for (const key of required) if (manifest[key] === undefined || manifest[key] === '') errors.push(`baseline manifest missing ${key}`);
+  if (!Array.isArray(manifest.fullContractGzipBase64Parts) || manifest.fullContractGzipBase64Parts.length === 0) errors.push('baseline manifest has no contract artifact parts');
   if (manifest.repository !== 'CHOUABBIA-AMINE/HidraAPI') errors.push(`unexpected backend repository ${manifest.repository}`);
   if (manifest.artifactName !== `hidra-api-openapi-${manifest.backendCommit}`) errors.push('artifact name does not match backend commit');
   if (hash(gzipBytes) !== manifest.fullContractGzipSha256) errors.push('checked-in compressed contract hash does not match manifest');
