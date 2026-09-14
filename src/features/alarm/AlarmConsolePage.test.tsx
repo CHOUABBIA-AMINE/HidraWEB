@@ -21,7 +21,7 @@ const fixtures = vi.hoisted(() => {
   };
 });
 
-const hidraHttpClient = vi.hoisted(() => vi.fn(async (config: { url?: string; method?: string }) => {
+const hidraHttpClient = vi.hoisted(() => vi.fn(async (config: { url?: string; method?: string; data?: unknown }) => {
   if (config.url?.endsWith('/security/permissions/catalog')) return { strategy: 'derived-route-permission-catalog', enforcement: 'backend-enforced', permissionFormat: '<module>:<resource>:<action>', routes: fixtures.routes };
   if (config.url?.endsWith('/security/permissions/routes')) return fixtures.routes;
   if (config.url?.endsWith('/identity/me/permissions')) return fixtures.permissions;
@@ -62,13 +62,17 @@ describe('HWEB-008 alarm console', () => {
     expect(await screen.findByText('MAINT')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Ouvrir le réseau' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Ouvrir mes tâches' })).toBeInTheDocument();
-    expect(screen.getByText(/référence acteur depuis le client/)).toBeInTheDocument();
+    expect(screen.getByText(/dérive l’identité de l’acteur/)).toBeInTheDocument();
+    expect(screen.queryByLabelText('Référence acteur')).not.toBeInTheDocument();
 
-    fireEvent.change(screen.getAllByLabelText('Référence acteur')[0], { target: { value: 'actor-1' } });
     fireEvent.click(screen.getByRole('button', { name: 'Acquitter' }));
 
     expect(await screen.findByText('Opération enregistrée par HidraAPI.')).toBeInTheDocument();
-    expect(hidraHttpClient).toHaveBeenCalledWith(expect.objectContaining({ method: 'POST', url: '/api/v1/alarm/alarms/acknowledgements' }));
+    expect(hidraHttpClient).toHaveBeenCalledWith(expect.objectContaining({
+      data: { alarmId: 'alarm-1' },
+      method: 'POST',
+      url: '/api/v1/alarm/alarms/acknowledgements',
+    }));
     expect(window.location.pathname).toBe('/alarms');
   });
 });
