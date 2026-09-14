@@ -83,6 +83,8 @@ Hosted-CI large-grid, topology-map preprocessing, and ECharts runtime performanc
 
 The full Chromium Playwright regression boundary and critical control-room journey coverage are defined in [`docs/deployment/Playwright-Regression-Suite.md`](docs/deployment/Playwright-Regression-Suite.md).
 
+The pinned HidraAPI artifact evidence and consumer compatibility gate are defined in [`docs/deployment/OpenAPI-Compatibility-Gate.md`](docs/deployment/OpenAPI-Compatibility-Gate.md).
+
 ## Implemented application surfaces
 
 - `/overview` — authenticated shell overview.
