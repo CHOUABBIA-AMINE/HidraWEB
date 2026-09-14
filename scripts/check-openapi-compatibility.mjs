@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer';
 import console from 'node:console';
 import fs from 'node:fs';
 import process from 'node:process';
