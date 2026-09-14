@@ -31,6 +31,9 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
 
+      - name: Verify HidraAPI OpenAPI compatibility
+        run: npm run openapi:compatibility
+
       - name: Generate HWEB-003 workbench OpenAPI client
         run: npm run api:generate:workbench
       - name: Generate HWEB-004 identity/organization OpenAPI client
