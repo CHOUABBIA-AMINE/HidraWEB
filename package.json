@@ -11,6 +11,8 @@
     "build": "tsc -b && vite build && npm run bundle:check",
     "bundle:check": "node scripts/check-bundle-budgets.mjs",
     "openapi:compatibility": "node scripts/check-openapi-compatibility.mjs",
+    "release:package": "node scripts/release-artifact.mjs package",
+    "release:verify": "node scripts/release-artifact.mjs verify",
     "preview": "vite preview",
     "typecheck": "tsc -b --pretty false",
     "lint": "eslint .",

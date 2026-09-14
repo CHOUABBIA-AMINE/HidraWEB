@@ -81,7 +81,21 @@ jobs:
         run: npm run test:performance
       - name: Production build
         run: npm run build
+      - name: Package release artifact
+        env:
+          HIDRA_RELEASE_SOURCE_SHA: ${{ github.sha }}
+        run: npm run release:package
+      - name: Verify release artifact
+        env:
+          HIDRA_RELEASE_SOURCE_SHA: ${{ github.sha }}
+        run: npm run release:verify
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
       - name: Full Playwright regression suite
         run: npm run test:e2e
+      - name: Upload verified release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hidraweb-release-${{ github.sha }}
+          path: release/hidraweb
+          if-no-files-found: error
