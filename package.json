@@ -10,6 +10,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build && npm run bundle:check",
     "bundle:check": "node scripts/check-bundle-budgets.mjs",
+    "openapi:compatibility": "node scripts/check-openapi-compatibility.mjs",
     "preview": "vite preview",
     "typecheck": "tsc -b --pretty false",
     "lint": "eslint .",
@@ -36,7 +37,7 @@
     "api:generate:audit": "orval --config orval.audit.config.ts",
     "api:generate:configuration": "orval --config orval.configuration.config.ts",
     "api:generate:documents": "orval --config orval.documents.config.ts",
-    "verify": "npm run api:generate:workbench && npm run api:generate:identity-organization && npm run api:generate:topology && npm run api:generate:telemetry-monitoring && npm run api:generate:workflow && npm run api:generate:alarm && npm run api:generate:incident && npm run api:generate:leak && npm run api:generate:hse && npm run api:generate:planning && npm run api:generate:custody && npm run api:generate:risk && npm run api:generate:analytics && npm run api:generate:simulation && npm run api:generate:reporting && npm run api:generate:audit && npm run api:generate:configuration && npm run api:generate:documents && npm run lint && npm run typecheck && npm run test && npm run test:performance && npm run build"
+    "verify": "npm run openapi:compatibility && npm run api:generate:workbench && npm run api:generate:identity-organization && npm run api:generate:topology && npm run api:generate:telemetry-monitoring && npm run api:generate:workflow && npm run api:generate:alarm && npm run api:generate:incident && npm run api:generate:leak && npm run api:generate:hse && npm run api:generate:planning && npm run api:generate:custody && npm run api:generate:risk && npm run api:generate:analytics && npm run api:generate:simulation && npm run api:generate:reporting && npm run api:generate:audit && npm run api:generate:configuration && npm run api:generate:documents && npm run lint && npm run typecheck && npm run test && npm run test:performance && npm run build"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
