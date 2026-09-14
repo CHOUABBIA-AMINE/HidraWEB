@@ -1,6 +1,6 @@
 # HWEB-015-11 — Backup/Rollback and Release Artifact Verification
 
-Status: IMPLEMENTED / PRODUCT-HEAD CI ACCEPTED / ROADMAP-INCLUSIVE CI PENDING
+Status: COMPLETE / EXACT-MAIN CI ACCEPTED
 
 ## Scope
 
@@ -19,7 +19,7 @@ The accepted HWEB-015-10 OpenAPI compatibility gate remains the cross-repository
 
 ## Implemented release-artifact contract
 
-CI now packages the exact Vite production build and checked-in Nginx templates into:
+CI packages the exact Vite production build and checked-in Nginx templates into:
 
 ```text
 release/hidraweb/
@@ -87,15 +87,24 @@ The successful run preserved and passed:
 - full Playwright regression suite;
 - verified release artifact upload.
 
-## Acceptance lifecycle
+## Final acceptance lifecycle
 
-The task is not complete until all remaining lifecycle stages succeed:
+```text
+Roadmap-inclusive head        : 9cc8a10fdbd6bbb08fd73528669786e3ad0621f7
+Roadmap-inclusive CI          : 34793719068 — SUCCESS
+Pull request                  : #85
+Independent PR CI             : 34793950405 — SUCCESS
+Guarded expected head         : 9cc8a10fdbd6bbb08fd73528669786e3ad0621f7
+Merge SHA                     : e7ab8f401cf7ceffde0f68ca1b2cdbb645f61c94
+Merge parent 1                : ab7a856453d7438e200e841cf4d8f48b8fc1e5f9
+Merge parent 2                : 9cc8a10fdbd6bbb08fd73528669786e3ad0621f7
+Exact-main CI                 : 34794197096 — SUCCESS
+Exact-main release artifact   : 10329157047
+Exact-main artifact name      : hidraweb-release-e7ab8f401cf7ceffde0f68ca1b2cdbb645f61c94
+Exact-main artifact digest    : sha256:5ce5e226dce38e72ef27d7fadd8b32ef45fb8d696b7fd7b5e25bfc6dde5477e6
+Exact-main artifact size      : 673908 bytes
+```
 
-1. roadmap-inclusive full CI;
-2. independent pull-request CI;
-3. guarded merge with exact expected head SHA;
-4. merge-parent verification;
-5. live `main` verification;
-6. exact merge-SHA `main` CI.
+The exact-main CI reran the complete compatibility, generation, lint, typecheck, unit/component, performance, bundle/build, release verification, Playwright, and artifact-upload lifecycle on the exact accepted merge SHA.
 
-HWEB-015-12 must not start automatically after HWEB-015-11 acceptance.
+HWEB-015-12 may begin only from this accepted exact `main`.
