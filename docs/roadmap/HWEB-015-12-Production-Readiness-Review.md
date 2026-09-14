@@ -1,6 +1,6 @@
 # HWEB-015-12 — Production Readiness Review
 
-Status: REVIEW COMPLETE / PRODUCT-HEAD CI PENDING
+Status: REVIEW COMPLETE / PRODUCT-HEAD CI ACCEPTED / ROADMAP-INCLUSIVE CI PENDING
 
 ## Scope
 
@@ -40,7 +40,7 @@ HidraAPI `main` remains at the same audited commit used by the accepted HWEB-015
 | Browser regression | HWEB-015-09 executes the complete Playwright suite and protects the representative monitoring → alarm → workflow operational journey. | PASS |
 | Backend contract compatibility | HWEB-015-10 verifies all 18 feature OpenAPI inputs against the accepted full HidraAPI artifact before generation and already caught/corrected real alarm actor-authority drift. | PASS |
 | Release/rollback | HWEB-015-11 packages the exact build plus deployment templates, verifies every file by SHA-256/source SHA, uploads only after Playwright, and requires immutable-artifact rollback rather than rebuilding old source. | PASS |
-| Production readiness | HWEB-015-12 consolidates the accepted controls, deployment prerequisites, residual boundaries, and final release decision, then reruns the complete CI lifecycle on the review head. | PENDING CURRENT CI |
+| Production readiness | HWEB-015-12 consolidates the accepted controls, deployment prerequisites, residual boundaries, and final release decision, then reruns the complete CI lifecycle on the review head. | PASS AT PRODUCT HEAD / FINAL LIFECYCLE PENDING |
 
 ## Current CI and release acceptance boundary
 
@@ -60,6 +60,21 @@ The checked-in `.github/workflows/ci.yml` is the cumulative repository acceptanc
 12. verified release-artifact upload only after every preceding gate succeeds.
 
 HWEB-015-12 does not create a weaker readiness-only pipeline. The final review must pass this same cumulative lifecycle at product head, roadmap-inclusive head, independent pull-request CI, and exact merge-SHA `main` CI.
+
+## Product-head evidence
+
+The exact review head passed the complete cumulative lifecycle without runtime-code changes or weakened gates:
+
+```text
+Product/review head             : 070e2dca5de9c2034112dd653b4023c7ffde013c
+Product-head CI                 : 34796052204 — SUCCESS
+Release artifact ID             : 10329198242
+Release artifact name           : hidraweb-release-070e2dca5de9c2034112dd653b4023c7ffde013c
+Release artifact digest         : sha256:ce3325bc5c8c4dd1d9e8a2ff8430589d795cf296b8425831d73aee5ad8a7e09d
+Release artifact size           : 673907 bytes
+```
+
+That run passed OpenAPI compatibility, all 18 Orval generators, lint, typecheck, unit/component tests, runtime performance budgets, production build and bundle budgets, release packaging, release-manifest verification, the complete Playwright suite, and verified artifact upload.
 
 ## Production configuration prerequisites
 
@@ -134,10 +149,10 @@ Frontend routes created/changed : none
 State ownership                 : no new browser, server, or business state
 Error states                    : readiness is NO-GO when a required CI, artifact, compatibility, deployment-input, rollback-evidence, or smoke-check prerequisite fails
 Tests added                     : none; the complete existing cumulative CI/test lifecycle is the acceptance evidence
-OpenAPI regeneration status     : current review must pass compatibility plus all 18 deterministic generators
+OpenAPI regeneration status     : PASS — compatibility plus all 18 deterministic generators passed product-head CI 34796052204
 Known backend gaps              : no authoritative browser WebSocket/STOMP bearer-handshake contract; no frontend-owned backend/database recovery semantics
 Known external boundaries       : external IdP UI/accessibility/SLA; deployment TLS/certificates/DNS/upstream; optional remote telemetry sink; environment-specific smoke/SLA evidence
-CI result                       : PENDING product-head review CI
+CI result                       : product-head CI 34796052204 — SUCCESS; roadmap-inclusive/PR/exact-main lifecycle pending
 ```
 
-The HWEB-015 phase must not be declared complete until HWEB-015-12 passes product-head CI, roadmap-inclusive CI, independent PR CI, guarded exact-head merge verification, and exact merge-SHA `main` CI.
+The HWEB-015 phase must not be declared complete until HWEB-015-12 passes roadmap-inclusive CI, independent PR CI, guarded exact-head merge verification, and exact merge-SHA `main` CI.
