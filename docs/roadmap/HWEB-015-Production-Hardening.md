@@ -1,15 +1,15 @@
 # HWEB-015 — Production Hardening
 
-Status: HWEB-015-09 COMPLETE / HWEB-015-10 NEXT
+Status: HWEB-015-10 COMPLETE / HWEB-015-11 NEXT
 
 ## Accepted starting point
 
 ```text
-HidraWEB verified main       : c9d9115ecd5d2d0b32d5137c2cb0ae2b2001e50a
-HWEB-015-08 exact-main CI    : 34788527098 — SUCCESS
+HidraWEB verified main       : 63b8fd9a28aa5678e1bafed7a7d8f85eee278a7c
+HWEB-015-09 exact-main CI    : 34789894742 — SUCCESS
 HidraAPI audited main        : 725a451ae4880ccb4f2ec508709241f88cd4aea7
-Current completed task       : HWEB-015-09 — full Playwright regression suite for critical operational journeys
-Next task                    : HWEB-015-10 — OpenAPI compatibility gate between HidraAPI and HidraWEB pipelines
+Current completed task       : HWEB-015-10 — OpenAPI compatibility gate between HidraAPI and HidraWEB pipelines
+Next task                    : HWEB-015-11 — backup/rollback and release artifact verification
 ```
 
 ## HWEB-015-01 — freeze supported enterprise authentication mode and IdP contract — COMPLETE
@@ -585,4 +585,68 @@ Product branch CI               : 34789020602 — SUCCESS
 Final verification              : roadmap-inclusive exact-head CI, independent PR CI, guarded exact-head merge, exact merge-SHA main CI required
 ```
 
-HWEB-015-10 must not begin until the roadmap-inclusive HWEB-015-09 head passes full CI, its exact PR head is independently verified, the guarded merge succeeds, and exact merge-SHA `main` CI is accepted.
+HWEB-015-10 was authorized only after HWEB-015-09 had been independently verified, guarded-merged, and accepted on exact merge-SHA `main` CI `34789894742` at `63b8fd9a28aa5678e1bafed7a7d8f85eee278a7c`.
+
+## HWEB-015-10 — OpenAPI compatibility gate between HidraAPI and HidraWEB pipelines — COMPLETE
+
+### Scope
+
+HWEB-015-10 establishes a deterministic consumer-side compatibility gate between the full OpenAPI contract published by HidraAPI and every checked-in feature contract consumed by HidraWEB Orval generation. It does not start HWEB-015-11 backup/rollback or release artifact work and does not create new backend routes, permissions, lifecycle rules, or frontend business state.
+
+### Backend artifact evidence
+
+The accepted compatibility baseline is the exact deterministic artifact from HidraAPI `main`:
+
+```text
+Backend commit      : 725a451ae4880ccb4f2ec508709241f88cd4aea7
+Backend CI          : 34764890847 — SUCCESS
+Artifact id         : 10320386070
+Artifact name       : hidra-api-openapi-725a451ae4880ccb4f2ec508709241f88cd4aea7
+Artifact digest     : sha256:4c401ba08e3aeb897be19b5944072f6ada7e08efc85c299683def9175e8d4c38
+Full contract SHA   : sha256:1d4bd8451989e5efcda453c0bf96a538040f28afad30e970a7c9d4765b9af00d
+Compressed evidence : sha256:3ae1ff18063a21576b123cf27e742b0ef353a2a1569c645034f0116ed1006152
+OpenAPI             : 3.1.0 / 230 paths / 214 schemas
+```
+
+HidraAPI already owns deterministic artifact publication, so no backend workflow change, cross-repository secret, PAT, or live-runtime dependency was introduced.
+
+### Compatibility gate
+
+`npm run openapi:compatibility` runs before all 18 feature Orval generators in `npm run verify` and in GitHub Actions. `scripts/check-openapi-compatibility.mjs` verifies the pinned artifact provenance/hashes, reconstructs the exact backend contract from the reviewed four-part gzip/base64 evidence, discovers all feature Orval configs, and compares their consumed routes and schemas against the accepted full backend artifact.
+
+The gate fails on removed paths/methods/parameters/responses/media types/schemas/properties, newly required consumed parameters/properties, incompatible types/formats/enums/nested item contracts, malformed Orval input ownership, changed contract count without baseline review, or artifact evidence/hash drift. Additive unrelated backend contracts and optional additions remain compatible.
+
+### Alarm authority drift discovered and corrected
+
+The first valid compatibility execution found 17 of 18 feature contracts compatible and correctly rejected the stale alarm slice because HidraAPI had removed client-selectable authoritative actor identity from acknowledgement and closure requests.
+
+HidraWEB was rebaselined to `openapi/hidra-alarm-725a451ae4880ccb4f2ec508709241f88cd4aea7.json`. The alarm operator UI and tests no longer send or expose acknowledgement/closure actor selectors. Actor identity is derived by HidraAPI from the authenticated principal, preserving backend authority instead of weakening the compatibility rule.
+
+### Documentation and tests
+
+`docs/deployment/OpenAPI-Compatibility-Gate.md` records the accepted backend artifact, hash/provenance evidence, compatibility semantics, pipeline boundary, update procedure, and regression rules. `README.md` links the contract.
+
+Alarm unit and Playwright coverage now explicitly proves that acknowledgement sends only backend-supported fields and exposes no client actor selector. All prior accessibility, runtime-performance, bundle-budget, and full Playwright gates remain in the same CI lifecycle.
+
+### Completion record
+
+```text
+Backend source commit / branch : 725a451ae4880ccb4f2ec508709241f88cd4aea7 / main
+Backend artifact CI             : 34764890847 — SUCCESS
+Backend artifact id             : 10320386070
+Backend artifact digest         : sha256:4c401ba08e3aeb897be19b5944072f6ada7e08efc85c299683def9175e8d4c38
+Endpoints and DTOs used         : existing accepted HidraAPI OpenAPI only; alarm acknowledgement/closure rebaselined to current backend DTOs
+Permissions used                : none introduced or changed
+Frontend routes created/changed : none
+State ownership                 : no new server/business state; actor attribution remains backend-owned
+Compatibility coverage          : all 18 feature Orval contract inputs against one accepted full HidraAPI artifact
+Tests added/changed             : alarm component/unit and Playwright actor-ownership assertions; existing complete suites retained
+Documentation                   : docs/deployment/OpenAPI-Compatibility-Gate.md; README.md
+OpenAPI regeneration status     : PASS — compatibility gate plus all 18 generators passed exact product-head CI
+Product branch                  : hweb-015-10-openapi-compatibility-gate
+Product head                    : ee0216d29c3f758ff9bc0150459396d000588dbf
+Product branch CI               : 34792028157 — SUCCESS
+Final verification              : roadmap-inclusive exact-head CI, independent PR CI, guarded exact-head merge, exact merge-SHA main CI required
+```
+
+HWEB-015-11 must not begin until the roadmap-inclusive HWEB-015-10 head passes full CI, its exact PR head is independently verified, the guarded merge succeeds, and exact merge-SHA `main` CI is accepted.

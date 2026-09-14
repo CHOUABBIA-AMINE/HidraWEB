@@ -120,8 +120,8 @@ export function AlarmConsolePage() {
   const [selectedAlarmId, setSelectedAlarmId] = useState('');
   const [draftFilters, setDraftFilters] = useState({ state: '', severityId: '', topologyAssetId: '', from: '', to: '' });
   const [filters, setFilters] = useState(draftFilters);
-  const [ackForm, setAckForm] = useState({ actorId: '', actorDisplayName: '', organizationUnitId: '', organizationUnitCode: '', comment: '' });
-  const [closeForm, setCloseForm] = useState({ closureType: 'NORMALIZED', closureReasonId: '', closureComment: '', actorId: '', requiresReview: false, reviewWorkflowInstanceId: '' });
+  const [ackForm, setAckForm] = useState({ organizationUnitId: '', organizationUnitCode: '', comment: '' });
+  const [closeForm, setCloseForm] = useState({ closureType: 'NORMALIZED', closureReasonId: '', closureComment: '', requiresReview: false, reviewWorkflowInstanceId: '' });
   const [shelveForm, setShelveForm] = useState({ shelvingReasonId: '', reasonText: '', shelvedUntil: '' });
 
   const canRead = permissions.can(ALARM_PERMISSIONS.read);
@@ -149,8 +149,6 @@ export function AlarmConsolePage() {
     mutationFn: () => {
       const request: AcknowledgeAlarmRequest = {
         alarmId: selectedAlarmId,
-        acknowledgedByActorId: optional(ackForm.actorId),
-        acknowledgedByDisplayName: optional(ackForm.actorDisplayName),
         organizationUnitId: optional(ackForm.organizationUnitId),
         organizationUnitCode: optional(ackForm.organizationUnitCode),
         comment: optional(ackForm.comment),
@@ -167,7 +165,6 @@ export function AlarmConsolePage() {
         closureType: closeForm.closureType as CloseAlarmRequest['closureType'],
         closureReasonId: optional(closeForm.closureReasonId),
         closureComment: optional(closeForm.closureComment),
-        closedByActorId: optional(closeForm.actorId),
         requiresReview: closeForm.requiresReview,
         reviewWorkflowInstanceId: closeForm.requiresReview ? optional(closeForm.reviewWorkflowInstanceId) : undefined,
       };
@@ -309,8 +306,6 @@ export function AlarmConsolePage() {
                         <Paper variant="outlined" sx={{ p: 1.5 }}>
                           <Typography component="h4" variant="subtitle2">{t('alarm.acknowledge')}</Typography>
                           <Box sx={{ display: 'grid', gap: 1, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, mt: 1 }}>
-                            <TextField label={t('alarm.actorId')} onChange={(e) => setAckForm({ ...ackForm, actorId: e.target.value })} size="small" value={ackForm.actorId} />
-                            <TextField label={t('alarm.actorDisplayName')} onChange={(e) => setAckForm({ ...ackForm, actorDisplayName: e.target.value })} size="small" value={ackForm.actorDisplayName} />
                             <TextField label={t('alarm.organizationUnitId')} onChange={(e) => setAckForm({ ...ackForm, organizationUnitId: e.target.value })} size="small" value={ackForm.organizationUnitId} />
                             <TextField label={t('alarm.organizationUnitCode')} onChange={(e) => setAckForm({ ...ackForm, organizationUnitCode: e.target.value })} size="small" value={ackForm.organizationUnitCode} />
                             <TextField label={t('alarm.comment')} multiline onChange={(e) => setAckForm({ ...ackForm, comment: e.target.value })} size="small" value={ackForm.comment} />
@@ -323,7 +318,6 @@ export function AlarmConsolePage() {
                           <Box sx={{ display: 'grid', gap: 1, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, mt: 1 }}>
                             <TextField label={t('alarm.closureType')} onChange={(e) => setCloseForm({ ...closeForm, closureType: e.target.value })} select size="small" value={closeForm.closureType}>{CLOSURE_TYPES.map((value) => <MenuItem key={value} value={value}>{value}</MenuItem>)}</TextField>
                             <TextField label={t('alarm.closureReasonId')} onChange={(e) => setCloseForm({ ...closeForm, closureReasonId: e.target.value })} size="small" value={closeForm.closureReasonId} />
-                            <TextField label={t('alarm.actorId')} onChange={(e) => setCloseForm({ ...closeForm, actorId: e.target.value })} size="small" value={closeForm.actorId} />
                             <TextField label={t('alarm.comment')} multiline onChange={(e) => setCloseForm({ ...closeForm, closureComment: e.target.value })} size="small" value={closeForm.closureComment} />
                             <FormControlLabel control={<Checkbox checked={closeForm.requiresReview} onChange={(e) => setCloseForm({ ...closeForm, requiresReview: e.target.checked })} />} label={t('alarm.requiresReview')} />
                             {closeForm.requiresReview ? <TextField label={t('alarm.reviewWorkflowInstanceId')} onChange={(e) => setCloseForm({ ...closeForm, reviewWorkflowInstanceId: e.target.value })} size="small" value={closeForm.reviewWorkflowInstanceId} /> : null}

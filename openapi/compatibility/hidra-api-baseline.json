@@ -1,0 +1,17 @@
+{
+  "repository": "CHOUABBIA-AMINE/HidraAPI",
+  "backendCommit": "725a451ae4880ccb4f2ec508709241f88cd4aea7",
+  "workflowRunId": 34764890847,
+  "artifactId": 10320386070,
+  "artifactName": "hidra-api-openapi-725a451ae4880ccb4f2ec508709241f88cd4aea7",
+  "artifactDigest": "sha256:4c401ba08e3aeb897be19b5944072f6ada7e08efc85c299683def9175e8d4c38",
+  "fullSpecSha256": "sha256:1d4bd8451989e5efcda453c0bf96a538040f28afad30e970a7c9d4765b9af00d",
+  "fullContractGzipBase64Parts": [
+    "openapi/compatibility/hidra-api-725a451ae4880ccb4f2ec508709241f88cd4aea7.part1.b64",
+    "openapi/compatibility/hidra-api-725a451ae4880ccb4f2ec508709241f88cd4aea7.part2.b64",
+    "openapi/compatibility/hidra-api-725a451ae4880ccb4f2ec508709241f88cd4aea7.part3.b64",
+    "openapi/compatibility/hidra-api-725a451ae4880ccb4f2ec508709241f88cd4aea7.part4.b64"
+  ],
+  "fullContractGzipSha256": "sha256:3ae1ff18063a21576b123cf27e742b0ef353a2a1569c645034f0116ed1006152",
+  "expectedOrvalContracts": 18
+}

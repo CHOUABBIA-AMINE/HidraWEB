@@ -20,7 +20,7 @@ async function mockAlarm(page: Page) {
   await page.route('**/api/v1/alarm/alarms/alarm-1/shelvings', (route) => route.fulfill({ json: [{ id: 'shelf-1', alarmId: 'alarm-1', shelvingReasonId: 'MAINT', reasonText: 'Inspection', shelvedByActorId: 'actor-1', shelvedAt: '2026-09-11T08:00:00Z', shelvedUntil: '2026-09-11T12:00:00Z', status: 'ACTIVE' }] }));
   await page.route('**/api/v1/alarm/alarms/alarm-1', (route) => route.fulfill({ json: alarm }));
   await page.route('**/api/v1/alarm/alarms/acknowledgements', async (route) => {
-    expect(route.request().postDataJSON()).toMatchObject({ alarmId: 'alarm-1', acknowledgedByActorId: 'actor-1' });
+    expect(route.request().postDataJSON()).toEqual({ alarmId: 'alarm-1' });
     await new Promise((resolve) => setTimeout(resolve, 250));
     await route.fulfill({ json: 'ack-1' });
   });
@@ -51,8 +51,9 @@ test('HWEB-008 presents backend-governed alarm response without invented suppres
   await expect(page.getByText('Pipeline Nord', { exact: true }).last()).toBeVisible();
   await expect(page.getByText('MAINT')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Retirer de l’étagère' })).toBeVisible();
+  await expect(page.getByText(/dérive l’identité de l’acteur/)).toBeVisible();
+  await expect(page.getByLabel('Référence acteur')).toHaveCount(0);
 
-  await page.getByLabel('Référence acteur').first().fill('actor-1');
   await page.getByRole('button', { name: 'Acquitter' }).click();
   await expect(page.getByRole('button', { name: 'Clôturer' })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Mettre en étagère' })).toBeDisabled();
