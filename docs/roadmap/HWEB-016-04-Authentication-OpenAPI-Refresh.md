@@ -1,12 +1,12 @@
 # HWEB-016-04 — Authentication OpenAPI Refresh
 
-Status: BLOCKED AT AUTHORITATIVE ARTIFACT IMPORT
+Status: READY FOR CI VERIFICATION
 
 ## Purpose
 
 Refresh HidraWEB's checked-in OpenAPI evidence from the completed HidraAPI AUTH-030 authentication baseline before any runtime authentication code is changed.
 
-This task is a contract-integrity gate. It must not reconstruct authentication schemas by hand when HidraAPI CI already publishes an authoritative OpenAPI artifact.
+This task is a contract-integrity gate. Authentication schemas and routes must come from the authoritative backend OpenAPI publication rather than handwritten reconstruction.
 
 ## Dependencies
 
@@ -16,123 +16,113 @@ HWEB-016-02 — Authentication Architecture Update  COMPLETE
 HWEB-016-03 — Runtime Inventory / Minimal Delta   COMPLETE
 ```
 
-Backend contract source frozen by HWEB-016-01:
+## Authoritative AUTH-030 publication imported
+
+The accepted HidraAPI AUTH-030 workflow publication used for this refresh is:
 
 ```text
-Repository : CHOUABBIA-AMINE/HidraAPI
-Branch     : main
-AUTH-030   : completed
-Main commit: 7b24dc122e52dd0c5471307e3611f2a3d999ae7d
+Repository      : CHOUABBIA-AMINE/HidraAPI
+Workflow run    : 35004817611
+Artifact ID     : 10411412102
+Artifact name   : hidra-api-openapi-592ce1a9ebafe714a65f71e5e2f75ba79281caf3
+Artifact digest : sha256:adb3bac76749b659c6e3fdbe46a1c5f9111878a2ce9059dcd463e63c039e045d
+Full spec SHA   : sha256:a3d5bff8b83005d71376ce9187313ce28bb20cbdda231335854a87b8e37bfb22
 ```
 
-The AUTH-030 closure roadmap records successful deterministic OpenAPI publication/artifact upload during its final CI acceptance run.
+The artifact was downloaded directly from the successful AUTH-030 HidraAPI CI run. Its ZIP digest matched the GitHub-published artifact digest before extraction.
 
-## Current HidraWEB evidence audited
+## Authentication contract proven by the artifact
 
-### Compatibility baseline
-
-`openapi/compatibility/hidra-api-baseline.json` is still pinned to:
-
-```text
-backendCommit = 725a451ae4880ccb4f2ec508709241f88cd4aea7
-```
-
-This predates the completed authentication gap closure.
-
-### Identity/organization slice
-
-`orval.identity-organization.config.ts` still consumes:
-
-```text
-openapi/hidra-identity-organization-af4c3b4723619a25dd9a94f4d27f5a36adab982e.json
-```
-
-That checked-in slice does not contain the AUTH-030 authentication HTTP contract.
-
-### Generated tree
-
-`src/api/generated/` contains only the repository placeholder on `main`; generated clients are produced by the existing Orval/verification workflow rather than treated as the source of contract truth.
-
-## Required AUTH-030 evidence
-
-The refreshed authoritative OpenAPI input must expose all of the following before runtime implementation begins:
+The imported OpenAPI exposes:
 
 ```text
 POST /api/v1/identity/authentication/login
 POST /api/v1/identity/authentication/oidc/complete
 AuthenticationLoginRequest
 AuthenticationLoginResponse
-ProviderType
 ```
 
-The expected source-level semantics, already verified independently in HWEB-016-01, are:
+`AuthenticationLoginRequest.providerType` is emitted inline as the backend enum rather than as a standalone `ProviderType` component. Its values are:
 
 ```text
-AuthenticationLoginRequest
-  providerType
-  principal
-  credentials
-
-AuthenticationLoginResponse
-  sessionId
-  accessToken
-  tokenType
-  jti
-  issuedAt
-  expiresAt
-  userId
-  username
-  displayName
-  authenticationType
-  identityProviderId
-  roles
-  permissions
+LOCAL
+LDAP
+ACTIVE_DIRECTORY
+OIDC
+OAUTH2
+SAML2
+KEYCLOAK
+AZURE_AD
+OKTA
 ```
 
-Those source-level facts are useful acceptance checks, but they are not permission to manufacture an OpenAPI document manually.
-
-## Integrity rule
-
-The existing compatibility gate verifies provenance as well as schema compatibility. Its manifest records:
+The direct-login request requires:
 
 ```text
-repository
-backendCommit
-workflowRunId
-artifactId
-artifactName
-artifactDigest
-fullSpecSha256
-fullContractGzipBase64Parts
-fullContractGzipSha256
-expectedOrvalContracts
+providerType
+principal
+credentials
 ```
 
-Therefore a valid HWEB-016-04 completion requires the actual published HidraAPI OpenAPI artifact (or another repository-approved deterministic publication carrying equivalent provenance) so these values can be updated truthfully.
-
-Forbidden shortcuts:
+The unified authentication response exposes:
 
 ```text
-- hand-write AuthenticationLoginRequest into the old slice
-- hand-write AuthenticationLoginResponse into the old slice
-- invent operationIds/tags/nullability from controller source
-- fabricate workflowRunId/artifactId/artifactDigest
-- point Orval at a source-derived pseudo-spec and call it CI evidence
-- change runtime authentication code before the refreshed contract is accepted
+sessionId
+accessToken
+tokenType
+jti
+issuedAt
+expiresAt
+userId
+username
+displayName
+authenticationType
+identityProviderId
+roles
+permissions
 ```
 
-## Work completed in this step
-
-The repository was re-audited before mutation and the minimum refresh surface was confirmed:
+## HidraWEB files refreshed
 
 ```text
 openapi/compatibility/hidra-api-baseline.json
-openapi/compatibility/hidra-api-<AUTH030-COMMIT>.part*.b64
-openapi/hidra-identity-organization-<AUTH030-COMMIT>.json
+openapi/compatibility/hidra-api-592ce1a9ebafe714a65f71e5e2f75ba79281caf3.part1.b64
+openapi/compatibility/hidra-api-592ce1a9ebafe714a65f71e5e2f75ba79281caf3.part2.b64
+openapi/compatibility/hidra-api-592ce1a9ebafe714a65f71e5e2f75ba79281caf3.part3.b64
+openapi/compatibility/hidra-api-592ce1a9ebafe714a65f71e5e2f75ba79281caf3.part4.b64
+openapi/hidra-identity-organization-592ce1a9ebafe714a65f71e5e2f75ba79281caf3.json
 orval.identity-organization.config.ts
 ```
 
-After those files are refreshed from the immutable backend publication, the acceptance commands are:
+The identity/organization slice is extracted directly from the authoritative artifact using these controller tags:
+
+```text
+identity-authentication-controller
+spring-identity-controller
+spring-organization-controller
+```
+
+That preserves the prior identity/organization contract surface while adding only the AUTH-030 authentication controller surface required by this migration step.
+
+## Integrity checks completed before repository CI
+
+```text
+PASS GitHub artifact digest matched downloaded ZIP SHA-256
+PASS full OpenAPI JSON SHA-256 recorded in compatibility manifest
+PASS deterministic gzip SHA-256 recorded in compatibility manifest
+PASS direct-login path present
+PASS OIDC-completion path present
+PASS AuthenticationLoginRequest present
+PASS AuthenticationLoginResponse present
+PASS required request fields verified from artifact
+PASS provider enum values verified from artifact
+PASS Orval identity/organization config repointed to refreshed slice
+PASS no runtime authentication source changed
+```
+
+## Required repository acceptance commands
+
+The branch must pass the existing project gates:
 
 ```bash
 npm run openapi:compatibility
@@ -140,39 +130,29 @@ npm run api:generate:identity-organization
 npm run typecheck
 ```
 
-Generated output must then prove that the direct-login and OIDC-completion operations plus their transport schemas are available without handwritten duplicate DTOs or URLs.
+Repository CI remains authoritative for completion because the execution environment used to import the artifact does not contain a network-accessible HidraWEB working tree or installed frontend dependencies.
 
-## Blocking condition
+## Completion rule
 
-The authoritative AUTH-030 OpenAPI archive itself has not been imported into HidraWEB during this task execution. Because the current checked-in evidence is stale and provenance metadata is mandatory, HWEB-016-04 must remain blocked rather than commit a synthetic replacement.
-
-This is an evidence/import blocker, not an uncertainty about the backend runtime contract. HWEB-016-01 already verified the live source controller, request DTO, response DTO, ProviderType taxonomy, public direct-login boundary, and authenticated OIDC completion boundary.
-
-## Acceptance checklist
+HWEB-016-04 becomes `COMPLETE` only when repository CI proves all three gates above and the generated identity/organization client includes operations for:
 
 ```text
-PASS stale compatibility baseline identified
-PASS stale identity/organization OpenAPI slice identified
-PASS exact AUTH-030 authentication endpoints/types identified from verified backend source
-PASS required compatibility/provenance fields identified
-PASS minimum files requiring refresh identified
-PASS generation/verification commands identified
-PASS handwritten/synthetic OpenAPI replacement explicitly prohibited
-BLOCK authoritative AUTH-030 OpenAPI publication not yet imported
-BLOCK updated compatibility gate not yet runnable against AUTH-030 evidence
-BLOCK generated auth transport not yet verified
+login
+completeOidc
 ```
+
+with transport models generated from `AuthenticationLoginRequest` and `AuthenticationLoginResponse`.
 
 ## Safety result
 
-No runtime authentication source was changed.
+No handwritten authentication DTO was introduced.
 
-No stale generated client was represented as AUTH-030 compatible.
+No runtime URL was duplicated in application code.
 
-No fabricated OpenAPI provenance was committed.
+No provider fallback behavior was added.
 
-## Next action required to unblock HWEB-016-04
+No runtime authentication implementation was changed before the contract refresh gate.
 
-Import the exact HidraAPI AUTH-030 CI OpenAPI artifact used by the accepted backend closure run, then atomically refresh the compatibility baseline and identity/organization slice and execute the three verification commands above.
+## Next task after CI acceptance
 
-Only after HWEB-016-04 reaches COMPLETE should the roadmap advance to the authentication gateway/runtime implementation task.
+Advance to the authentication gateway/runtime implementation step only after this branch passes compatibility, Orval generation, and TypeScript verification.
