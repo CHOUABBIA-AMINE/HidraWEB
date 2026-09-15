@@ -9,8 +9,9 @@ Canonical authority:
 - [`architecture/HidraWeb-Information-Architecture.md`](architecture/HidraWeb-Information-Architecture.md) — navigation, processes and workspace hierarchy.
 - [`architecture/Hidra-API-Web-Contract-v1.md`](architecture/Hidra-API-Web-Contract-v1.md) — HidraAPI/HidraWeb interface rules.
 - [`architecture/HidraWeb-Technical-Architecture.md`](architecture/HidraWeb-Technical-Architecture.md) — technology, source boundaries and runtime architecture.
+- [`roadmap/HWEB-016-01-Authentication-Contract-Freeze.md`](roadmap/HWEB-016-01-Authentication-Contract-Freeze.md) — current verified authentication contract freeze against HidraAPI AUTH-030.
 
-If this summary conflicts with a canonical document, the canonical document wins.
+If this summary conflicts with verified live HidraAPI/OpenAPI evidence, the live backend contract wins and canonical documents must be corrected.
 
 ## Application shell
 
@@ -126,14 +127,49 @@ Generic module/resource workbench routes may exist as secondary/admin/discovery 
 ## State ownership
 
 - Server state: TanStack Query.
-- Authentication/session: AuthProvider abstraction.
-- Permission state: PermissionProvider fed by HidraAPI metadata.
+- Authentication/session: `AuthProvider` owns provider-independent Hidra session state and keeps bearer credentials private to auth/transport infrastructure.
+- Permission state: `PermissionProvider` fed by HidraAPI permission metadata/contracts.
 - Cross-screen UI context: small Zustand stores only where justified.
 - Local UI state: React state and route/search parameters.
 - Forms: React Hook Form + Zod.
 - Realtime: SSE/STOMP adapters feeding TanStack Query invalidation/update and notification UX.
 
+Authentication source (`LOCAL`, `LDAP`, `ACTIVE_DIRECTORY`, `OIDC`) is session metadata only and must not drive business authorization or feature-module branching.
+
 HidraWeb shall not maintain a second global copy of backend entities.
+
+## Authentication architecture
+
+The application authentication abstraction is provider-independent:
+
+```text
+Login/authentication UI
+        -> selected authentication mechanism
+        -> auth application/gateway boundary
+        -> HidraAPI / external OIDC flow where applicable
+        -> unified AuthenticationLoginResponse
+        -> Hidra-issued accessToken
+        -> AuthProvider
+        -> Axios / Router / PermissionProvider
+```
+
+Verified direct authentication uses:
+
+```text
+POST /api/v1/identity/authentication/login
+  providerType = LOCAL | LDAP | ACTIVE_DIRECTORY
+```
+
+OIDC retains browser Authorization Code + PKCE and completes the Hidra session through:
+
+```text
+GET  /api/v1/security/oidc
+POST /api/v1/identity/authentication/oidc/complete
+```
+
+Feature modules never know which provider verified the identity. They depend only on authenticated Hidra session state and Hidra-owned permissions.
+
+Provider fallback is forbidden.
 
 ## API architecture
 
@@ -150,6 +186,8 @@ Preferred flow:
 ```
 
 No component may call Axios directly. Existing API catalogs remain governance/evidence artifacts.
+
+Authentication calls follow the same generated-client preference; handwritten authentication URLs are allowed only while a verified endpoint is absent from the selected OpenAPI artifact and must be gap-tracked.
 
 ## Topology capabilities
 
