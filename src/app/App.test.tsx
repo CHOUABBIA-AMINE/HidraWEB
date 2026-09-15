@@ -52,6 +52,28 @@ const fixtures = vi.hoisted(() => {
   };
 });
 
+vi.mock('@/app/auth/authenticationGateway', () => ({
+  authenticationGateway: {
+    loginLocal: vi.fn(async () => ({
+      accessToken: 'hidra-jwt-local-test',
+      authenticationType: 'LOCAL',
+      expiresAt: Date.now() + 60 * 60 * 1000,
+      sessionId: 'session-local-1',
+      tokenType: 'Bearer',
+      identityProviderId: undefined,
+      principal: {
+        userId: 'user-operator',
+        username: 'operator',
+        displayName: 'Operator',
+        roles: ['ROLE_OPERATOR'],
+        permissions: fixtures.effectivePermissions,
+      },
+    })),
+    loginDirectory: vi.fn(),
+    completeOidcLogin: vi.fn(),
+  },
+}));
+
 vi.mock('@/api/client/hidraHttpClient', () => ({
   hidraHttpClient: vi.fn(async (config: { url?: string }) => {
     if (config.url?.endsWith('/catalog')) return fixtures.catalog;
