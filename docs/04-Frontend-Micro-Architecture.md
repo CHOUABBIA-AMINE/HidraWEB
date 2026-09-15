@@ -8,8 +8,9 @@ Canonical authority:
 
 - [`architecture/HidraWeb-Technical-Architecture.md`](architecture/HidraWeb-Technical-Architecture.md)
 - [`architecture/Hidra-API-Web-Contract-v1.md`](architecture/Hidra-API-Web-Contract-v1.md)
+- [`roadmap/HWEB-016-01-Authentication-Contract-Freeze.md`](roadmap/HWEB-016-01-Authentication-Contract-Freeze.md) for the current verified authentication contract.
 
-If this guide conflicts with either canonical document, the canonical document wins.
+If this guide conflicts with verified live HidraAPI/OpenAPI evidence, the verified backend contract wins and canonical documents must be corrected.
 
 ## Folder structure
 
@@ -210,9 +211,29 @@ Rules:
 
 ## Authentication conventions
 
-- Authentication is accessed through `AuthProvider`.
-- Feature code never reads/writes bearer tokens or Basic credentials directly.
-- JWT/Basic mode differences remain inside auth/transport infrastructure.
+- Authentication is accessed only through `AuthProvider` and auth infrastructure under `src/app/auth`/transport boundaries.
+- Feature code never reads/writes bearer tokens or submitted LOCAL/LDAP/AD credentials directly.
+- Feature code never branches on authentication source for authorization or business behavior.
+- Direct login uses the verified `POST /api/v1/identity/authentication/login` contract with explicit `providerType`.
+- OIDC retains Authorization Code + PKCE and converges through `POST /api/v1/identity/authentication/oidc/complete`.
+- All successful paths normalize to one Hidra session result containing the Hidra-issued bearer credential and normalized principal/session metadata.
+- Provider fallback is forbidden; one failed provider attempt must not trigger another provider.
+- Bearer-token storage remains private and memory-only unless HidraAPI publishes a different authoritative browser contract.
+- No refresh, logout/revoke, provider-discovery, or current-principal endpoint may be invented where backend evidence is absent.
+- Development Basic/disabled compatibility is infrastructure compatibility only; it is not the long-term application authentication domain model.
+
+Recommended internal dependency direction:
+
+```text
+LoginPage / callback route
+        -> auth application/gateway
+        -> generated HidraAPI auth client and OIDC adapter
+        -> session normalization
+        -> AuthProvider
+        -> authorization-header factory / Router / PermissionProvider
+```
+
+Components must not bypass this boundary.
 
 ## Authorization conventions
 
@@ -223,6 +244,16 @@ Use HidraAPI permission metadata for:
 - action/button guards.
 
 Backend `403` remains authoritative. Client guards are not a security boundary.
+
+Authentication source, AD groups, LDAP metadata, and external OIDC roles/scopes must not be used as a replacement for Hidra-owned permission resolution.
+
+## Authenticated cache conventions
+
+- User-scoped server state remains in TanStack Query, not inside `AuthProvider`.
+- On authentication, establish the Hidra session before enabling protected queries.
+- On logout, expiry, or `401`, cancel/remove authenticated user-scoped queries before allowing another actor to establish a session.
+- Permission state and principal/session state must be cleared together with the bearer credential.
+- `403` does not clear the authenticated session.
 
 ## Map conventions
 
@@ -241,8 +272,8 @@ Backend `403` remains authoritative. Client guards are not a security boundary.
 
 ## Error handling conventions
 
-- `401`: authentication/session handling.
-- `403`: permission-denied state.
+- `401`: terminate/invalidate the frontend authenticated session and require re-authentication.
+- `403`: permission-denied state; preserve the authenticated session.
 - `404`: not-found workbench/detail state.
 - `409`: stale/conflicting state; refresh/review.
 - `422`: form/business decision feedback where backend uses it.
@@ -259,6 +290,8 @@ Feature modules shall not independently parse raw Axios error shapes.
 - E2E: Playwright.
 - Accessibility: WCAG 2.2 AA target with automated and keyboard/manual checks.
 
+Authentication tests must include provider routing/no-fallback behavior, Hidra session normalization, OIDC callback security, `401` cleanup, `403` preservation, and authenticated cache isolation.
+
 ## Architecture guardrails
 
 Once source code is scaffolded, automate checks for:
@@ -266,6 +299,7 @@ Once source code is scaffolded, automate checks for:
 - forbidden deep cross-module imports;
 - generated API drift;
 - TypeScript compile errors;
-- lint/test/build failures.
+- lint/test/build failures;
+- authentication token/credential access outside approved auth/transport boundaries where practical.
 
 Micro-frontends are explicitly out of scope.
