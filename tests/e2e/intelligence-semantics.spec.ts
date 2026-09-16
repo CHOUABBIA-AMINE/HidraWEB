@@ -49,12 +49,19 @@ const operationalOwnerModules = new Set([
   'workflow',
 ]);
 
+const authenticationExchangePaths = new Set([
+  '/api/v1/identity/authentication/login',
+  '/api/v1/identity/authentication/oidc/complete',
+]);
+
 async function mockIntelligenceReads(page: Page, operationalWrites: string[]) {
   page.on('request', (request) => {
     if (request.method() === 'GET' || request.method() === 'HEAD' || request.method() === 'OPTIONS') return;
-    const match = new URL(request.url()).pathname.match(/^\/api\/v1\/([^/]+)/);
+    const pathname = new URL(request.url()).pathname;
+    if (authenticationExchangePaths.has(pathname)) return;
+    const match = pathname.match(/^\/api\/v1\/([^/]+)/);
     if (match && operationalOwnerModules.has(match[1])) {
-      operationalWrites.push(`${request.method()} ${new URL(request.url()).pathname}`);
+      operationalWrites.push(`${request.method()} ${pathname}`);
     }
   });
 
