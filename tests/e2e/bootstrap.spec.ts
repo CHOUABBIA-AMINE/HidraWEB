@@ -139,7 +139,7 @@ test('HWEB-002 keeps a rejected Basic authentication request on the 401 sign-in 
   await expect(page).toHaveURL(/\/login$/);
 });
 
-test('HWEB-002 renders the global 403 state when HidraAPI refuses permission metadata', async ({ page }) => {
+test('HWEB-002 fails closed when permission metadata is forbidden during session initialization', async ({ page }) => {
   await page.route('**/api/v1/security/permissions/routes', (route) => route.fulfill({ json: routes }));
   await page.route('**/api/v1/security/permissions/catalog', (route) => route.fulfill({ status: 403, json: { status: 403, title: 'Forbidden' } }));
   await page.route('**/api/v1/identity/me/permissions', (route) => route.fulfill({ json: effectivePermissions }));
@@ -147,7 +147,8 @@ test('HWEB-002 renders the global 403 state when HidraAPI refuses permission met
   await page.getByLabel('Nom d’utilisateur').fill('operator');
   await page.getByLabel('Mot de passe').fill('secret');
   await page.getByRole('button', { name: 'Se connecter' }).click();
-  await expect(page.getByRole('heading', { name: 'Accès refusé' })).toBeVisible();
+  await expect(page.getByRole('alert')).toContainText('Forbidden');
+  await expect(page).toHaveURL(/\/login$/);
 });
 
 test('HWEB-002 renders the authenticated 404 state inside the shell', async ({ page }) => {

@@ -18,7 +18,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev',
+    command: 'VITE_HIDRA_API_BASE_URL=/ HIDRA_E2E_AUTH_MOCK=1 npm run dev',
     url: 'http://127.0.0.1:5173/overview',
     reuseExistingServer: !process.env.CI,
   },
