@@ -9,7 +9,7 @@ import { bearerAuthorizationHeader } from '@/app/auth/authEncoding';
 import { HIDRA_AUTH_UNAUTHORIZED_EVENT } from '@/app/auth/authEvents';
 import { beginOidcAuthorization, completeOidcAuthorization } from '@/app/auth/oidcClient';
 import { registerAuthorizationHeaderFactory } from '@/app/auth/authorizationHeaderRegistry';
-import { runtimeConfig } from '@/app/bootstrap/runtimeConfig';
+import { runtimeConfig, type HidraCredentialProvider } from '@/app/bootstrap/runtimeConfig';
 import { permissionEndpoints } from '@/features/permissions/api/permissionEndpoints';
 
 const TOKEN_EXPIRY_SKEW_MS = 30_000;
@@ -129,22 +129,26 @@ export function AuthProvider({ children }: PropsWithChildren) {
     [clearExpiryTimer, clearSession, queryClient],
   );
 
-  const authenticateBasic = useCallback(
-    async (username: string, password: string) => {
+  const authenticateCredentials = useCallback(
+    async (provider: HidraCredentialProvider, principal: string, credentials: string) => {
       if (runtimeConfig.authMode !== 'basic') {
-        throw new Error('Local authentication is not enabled for this HidraWeb runtime.');
+        throw new Error('Credential authentication is not enabled for this HidraWeb runtime.');
       }
+      if (provider !== runtimeConfig.credentialProvider) {
+        throw new Error(`Authentication provider ${provider} is not enabled for this HidraWeb runtime.`);
+      }
+
       setError(undefined);
       setStatus('checking');
       try {
-        const result = await authenticationGateway.loginLocal({
-          principal: username,
-          credentials: password,
-        });
+        const input = { principal, credentials };
+        const result = provider === 'LOCAL'
+          ? await authenticationGateway.loginLocal(input)
+          : await authenticationGateway.loginDirectory(provider, input);
         await commitHidraSession(result, 'basic');
       } catch (cause) {
         clearSession();
-        const message = cause instanceof Error ? cause.message : 'Local sign-in failed.';
+        const message = cause instanceof Error ? cause.message : `${provider} sign-in failed.`;
         setError(message);
         throw cause;
       }
@@ -190,15 +194,16 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const value = useMemo(
     () => ({
       mode: runtimeConfig.authMode,
+      credentialProvider: runtimeConfig.credentialProvider,
       status,
       session,
       error,
-      authenticateBasic,
+      authenticateCredentials,
       beginOidcSignIn,
       completeOidcSignIn,
       signOut,
     }),
-    [authenticateBasic, beginOidcSignIn, completeOidcSignIn, error, session, signOut, status],
+    [authenticateCredentials, beginOidcSignIn, completeOidcSignIn, error, session, signOut, status],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

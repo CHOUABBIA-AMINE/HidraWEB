@@ -64,7 +64,8 @@ describe('HWEB-002 / HWEB-004 / HWEB-005 / HWEB-007 / HWEB-008 capability-driven
   it('authenticates and enables only implemented navigation backed by effective grants', async () => {
     render(<AppProviders><App /></AppProviders>);
 
-    expect(await screen.findByRole('heading', { name: 'Connexion de développement' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Hidra Local' })).toBeInTheDocument();
+    expect(screen.getByText('LOCAL', { exact: true })).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText(/Nom d’utilisateur/), { target: { value: 'operator' } });
     fireEvent.change(screen.getByLabelText(/Mot de passe/), { target: { value: 'secret' } });
     fireEvent.click(screen.getByRole('button', { name: 'Se connecter' }));
