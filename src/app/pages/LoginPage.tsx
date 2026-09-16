@@ -4,11 +4,17 @@ import { useTranslation } from 'react-i18next';
 import { Navigate, useLocation } from 'react-router';
 
 import { useAuth } from '@/app/auth/useAuth';
-import { runtimeConfig } from '@/app/bootstrap/runtimeConfig';
+import { runtimeConfig, type HidraCredentialProvider } from '@/app/bootstrap/runtimeConfig';
 
 interface LoginLocationState {
   from?: string;
 }
+
+const CREDENTIAL_PROVIDER_LABELS: Record<HidraCredentialProvider, string> = {
+  LOCAL: 'Hidra Local',
+  LDAP: 'LDAP',
+  ACTIVE_DIRECTORY: 'Active Directory',
+};
 
 export function LoginPage() {
   const { t } = useTranslation();
@@ -63,7 +69,7 @@ export function LoginPage() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      await auth.authenticateBasic(username, password);
+      await auth.authenticateCredentials(auth.credentialProvider, username, password);
     } catch {
       // AuthProvider owns the normalized error state displayed below.
     }
@@ -73,8 +79,12 @@ export function LoginPage() {
     <Box sx={{ bgcolor: 'grey.50', display: 'grid', minHeight: '100vh', placeItems: 'center', p: 3 }}>
       <Paper component="main" elevation={1} sx={{ width: 'min(100%, 440px)', p: { xs: 3, md: 5 } }}>
         <Typography color="primary" sx={{ fontWeight: 700 }} variant="overline">HIDRA</Typography>
-        <Typography component="h1" sx={{ mt: 1 }} variant="h4">{t('auth.basic.title')}</Typography>
-        <Typography color="text.secondary" sx={{ mt: 1 }}>{t('auth.basic.description')}</Typography>
+        <Typography component="h1" sx={{ mt: 1 }} variant="h4">
+          {CREDENTIAL_PROVIDER_LABELS[auth.credentialProvider]}
+        </Typography>
+        <Typography color="text.secondary" sx={{ mt: 1 }} variant="body2">
+          {auth.credentialProvider}
+        </Typography>
         <Box component="form" onSubmit={handleSubmit} sx={{ display: 'grid', gap: 2, mt: 4 }}>
           <TextField autoComplete="username" autoFocus label={t('auth.basic.username')} onChange={(event) => setUsername(event.target.value)} required value={username} />
           <TextField autoComplete="current-password" label={t('auth.basic.password')} onChange={(event) => setPassword(event.target.value)} required type="password" value={password} />
