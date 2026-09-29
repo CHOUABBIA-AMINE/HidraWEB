@@ -3,7 +3,7 @@ import { defineConfig } from 'orval';
 export default defineConfig({
   workbench: {
     input: {
-      target: './openapi/hidra-workbench-af4c3b4723619a25dd9a94f4d27f5a36adab982e.json',
+      target: './openapi/hidra-workbench-63f3f60974ce57eb8cd5e42910397615195624fb.json',
     },
     output: {
       mode: 'single',

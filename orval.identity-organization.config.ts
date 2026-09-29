@@ -3,7 +3,7 @@ import { defineConfig } from 'orval';
 export default defineConfig({
   identityOrganization: {
     input: {
-      target: './openapi/hidra-identity-organization-592ce1a9ebafe714a65f71e5e2f75ba79281caf3.json',
+      target: './openapi/hidra-identity-organization-63f3f60974ce57eb8cd5e42910397615195624fb.json',
     },
     output: {
       mode: 'single',

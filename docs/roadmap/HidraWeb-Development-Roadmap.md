@@ -63,7 +63,7 @@ The new execution line is HWEB-R01 through HWEB-R17.
 | Code | Exact commit message | Scope | Exit criterion | Status |
 |---|---|---|---|---|
 | HWEB-R01 | `docs(architecture): reconcile HidraWEB with current HidraAPI` | Audit live frontend against current backend, update canonical contract, replace forward roadmap. Documentation only. | Reuse/reset decision recorded; stale contract areas identified; next task defined. | **Completed** |
-| HWEB-R02 | `chore(api): refresh HidraAPI OpenAPI baseline` | Replace accepted full OpenAPI artifact evidence and all feature slices with the current verified code-equivalent backend artifact; rationalize Orval configs only as needed. | Compatibility gate, all generators, typecheck and build use one current backend baseline. | Planned |
+| HWEB-R02 | `chore(api): refresh HidraAPI OpenAPI baseline` | Replace accepted full OpenAPI artifact evidence and all feature slices with the current verified code-equivalent backend artifact; rationalize Orval configs only as needed. | Compatibility gate, all generators, typecheck and build use one current backend baseline. | **Completed** |
 | HWEB-R03 | `refactor(authentication): align session with HidraAPI principal contract` | Regenerate identity contract; use current login/OIDC endpoints and canonical `GET /api/v1/identity/me` plus effective permissions for authenticated session state. | No invented auth endpoints; principal/session tests pass. | Planned |
 | HWEB-R04 | `refactor(authorization): align shell with effective permissions` | Align permission model/navigation guards with backend-enforced route catalog and current effective permissions. | No catalog-only assumption; 401/403 and permission-aware navigation tests pass. | Planned |
 | HWEB-R05 | `refactor(organization): align operational context with canonical scopes` | Replace stale Organization assumptions with dedicated reads plus `OperationalScope` / `ResponsibilityAssignment` contracts. | No retired scope tuple model; organization/operational context is backend-driven. | Planned |
@@ -106,7 +106,25 @@ docs/roadmap/HidraWeb-Development-Roadmap.md
 
 No production TypeScript, package manifest, OpenAPI artifact or generated client change is authorized in HWEB-R01.
 
-## 6. Validation policy
+## 6. HWEB-R02 completion evidence
+
+HWEB-R02 repins the complete consumer-contract baseline to one verified HidraAPI artifact:
+
+- HidraAPI source SHA: `63f3f60974ce57eb8cd5e42910397615195624fb`;
+- HidraWEB source SHA at task start: `5f3ab3fdbbe7c0cfe45a0c20b2a772a8c169971d`;
+- HidraAPI CI run: `36573899231` — success;
+- OpenAPI artifact id: `11036334163`;
+- OpenAPI artifact digest: `sha256:1b67c8f316749f46f9d5c2b37a5bad25d9ddd72fd8145caa2251b674a123c824`;
+- full OpenAPI SHA-256: `sha256:e80013f529b667c4b3f2b1e83e2087a52b4a4c87e16560d434eb34a740ca6665`;
+- deterministic gzip SHA-256: `sha256:1cc7b138b54bf59ebdf025a37cd84ce234218ec298415dd502d6796720170e6f`;
+- expected Orval consumer contracts: `18`;
+- every feature Orval config now points to a `63f3f60974ce57eb8cd5e42910397615195624fb`-named checked-in contract;
+- the identity/organization consumer slice is refreshed from the current full artifact; unchanged consumed surfaces are repinned and must pass the compatibility gate against the same full artifact;
+- R02 does not add newly available product behavior; R03+ expands consumed operations deliberately.
+
+No production feature logic, authentication behavior, frontend route behavior, or backend code is changed by HWEB-R02.
+
+## 7. Validation policy
 
 Documentation-only tasks:
 
@@ -142,7 +160,7 @@ npm run test:performance
 
 Do not claim a gate passed unless it actually ran successfully.
 
-## 7. Required completion record
+## 8. Required completion record
 
 Each HWEB-R task must record:
 
@@ -161,10 +179,10 @@ known backend gaps
 CI status
 ```
 
-## 8. Next authorized task
+## 9. Next authorized task
 
 ```text
-HWEB-R02 — chore(api): refresh HidraAPI OpenAPI baseline
+HWEB-R03 — refactor(authentication): align session with HidraAPI principal contract
 ```
 
-Do not execute HWEB-R03 or later work in the same task.
+Do not execute HWEB-R04 or later work in the same task.

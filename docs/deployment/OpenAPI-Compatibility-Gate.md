@@ -1,6 +1,6 @@
 # HidraAPI ↔ HidraWEB OpenAPI Compatibility Gate
 
-Status: HWEB-015-10 production-hardening contract
+Status: HWEB-R02 reconciled production-hardening contract
 
 ## Purpose
 
@@ -14,22 +14,22 @@ The compatibility baseline is the exact deterministic artifact published by Hidr
 
 ```text
 Backend repository : CHOUABBIA-AMINE/HidraAPI
-Backend commit     : 725a451ae4880ccb4f2ec508709241f88cd4aea7
-Workflow run       : 34764890847 — SUCCESS
-Artifact id        : 10320386070
-Artifact name      : hidra-api-openapi-725a451ae4880ccb4f2ec508709241f88cd4aea7
-Artifact digest    : sha256:4c401ba08e3aeb897be19b5944072f6ada7e08efc85c299683def9175e8d4c38
-Full contract SHA  : sha256:1d4bd8451989e5efcda453c0bf96a538040f28afad30e970a7c9d4765b9af00d
-Compressed SHA     : sha256:3ae1ff18063a21576b123cf27e742b0ef353a2a1569c645034f0116ed1006152
+Backend commit     : 63f3f60974ce57eb8cd5e42910397615195624fb
+Workflow run       : 36573899231 — SUCCESS
+Artifact id        : 11036334163
+Artifact name      : hidra-api-openapi-63f3f60974ce57eb8cd5e42910397615195624fb
+Artifact digest    : sha256:1b67c8f316749f46f9d5c2b37a5bad25d9ddd72fd8145caa2251b674a123c824
+Full contract SHA  : sha256:e80013f529b667c4b3f2b1e83e2087a52b4a4c87e16560d434eb34a740ca6665
+Compressed SHA     : sha256:1cc7b138b54bf59ebdf025a37cd84ce234218ec298415dd502d6796720170e6f
 ```
 
 `openapi/compatibility/hidra-api-baseline.json` records this provenance and the expected count of feature Orval contracts. The exact full OpenAPI JSON is deterministically gzip-compressed, base64-encoded, and split across four checked-in text-safe files:
 
 ```text
-openapi/compatibility/hidra-api-725a451ae4880ccb4f2ec508709241f88cd4aea7.part1.b64
-openapi/compatibility/hidra-api-725a451ae4880ccb4f2ec508709241f88cd4aea7.part2.b64
-openapi/compatibility/hidra-api-725a451ae4880ccb4f2ec508709241f88cd4aea7.part3.b64
-openapi/compatibility/hidra-api-725a451ae4880ccb4f2ec508709241f88cd4aea7.part4.b64
+openapi/compatibility/hidra-api-63f3f60974ce57eb8cd5e42910397615195624fb.part1.b64
+openapi/compatibility/hidra-api-63f3f60974ce57eb8cd5e42910397615195624fb.part2.b64
+openapi/compatibility/hidra-api-63f3f60974ce57eb8cd5e42910397615195624fb.part3.b64
+openapi/compatibility/hidra-api-63f3f60974ce57eb8cd5e42910397615195624fb.part4.b64
 ```
 
 The compatibility checker reconstructs those parts and verifies both the compressed payload SHA-256 and the decoded full-contract SHA-256 before comparing any frontend contract.
@@ -59,12 +59,12 @@ Additive backend paths, optional parameters, optional fields, and unrelated sche
 
 HidraAPI CI owns creation of the deterministic full OpenAPI artifact. HidraWEB CI owns consumer compatibility and Orval regeneration. The compatibility step runs after dependency installation and before all HWEB-003 through HWEB-014 feature generators.
 
-HWEB-015-10 deliberately does not grant the HidraWEB `GITHUB_TOKEN` access to another repository, add a PAT, depend on a live backend endpoint during frontend CI, weaken artifact retention/security, or modify HidraAPI CI outside an authorized backend roadmap task.
+HWEB-R02 deliberately does not grant the HidraWEB `GITHUB_TOKEN` access to another repository, add a PAT, depend on a live backend endpoint during frontend CI, weaken artifact retention/security, or modify HidraAPI CI outside an authorized backend roadmap task.
 
 Updating the accepted baseline is a reviewed frontend change: first verify a successful HidraAPI `main` run and exact artifact/digest, then replace the four pinned artifact parts and manifest together and run the complete HidraWEB lifecycle.
 
 ## Regression rule
 
-A future change is not HWEB-015-10-safe if it bypasses `openapi:compatibility`, changes the baseline without exact backend CI/artifact evidence, silently narrows the discovered Orval contract set, or makes production verification depend on an unverified live endpoint.
+A future change is not HWEB-R02-safe if it bypasses `openapi:compatibility`, changes the baseline without exact backend CI/artifact evidence, silently narrows the discovered Orval contract set, or makes production verification depend on an unverified live endpoint.
 
 HWEB-015-11 remains separate and owns backup/rollback and release artifact verification.

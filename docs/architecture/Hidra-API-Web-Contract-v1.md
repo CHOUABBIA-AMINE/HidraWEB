@@ -60,7 +60,7 @@ HidraAPI CI run `36573899231` succeeded and published:
 
 `hidra-api-openapi-63f3f60974ce57eb8cd5e42910397615195624fb`
 
-Current HidraWEB still pins an older accepted OpenAPI baseline (`725a451...`). Until HWEB-R02 refreshes the checked-in artifact/slices, generated transport code must be treated as stale even where endpoint paths still match.
+HidraWEB accepts this exact verified artifact as its current machine-contract baseline. HWEB-R02 repins all 18 checked-in feature contracts and Orval configurations to `63f3f60974ce57eb8cd5e42910397615195624fb`; later HWEB-R tasks may deliberately expand individual slices when they begin consuming newly available backend operations.
 
 ## 5. Core cross-cutting rules
 

@@ -2,7 +2,7 @@ import { defineConfig } from 'orval';
 
 export default defineConfig({
   custody: {
-    input: { target: './openapi/hidra-custody-2e6f93c14e330c8cc839a5de75ecc7b893f9872c.json' },
+    input: { target: './openapi/hidra-custody-63f3f60974ce57eb8cd5e42910397615195624fb.json' },
     output: {
       mode: 'single',
       target: './src/api/generated/custody/custody.ts',
