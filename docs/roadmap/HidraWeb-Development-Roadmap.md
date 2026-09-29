@@ -71,7 +71,7 @@ The new execution line is HWEB-R01 through HWEB-R17.
 | HWEB-R07 | `refactor(topology): align network workspace with current map contract` | Revalidate current layer catalog/typed geometry/search, retain HidraMap/MapLibre, remove stale missing-layer assumptions. | Network workspace consumes only current topology API. | **Completed** |
 | HWEB-R08 | `refactor(operations): align telemetry and monitoring workspaces` | Regenerate telemetry/monitoring types and revalidate readings, quality/state, trend, rules and deviations. | REST/query behavior green; no invented realtime topics. | **Completed** |
 | HWEB-R09 | `refactor(workflow): align tasks with backend actions` | Revalidate task inbox/detail/available-actions/instance/timeline/transition execution. | All actions are backend-defined and concurrency/error states tested. | **Completed** |
-| HWEB-R10 | `refactor(alarm): align console with backend lifecycle` | Revalidate list/detail/ack/close/shelving behavior and accessible severity/state presentation. | Alarm console uses current backend lifecycle only; no fake realtime. | Planned |
+| HWEB-R10 | `refactor(alarm): align console with backend lifecycle` | Revalidate list/detail/ack/close/shelving behavior and accessible severity/state presentation. | Alarm console uses current backend lifecycle only; no fake realtime. | **Completed** |
 | HWEB-R11 | `refactor(events): align incident leak and hse workspaces` | Revalidate current HidraAPI incident/leak/HSE read contracts. | No direct LeakDetectionAPI dependency; events workspace remains HidraAPI-driven. | Planned |
 | HWEB-R12 | `refactor(planning): align planning and approval contracts` | Revalidate periods/plans/revisions/targets and backend approval actions. | No frontend-defined approval state machine. | Planned |
 | HWEB-R13 | `refactor(engineering): align integrity and assets contracts` | Regenerate assets/integrity schemas, remove handwritten backend DTO replicas and revalidate engineering composition. | No duplicated transport DTOs; workbench remains secondary. | Planned |
@@ -307,10 +307,32 @@ HWEB-R09 revalidates the workflow task experience against the current backend-de
 
 No backend code, alarm lifecycle, planning approval behavior, realtime contract, or non-workflow product state machine is changed by HWEB-R09.
 
-## 16. Next authorized task
+## 16. HWEB-R10 completion evidence
+
+HWEB-R10 revalidates the alarm console against the current HidraAPI alarm lifecycle contract:
+
+- HidraAPI source SHA: `260295c6eebc4b01922d2d488810a671305860a6`;
+- HidraWEB source SHA at task start: `2e157d28e9ce4b16ed326f37bd097a3b1a362d57`;
+- OpenAPI evidence: `63f3f60974ce57eb8cd5e42910397615195624fb`;
+- alarm OpenAPI provenance now references the verified HidraAPI artifact/run used by the reconciled frontend baseline;
+- alarm reads remain `GET /api/v1/alarm/alarms`, `/alarms/{id}`, and `/alarms/{id}/shelvings`;
+- acknowledgement remains `POST /api/v1/alarm/alarms/acknowledgements`;
+- closure remains `POST /api/v1/alarm/alarms/closures`;
+- shelving remains `POST /api/v1/alarm/alarms/{id}/shelvings`;
+- unshelving remains `POST /api/v1/alarm/alarms/{id}/shelvings/{shelvingId}/unshelve`;
+- acknowledgement and closure do not send client-selected actor identity; HidraAPI derives authenticated actor/principal identity server-side;
+- shelving correlation remains an HTTP `X-Correlation-Id` header and is not duplicated into the shelving body contract;
+- unshelve UI is now exposed only when the backend shelving record is `ACTIVE` and has not already been unshelved, matching the backend lifecycle guard;
+- alarm state and severity remain textually visible in addition to color treatment, preserving accessible non-color-only meaning;
+- suppression remains distinct from shelving and no suppression mutation is invented because none is published in the accepted contract;
+- current realtime capability still publishes no alarm event family, so the alarm console remains query-driven and does not invent domain realtime topics.
+
+No backend code, incident lifecycle, workflow semantics, suppression capability, realtime contract, or non-alarm product behavior is changed by HWEB-R10.
+
+## 17. Next authorized task
 
 ```text
-HWEB-R10 — refactor(alarm): align console with backend lifecycle
+HWEB-R11 — refactor(events): align incident leak and hse workspaces
 ```
 
-Do not execute HWEB-R11 or later work in the same task.
+Do not execute HWEB-R12 or later work in the same task.

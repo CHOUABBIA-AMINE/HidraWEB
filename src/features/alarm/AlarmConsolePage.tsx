@@ -96,8 +96,12 @@ function AlarmRow({ alarm, language, onOpen, openLabel }: { alarm: AlarmView; la
   );
 }
 
+export function isActiveShelving(shelving: ShelvingView): boolean {
+  return Boolean(shelving.id) && shelving.status === 'ACTIVE' && !shelving.unshelvedAt;
+}
+
 function ShelvingRow({ shelving, canExecute, busy, onUnshelve, t }: { shelving: ShelvingView; canExecute: boolean; busy: boolean; onUnshelve: () => void; t: (key: string) => string }) {
-  const active = Boolean(shelving.id) && !shelving.unshelvedAt;
+  const active = isActiveShelving(shelving);
   return (
     <TableRow>
       <TableCell>{shelving.status ?? '—'}</TableCell>
