@@ -76,7 +76,7 @@ The new execution line is HWEB-R01 through HWEB-R17.
 | HWEB-R12 | `refactor(planning): align planning and approval contracts` | Revalidate periods/plans/revisions/targets and backend approval actions. | No frontend-defined approval state machine. | **Completed** |
 | HWEB-R13 | `refactor(engineering): align integrity and assets contracts` | Regenerate assets/integrity schemas, remove handwritten backend DTO replicas and revalidate engineering composition. | No duplicated transport DTOs; workbench remains secondary. | **Completed** |
 | HWEB-R14 | `refactor(custody): align metering and custody contracts` | Revalidate custody command contracts and supporting workbench/reference data. | Current OpenAPI types and permissions used. | **Completed** |
-| HWEB-R15 | `refactor(intelligence): align risk analytics simulation reporting` | Revalidate each intelligence workspace against current backend capability/workbench contracts. | No synthetic KPI/simulation semantics. | Planned |
+| HWEB-R15 | `refactor(intelligence): align risk analytics simulation reporting` | Revalidate each intelligence workspace against current backend capability/workbench contracts. | No synthetic KPI/simulation semantics. | **Completed** |
 | HWEB-R16 | `refactor(administration): align governance workspaces` | Revalidate audit/configuration/documents/integration/notification administration. | Destructive actions permission-gated; provider capabilities not invented. | Planned |
 | HWEB-R17 | `test(release): harden reconciled HidraWEB` | Full accessibility, performance, E2E, OpenAPI compatibility, deployment and release-artifact review. | `npm run verify`, required E2E/performance gates and production-readiness checklist green. | Planned |
 
@@ -411,10 +411,31 @@ HWEB-R14 revalidates the Metering & Custody workspace against the current HidraA
 
 No backend code, custody domain lifecycle, metering calculation, workbench semantics, intelligence behavior, or realtime contract is changed by HWEB-R14.
 
-## 21. Next authorized task
+## 21. HWEB-R15 completion evidence
+
+HWEB-R15 revalidates the Intelligence workspaces against the current HidraAPI risk, analytics, simulation, reporting, and generic workbench contracts:
+
+- HidraAPI source SHA: `260295c6eebc4b01922d2d488810a671305860a6`;
+- HidraWEB source SHA at task start: `15af227827f7c445bc77477d1f7d062830de3417`;
+- OpenAPI evidence: `63f3f60974ce57eb8cd5e42910397615195624fb`;
+- risk, analytics, simulation, and reporting OpenAPI provenance now references the verified HidraAPI artifact/run used by the reconciled frontend baseline;
+- each module publishes a current `GET /api/v1/<module>/capabilities` endpoint plus typed mutation contracts, but the reconciled R15 workspaces remain read-only because no authorized product requirement exists to trigger those mutations here;
+- Risk reads remain runtime-discovered workbench records for backend-owned risk registers and assessments;
+- Analytics reads remain runtime-discovered workbench records for backend-owned datasets, insights, metric definitions, and evaluation runs;
+- Simulation reads remain runtime-discovered workbench records for backend-owned models, scenarios, runs, and recommendations;
+- Reporting reads remain runtime-discovered workbench records for backend-owned definitions, requests, runs, and output artifacts;
+- generic workbench reads remain `GET /api/v1/workbench/{module}/resources`, `GET /api/v1/workbench/{module}/{resource}`, and `GET /api/v1/workbench/{module}/{resource}/{id}`;
+- module-specific tests verify risk/analytics/simulation/reporting record discovery and detail transport through those canonical workbench paths, including encoded record identifiers;
+- frontend views display backend-published status, score, confidence, run, artifact, and recommendation fields only; HidraWEB does not calculate synthetic KPIs, simulate pipeline behavior, infer recommendations, or create independent intelligence semantics;
+- no deferred CPM/RTTM, digital-twin solver, direct compute sidecar, or realtime-event dependency is introduced;
+- backend route permissions remain authoritative and workbench visibility continues to fail closed through the reconciled permission model.
+
+No backend code, intelligence mutation workflow, risk scoring formula, analytics calculation, simulation engine, report generation engine, or realtime contract is changed by HWEB-R15.
+
+## 22. Next authorized task
 
 ```text
-HWEB-R15 — refactor(intelligence): align risk analytics simulation reporting
+HWEB-R16 — refactor(administration): align governance workspaces
 ```
 
-Do not execute HWEB-R16 or later work in the same task.
+Do not execute HWEB-R17 or later work in the same task.
