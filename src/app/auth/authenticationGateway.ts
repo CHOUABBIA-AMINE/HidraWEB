@@ -4,10 +4,12 @@ import {
   HIDRA_CORRELATION_ID_HEADER,
   HIDRA_REQUEST_ID_HEADER,
 } from '@/api/client/diagnosticHeaders';
+import { hidraHttpClient } from '@/api/client/hidraHttpClient';
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
 import type {
   AuthenticationLoginRequest,
   AuthenticationLoginResponse,
+  PrincipalView,
 } from '@/api/generated/identity-organization/model';
 import { runtimeConfig } from '@/app/bootstrap/runtimeConfig';
 
@@ -30,10 +32,13 @@ export interface AuthenticationCredentials {
 }
 
 export interface HidraPrincipalView {
+  authenticationName?: string;
+  authenticationType?: string;
   userId?: string;
   username?: string;
   displayName?: string;
-  roles: readonly string[];
+  employeeReferenceId?: string;
+  authenticationAuthorities: readonly string[];
   permissions: readonly string[];
 }
 
@@ -54,6 +59,7 @@ export interface AuthenticationGateway {
     credentials: AuthenticationCredentials,
   ): Promise<HidraSessionResult>;
   completeOidcLogin(externalAccessToken: string): Promise<HidraSessionResult>;
+  loadCurrentPrincipal(): Promise<HidraPrincipalView>;
 }
 
 const authenticationExchangeClient = axios.create({
@@ -101,13 +107,39 @@ export function normalizeAuthenticationResponse(
     authenticationType,
     identityProviderId: response.identityProviderId,
     principal: {
+      authenticationName: response.username,
+      authenticationType,
       userId: response.userId,
       username: response.username,
       displayName: response.displayName,
-      roles: response.roles ?? [],
+      authenticationAuthorities: response.roles ?? [],
       permissions: response.permissions ?? [],
     },
   };
+}
+
+export function normalizeCurrentPrincipal(
+  response: PrincipalView,
+  effectivePermissions: readonly string[],
+): HidraPrincipalView {
+  return {
+    authenticationName: response.authenticationName,
+    authenticationType: response.authenticationType,
+    userId: response.userId,
+    username: response.username,
+    displayName: response.displayName,
+    employeeReferenceId: response.employeeReferenceId,
+    authenticationAuthorities: response.authenticationAuthorities ?? [],
+    permissions: [...effectivePermissions],
+  };
+}
+
+async function loadCurrentPrincipal(): Promise<HidraPrincipalView> {
+  const [principal, permissions] = await Promise.all([
+    hidraHttpClient<PrincipalView>({ method: 'GET', url: '/api/v1/identity/me' }),
+    hidraHttpClient<string[]>({ method: 'GET', url: '/api/v1/identity/me/permissions' }),
+  ]);
+  return normalizeCurrentPrincipal(principal, permissions);
 }
 
 async function postAuthentication<T>(
@@ -162,4 +194,6 @@ export const authenticationGateway: AuthenticationGateway = {
     );
     return normalizeAuthenticationResponse(response, 'OIDC');
   },
+
+  loadCurrentPrincipal,
 };

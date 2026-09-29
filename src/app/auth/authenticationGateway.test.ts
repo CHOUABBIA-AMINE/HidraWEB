@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { normalizeAuthenticationResponse } from '@/app/auth/authenticationGateway';
+import {
+  normalizeAuthenticationResponse,
+  normalizeCurrentPrincipal,
+} from '@/app/auth/authenticationGateway';
 
 describe('HWEB-016-05 authentication gateway', () => {
   it('normalizes a backend authentication response into one Hidra session result', () => {
@@ -27,12 +30,41 @@ describe('HWEB-016-05 authentication gateway', () => {
       tokenType: undefined,
       identityProviderId: undefined,
       principal: {
+        authenticationName: 'operator',
+        authenticationType: 'LDAP',
         userId: 'user-1',
         username: 'operator',
         displayName: 'Pipeline Operator',
-        roles: ['OPERATOR'],
+        authenticationAuthorities: ['OPERATOR'],
         permissions: ['telemetry:read'],
       },
+    });
+  });
+
+  it('normalizes the canonical current-principal contract and dedicated effective permissions', () => {
+    const principal = normalizeCurrentPrincipal(
+      {
+        authenticationName: 'operator@example.dz',
+        authenticationType: 'OIDC',
+        userId: 'user-1',
+        username: 'operator',
+        displayName: 'Pipeline Operator',
+        employeeReferenceId: 'employee-1',
+        authenticationAuthorities: ['ROLE_OPERATOR'],
+        effectivePermissions: ['stale:permission'],
+      },
+      ['alarm:read', 'telemetry:read'],
+    );
+
+    expect(principal).toEqual({
+      authenticationName: 'operator@example.dz',
+      authenticationType: 'OIDC',
+      userId: 'user-1',
+      username: 'operator',
+      displayName: 'Pipeline Operator',
+      employeeReferenceId: 'employee-1',
+      authenticationAuthorities: ['ROLE_OPERATOR'],
+      permissions: ['alarm:read', 'telemetry:read'],
     });
   });
 

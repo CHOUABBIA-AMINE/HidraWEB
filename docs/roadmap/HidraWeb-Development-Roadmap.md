@@ -64,7 +64,7 @@ The new execution line is HWEB-R01 through HWEB-R17.
 |---|---|---|---|---|
 | HWEB-R01 | `docs(architecture): reconcile HidraWEB with current HidraAPI` | Audit live frontend against current backend, update canonical contract, replace forward roadmap. Documentation only. | Reuse/reset decision recorded; stale contract areas identified; next task defined. | **Completed** |
 | HWEB-R02 | `chore(api): refresh HidraAPI OpenAPI baseline` | Replace accepted full OpenAPI artifact evidence and all feature slices with the current verified code-equivalent backend artifact; rationalize Orval configs only as needed. | Compatibility gate, all generators, typecheck and build use one current backend baseline. | **Completed** |
-| HWEB-R03 | `refactor(authentication): align session with HidraAPI principal contract` | Regenerate identity contract; use current login/OIDC endpoints and canonical `GET /api/v1/identity/me` plus effective permissions for authenticated session state. | No invented auth endpoints; principal/session tests pass. | Planned |
+| HWEB-R03 | `refactor(authentication): align session with HidraAPI principal contract` | Regenerate identity contract; use current login/OIDC endpoints and canonical `GET /api/v1/identity/me` plus effective permissions for authenticated session state. | No invented auth endpoints; principal/session tests pass. | **Completed** |
 | HWEB-R04 | `refactor(authorization): align shell with effective permissions` | Align permission model/navigation guards with backend-enforced route catalog and current effective permissions. | No catalog-only assumption; 401/403 and permission-aware navigation tests pass. | Planned |
 | HWEB-R05 | `refactor(organization): align operational context with canonical scopes` | Replace stale Organization assumptions with dedicated reads plus `OperationalScope` / `ResponsibilityAssignment` contracts. | No retired scope tuple model; organization/operational context is backend-driven. | Planned |
 | HWEB-R06 | `refactor(workbench): align generic resource browsing` | Regenerate workbench contract and retain it as secondary/reference/admin UX only. | List/detail/search work against refreshed OpenAPI; no specialized workflow is replaced by workbench. | Planned |
@@ -179,10 +179,27 @@ known backend gaps
 CI status
 ```
 
-## 9. Next authorized task
+## 9. HWEB-R03 completion evidence
+
+HWEB-R03 aligns frontend session establishment with the canonical authenticated-principal contract:
+
+- HidraAPI source SHA: `260295c6eebc4b01922d2d488810a671305860a6`;
+- HidraWEB source SHA at task start: `160c01b0658a06679329ab719f29a24d5988daba`;
+- OpenAPI evidence: `63f3f60974ce57eb8cd5e42910397615195624fb`;
+- authentication exchange remains `POST /api/v1/identity/authentication/login` and `POST /api/v1/identity/authentication/oidc/complete`;
+- canonical session identity now refreshes through `GET /api/v1/identity/me`;
+- effective permissions now refresh through `GET /api/v1/identity/me/permissions`;
+- login-response roles/permissions are no longer the authoritative post-authentication session identity;
+- current-principal fields include authentication name/type, user identity, employee reference, authentication authorities and effective permissions;
+- frontend principal-gap messaging is removed in French, English and Arabic;
+- no authorization-navigation policy changes are included; those remain HWEB-R04.
+
+No backend code, frontend routes, Organization operational-scope flow, or realtime behavior is changed by HWEB-R03.
+
+## 10. Next authorized task
 
 ```text
-HWEB-R03 — refactor(authentication): align session with HidraAPI principal contract
+HWEB-R04 — refactor(authorization): align shell with effective permissions
 ```
 
-Do not execute HWEB-R04 or later work in the same task.
+Do not execute HWEB-R05 or later work in the same task.

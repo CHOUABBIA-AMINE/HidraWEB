@@ -4,7 +4,11 @@ import { useCallback, useEffect, useMemo, useRef, useState, type PropsWithChildr
 import { hidraHttpClient } from '@/api/client/hidraHttpClient';
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
 import { AuthContext, type AuthSession, type AuthSessionSource, type AuthStatus } from '@/app/auth/authContext';
-import { authenticationGateway, type HidraSessionResult } from '@/app/auth/authenticationGateway';
+import {
+  authenticationGateway,
+  type HidraPrincipalView,
+  type HidraSessionResult,
+} from '@/app/auth/authenticationGateway';
 import { bearerAuthorizationHeader } from '@/app/auth/authEncoding';
 import { HIDRA_AUTH_UNAUTHORIZED_EVENT } from '@/app/auth/authEvents';
 import { beginOidcAuthorization, completeOidcAuthorization } from '@/app/auth/oidcClient';
@@ -19,12 +23,13 @@ function registerHeader(header?: string): void {
   registerAuthorizationHeaderFactory(() => header);
 }
 
-function principalLabel(result: HidraSessionResult): string {
+function principalLabel(principal: HidraPrincipalView, authenticationType: string): string {
   return (
-    result.principal.displayName?.trim() ||
-    result.principal.username?.trim() ||
-    result.principal.userId?.trim() ||
-    result.authenticationType
+    principal.displayName?.trim() ||
+    principal.username?.trim() ||
+    principal.userId?.trim() ||
+    principal.authenticationName?.trim() ||
+    authenticationType
   );
 }
 
@@ -96,20 +101,20 @@ export function AuthProvider({ children }: PropsWithChildren) {
       setStatus('checking');
 
       try {
-        await Promise.all([
+        const [principal] = await Promise.all([
+          authenticationGateway.loadCurrentPrincipal(),
           hidraHttpClient({ method: 'GET', url: permissionEndpoints.catalog }),
           hidraHttpClient({ method: 'GET', url: permissionEndpoints.routes }),
-          hidraHttpClient({ method: 'GET', url: permissionEndpoints.effective }),
         ]);
 
         setSession({
-          principalLabel: principalLabel(result),
+          principalLabel: principalLabel(principal, result.authenticationType),
           source,
           sessionId: result.sessionId,
           expiresAt: result.expiresAt,
           authenticationType: result.authenticationType,
           identityProviderId: result.identityProviderId,
-          principal: result.principal,
+          principal,
         });
         setStatus('authenticated');
 
