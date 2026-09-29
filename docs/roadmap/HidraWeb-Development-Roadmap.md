@@ -70,7 +70,7 @@ The new execution line is HWEB-R01 through HWEB-R17.
 | HWEB-R06 | `refactor(workbench): align generic resource browsing` | Regenerate workbench contract and retain it as secondary/reference/admin UX only. | List/detail/search work against refreshed OpenAPI; no specialized workflow is replaced by workbench. | **Completed** |
 | HWEB-R07 | `refactor(topology): align network workspace with current map contract` | Revalidate current layer catalog/typed geometry/search, retain HidraMap/MapLibre, remove stale missing-layer assumptions. | Network workspace consumes only current topology API. | **Completed** |
 | HWEB-R08 | `refactor(operations): align telemetry and monitoring workspaces` | Regenerate telemetry/monitoring types and revalidate readings, quality/state, trend, rules and deviations. | REST/query behavior green; no invented realtime topics. | **Completed** |
-| HWEB-R09 | `refactor(workflow): align tasks with backend actions` | Revalidate task inbox/detail/available-actions/instance/timeline/transition execution. | All actions are backend-defined and concurrency/error states tested. | Planned |
+| HWEB-R09 | `refactor(workflow): align tasks with backend actions` | Revalidate task inbox/detail/available-actions/instance/timeline/transition execution. | All actions are backend-defined and concurrency/error states tested. | **Completed** |
 | HWEB-R10 | `refactor(alarm): align console with backend lifecycle` | Revalidate list/detail/ack/close/shelving behavior and accessible severity/state presentation. | Alarm console uses current backend lifecycle only; no fake realtime. | Planned |
 | HWEB-R11 | `refactor(events): align incident leak and hse workspaces` | Revalidate current HidraAPI incident/leak/HSE read contracts. | No direct LeakDetectionAPI dependency; events workspace remains HidraAPI-driven. | Planned |
 | HWEB-R12 | `refactor(planning): align planning and approval contracts` | Revalidate periods/plans/revisions/targets and backend approval actions. | No frontend-defined approval state machine. | Planned |
@@ -287,10 +287,30 @@ HWEB-R08 revalidates the operations workspace against the current HidraAPI telem
 
 No backend code, workflow behavior, alarm lifecycle, realtime subscription contract, or deferred industrial-extension capability is changed by HWEB-R08.
 
-## 15. Next authorized task
+## 15. HWEB-R09 completion evidence
+
+HWEB-R09 revalidates the workflow task experience against the current backend-defined task/action contract:
+
+- HidraAPI source SHA: `260295c6eebc4b01922d2d488810a671305860a6`;
+- HidraWEB source SHA at task start: `ec6f0bfbd7d0a674a043ea01ebec04dff73d8e4a`;
+- OpenAPI evidence: `63f3f60974ce57eb8cd5e42910397615195624fb`;
+- workflow OpenAPI provenance now references the verified HidraAPI artifact/run used by the reconciled frontend baseline;
+- authenticated inbox/detail reads remain `GET /api/v1/workflow/tasks` and `/tasks/{id}`;
+- backend-authoritative actions remain `GET /api/v1/workflow/tasks/{id}/available-actions`;
+- instance/timeline reads remain `GET /api/v1/workflow/instances/{id}` and `/timeline`;
+- transition execution remains `POST /api/v1/workflow/tasks/{taskId}/transitions/{transitionId}/execute`;
+- only backend-returned actions with `permitted = true` and a concrete `transitionId` are presented as executable actions;
+- transition execution carries the exact task `updatedAt` as `expectedTaskUpdatedAt`, preserving backend optimistic-concurrency enforcement;
+- HTTP 409 stale-task conflicts are explicitly mapped to a refresh-task-and-actions instruction, distinct from authorization denial;
+- adapter tests cover inbox, task, available-actions, instance, timeline and encoded transition execution paths plus authoritative request payload transport;
+- the frontend does not define its own workflow transition graph, approval state machine, or alternative action semantics.
+
+No backend code, alarm lifecycle, planning approval behavior, realtime contract, or non-workflow product state machine is changed by HWEB-R09.
+
+## 16. Next authorized task
 
 ```text
-HWEB-R09 — refactor(workflow): align tasks with backend actions
+HWEB-R10 — refactor(alarm): align console with backend lifecycle
 ```
 
-Do not execute HWEB-R10 or later work in the same task.
+Do not execute HWEB-R11 or later work in the same task.

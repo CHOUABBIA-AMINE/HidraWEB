@@ -36,7 +36,7 @@ import { WORKFLOW_PERMISSIONS } from '@/features/workflow/api/workflowPermission
 
 const INBOX_SIZE = 50;
 
-function displayError(error: unknown): string {
+export function workflowErrorMessage(error: unknown): string {
   const normalized = normalizeHidraApiError(error);
   if (normalized.status === 403) return 'HidraAPI refused workflow access.';
   if (normalized.status === 409) return 'The task changed. Refresh the task and available actions before retrying.';
@@ -143,8 +143,8 @@ export function WorkflowTasksPage() {
         </Box>
 
         {!canTasks ? <Alert severity="warning">{t('workflow.unavailable')}</Alert> : null}
-        {firstError ? <Alert severity="error">{displayError(firstError)}</Alert> : null}
-        {transitionMutation.error ? <Alert severity="error">{displayError(transitionMutation.error)}</Alert> : null}
+        {firstError ? <Alert severity="error">{workflowErrorMessage(firstError)}</Alert> : null}
+        {transitionMutation.error ? <Alert severity="error">{workflowErrorMessage(transitionMutation.error)}</Alert> : null}
         {successMessage ? <Alert severity="success">{successMessage}</Alert> : null}
 
         {canTasks ? (
