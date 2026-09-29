@@ -73,7 +73,7 @@ The new execution line is HWEB-R01 through HWEB-R17.
 | HWEB-R09 | `refactor(workflow): align tasks with backend actions` | Revalidate task inbox/detail/available-actions/instance/timeline/transition execution. | All actions are backend-defined and concurrency/error states tested. | **Completed** |
 | HWEB-R10 | `refactor(alarm): align console with backend lifecycle` | Revalidate list/detail/ack/close/shelving behavior and accessible severity/state presentation. | Alarm console uses current backend lifecycle only; no fake realtime. | **Completed** |
 | HWEB-R11 | `refactor(events): align incident leak and hse workspaces` | Revalidate current HidraAPI incident/leak/HSE read contracts. | No direct LeakDetectionAPI dependency; events workspace remains HidraAPI-driven. | **Completed** |
-| HWEB-R12 | `refactor(planning): align planning and approval contracts` | Revalidate periods/plans/revisions/targets and backend approval actions. | No frontend-defined approval state machine. | Planned |
+| HWEB-R12 | `refactor(planning): align planning and approval contracts` | Revalidate periods/plans/revisions/targets and backend approval actions. | No frontend-defined approval state machine. | **Completed** |
 | HWEB-R13 | `refactor(engineering): align integrity and assets contracts` | Regenerate assets/integrity schemas, remove handwritten backend DTO replicas and revalidate engineering composition. | No duplicated transport DTOs; workbench remains secondary. | Planned |
 | HWEB-R14 | `refactor(custody): align metering and custody contracts` | Revalidate custody command contracts and supporting workbench/reference data. | Current OpenAPI types and permissions used. | Planned |
 | HWEB-R15 | `refactor(intelligence): align risk analytics simulation reporting` | Revalidate each intelligence workspace against current backend capability/workbench contracts. | No synthetic KPI/simulation semantics. | Planned |
@@ -349,10 +349,32 @@ HWEB-R11 revalidates the event workspace against the current HidraAPI incident, 
 
 No backend code, planning behavior, leak-compute sidecar integration, realtime contract, or event lifecycle state machine is changed by HWEB-R11.
 
-## 18. Next authorized task
+## 18. HWEB-R12 completion evidence
+
+HWEB-R12 revalidates the Planning workspace against the current HidraAPI planning-query and revision-approval contracts:
+
+- HidraAPI source SHA: `260295c6eebc4b01922d2d488810a671305860a6`;
+- HidraWEB source SHA at task start: `3187022af800f161a56d923485d3f95bf77dd51f`;
+- OpenAPI evidence: `63f3f60974ce57eb8cd5e42910397615195624fb`;
+- planning OpenAPI provenance now references the verified HidraAPI artifact/run used by the reconciled frontend baseline;
+- planning period reads remain `GET /api/v1/planning/periods` and `/periods/{id}`;
+- operational-plan reads remain `GET /api/v1/planning/operational-plans` and `/operational-plans/{id}`;
+- revision reads remain `GET /api/v1/planning/revisions?planId=...` and `/revisions/{id}`;
+- plan-target reads remain `GET /api/v1/planning/targets?revisionId=...` and `/targets/{id}`;
+- revision-scoped approval remains `GET /api/v1/planning/revisions/{revisionId}/approval`;
+- approval execution remains `POST /api/v1/planning/revisions/{revisionId}/approval/actions/{transitionId}/execute`;
+- the frontend displays and executes only backend-returned approval actions; it does not define an independent approval transition graph;
+- execution carries the exact backend `currentTaskUpdatedAt` value as `expectedTaskUpdatedAt`, preserving workflow optimistic-concurrency semantics;
+- action `permitted`, `transitionId`, required reason/comment flags, and required permission code remain backend-owned;
+- planned-vs-actual continues to join Planning target identity with Monitoring-owned expected/actual/difference values rather than recomputing business semantics in the browser;
+- adapter tests cover canonical period/plan/revision/target list-detail paths, paging/scoping parameters, encoded identifiers, approval projection reads, and authoritative approval execution payload transport.
+
+No backend code, workflow transition graph, planning lifecycle state machine, monitoring calculation, engineering behavior, or realtime contract is changed by HWEB-R12.
+
+## 19. Next authorized task
 
 ```text
-HWEB-R12 — refactor(planning): align planning and approval contracts
+HWEB-R13 — refactor(engineering): align integrity and assets contracts
 ```
 
-Do not execute HWEB-R13 or later work in the same task.
+Do not execute HWEB-R14 or later work in the same task.
