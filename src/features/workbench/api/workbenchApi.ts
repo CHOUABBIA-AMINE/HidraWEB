@@ -67,11 +67,17 @@ function normalizeDescriptor(value: OperationalResourceDescriptor): WorkbenchRes
   };
 }
 
-function normalizeRecord(value: OperationalRecordResponse): WorkbenchRecord | null {
-  if (!value.module || !value.resource) return null;
+function normalizeRecord(
+  value: OperationalRecordResponse,
+  fallbackModule?: string,
+  fallbackResource?: string,
+): WorkbenchRecord | null {
+  const module = value.module ?? fallbackModule;
+  const resource = value.resource ?? fallbackResource;
+  if (!module || !resource) return null;
   return {
-    module: value.module,
-    resource: value.resource,
+    module,
+    resource,
     id: value.id,
     attributes: value.attributes ?? {},
   };
@@ -85,7 +91,9 @@ function normalizePage(value: OperationalPageResponse, module: string, resource:
     size: value.size ?? 0,
     totalElements: value.totalElements ?? 0,
     totalPages: value.totalPages ?? 0,
-    items: (value.items ?? []).map(normalizeRecord).filter((item): item is WorkbenchRecord => item !== null),
+    items: (value.items ?? [])
+      .map((item) => normalizeRecord(item, module, resource))
+      .filter((item): item is WorkbenchRecord => item !== null),
   };
 }
 
@@ -127,7 +135,11 @@ export async function fetchWorkbenchRecord(module: string, resource: string, id:
     method: 'GET',
     url: `/api/v1/workbench/${segment(module)}/${segment(resource)}/${segment(id)}`,
   });
-  return normalizeRecord(response) ?? { module, resource, id, attributes: {} };
+  const normalized = normalizeRecord(response, module, resource);
+  if (!normalized) {
+    throw new Error(`Invalid workbench detail contract for ${module}/${resource}/${id}.`);
+  }
+  return normalized;
 }
 
 export async function searchWorkbenchRecords(
