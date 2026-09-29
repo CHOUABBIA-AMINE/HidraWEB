@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App } from '@/app/App';
 import { AppProviders } from '@/app/providers/AppProviders';
@@ -31,6 +31,27 @@ const hidraHttpClient = vi.hoisted(() => vi.fn(async (config: { url?: string; me
 }));
 
 vi.mock('@/api/client/hidraHttpClient', () => ({ hidraHttpClient }));
+
+
+async function flushReactScheduler() {
+  await new Promise<void>((resolve) => {
+    const setImmediateFn = (globalThis as typeof globalThis & {
+      setImmediate?: (callback: () => void) => unknown;
+    }).setImmediate;
+
+    if (setImmediateFn) {
+      setImmediateFn(resolve);
+      return;
+    }
+
+    globalThis.setTimeout(resolve, 0);
+  });
+}
+
+afterEach(async () => {
+  cleanup();
+  await flushReactScheduler();
+});
 
 describe('HWEB-008 alarm console read-only authorization', () => {
   beforeEach(() => {
