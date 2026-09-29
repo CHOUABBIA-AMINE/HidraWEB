@@ -36,12 +36,11 @@ export function OrganizationCommandPanel() {
   const queryClient = useQueryClient();
   const [unit, setUnit] = useState({ code: '', nameAr: '', nameFr: '', nameEn: '', unitTypeId: '', parentUnitId: '', status: 'ACTIVE', validFrom: '' });
   const [employee, setEmployee] = useState({
-    employeeNumber: '', firstNameAr: '', lastNameAr: '', firstNameLt: '', lastNameLt: '', displayNameAr: '', displayNameLt: '',
+    employeeNumber: '', firstNameAr: '', lastNameAr: '', firstNameLt: '', lastNameLt: '',
     emailAddress: '', mobileNumber: '', employeeType: 'PERMANENT', identityUserReference: '',
   });
   const [assignment, setAssignment] = useState({
-    employeeId: '', organizationUnitId: '', positionId: '', assignmentType: 'PRIMARY', operationalScopeType: '', operationalScopeId: '',
-    operationalScopeCode: '', operationalScopeName: '', validFrom: '', validTo: '',
+    employeeId: '', organizationUnitId: '', positionId: '', assignmentType: 'PRIMARY', validFrom: '', validTo: '',
   });
 
   const createUnitMutation = useMutation({
@@ -69,8 +68,6 @@ export function OrganizationCommandPanel() {
         lastNameAr: optional(employee.lastNameAr),
         firstNameLt: optional(employee.firstNameLt),
         lastNameLt: optional(employee.lastNameLt),
-        displayNameAr: optional(employee.displayNameAr),
-        displayNameLt: optional(employee.displayNameLt),
         emailAddress: optional(employee.emailAddress),
         mobileNumber: optional(employee.mobileNumber),
         employeeType: employee.employeeType as RegisterEmployeeRequest['employeeType'],
@@ -88,10 +85,6 @@ export function OrganizationCommandPanel() {
         organizationUnitId: optional(assignment.organizationUnitId),
         positionId: optional(assignment.positionId),
         assignmentType: assignment.assignmentType as AssignEmployeeRequest['assignmentType'],
-        operationalScopeType: optional(assignment.operationalScopeType),
-        operationalScopeId: optional(assignment.operationalScopeId),
-        operationalScopeCode: optional(assignment.operationalScopeCode),
-        operationalScopeName: optional(assignment.operationalScopeName),
         validFrom: optionalInstant(assignment.validFrom),
         validTo: optionalInstant(assignment.validTo),
       };
@@ -132,10 +125,8 @@ export function OrganizationCommandPanel() {
           <TextField label={t('context.fields.employeeNumber')} onChange={(event) => setEmployee({ ...employee, employeeNumber: event.target.value })} size="small" value={employee.employeeNumber} />
           <TextField label={t('context.fields.firstNameLt')} onChange={(event) => setEmployee({ ...employee, firstNameLt: event.target.value })} size="small" value={employee.firstNameLt} />
           <TextField label={t('context.fields.lastNameLt')} onChange={(event) => setEmployee({ ...employee, lastNameLt: event.target.value })} size="small" value={employee.lastNameLt} />
-          <TextField label={t('context.fields.displayNameLt')} onChange={(event) => setEmployee({ ...employee, displayNameLt: event.target.value })} size="small" value={employee.displayNameLt} />
           <TextField label={t('context.fields.firstNameAr')} onChange={(event) => setEmployee({ ...employee, firstNameAr: event.target.value })} size="small" value={employee.firstNameAr} />
           <TextField label={t('context.fields.lastNameAr')} onChange={(event) => setEmployee({ ...employee, lastNameAr: event.target.value })} size="small" value={employee.lastNameAr} />
-          <TextField label={t('context.fields.displayNameAr')} onChange={(event) => setEmployee({ ...employee, displayNameAr: event.target.value })} size="small" value={employee.displayNameAr} />
           <TextField label={t('context.fields.emailAddress')} onChange={(event) => setEmployee({ ...employee, emailAddress: event.target.value })} size="small" value={employee.emailAddress} />
           <TextField label={t('context.fields.mobileNumber')} onChange={(event) => setEmployee({ ...employee, mobileNumber: event.target.value })} size="small" value={employee.mobileNumber} />
           <TextField label={t('context.fields.employeeType')} onChange={(event) => setEmployee({ ...employee, employeeType: event.target.value })} select size="small" value={employee.employeeType}>
@@ -158,10 +149,6 @@ export function OrganizationCommandPanel() {
           <TextField label={t('context.fields.assignmentType')} onChange={(event) => setAssignment({ ...assignment, assignmentType: event.target.value })} select size="small" value={assignment.assignmentType}>
             {ASSIGNMENT_TYPES.map((value) => <MenuItem key={value} value={value}>{value}</MenuItem>)}
           </TextField>
-          <TextField label={t('context.fields.operationalScopeType')} onChange={(event) => setAssignment({ ...assignment, operationalScopeType: event.target.value })} size="small" value={assignment.operationalScopeType} />
-          <TextField label={t('context.fields.operationalScopeId')} onChange={(event) => setAssignment({ ...assignment, operationalScopeId: event.target.value })} size="small" value={assignment.operationalScopeId} />
-          <TextField label={t('context.fields.operationalScopeCode')} onChange={(event) => setAssignment({ ...assignment, operationalScopeCode: event.target.value })} size="small" value={assignment.operationalScopeCode} />
-          <TextField label={t('context.fields.operationalScopeName')} onChange={(event) => setAssignment({ ...assignment, operationalScopeName: event.target.value })} size="small" value={assignment.operationalScopeName} />
           <TextField slotProps={{ inputLabel: { shrink: true } }} label={t('context.fields.validFrom')} onChange={(event) => setAssignment({ ...assignment, validFrom: event.target.value })} size="small" type="datetime-local" value={assignment.validFrom} />
           <TextField slotProps={{ inputLabel: { shrink: true } }} label={t('context.fields.validTo')} onChange={(event) => setAssignment({ ...assignment, validTo: event.target.value })} size="small" type="datetime-local" value={assignment.validTo} />
         </Box>
