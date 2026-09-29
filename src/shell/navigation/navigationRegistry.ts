@@ -14,6 +14,14 @@ export interface NavigationItem {
   deliveryTask: string;
 }
 
+export function isNavigationItemAuthorized(
+  item: NavigationItem,
+  authorizedModules: ReadonlySet<string>,
+): boolean {
+  return item.capabilityModules.length === 0 ||
+    item.capabilityModules.some((module) => authorizedModules.has(module));
+}
+
 export interface NavigationSection {
   id: string;
   labelKey?: string;

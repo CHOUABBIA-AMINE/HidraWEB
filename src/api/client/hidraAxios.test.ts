@@ -6,6 +6,7 @@ import {
   HIDRA_REQUEST_ID_HEADER,
 } from '@/api/client/diagnosticHeaders';
 import { hidraAxios } from '@/api/client/hidraAxios';
+import { HIDRA_AUTH_UNAUTHORIZED_EVENT } from '@/app/auth/authEvents';
 import {
   configureTechnicalErrorSink,
   type TechnicalErrorReport,
@@ -109,4 +110,61 @@ describe('hidraAxios diagnostics', () => {
     expect(reports[0].requestId).toBeTruthy();
     expect(JSON.stringify(reports[0])).not.toContain('must-not-leak');
   });
+
+  it('dispatches the unauthorized session event on backend HTTP 401', async () => {
+    let unauthorizedEvents = 0;
+    const listener = () => { unauthorizedEvents += 1; };
+    window.addEventListener(HIDRA_AUTH_UNAUTHORIZED_EVENT, listener);
+
+    try {
+      await expect(
+        hidraAxios.request({
+          method: 'GET',
+          url: '/api/v1/protected',
+          adapter: async (config) => {
+            throw new AxiosError('Unauthorized', 'ERR_BAD_RESPONSE', config, undefined, {
+              data: { title: 'Unauthorized', status: 401 },
+              status: 401,
+              statusText: 'Unauthorized',
+              headers: new AxiosHeaders(),
+              config,
+            });
+          },
+        }),
+      ).rejects.toMatchObject({ status: 401 });
+
+      expect(unauthorizedEvents).toBe(1);
+    } finally {
+      window.removeEventListener(HIDRA_AUTH_UNAUTHORIZED_EVENT, listener);
+    }
+  });
+
+  it('preserves the authenticated session signal on backend HTTP 403', async () => {
+    let unauthorizedEvents = 0;
+    const listener = () => { unauthorizedEvents += 1; };
+    window.addEventListener(HIDRA_AUTH_UNAUTHORIZED_EVENT, listener);
+
+    try {
+      await expect(
+        hidraAxios.request({
+          method: 'GET',
+          url: '/api/v1/forbidden',
+          adapter: async (config) => {
+            throw new AxiosError('Forbidden', 'ERR_BAD_RESPONSE', config, undefined, {
+              data: { title: 'Forbidden', status: 403 },
+              status: 403,
+              statusText: 'Forbidden',
+              headers: new AxiosHeaders(),
+              config,
+            });
+          },
+        }),
+      ).rejects.toMatchObject({ status: 403 });
+
+      expect(unauthorizedEvents).toBe(0);
+    } finally {
+      window.removeEventListener(HIDRA_AUTH_UNAUTHORIZED_EVENT, listener);
+    }
+  });
+
 });

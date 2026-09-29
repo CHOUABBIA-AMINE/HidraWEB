@@ -65,7 +65,7 @@ The new execution line is HWEB-R01 through HWEB-R17.
 | HWEB-R01 | `docs(architecture): reconcile HidraWEB with current HidraAPI` | Audit live frontend against current backend, update canonical contract, replace forward roadmap. Documentation only. | Reuse/reset decision recorded; stale contract areas identified; next task defined. | **Completed** |
 | HWEB-R02 | `chore(api): refresh HidraAPI OpenAPI baseline` | Replace accepted full OpenAPI artifact evidence and all feature slices with the current verified code-equivalent backend artifact; rationalize Orval configs only as needed. | Compatibility gate, all generators, typecheck and build use one current backend baseline. | **Completed** |
 | HWEB-R03 | `refactor(authentication): align session with HidraAPI principal contract` | Regenerate identity contract; use current login/OIDC endpoints and canonical `GET /api/v1/identity/me` plus effective permissions for authenticated session state. | No invented auth endpoints; principal/session tests pass. | **Completed** |
-| HWEB-R04 | `refactor(authorization): align shell with effective permissions` | Align permission model/navigation guards with backend-enforced route catalog and current effective permissions. | No catalog-only assumption; 401/403 and permission-aware navigation tests pass. | Planned |
+| HWEB-R04 | `refactor(authorization): align shell with effective permissions` | Align permission model/navigation guards with backend-enforced route catalog and current effective permissions. | No catalog-only assumption; 401/403 and permission-aware navigation tests pass. | **Completed** |
 | HWEB-R05 | `refactor(organization): align operational context with canonical scopes` | Replace stale Organization assumptions with dedicated reads plus `OperationalScope` / `ResponsibilityAssignment` contracts. | No retired scope tuple model; organization/operational context is backend-driven. | Planned |
 | HWEB-R06 | `refactor(workbench): align generic resource browsing` | Regenerate workbench contract and retain it as secondary/reference/admin UX only. | List/detail/search work against refreshed OpenAPI; no specialized workflow is replaced by workbench. | Planned |
 | HWEB-R07 | `refactor(topology): align network workspace with current map contract` | Revalidate current layer catalog/typed geometry/search, retain HidraMap/MapLibre, remove stale missing-layer assumptions. | Network workspace consumes only current topology API. | Planned |
@@ -196,10 +196,28 @@ HWEB-R03 aligns frontend session establishment with the canonical authenticated-
 
 No backend code, frontend routes, Organization operational-scope flow, or realtime behavior is changed by HWEB-R03.
 
-## 10. Next authorized task
+## 10. HWEB-R04 completion evidence
+
+HWEB-R04 aligns shell navigation with backend-enforced permission evidence:
+
+- HidraAPI source SHA: `260295c6eebc4b01922d2d488810a671305860a6`;
+- HidraWEB source SHA at task start: `0fe4ffe2d3704b31334c2ed3d5c47618f0d5258f`;
+- OpenAPI evidence: `63f3f60974ce57eb8cd5e42910397615195624fb`;
+- route permission metadata remains sourced from `GET /api/v1/security/permissions/routes`;
+- effective grants remain sourced from `GET /api/v1/identity/me/permissions`;
+- shell module visibility is now derived from the intersection of published route descriptors and effective grants, rather than from permission-string prefixes alone;
+- the backend wildcard grant `*` remains supported across all published route modules;
+- HTTP 401 continues to terminate the frontend session through the unauthorized event;
+- HTTP 403 preserves the authenticated session and remains an authorization denial;
+- navigation tests cover allowed, denied, and wildcard behavior;
+- stale catalog-only authorization messaging is removed from French, English, and Arabic shell copy.
+
+No backend code, feature workflow behavior, Organization operational-context model, or realtime behavior is changed by HWEB-R04.
+
+## 11. Next authorized task
 
 ```text
-HWEB-R04 — refactor(authorization): align shell with effective permissions
+HWEB-R05 — refactor(organization): align operational context with canonical scopes
 ```
 
-Do not execute HWEB-R05 or later work in the same task.
+Do not execute HWEB-R06 or later work in the same task.

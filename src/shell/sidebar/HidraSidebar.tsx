@@ -25,7 +25,12 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
 
 import { usePermissions } from '@/features/permissions/usePermissions';
-import { navigationSections, type NavigationIconKey, type NavigationItem } from '@/shell/navigation/navigationRegistry';
+import {
+  isNavigationItemAuthorized,
+  navigationSections,
+  type NavigationIconKey,
+  type NavigationItem,
+} from '@/shell/navigation/navigationRegistry';
 
 const expandedWidth = 272;
 const collapsedWidth = 72;
@@ -55,7 +60,7 @@ export function HidraSidebar({ collapsed }: HidraSidebarProps) {
   const visibleSections = navigationSections
     .map((section) => ({
       ...section,
-      items: section.items.filter((item) => permissions.hasAnyModuleCapability(item.capabilityModules)),
+      items: section.items.filter((item) => isNavigationItemAuthorized(item, permissions.modules)),
     }))
     .filter((section) => section.items.length > 0);
 

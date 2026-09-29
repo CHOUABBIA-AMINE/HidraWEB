@@ -34,9 +34,9 @@ export function normalizePermissionMetadata(
   const modules = wildcard
     ? new Set(routes.map((descriptor) => descriptor.module))
     : new Set(
-        effectivePermissions
-          .map((permission) => permission.split(':', 1)[0])
-          .filter((module) => module.length > 0 && module !== '*'),
+        routes
+          .filter((descriptor) => permissions.has(descriptor.permission))
+          .map((descriptor) => descriptor.module),
       );
 
   return {
