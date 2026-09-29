@@ -75,7 +75,7 @@ The new execution line is HWEB-R01 through HWEB-R17.
 | HWEB-R11 | `refactor(events): align incident leak and hse workspaces` | Revalidate current HidraAPI incident/leak/HSE read contracts. | No direct LeakDetectionAPI dependency; events workspace remains HidraAPI-driven. | **Completed** |
 | HWEB-R12 | `refactor(planning): align planning and approval contracts` | Revalidate periods/plans/revisions/targets and backend approval actions. | No frontend-defined approval state machine. | **Completed** |
 | HWEB-R13 | `refactor(engineering): align integrity and assets contracts` | Regenerate assets/integrity schemas, remove handwritten backend DTO replicas and revalidate engineering composition. | No duplicated transport DTOs; workbench remains secondary. | **Completed** |
-| HWEB-R14 | `refactor(custody): align metering and custody contracts` | Revalidate custody command contracts and supporting workbench/reference data. | Current OpenAPI types and permissions used. | Planned |
+| HWEB-R14 | `refactor(custody): align metering and custody contracts` | Revalidate custody command contracts and supporting workbench/reference data. | Current OpenAPI types and permissions used. | **Completed** |
 | HWEB-R15 | `refactor(intelligence): align risk analytics simulation reporting` | Revalidate each intelligence workspace against current backend capability/workbench contracts. | No synthetic KPI/simulation semantics. | Planned |
 | HWEB-R16 | `refactor(administration): align governance workspaces` | Revalidate audit/configuration/documents/integration/notification administration. | Destructive actions permission-gated; provider capabilities not invented. | Planned |
 | HWEB-R17 | `test(release): harden reconciled HidraWEB` | Full accessibility, performance, E2E, OpenAPI compatibility, deployment and release-artifact review. | `npm run verify`, required E2E/performance gates and production-readiness checklist green. | Planned |
@@ -390,10 +390,31 @@ HWEB-R13 aligns Engineering command contracts with the current HidraAPI assets/i
 
 No backend code, engineering business lifecycle, workbench semantics, custody behavior, deferred B31G capability, or realtime contract is changed by HWEB-R13.
 
-## 20. Next authorized task
+## 20. HWEB-R14 completion evidence
+
+HWEB-R14 revalidates the Metering & Custody workspace against the current HidraAPI custody command contract while preserving workbench-backed reference/read composition:
+
+- HidraAPI source SHA: `260295c6eebc4b01922d2d488810a671305860a6`;
+- HidraWEB source SHA at task start: `79cde82350f7e9df28ecddc828e71d0fbaa0c3bc`;
+- OpenAPI evidence: `63f3f60974ce57eb8cd5e42910397615195624fb`;
+- custody OpenAPI provenance now references the verified HidraAPI artifact/run used by the reconciled frontend baseline;
+- measurement-period creation remains `POST /api/v1/custody/measurement-periods`;
+- transfer-ticket creation remains `POST /api/v1/custody/transfer-tickets`;
+- discrepancy opening remains `POST /api/v1/custody/discrepancies`;
+- all three commands continue to consume generated OpenAPI request/response types; no handwritten custody transport DTO replica is introduced;
+- command availability continues to be derived from backend route-permission metadata plus effective permissions and fails closed when metadata/grants are absent;
+- custody period/ticket/discrepancy list/detail presentation remains backed by generic workbench records because HidraAPI does not publish dedicated read controllers for these surfaces in the accepted contract;
+- agreements, transfer points, batches, quantity calculations, reconciliation rows, metering snapshots and party references remain runtime-discovered custody/workbench data rather than hardcoded frontend catalogs;
+- topology, telemetry and party master data remain owner-module truth; custody displays explicit neutral references/snapshots only and does not scan or mutate foreign collections;
+- no client-side custody lifecycle state machine, metering calculation, reconciliation formula, approval logic or synthetic fiscal value is introduced;
+- adapter tests cover the canonical typed measurement-period, transfer-ticket and discrepancy command payloads and paths.
+
+No backend code, custody domain lifecycle, metering calculation, workbench semantics, intelligence behavior, or realtime contract is changed by HWEB-R14.
+
+## 21. Next authorized task
 
 ```text
-HWEB-R14 — refactor(custody): align metering and custody contracts
+HWEB-R15 — refactor(intelligence): align risk analytics simulation reporting
 ```
 
-Do not execute HWEB-R15 or later work in the same task.
+Do not execute HWEB-R16 or later work in the same task.
