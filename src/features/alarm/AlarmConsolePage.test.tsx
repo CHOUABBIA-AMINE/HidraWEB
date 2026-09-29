@@ -24,6 +24,7 @@ const fixtures = vi.hoisted(() => {
 const hidraHttpClient = vi.hoisted(() => vi.fn(async (config: { url?: string; method?: string; data?: unknown }) => {
   if (config.url?.endsWith('/security/permissions/catalog')) return { strategy: 'derived-route-permission-catalog', enforcement: 'backend-enforced', permissionFormat: '<module>:<resource>:<action>', routes: fixtures.routes };
   if (config.url?.endsWith('/security/permissions/routes')) return fixtures.routes;
+  if (config.url === '/api/v1/identity/me') return { authenticationName: 'operator', authenticationType: 'LOCAL', userId: 'user-operator', username: 'operator', displayName: 'Operator', employeeReferenceId: 'employee-operator', authenticationAuthorities: [], effectivePermissions: [] };
   if (config.url?.endsWith('/identity/me/permissions')) return fixtures.permissions;
   if (config.url === '/api/v1/alarm/alarms' && config.method === 'GET') return { content: [fixtures.alarm], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false };
   if (config.url === '/api/v1/alarm/alarms/alarm-1' && config.method === 'GET') return fixtures.alarm;

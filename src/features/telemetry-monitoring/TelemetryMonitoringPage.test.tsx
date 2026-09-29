@@ -20,6 +20,7 @@ vi.mock('@/api/client/hidraHttpClient', () => ({
   hidraHttpClient: vi.fn(async (config: { url?: string }) => {
     if (config.url?.endsWith('/security/permissions/catalog')) return { strategy: 'derived-route-permission-catalog', enforcement: 'backend-enforced', permissionFormat: '<module>:<resource>:<action>', routes: fixtures.routes };
     if (config.url?.endsWith('/security/permissions/routes')) return fixtures.routes;
+    if (config.url === '/api/v1/identity/me') return { authenticationName: 'operator', authenticationType: 'LOCAL', userId: 'user-operator', username: 'operator', displayName: 'Operator', employeeReferenceId: 'employee-operator', authenticationAuthorities: [], effectivePermissions: [] };
     if (config.url?.endsWith('/identity/me/permissions')) return fixtures.permissions;
     if (config.url === '/api/v1/telemetry/reference/reading-states') return ['TRUSTED'];
     if (config.url === '/api/v1/telemetry/reference/quality-codes') return [{ id: 'GOOD', code: 'GOOD', translations: {}, active: true }];

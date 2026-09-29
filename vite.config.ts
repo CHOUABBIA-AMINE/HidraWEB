@@ -7,6 +7,26 @@ function e2eAuthenticationMockPlugin(): Plugin | undefined {
   return {
     name: 'hidra-e2e-authentication-mock',
     configureServer(server) {
+      server.middlewares.use('/api/v1/identity/me', (request, response, next) => {
+        if (request.method !== 'GET' || request.url !== '/') {
+          next();
+          return;
+        }
+
+        response.statusCode = 200;
+        response.setHeader('Content-Type', 'application/json');
+        response.end(JSON.stringify({
+          authenticationName: 'playwright-user',
+          authenticationType: 'LOCAL',
+          userId: 'e2e-playwright-user',
+          username: 'playwright-user',
+          displayName: 'Playwright User',
+          employeeReferenceId: 'employee-playwright-user',
+          authenticationAuthorities: [],
+          effectivePermissions: [],
+        }));
+      });
+
       server.middlewares.use('/api/v1/identity/authentication/login', (request, response, next) => {
         if (request.method !== 'POST') {
           next();

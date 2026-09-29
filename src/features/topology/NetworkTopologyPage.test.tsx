@@ -35,6 +35,7 @@ vi.mock('@/api/client/hidraHttpClient', () => ({
       };
     }
     if (config.url?.endsWith('/security/permissions/routes')) return fixtures.routes;
+    if (config.url === '/api/v1/identity/me') return { authenticationName: 'operator', authenticationType: 'LOCAL', userId: 'user-operator', username: 'operator', displayName: 'Operator', employeeReferenceId: 'employee-operator', authenticationAuthorities: [], effectivePermissions: [] };
     if (config.url?.endsWith('/identity/me/permissions')) return fixtures.effectivePermissions;
     if (config.url === '/api/v1/topology/map/layers') return [fixtures.layer];
     if (config.url === '/api/v1/topology/map/layers/facilities') return fixtures.layer;
