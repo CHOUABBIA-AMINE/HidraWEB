@@ -54,6 +54,10 @@ jobs:
         run: npm run api:generate:hse
       - name: Generate HWEB-010 planning OpenAPI client
         run: npm run api:generate:planning
+      - name: Generate HWEB-011 assets OpenAPI client
+        run: npm run api:generate:assets
+      - name: Generate HWEB-011 integrity OpenAPI client
+        run: npm run api:generate:integrity
       - name: Generate HWEB-012 custody OpenAPI client
         run: npm run api:generate:custody
       - name: Generate HWEB-013 risk OpenAPI client

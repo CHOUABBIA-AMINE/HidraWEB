@@ -74,7 +74,7 @@ The new execution line is HWEB-R01 through HWEB-R17.
 | HWEB-R10 | `refactor(alarm): align console with backend lifecycle` | Revalidate list/detail/ack/close/shelving behavior and accessible severity/state presentation. | Alarm console uses current backend lifecycle only; no fake realtime. | **Completed** |
 | HWEB-R11 | `refactor(events): align incident leak and hse workspaces` | Revalidate current HidraAPI incident/leak/HSE read contracts. | No direct LeakDetectionAPI dependency; events workspace remains HidraAPI-driven. | **Completed** |
 | HWEB-R12 | `refactor(planning): align planning and approval contracts` | Revalidate periods/plans/revisions/targets and backend approval actions. | No frontend-defined approval state machine. | **Completed** |
-| HWEB-R13 | `refactor(engineering): align integrity and assets contracts` | Regenerate assets/integrity schemas, remove handwritten backend DTO replicas and revalidate engineering composition. | No duplicated transport DTOs; workbench remains secondary. | Planned |
+| HWEB-R13 | `refactor(engineering): align integrity and assets contracts` | Regenerate assets/integrity schemas, remove handwritten backend DTO replicas and revalidate engineering composition. | No duplicated transport DTOs; workbench remains secondary. | **Completed** |
 | HWEB-R14 | `refactor(custody): align metering and custody contracts` | Revalidate custody command contracts and supporting workbench/reference data. | Current OpenAPI types and permissions used. | Planned |
 | HWEB-R15 | `refactor(intelligence): align risk analytics simulation reporting` | Revalidate each intelligence workspace against current backend capability/workbench contracts. | No synthetic KPI/simulation semantics. | Planned |
 | HWEB-R16 | `refactor(administration): align governance workspaces` | Revalidate audit/configuration/documents/integration/notification administration. | Destructive actions permission-gated; provider capabilities not invented. | Planned |
@@ -371,10 +371,29 @@ HWEB-R12 revalidates the Planning workspace against the current HidraAPI plannin
 
 No backend code, workflow transition graph, planning lifecycle state machine, monitoring calculation, engineering behavior, or realtime contract is changed by HWEB-R12.
 
-## 19. Next authorized task
+## 19. HWEB-R13 completion evidence
+
+HWEB-R13 aligns Engineering command contracts with the current HidraAPI assets/integrity APIs while preserving the generic workbench as secondary read/reference UX:
+
+- HidraAPI source SHA: `260295c6eebc4b01922d2d488810a671305860a6`;
+- HidraWEB source SHA at task start: `f6ddc07c6d249279ab2e67bd2aa3f79a2dda1373`;
+- OpenAPI evidence: `63f3f60974ce57eb8cd5e42910397615195624fb`;
+- new checked-in assets and integrity OpenAPI consumer slices are pinned to the verified HidraAPI artifact/run;
+- feature Orval contracts increase from 18 to 20 and CI now regenerates dedicated assets and integrity clients before lint/typecheck/tests;
+- handwritten request/response DTO replicas are removed from `assetsApi.ts` and `integrityApi.ts`; those adapters now consume generated model contracts;
+- assets commands remain the canonical `POST /api/v1/assets/maintainable-assets`, `POST /api/v1/assets/asset-conditions`, `POST /api/v1/assets/maintenance-work-orders`, and concurrency-protected `PATCH /api/v1/assets/maintainable-assets/{assetId}`;
+- integrity assessment creation remains `POST /api/v1/integrity/assessments`, with program/case schemas included in the dedicated integrity contract for future typed use without reintroducing handwritten DTOs;
+- maintainable-asset rename continues to transport backend `expectedUpdatedAt` concurrency state exactly;
+- Engineering list/detail/resource browsing remains on the generic workbench and therefore stays secondary to typed domain commands rather than replacing them;
+- cross-module engineering context continues to display only backend-published references and does not infer topology/document/risk/incident relationships;
+- adapter tests cover canonical typed assets/integrity command paths and encoded maintainable-asset identifiers.
+
+No backend code, engineering business lifecycle, workbench semantics, custody behavior, deferred B31G capability, or realtime contract is changed by HWEB-R13.
+
+## 20. Next authorized task
 
 ```text
-HWEB-R13 — refactor(engineering): align integrity and assets contracts
+HWEB-R14 — refactor(custody): align metering and custody contracts
 ```
 
-Do not execute HWEB-R14 or later work in the same task.
+Do not execute HWEB-R15 or later work in the same task.

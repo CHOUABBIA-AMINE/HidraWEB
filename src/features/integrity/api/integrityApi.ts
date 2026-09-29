@@ -1,26 +1,10 @@
 import { hidraHttpClient } from '@/api/client/hidraHttpClient';
+import type {
+  CreateIntegrityAssessmentRequest,
+  IntegrityAssessmentResponse,
+} from '@/api/generated/integrity/model';
 
-export interface CreateIntegrityAssessmentRequest {
-  programId?: string;
-  assessmentNumber?: string;
-  title?: string;
-  description?: string;
-  assessmentTypeId?: string;
-  methodologyId?: string;
-  assessmentDate?: string;
-  assessedByActorId?: string;
-  workflowInstanceId?: string;
-}
-
-export interface IntegrityAssessmentResponse {
-  id?: string;
-  programId?: string;
-  assessmentNumber?: string;
-  title?: string;
-  assessmentTypeId?: string;
-  status?: string;
-  assessmentDate?: string;
-}
+export type { CreateIntegrityAssessmentRequest };
 
 export function createIntegrityAssessment(
   request: CreateIntegrityAssessmentRequest,
