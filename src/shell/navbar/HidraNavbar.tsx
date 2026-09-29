@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '@/app/auth/useAuth';
 import { runtimeConfig } from '@/app/bootstrap/runtimeConfig';
+import { OperationalContextSelector } from '@/features/context/components/OperationalContextSelector';
 import { useRealtimeStatus } from '@/features/realtime/useRealtimeStatus';
 
 interface HidraNavbarProps {
@@ -47,7 +48,7 @@ export function HidraNavbar({ sidebarCollapsed, onToggleSidebar }: HidraNavbarPr
           </Typography>
         </Box>
         <Chip label={runtimeConfig.environment.toUpperCase()} size="small" variant="outlined" />
-        <Chip label={t('shell.operationalContextPlaceholder')} size="small" sx={{ display: { xs: 'none', lg: 'inline-flex' } }} variant="outlined" />
+        <OperationalContextSelector />
         <TextField
           disabled
           placeholder={t('shell.searchPlaceholder')}

@@ -5,7 +5,9 @@ import type {
   EmployeeResponse,
   EvaluatePermissionRequest,
   OrganizationUnitResponse,
+  OperationalScopeResponse,
   PermissionDecisionResponse,
+  ResponsibilityResponse,
   RegisterEmployeeRequest,
   UserResponse,
 } from '@/api/generated/identity-organization/model';
@@ -36,5 +38,21 @@ export function assignEmployee(request: AssignEmployeeRequest): Promise<string> 
     method: 'POST',
     url: '/api/v1/organization/employees/assignments',
     data: request,
+  });
+}
+
+
+export function fetchResponsibilitiesByEmployee(employeeId: string): Promise<ResponsibilityResponse[]> {
+  return hidraHttpClient<ResponsibilityResponse[]>({
+    method: 'GET',
+    url: '/api/v1/organization/responsibilities',
+    params: { assigneeType: 'EMPLOYEE', assigneeId: employeeId },
+  });
+}
+
+export function fetchOperationalScope(scopeId: number): Promise<OperationalScopeResponse> {
+  return hidraHttpClient<OperationalScopeResponse>({
+    method: 'GET',
+    url: `/api/v1/organization/operational-scopes/${scopeId}`,
   });
 }

@@ -66,7 +66,7 @@ The new execution line is HWEB-R01 through HWEB-R17.
 | HWEB-R02 | `chore(api): refresh HidraAPI OpenAPI baseline` | Replace accepted full OpenAPI artifact evidence and all feature slices with the current verified code-equivalent backend artifact; rationalize Orval configs only as needed. | Compatibility gate, all generators, typecheck and build use one current backend baseline. | **Completed** |
 | HWEB-R03 | `refactor(authentication): align session with HidraAPI principal contract` | Regenerate identity contract; use current login/OIDC endpoints and canonical `GET /api/v1/identity/me` plus effective permissions for authenticated session state. | No invented auth endpoints; principal/session tests pass. | **Completed** |
 | HWEB-R04 | `refactor(authorization): align shell with effective permissions` | Align permission model/navigation guards with backend-enforced route catalog and current effective permissions. | No catalog-only assumption; 401/403 and permission-aware navigation tests pass. | **Completed** |
-| HWEB-R05 | `refactor(organization): align operational context with canonical scopes` | Replace stale Organization assumptions with dedicated reads plus `OperationalScope` / `ResponsibilityAssignment` contracts. | No retired scope tuple model; organization/operational context is backend-driven. | Planned |
+| HWEB-R05 | `refactor(organization): align operational context with canonical scopes` | Replace stale Organization assumptions with dedicated reads plus `OperationalScope` / `ResponsibilityAssignment` contracts. | No retired scope tuple model; organization/operational context is backend-driven. | **Completed** |
 | HWEB-R06 | `refactor(workbench): align generic resource browsing` | Regenerate workbench contract and retain it as secondary/reference/admin UX only. | List/detail/search work against refreshed OpenAPI; no specialized workflow is replaced by workbench. | Planned |
 | HWEB-R07 | `refactor(topology): align network workspace with current map contract` | Revalidate current layer catalog/typed geometry/search, retain HidraMap/MapLibre, remove stale missing-layer assumptions. | Network workspace consumes only current topology API. | Planned |
 | HWEB-R08 | `refactor(operations): align telemetry and monitoring workspaces` | Regenerate telemetry/monitoring types and revalidate readings, quality/state, trend, rules and deviations. | REST/query behavior green; no invented realtime topics. | Planned |
@@ -214,10 +214,29 @@ HWEB-R04 aligns shell navigation with backend-enforced permission evidence:
 
 No backend code, feature workflow behavior, Organization operational-context model, or realtime behavior is changed by HWEB-R04.
 
-## 11. Next authorized task
+## 11. HWEB-R05 completion evidence
+
+HWEB-R05 aligns the cross-screen operational context with the canonical Organization responsibility model:
+
+- HidraAPI source SHA: `260295c6eebc4b01922d2d488810a671305860a6`;
+- HidraWEB source SHA at task start: `32287c244e1c3419843b66cda3ecfe91e2279959`;
+- OpenAPI evidence: `63f3f60974ce57eb8cd5e42910397615195624fb`;
+- the identity/organization slice now includes canonical operational-scope registration/read and responsibility list/assign/revoke contracts;
+- the frontend reads responsibility context through `GET /api/v1/organization/responsibilities?assigneeType=EMPLOYEE&assigneeId=...`;
+- current employee identity comes from the authenticated principal's `employeeReferenceId`;
+- active operational contexts come only from backend-enriched `ResponsibilityResponse.scope` objects;
+- selected operational context stores canonical `scopeId` plus owner-resolved display attributes; it never reconstructs the retired `operationalScopeType/id/code/name` tuple from employee assignments;
+- duplicate responsibilities over the same scope are de-duplicated by canonical scope registry ID;
+- ended/suspended/cancelled responsibilities and assignments without canonical scope data do not become selectable operational context;
+- the shell navbar replaces its placeholder chip with a backend-driven operational-context selector when current responsibilities exist;
+- no physical/network ownership is inferred from OrganizationUnit hierarchy alone.
+
+No backend code, workbench-resource refactor, topology behavior, or workflow semantics are changed by HWEB-R05.
+
+## 12. Next authorized task
 
 ```text
-HWEB-R05 — refactor(organization): align operational context with canonical scopes
+HWEB-R06 — refactor(workbench): align generic resource browsing
 ```
 
-Do not execute HWEB-R06 or later work in the same task.
+Do not execute HWEB-R07 or later work in the same task.
