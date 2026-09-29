@@ -1,359 +1,170 @@
-# HidraWeb Development Roadmap
+# HidraWEB Development Roadmap — Reconciled Baseline
 
 ```text
-Repository       : HidraWEB
-Backend truth    : CHOUABBIA-AMINE/HidraAPI main
-Architecture     : docs/architecture/HidraWeb-Information-Architecture.md
-                   docs/architecture/Hidra-API-Web-Contract-v1.md
-                   docs/architecture/HidraWeb-Technical-Architecture.md
-Delivery model   : modular frontend monolith
-Rule             : no screen/action/API assumption without HidraAPI evidence or an explicit approved TARGET gap
+Repository       : CHOUABBIA-AMINE/HidraWEB
+Frontend baseline: 02a101fda401b7335b51e95ea17d281baeabbe93
+Backend truth    : CHOUABBIA-AMINE/HidraAPI
+Backend baseline : 260295c6eebc4b01922d2d488810a671305860a6
+OpenAPI evidence : 63f3f60974ce57eb8cd5e42910397615195624fb
+Decision         : CONTINUE / REFACTOR
+Execution model  : exactly one HWEB-R task per commit
 ```
 
-## Global delivery rules
-
-1. HidraAPI is the source of business truth and final authorization enforcement.
-2. HidraWeb consumes OpenAPI, permission metadata, DTOs and realtime contracts; it does not mirror JPA/domain implementation.
-3. Primary navigation is process-oriented; backend modules remain ownership boundaries.
-4. Cross-module UI composition belongs in `src/processes`.
-5. Every API use is typed from HidraAPI OpenAPI or documented as an approved temporary exception.
-6. Every task ends with lint, typecheck, tests and production build green.
-7. A feature is not complete until authorization and failure states are tested.
-8. No micro-frontends, alternate framework or alternate map engine are introduced without an architecture decision.
-
----
-
-# HWEB-001 — Bootstrap Application
-
-**Dependency:** architecture baseline complete.  
-**Outcome:** executable React/TypeScript foundation.
-
-Tasks:
-
-- HWEB-001-01 branch from current `main`.
-- HWEB-001-02 Node 24 LTS and npm toolchain baseline.
-- HWEB-001-03 package manifest with approved dependencies.
-- HWEB-001-04 strict TypeScript configuration.
-- HWEB-001-05 Vite development/build configuration on port 5173.
-- HWEB-001-06 canonical provider composition.
-- HWEB-001-07 minimal `/overview` router only.
-- HWEB-001-08 central Axios/correlation/error infrastructure.
-- HWEB-001-09 Orval OpenAPI generation configuration.
-- HWEB-001-10 verified permission endpoint constants.
-- HWEB-001-11 i18next bootstrap with RTL capability.
-- HWEB-001-12 Vitest + React Testing Library smoke.
-- HWEB-001-13 Playwright startup smoke.
-- HWEB-001-14 CI pipeline.
-- HWEB-001-15 committed package lock.
-- HWEB-001-16 CI converted to `npm ci`.
-- HWEB-001-17 CI green.
-
-**Exit:** application boots and all technical quality gates pass; no business process implemented.
-
----
-
-# HWEB-002 — Application Shell, Authentication and Permissions
-
-**Depends on:** HWEB-001.  
-**Backend source:** HidraAPI security configuration and permission catalog/routes.
-
-Tasks:
-
-- HWEB-002-01 inventory actual authentication modes and environment configuration from HidraAPI.
-- HWEB-002-02 implement `AuthProvider` adapters for dev Basic and enterprise JWT without embedding credentials in feature code.
-- HWEB-002-03 confirm whether an authenticated-principal endpoint exists; if absent, document a TARGET contract gap before coding principal UI.
-- HWEB-002-04 implement permission catalog query for `/api/v1/security/permissions/catalog`.
-- HWEB-002-05 implement route descriptor query for `/api/v1/security/permissions/routes`.
-- HWEB-002-06 normalize permission metadata into frontend guard model without treating client guards as enforcement.
-- HWEB-002-07 implement permanent navbar: product identity, operational context placeholder, global search placeholder, realtime status, tasks, notifications, language, profile.
-- HWEB-002-08 implement collapsible process sidebar from canonical navigation registry.
-- HWEB-002-09 intersect sidebar routes/actions with loaded permission metadata.
-- HWEB-002-10 implement 401/403/404 global states.
-- HWEB-002-11 implement contextual drawer infrastructure; no permanent right column.
-- HWEB-002-12 add shell accessibility/keyboard tests.
-- HWEB-002-13 add authorization E2E scenarios.
-
-**Exit:** authenticated shell renders only permitted process entries; backend 403 remains authoritative.
-
----
-
-# HWEB-003 — Generic Operational Workbench
-
-**Depends on:** HWEB-002.  
-**Backend source:** HidraAPI `HidraOperationalWorkbenchController`.
-
-Tasks:
-
-- HWEB-003-01 generate/update OpenAPI clients from current HidraAPI.
-- HWEB-003-02 implement module discovery from `GET /api/v1/workbench/modules`.
-- HWEB-003-03 implement resource discovery from `GET /api/v1/workbench/{module}/resources`.
-- HWEB-003-04 implement paged list/query from workbench list endpoint.
-- HWEB-003-05 implement detail retrieval.
-- HWEB-003-06 implement advanced search POST contract.
-- HWEB-003-07 create reusable `OperationalWorkbenchPage`.
-- HWEB-003-08 create reusable data-grid toolbar/filter/pagination primitives.
-- HWEB-003-09 create generic detail drawer.
-- HWEB-003-10 ensure workbench is secondary-resource UX, not a replacement for specialized operational processes.
-- HWEB-003-11 test 400/403/404/5xx and empty/loading states.
-
-**Exit:** authorized generic backend resources can be discovered, listed, searched and inspected without handwritten DTO assumptions.
-
----
-
-# HWEB-004 — Identity and Organization Context
-
-**Depends on:** HWEB-003.  
-**Backend owners:** `identity`, `organization`.
-
-Tasks:
-
-- HWEB-004-01 inventory current identity/organization controllers, DTOs and workbench resources.
-- HWEB-004-02 generate clients and map only verified contracts.
-- HWEB-004-03 implement users/roles/permissions workspaces where endpoints exist.
-- HWEB-004-04 implement organization units and employee/assignment workspaces where endpoints exist.
-- HWEB-004-05 establish reusable actor and organization display/reference components.
-- HWEB-004-06 keep login credentials owned by identity and employee hierarchy owned by organization.
-- HWEB-004-07 authorization and workflow-reference tests.
-
-**Exit:** HidraWeb can display responsible actor/organization context used by later operational processes.
-
----
-
-# HWEB-005 — Network and Topology Workspace
-
-**Depends on:** HWEB-002; uses HWEB-003 primitives where useful.  
-**Backend owner:** `topology`.
-
-Tasks:
-
-- HWEB-005-01 verify current topology layer catalog and GeoJSON contracts.
-- HWEB-005-02 implement `HidraMap` abstraction and MapLibre adapter.
-- HWEB-005-03 load `GET /api/v1/topology/map/layers`.
-- HWEB-005-04 load layer metadata/features.
-- HWEB-005-05 render `/api/v1/topology/map/geojson` as valid GeoJSON.
-- HWEB-005-06 implement topology search endpoint.
-- HWEB-005-07 implement layer tree, legend, visibility and selection state.
-- HWEB-005-08 implement asset inspector contextual drawer.
-- HWEB-005-09 expose only backend-evidenced layers; pipeline-system/pipeline layer gaps remain explicit if absent.
-- HWEB-005-10 add map performance guardrails and feature-count observability.
-- HWEB-005-11 add map keyboard/accessibility alternatives where practical.
-
-**Exit:** `/network` is a specialized operational spatial workspace backed only by HidraAPI topology contracts.
-
----
-
-# HWEB-006 — Telemetry and Operational Monitoring
-
-**Depends on:** HWEB-005.  
-**Backend owners:** `telemetry`, `monitoring`; topology provides spatial context.
-
-Tasks:
-
-- HWEB-006-01 inventory telemetry/monitoring routes, DTOs, workbench resources and realtime events.
-- HWEB-006-02 implement telemetry readings browser.
-- HWEB-006-03 implement reading quality/state presentation from actual enums/catalogs.
-- HWEB-006-04 implement monitoring rules/envelopes/deviations where contracts exist.
-- HWEB-006-05 implement ECharts trend component with unit/time handling.
-- HWEB-006-06 link telemetry/monitoring records to topology asset context.
-- HWEB-006-07 add realtime invalidation only for verified events.
-- HWEB-006-08 implement `/operations` overview from verified data only.
-- HWEB-006-09 performance test large reading series and paginated lists.
-
-**Exit:** operators can inspect trusted operational readings and deviations with topology context.
-
----
-
-# HWEB-007 — Workflow and My Tasks
-
-**Depends on:** HWEB-004 and HWEB-006.  
-**Backend owner:** `workflow`.
-
-Tasks:
-
-- HWEB-007-01 refresh workflow controller/DTO/state evidence from HidraAPI.
-- HWEB-007-02 generate clients for workflow instances/tasks/actions.
-- HWEB-007-03 implement `/work/tasks` using only retrievable backend task data.
-- HWEB-007-04 implement embedded workflow panel contract.
-- HWEB-007-05 derive action availability only from backend APIs/metadata; never invent approve/reject/delegate/escalate state rules.
-- HWEB-007-06 record reason/comment forms from exact DTOs.
-- HWEB-007-07 after workflow mutation, invalidate/refetch target-module resource from its owner.
-- HWEB-007-08 implement workflow timeline from backend evidence.
-- HWEB-007-09 test stale/conflict/permission/error outcomes.
-
-**Exit:** workflow is global and embedded while backend target modules retain business fact ownership.
-
----
-
-# HWEB-008 — Alarm Console
-
-**Depends on:** HWEB-006 and HWEB-007.  
-**Backend owner:** `alarm`.
-
-Tasks:
-
-- HWEB-008-01 inventory current alarm endpoints, DTOs, enums and permissions.
-- HWEB-008-02 implement dense active alarm console.
-- HWEB-008-03 implement history/detail workspace.
-- HWEB-008-04 implement acknowledgement/closure/shelving actions only where exact endpoints exist.
-- HWEB-008-05 implement severity/state semantic design components.
-- HWEB-008-06 connect verified realtime alarm events to TanStack Query invalidation/update.
-- HWEB-008-07 add topology links and related workflow context.
-- HWEB-008-08 test concurrent mutation and authorization behavior.
-
-**Exit:** operator alarm response is specialized, fast and backend-governed.
-
----
-
-# HWEB-009 — Events and Incidents
-
-**Depends on:** HWEB-008 and HWEB-007.  
-**Backend owners:** `incident`, `leakdetection`, `hse`.
-
-Tasks:
-
-- HWEB-009-01 inventory incident/leak/HSE contracts and permissions.
-- HWEB-009-02 implement incident register and full entity workspace.
-- HWEB-009-03 implement leak case workspace from actual leakdetection contracts.
-- HWEB-009-04 implement HSE event workspace from actual HSE contracts.
-- HWEB-009-05 compose alarm, topology, workflow and document context through public module interfaces.
-- HWEB-009-06 implement evidence/timeline patterns.
-- HWEB-009-07 implement create/update domain actions only where exposed.
-- HWEB-009-08 test cross-links, permission boundaries and failure recovery.
-
-**Exit:** `/events` provides one user process while preserving three backend owners.
-
----
-
-# HWEB-010 — Planning
-
-**Depends on:** HWEB-006 and HWEB-007.  
-**Backend owner:** `planning`.
-
-Tasks:
-
-- HWEB-010-01 inventory plans/periods/targets/nominations/revisions DTOs and endpoints.
-- HWEB-010-02 implement planning period and plan workspaces.
-- HWEB-010-03 implement revisions/version presentation.
-- HWEB-010-04 integrate workflow approval only from verified workflow/plan contracts.
-- HWEB-010-05 implement planned-vs-actual using telemetry only where comparable backend fields are proven.
-- HWEB-010-06 test version/concurrency behavior.
-
-**Exit:** planning process is operationally usable without transferring data ownership from planning/telemetry/workflow.
-
----
-
-# HWEB-011 — Integrity and Maintenance
-
-**Depends on:** HWEB-005, HWEB-007 and HWEB-009.  
-**Backend owners:** `integrity`, `assets`.
-
-Tasks:
-
-- HWEB-011-01 inventory integrity/assets DTOs, resources and actions.
-- HWEB-011-02 implement condition/integrity assessment workspaces.
-- HWEB-011-03 implement maintainable asset and work-order workspaces.
-- HWEB-011-04 compose topology, document, risk and incident context through process layer.
-- HWEB-011-05 implement asset history/timeline from actual evidence.
-- HWEB-011-06 test role/permission and concurrent updates.
-
-**Exit:** `/engineering` unifies integrity and maintenance UX while keeping backend ownership separate.
-
----
-
-# HWEB-012 — Metering and Custody
-
-**Depends on:** HWEB-004 and HWEB-006.  
-**Backend owners:** `custody`, with `party` only where evidenced.
-
-Tasks:
-
-- HWEB-012-01 inventory custody/party contracts.
-- HWEB-012-02 implement measurement-period workspace.
-- HWEB-012-03 implement transfer ticket workspace.
-- HWEB-012-04 implement discrepancy/reconciliation workspace where APIs exist.
-- HWEB-012-05 add topology/telemetry/party references without duplicating foreign aggregates.
-- HWEB-012-06 keep party scope conservative until its ownership is explicitly validated.
-
-**Exit:** custody operations are available under one engineering/process area using verified contracts.
-
----
-
-# HWEB-013 — Intelligence
-
-**Depends on:** trusted operational processes HWEB-006 through HWEB-012.  
-**Backend owners:** `risk`, `analytics`, `simulation`, `reporting`.
-
-Tasks:
-
-- HWEB-013-01 inventory risk/analytics/simulation/reporting contracts.
-- HWEB-013-02 implement risk views.
-- HWEB-013-03 implement analytics datasets/insights/metrics where exposed.
-- HWEB-013-04 implement simulation scenario/run/result workspaces.
-- HWEB-013-05 implement report definition/run/export workspaces.
-- HWEB-013-06 enforce read/derive/recommend presentation semantics; intelligence does not silently mutate operational source-of-truth state.
-- HWEB-013-07 performance test charts, large analytic results and scenario comparisons.
-
-**Exit:** `/intelligence` derives insight from trusted backend data without owning operational truth.
-
----
-
-# HWEB-014 — Governance and Administration Completion
-
-**Depends on:** HWEB-002/HWEB-003 and relevant backend maturity.  
-**Backend owners:** `audit`, `configuration`, `documents`, `integration`, `notification`, plus identity/organization administration.
-
-Tasks:
-
-- HWEB-014-01 audit search/export UI where query endpoints exist.
-- HWEB-014-02 configuration/feature-flag administration with strict permissions.
-- HWEB-014-03 document upload/download/version evidence using multipart/stream contracts only.
-- HWEB-014-04 integration connector/job/dead-letter monitoring where exposed.
-- HWEB-014-05 notification center/delivery evidence according to actual APIs.
-- HWEB-014-06 administration destructive-action confirmations and audit references.
-
-**Exit:** governance/supporting capabilities are available without dominating primary operational navigation.
-
----
-
-# HWEB-015 — Production Hardening
-
-**Depends on:** feature scope accepted.  
-**Outcome:** production-ready enterprise frontend.
-
-Tasks:
-
-- HWEB-015-01 freeze supported enterprise authentication mode and IdP contract.
-- HWEB-015-02 OIDC/JWT production integration and token lifecycle hardening.
-- HWEB-015-03 same-origin reverse-proxy deployment design.
-- HWEB-015-04 CSP, TLS, secure headers and static asset cache policy.
-- HWEB-015-05 frontend observability, structured technical error reporting and correlation IDs.
-- HWEB-015-06 WCAG 2.2 AA audit including keyboard-only control-room workflows.
-- HWEB-015-07 bundle analysis and route-level lazy loading budgets.
-- HWEB-015-08 large-grid/map/chart performance tests.
-- HWEB-015-09 full Playwright regression suite for critical operational journeys.
-- HWEB-015-10 OpenAPI compatibility gate between HidraAPI and HidraWEB pipelines.
-- HWEB-015-11 backup/rollback and release artifact verification.
-- HWEB-015-12 production readiness review.
-
-**Exit:** all functional, security, accessibility, performance and deployment gates are accepted.
-
----
-
-## Mandatory task completion template
-
-Every implementation task shall record:
+## 1. Governance
+
+HidraAPI is the source of business truth and final authorization enforcement.
+
+Before every HWEB-R task:
+
+1. recover current HidraAPI `main`;
+2. recover current HidraWEB `main`;
+3. read `docs/architecture/Hidra-API-Web-Contract-v1.md`;
+4. read this roadmap task;
+5. inspect the current/pinned OpenAPI contract;
+6. implement exactly one task;
+7. validate;
+8. commit with the exact message defined below;
+9. push;
+10. inspect CI once;
+11. stop.
+
+Do not continue automatically to the next task.
+
+## 2. Historical roadmap status
+
+The original HWEB-001 through HWEB-016 work remains valuable implementation history and test evidence.
+
+It is **not** deleted.
+
+However those task numbers are no longer the forward execution queue because HidraAPI evolved materially after the last HidraWEB main commit.
+
+Existing per-task documents under `docs/roadmap/HWEB-*.md` are historical evidence unless explicitly referenced by an HWEB-R task.
+
+The new execution line is HWEB-R01 through HWEB-R17.
+
+## 3. Architectural rules
+
+- modular frontend monolith; no micro-frontends;
+- OpenAPI/Orval is transport authority;
+- no handwritten backend DTO replicas after the relevant regenerated contract exists;
+- React components do not call Axios directly;
+- TanStack Query owns server state;
+- Zustand remains small cross-screen UI state only;
+- frontend permissions are UX guards; backend enforcement is authoritative;
+- Organization operational context uses the backend canonical scope/responsibility model;
+- realtime domain subscriptions are forbidden while HidraAPI reports no published event families;
+- direct browser dependency on LeakDetectionAPI is forbidden while the backend extension roadmap is parked;
+- MapLibre remains behind `HidraMap`;
+- ECharts visualizes only verified backend data;
+- WCAG 2.2 AA remains a release requirement.
+
+## 4. Reconciled task sequence
+
+| Code | Exact commit message | Scope | Exit criterion | Status |
+|---|---|---|---|---|
+| HWEB-R01 | `docs(architecture): reconcile HidraWEB with current HidraAPI` | Audit live frontend against current backend, update canonical contract, replace forward roadmap. Documentation only. | Reuse/reset decision recorded; stale contract areas identified; next task defined. | **Completed** |
+| HWEB-R02 | `chore(api): refresh HidraAPI OpenAPI baseline` | Replace accepted full OpenAPI artifact evidence and all feature slices with the current verified code-equivalent backend artifact; rationalize Orval configs only as needed. | Compatibility gate, all generators, typecheck and build use one current backend baseline. | Planned |
+| HWEB-R03 | `refactor(authentication): align session with HidraAPI principal contract` | Regenerate identity contract; use current login/OIDC endpoints and canonical `GET /api/v1/identity/me` plus effective permissions for authenticated session state. | No invented auth endpoints; principal/session tests pass. | Planned |
+| HWEB-R04 | `refactor(authorization): align shell with effective permissions` | Align permission model/navigation guards with backend-enforced route catalog and current effective permissions. | No catalog-only assumption; 401/403 and permission-aware navigation tests pass. | Planned |
+| HWEB-R05 | `refactor(organization): align operational context with canonical scopes` | Replace stale Organization assumptions with dedicated reads plus `OperationalScope` / `ResponsibilityAssignment` contracts. | No retired scope tuple model; organization/operational context is backend-driven. | Planned |
+| HWEB-R06 | `refactor(workbench): align generic resource browsing` | Regenerate workbench contract and retain it as secondary/reference/admin UX only. | List/detail/search work against refreshed OpenAPI; no specialized workflow is replaced by workbench. | Planned |
+| HWEB-R07 | `refactor(topology): align network workspace with current map contract` | Revalidate current layer catalog/typed geometry/search, retain HidraMap/MapLibre, remove stale missing-layer assumptions. | Network workspace consumes only current topology API. | Planned |
+| HWEB-R08 | `refactor(operations): align telemetry and monitoring workspaces` | Regenerate telemetry/monitoring types and revalidate readings, quality/state, trend, rules and deviations. | REST/query behavior green; no invented realtime topics. | Planned |
+| HWEB-R09 | `refactor(workflow): align tasks with backend actions` | Revalidate task inbox/detail/available-actions/instance/timeline/transition execution. | All actions are backend-defined and concurrency/error states tested. | Planned |
+| HWEB-R10 | `refactor(alarm): align console with backend lifecycle` | Revalidate list/detail/ack/close/shelving behavior and accessible severity/state presentation. | Alarm console uses current backend lifecycle only; no fake realtime. | Planned |
+| HWEB-R11 | `refactor(events): align incident leak and hse workspaces` | Revalidate current HidraAPI incident/leak/HSE read contracts. | No direct LeakDetectionAPI dependency; events workspace remains HidraAPI-driven. | Planned |
+| HWEB-R12 | `refactor(planning): align planning and approval contracts` | Revalidate periods/plans/revisions/targets and backend approval actions. | No frontend-defined approval state machine. | Planned |
+| HWEB-R13 | `refactor(engineering): align integrity and assets contracts` | Regenerate assets/integrity schemas, remove handwritten backend DTO replicas and revalidate engineering composition. | No duplicated transport DTOs; workbench remains secondary. | Planned |
+| HWEB-R14 | `refactor(custody): align metering and custody contracts` | Revalidate custody command contracts and supporting workbench/reference data. | Current OpenAPI types and permissions used. | Planned |
+| HWEB-R15 | `refactor(intelligence): align risk analytics simulation reporting` | Revalidate each intelligence workspace against current backend capability/workbench contracts. | No synthetic KPI/simulation semantics. | Planned |
+| HWEB-R16 | `refactor(administration): align governance workspaces` | Revalidate audit/configuration/documents/integration/notification administration. | Destructive actions permission-gated; provider capabilities not invented. | Planned |
+| HWEB-R17 | `test(release): harden reconciled HidraWEB` | Full accessibility, performance, E2E, OpenAPI compatibility, deployment and release-artifact review. | `npm run verify`, required E2E/performance gates and production-readiness checklist green. | Planned |
+
+## 5. HWEB-R01 completion evidence
+
+HWEB-R01 established:
+
+- current HidraAPI head `260295c6eebc4b01922d2d488810a671305860a6`;
+- current HidraWEB head `02a101fda401b7335b51e95ea17d281baeabbe93`;
+- code-equivalent verified HidraAPI OpenAPI artifact from `63f3f60974ce57eb8cd5e42910397615195624fb`;
+- current HidraWEB OpenAPI baseline `725a451...` is stale;
+- current frontend architecture is worth retaining;
+- no repository-wide reset is required;
+- direct LeakDetectionAPI/gRPC/CPM integration is not a current frontend capability;
+- backend route permissions are now enforced;
+- current principal/effective permissions exist;
+- canonical Organization operational scopes/responsibilities require frontend reconciliation;
+- current realtime transport has no domain event publishers.
+
+Files authorized for HWEB-R01:
 
 ```text
-Backend source commit / branch
-Endpoints and DTOs used
-Permissions used
-Frontend routes created/changed
-State ownership
-Error states
-Tests added
-OpenAPI regeneration status
-Known backend gaps
-CI result
+docs/architecture/HidraWEB-Reconciliation-Audit.md
+docs/architecture/Hidra-API-Web-Contract-v1.md
+docs/roadmap/HidraWeb-Development-Roadmap.md
 ```
 
-A task may not be marked complete from UI appearance alone.
+No production TypeScript, package manifest, OpenAPI artifact or generated client change is authorized in HWEB-R01.
+
+## 6. Validation policy
+
+Documentation-only tasks:
+
+- verify live backend/frontend SHAs;
+- verify only authorized documentation paths changed;
+- validate Markdown structure/reference paths where practical;
+- rely on repository CI for full frontend lifecycle when CI triggers.
+
+Contract/API tasks:
+
+```bash
+npm ci
+npm run openapi:compatibility
+npm run typecheck
+npm run lint
+npm run test
+npm run build
+```
+
+Use `npm run verify` when the task scope requires the complete lifecycle.
+
+Critical browser-flow tasks also run:
+
+```bash
+npm run test:e2e
+```
+
+Performance-sensitive tasks also run:
+
+```bash
+npm run test:performance
+```
+
+Do not claim a gate passed unless it actually ran successfully.
+
+## 7. Required completion record
+
+Each HWEB-R task must record:
+
+```text
+HidraAPI source SHA
+HidraWEB source SHA
+OpenAPI artifact/snapshot used
+backend endpoints consumed
+backend DTOs consumed
+backend permissions consumed
+frontend routes changed
+state ownership
+realtime contracts used
+tests added/updated
+known backend gaps
+CI status
+```
+
+## 8. Next authorized task
+
+```text
+HWEB-R02 — chore(api): refresh HidraAPI OpenAPI baseline
+```
+
+Do not execute HWEB-R03 or later work in the same task.

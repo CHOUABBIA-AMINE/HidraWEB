@@ -1,251 +1,237 @@
 # Hidra API–Web Contract v1
 
 ```text
-Document code : HIDRA-API-WEB-CONTRACT-v1
-Repository    : HidraWEB
-Product       : HidraWeb / HidraAPI
-Owner         : Sonatrach / TRC Digitalization Initiative
-Author        : Abir MEDJERAB
-Status        : Canonical normative contract
+Document code   : HIDRA-API-WEB-CONTRACT-v1
+Repository      : HidraWEB
+Product         : HidraWEB / HidraAPI
+Owner           : Sonatrach / TRC Digitalization Initiative
+Author          : Abir MEDJERAB
+Status          : Canonical normative contract
+Frontend base   : 02a101fda401b7335b51e95ea17d281baeabbe93
+Backend base    : 260295c6eebc4b01922d2d488810a671305860a6
+OpenAPI evidence: 63f3f60974ce57eb8cd5e42910397615195624fb
+Reconciled      : 2026-09-29
 ```
 
 ## 1. Purpose
 
-This document defines the normative boundary between HidraAPI and HidraWeb.
+This document is the single canonical human-readable boundary between HidraAPI and HidraWEB.
 
-It exists to prevent frontend coupling to persistence/domain internals, standardize cross-cutting behavior and make backend/frontend incompatibilities detectable before deployment.
+HidraAPI is the source of business truth, validation, authorization, workflow semantics, organization semantics and durable operational state. HidraWEB owns presentation, interaction, client caching and frontend composition.
 
-Existing HidraAPI endpoints are preserved where implemented. Missing or inconsistent capabilities may be recorded as `TARGET`, but must not be presented as implemented until verified in HidraAPI.
+If this document conflicts with live HidraAPI/OpenAPI, HidraAPI wins and this document must be corrected.
 
 ## 2. Contract status vocabulary
 
-Every frontend-facing contract item shall be classified as one of:
-
 | Status | Meaning |
 |---|---|
-| `IMPLEMENTED` | Verified in HidraAPI and consumable by HidraWeb |
-| `TARGET` | Approved contract requirement not yet verified/implemented |
-| `OPTIONAL` | Supported when a backend mode/capability is enabled |
-| `NOT SUPPORTED` | Explicitly unavailable; frontend must not invent it |
+| `IMPLEMENTED` | Verified in current HidraAPI and consumable by HidraWEB |
+| `TARGET` | Approved frontend/backend requirement not yet implemented or not yet consumed |
+| `OPTIONAL` | Available only when a verified backend/runtime mode is enabled |
+| `NOT SUPPORTED` | Explicitly unavailable in the current contract; frontend must not invent it |
+| `MOCKED` | Development-only frontend behavior; never evidence of backend capability |
 
-Mock implementations used during frontend development shall be labeled `MOCKED` in development artifacts and must not be confused with backend capability.
-
-## 3. Core principles
-
-1. HidraAPI is the source of business truth and final authorization enforcement.
-2. HidraWeb owns presentation, interaction, client caching, route guards and feedback; it does not duplicate backend domain rules.
-3. API request/response DTOs are contracts. JPA entities and internal domain aggregates are not frontend contracts.
-4. OpenAPI is the machine-readable schema source for implemented REST APIs.
-5. Identifiers are opaque strings.
-6. REST is authoritative for durable commands/queries; SSE/STOMP provides realtime delivery and cache refresh signals.
-7. Machine values remain locale-neutral; localization belongs to presentation/catalog contracts.
-8. Breaking API changes require contract review and versioning/coordination.
-
-## 4. Base paths and versioning
-
-| Concern | Contract |
-|---|---|
-| Business APIs | `/api/v1` |
-| OpenAPI | `/v3/api-docs` |
-| Operational health | `/actuator/*` where exposed; not a business API |
-| Major breaking changes | URI/API contract version review required |
-| Additive response fields | Clients must tolerate unknown fields |
-
-## 5. API evidence and governance hierarchy
-
-The contract sources are ordered as follows:
+## 3. Authority order
 
 ```text
-1. HidraAPI implementation + OpenAPI
-   -> machine/runtime truth
-
-2. Generated TypeScript transport contracts
-   -> compile-time frontend truth
-
-3. Existing HidraWEB API catalog/evidence documents
-   -> governance, endpoint inventory and gap tracking
-
-4. This document
-   -> normative cross-cutting rules and target contracts
+1. live HidraAPI main implementation
+2. deterministic HidraAPI OpenAPI artifact
+3. generated HidraWEB transport contracts
+4. this canonical contract
+5. supporting HidraWEB catalogs/gap reports
+6. historical roadmap/handoff evidence
 ```
 
-Existing evidence artifacts such as `docs/02-Backend-Frontend-Contract.md` and `docs/15-API-Catalog.xlsx` remain supporting catalogs and shall not be deleted merely because generated clients are introduced.
+JPA entities and internal backend domain aggregates are never frontend transport contracts.
 
-## 6. HTTP semantics
+## 4. Current machine-contract baseline
 
-| Operation | Preferred method | Rule |
+Current live HidraAPI head:
+
+`260295c6eebc4b01922d2d488810a671305860a6`
+
+The verified OpenAPI-producing commit:
+
+`63f3f60974ce57eb8cd5e42910397615195624fb`
+
+is code-equivalent to the current head because subsequent commits through the current baseline modify only governance/project-state/extended-capability documentation.
+
+HidraAPI CI run `36573899231` succeeded and published:
+
+`hidra-api-openapi-63f3f60974ce57eb8cd5e42910397615195624fb`
+
+Current HidraWEB still pins an older accepted OpenAPI baseline (`725a451...`). Until HWEB-R02 refreshes the checked-in artifact/slices, generated transport code must be treated as stale even where endpoint paths still match.
+
+## 5. Core cross-cutting rules
+
+1. REST/OpenAPI is authoritative for durable commands and queries.
+2. OpenAPI-generated TypeScript types are the transport type authority.
+3. React components never call Axios directly.
+4. Generated code contains no handwritten business logic.
+5. Frontend view models may adapt transport types but may not redefine backend semantics.
+6. Identifiers remain opaque.
+7. Backend machine enum values remain locale-neutral.
+8. UI permission guards improve UX but never replace backend enforcement.
+9. Realtime is an optimization/refresh channel, never a second source of truth.
+10. Missing backend capability stays missing/targeted; the frontend does not manufacture it.
+
+## 6. Base paths
+
+| Concern | Current contract | Status |
 |---|---|---|
-| List/detail | `GET` | Idempotent |
-| Create | `POST` | Return created representation/reference |
-| Partial mutation | `PATCH` | Only where an explicit partial-update contract exists |
-| Full replacement | `PUT` | Only for genuinely replaceable resources |
-| Delete | `DELETE` | Subject to domain permission/lifecycle rules |
-| Complex search | `POST` | Search body; no mutation |
-| Domain action | `POST` | Use when the action is not valid CRUD semantics |
+| Business REST | `/api/v1/**` | IMPLEMENTED |
+| OpenAPI | `/v3/api-docs` | IMPLEMENTED |
+| Realtime capabilities | `/api/v1/realtime/capabilities` | IMPLEMENTED |
+| SSE transport | `/api/v1/realtime/sse` | IMPLEMENTED transport only |
+| STOMP/WebSocket | `/api/v1/realtime/ws` | IMPLEMENTED transport only |
+| Direct browser LeakDetectionAPI | none | NOT SUPPORTED |
 
-HidraWeb must preserve existing HidraAPI routes, including legacy/action aliases, until backend deprecation is explicitly managed.
+## 7. Authentication
 
-## 7. Standard headers
-
-| Header | Direction | Rule |
-|---|---|---|
-| `Authorization` | Web -> API | Credentials/token supplied by active AuthProvider |
-| `X-Correlation-ID` | Both | `TARGET` canonical diagnostic correlation; web generates when absent, API echoes where supported |
-| `Accept-Language` | Web -> API | Locale preference for server/catalog labels where supported |
-| `Content-Type` | Both | `application/json` except multipart/streaming |
-| Concurrency token/version | Web -> API | `TARGET` for critical mutable resources where not already present |
-
-## 8. Authentication contract
-
-HidraAPI evidence supports configurable authentication modes including JWT, Basic and disabled/test-oriented modes.
-
-HidraWeb shall hide transport/authentication specifics behind an application authentication abstraction:
-
-```ts
-interface AuthProvider {
-  login(): Promise<void>;
-  logout(): Promise<void>;
-  getAccessToken(): Promise<string | undefined>;
-  getPrincipal(): Principal | undefined;
-}
-```
-
-Rules:
-
-- feature modules must not read/write authentication tokens directly;
-- HidraWeb must not invent a username/password login endpoint;
-- when JWT mode is active, token acquisition is delegated to the configured enterprise identity provider/integration contract;
-- Basic mode may be supported for local/development operation without leaking Basic-auth logic into feature modules.
-
-### 8.1 Current principal
-
-A canonical current-user endpoint such as:
+### 7.1 Implemented endpoints
 
 ```text
-GET /api/v1/security/me
+POST /api/v1/identity/authentication/login
+POST /api/v1/identity/authentication/oidc/complete
+GET  /api/v1/identity/me
+GET  /api/v1/identity/me/permissions
 ```
 
-is classified as `TARGET` unless an equivalent implemented HidraAPI endpoint is verified.
+Status: **IMPLEMENTED**
 
-If an existing implemented endpoint already provides the required principal/locale/organization/permission context, HidraWeb shall consume that instead of requiring a duplicate endpoint.
+HidraWEB must not invent `/auth/me`, `/auth/login`, `/auth/refresh`, or `/auth/logout`.
 
-## 9. Authorization and permission metadata
+The canonical authenticated-principal refresh is:
 
-Verified frontend-oriented HidraAPI permission metadata includes:
+`GET /api/v1/identity/me`
+
+The frontend may use the login response to establish the initial token/session exchange, but after authentication it must reconcile displayed principal/effective-permission state with the canonical current-principal APIs.
+
+Authentication transport must stay behind the frontend authentication abstraction.
+
+Feature modules must never read/write credentials or bearer tokens directly.
+
+## 8. Authorization
+
+Current metadata APIs:
 
 ```text
 GET /api/v1/security/permissions/catalog
 GET /api/v1/security/permissions/routes
+GET /api/v1/identity/me/permissions
 ```
 
-HidraWeb shall consume this metadata for:
+Status: **IMPLEMENTED**
 
-- route visibility;
-- sidebar/menu visibility;
-- action/button guards;
-- permission-aware feature composition.
+The current backend catalog reports:
 
-Rules:
+`backend-enforced by HidraRouteAuthorizationInterceptor`
+
+and the route interceptor enforces derived permissions for `/api/v1/**` MVC routes except explicit public/authenticated-only paths.
+
+Therefore the former “catalog-only” security assumption is obsolete.
+
+Frontend rules:
 
 ```text
-UI permission guard != security boundary
+UI permission guard != authorization authority
+backend 401/403 = authoritative
 ```
 
-- HidraAPI remains the final enforcement point.
-- A stale UI guard must not be assumed to authorize a request.
-- `403` responses remain authoritative.
-- Feature components shall not use hard-coded role-name comparisons as their primary authorization mechanism.
+Do not use role-name, organization-name, job-title or route-name inference as the primary authorization model.
 
-## 10. DTO boundary
+## 9. Identity administration
+
+Current HidraAPI exposes dedicated principal/user/role/permission reads and administration commands.
+
+Status: **IMPLEMENTED**
+
+HidraWEB should prefer dedicated typed APIs for first-class identity workflows. The generic workbench remains acceptable for secondary inspection but must not substitute for a dedicated contract when one exists.
+
+## 10. Organization and operational responsibility
+
+### 10.1 Organizational hierarchy
+
+Current dedicated reads include:
+
+```text
+GET /api/v1/organization/units
+GET /api/v1/organization/units/{id}
+GET /api/v1/organization/units/{id}/children
+GET /api/v1/organization/hierarchy
+GET /api/v1/organization/employees
+GET /api/v1/organization/employees/{id}
+GET /api/v1/organization/employees/{id}/assignments
+GET /api/v1/organization/assignments
+```
+
+Status: **IMPLEMENTED**
+
+### 10.2 Canonical operational responsibility model
+
+```text
+OrganizationUnit
+  owns organizational identity/hierarchy
+
+OperationalScope
+  id
+  type
+  targetId
+
+ResponsibilityAssignment
+  assigneeType
+  assigneeId
+  scopeId
+  responsibilityType
+  effective-dated lifecycle
+```
+
+HidraWEB must not retain retired duplicated scope type/target/code/name tuples as an independent frontend model.
+
+Physical/network ownership must not be inferred from OrganizationUnit hierarchy alone.
+
+Operational-context UI must be driven by the current scope/responsibility APIs when implemented in HWEB-R05.
+
+## 11. OpenAPI and Orval
 
 Required flow:
 
 ```text
-Backend domain/JPA model
-    -> backend API mapper
-    -> REST DTO / OpenAPI schema
-    -> generated TypeScript transport type
-    -> optional frontend mapper
-    -> frontend view model
-```
-
-Forbidden:
-
-```text
-JPA entity semantics -> React component contract
-```
-
-Forms must be based on explicit request DTO semantics. Unknown backend semantics remain unknown/gap-tracked; the frontend shall not invent business validation rules.
-
-## 11. OpenAPI and generated TypeScript
-
-Preferred implementation contract:
-
-```text
-HidraAPI /v3/api-docs
-    -> OpenAPI artifact
-    -> Orval generation
+HidraAPI verified OpenAPI
+    -> pinned HidraWEB contract evidence
+    -> Orval
     -> src/api/generated/
-    -> typed clients + TanStack Query integration
+    -> optional frontend adapter/view model
+    -> UI
 ```
 
 Rules:
 
-- generated files contain no handwritten business logic;
-- generated code is treated as infrastructure/transport code;
-- every implemented frontend API use must still be traceable to HidraAPI evidence/API catalog governance;
-- handwritten endpoint URLs are not permitted when an equivalent generated client exists;
-- contract generation/typecheck failures block merge.
-
-Axios may remain the generated/central HTTP transport. React components must never call Axios directly.
+- generated files are transport infrastructure;
+- handwritten DTO replicas are prohibited where OpenAPI provides the schema;
+- handwritten URL strings should be eliminated when an equivalent generated operation exists;
+- binary/multipart handling may use a thin transport adapter where generated-client ergonomics are insufficient, but it must still use verified backend paths/types;
+- regeneration/typecheck/compatibility failures block merge.
 
 ## 12. Error contract
 
-HidraAPI ProblemDetail handling is the base error model. HidraWeb shall normalize server errors into one `HidraApiError` representation.
+HidraAPI ProblemDetail handling remains the base HTTP error contract.
 
-### 12.1 Canonical target shape
+HidraWEB normalizes transport failures into one frontend error model and handles:
 
-Where HidraAPI exposes/standardizes these fields, use:
+- validation/request errors;
+- `401`;
+- `403`;
+- `404`;
+- `409`;
+- server errors;
+- network failures.
 
-```json
-{
-  "type": "https://hidra/errors/validation",
-  "title": "Validation failed",
-  "status": 400,
-  "code": "HIDRA_VALIDATION_ERROR",
-  "detail": "One or more fields are invalid.",
-  "instance": "/api/v1/planning/plans",
-  "correlationId": "9f9d...",
-  "errors": [
-    {
-      "field": "startDate",
-      "code": "INVALID_DATE",
-      "message": "Start date must precede end date."
-    }
-  ]
-}
-```
+Do not invent field-level validation structures not emitted by the backend.
 
-Fields not currently emitted by HidraAPI are `TARGET`, not assumptions.
+## 13. Generic operational workbench
 
-### 12.2 Frontend handling
-
-| HTTP status | Required behavior |
-|---|---|
-| `400` | field/request validation feedback |
-| `401` | authentication/session flow |
-| `403` | permission denied; no automatic privilege retry |
-| `404` | not-found workspace/detail state |
-| `409` | concurrency/state conflict; refresh/review |
-| `422` | business validation when backend uses it |
-| `429` | backoff/rate-limit feedback when used |
-| `5xx` | operational error state with retry and diagnostic reference |
-
-Stack traces shall never be presented to end users.
-
-## 13. Generic operational workbench contract
-
-Verified generic workbench APIs include:
+Verified routes:
 
 ```text
 GET  /api/v1/workbench/modules
@@ -255,37 +241,13 @@ GET  /api/v1/workbench/{module}/{resource}/{id}
 POST /api/v1/workbench/{module}/{resource}/search
 ```
 
-The generic workbench is intended for discovery, list/detail/search and secondary/reference/admin resources.
+Status: **IMPLEMENTED**
 
-It does not replace purpose-built domain command APIs or specialized operational screens.
+The workbench remains a secondary/reference/admin capability. It does not replace specialized domain UX when dedicated typed APIs exist.
 
-## 14. Pagination, sorting and search
+## 14. Topology map
 
-Existing endpoints shall be consumed according to their documented parameters.
-
-The preferred convergence model for pageable list APIs is:
-
-```text
-?page=0&size=50&sort=timestamp,desc&q=...
-```
-
-Canonical page response convergence is `TARGET` where specialized endpoints differ:
-
-```json
-{
-  "items": [],
-  "page": 0,
-  "size": 50,
-  "totalItems": 4861,
-  "totalPages": 98
-}
-```
-
-The existing generic workbench already provides `page`, `size` and query support; do not invent pagination for endpoints that do not expose it.
-
-## 15. Topology map contract
-
-Verified topology visualization APIs include:
+Verified routes:
 
 ```text
 GET /api/v1/topology/map/layers
@@ -295,128 +257,160 @@ GET /api/v1/topology/map/geojson
 GET /api/v1/topology/map/search
 ```
 
-HidraWeb shall consume valid GeoJSON directly.
+Status: **IMPLEMENTED**
 
-Rules:
+HidraWEB uses MapLibre through `HidraMap`.
 
-- do not invent a custom frontend geometry protocol;
-- preserve stable feature/resource identifiers;
-- presentation styles may be frontend-owned;
-- future vector-tile evolution must remain compatible with stable resource identity and navigation links.
+Frontend owns visual styling, selection, viewport, layer visibility and legend behavior. HidraAPI owns feature identity, topology semantics and geometry payload.
 
-## 16. Workflow contract
+Do not fabricate coordinates or geometry.
 
-Verified workflow commands include:
+## 15. Telemetry and monitoring
 
-```text
-POST /api/v1/workflow/instances
-POST /api/v1/workflow/tasks
-POST /api/v1/workflow/actions
-```
-
-Rules:
-
-- workflow owns decision-process state;
-- target modules own target business facts;
-- HidraWeb must not invent canonical workflow states/actions absent explicit backend evidence;
-- action buttons shall be derived from explicit workflow/module APIs or future metadata contracts;
-- after a workflow decision that may affect a target aggregate, HidraWeb refreshes the target through its owning module API.
-
-## 17. Realtime contract
-
-HidraAPI exposes realtime capability through SSE and STOMP/WebSocket infrastructure.
-
-Use realtime for live delivery such as:
-
-- telemetry changes;
-- alarm changes;
-- incident changes;
-- task/workflow assignment changes;
-- notifications.
-
-Architecture rule:
+Current telemetry query contract includes:
 
 ```text
-REST/API = authoritative state
-SSE/STOMP = event delivery / cache refresh signal
+GET /api/v1/telemetry/reference/reading-states
+GET /api/v1/telemetry/reference/quality-codes
+GET /api/v1/telemetry/points/{pointId}/readings
+GET /api/v1/telemetry/points/{pointId}/readings/latest
+GET /api/v1/telemetry/points/{pointId}/trend
 ```
 
-Expected normalized event envelope where supported/standardized:
+Current monitoring query contract includes:
 
-```json
-{
-  "eventType": "ALARM_UPDATED",
-  "resourceType": "ALARM",
-  "resourceId": "alm-123",
-  "occurredAt": "2026-09-09T14:43:31Z",
-  "correlationId": "..."
-}
+```text
+GET /api/v1/monitoring/rules
+GET /api/v1/monitoring/rules/{id}
+GET /api/v1/monitoring/deviations
+GET /api/v1/monitoring/deviations/{id}
 ```
 
-Fields absent from current HidraAPI event payloads are `TARGET`, not assumed.
+Status: **IMPLEMENTED**
 
-Realtime failure must not make the application unusable; fallback queries/refetch remain available.
+Server state belongs to TanStack Query. Do not place telemetry history/series in Zustand.
 
-## 18. Date/time, identifiers and enum values
+## 16. Workflow
 
-| Concern | Rule |
+Current first-class query/transition contract includes:
+
+```text
+GET  /api/v1/workflow/tasks
+GET  /api/v1/workflow/tasks/{id}
+GET  /api/v1/workflow/tasks/{id}/available-actions
+GET  /api/v1/workflow/instances/{id}
+GET  /api/v1/workflow/instances/{id}/timeline
+POST /api/v1/workflow/tasks/{taskId}/transitions/{transitionId}/execute
+```
+
+Status: **IMPLEMENTED**
+
+Available actions are backend-authoritative. HidraWEB must never derive approve/reject/delegate/escalate rules from frontend-only state.
+
+## 17. Alarm
+
+Current first-class query/lifecycle contract includes:
+
+```text
+GET  /api/v1/alarm/alarms
+GET  /api/v1/alarm/alarms/{id}
+GET  /api/v1/alarm/alarms/{id}/shelvings
+POST /api/v1/alarm/alarms/acknowledgements
+POST /api/v1/alarm/alarms/closures
+POST /api/v1/alarm/alarms/{id}/shelvings
+POST /api/v1/alarm/alarms/{id}/shelvings/{shelvingId}/unshelve
+```
+
+Status: **IMPLEMENTED**
+
+Severity/state colors in the UI must be based on backend values and accessible semantics, not decorative color.
+
+## 18. Incident, leak detection and HSE
+
+HidraAPI currently exposes first-class read contracts for incident, leak candidates/cases and HSE cases/CAPA used by the existing events workspace.
+
+Status: **IMPLEMENTED through HidraAPI**
+
+Direct frontend access to `LeakDetectionAPI` is **NOT SUPPORTED**.
+
+## 19. Realtime
+
+HidraAPI transport capability is **IMPLEMENTED**, but domain publication is currently **NOT SUPPORTED**.
+
+The current capability response explicitly reports:
+
+```text
+publicationStatus = transport-configured-no-domain-publishers
+eventFamilies     = []
+recoveryStrategy  = query-after-reconnect
+```
+
+Therefore:
+
+- HidraWEB may probe realtime capabilities;
+- HidraWEB must not invent alarm/telemetry/workflow/incident topics;
+- REST/query remains authoritative;
+- no domain feature may depend on a realtime subscription until the backend advertises a verified event family.
+
+The historical example event envelope is not evidence of an implemented domain publisher and is removed from the normative contract.
+
+## 20. State ownership
+
+| State | Frontend owner |
 |---|---|
-| Date/time | ISO-8601 over API; UTC where backend contract defines UTC; localize only for display |
-| IDs | opaque TypeScript `string`; never parse numeric/business meaning |
-| Enums | backend machine values are preserved; frontend translates labels |
-| Nullability | follow OpenAPI/DTO evidence; do not infer |
-| Units | must be explicit in schema/domain meaning; UI converts only under defined presentation rules |
+| Backend resources/query results | TanStack Query |
+| Forms | React Hook Form |
+| Shareable filters/pagination | URL/search params where appropriate |
+| Local dialogs/tabs/transient UI | React local state |
+| Small cross-screen shell/application context | Zustand |
+| Realtime signals when verified | Query invalidation/update, not parallel entity storage |
 
-## 19. Concurrency
+A giant frontend entity store is prohibited.
 
-Optimistic concurrency is required as a `TARGET` contract for critical mutable resources where HidraAPI does not already provide an equivalent mechanism.
+## 21. Deferred industrial extension
 
-Priority candidates:
+The HidraAPI extended industrial-capability roadmap is parked.
 
-- alarms;
-- incidents;
-- plans;
-- workflow tasks;
-- governed configuration.
+The following are therefore **NOT SUPPORTED current frontend contracts**:
 
-A stale write should produce a deterministic conflict response, preferably `409 Conflict`, allowing HidraWeb to prompt refresh/review.
+- direct LeakDetectionAPI integration;
+- gRPC-Web;
+- CPM/RTTM streams;
+- MQTT/Sparkplug semantics;
+- PostGIS-specific browser contracts;
+- Modified B31G UI contracts.
 
-Frontend convenience alone is not sufficient reason to alter HidraAPI; concurrency is a domain consistency requirement and therefore a legitimate backend contract concern.
+They require explicit backend roadmap reactivation and a new contract review.
 
-## 20. Documents/files
+## 22. Frontend navigation and presentation
 
-Rules:
+Primary navigation remains process-oriented rather than mirroring Java packages.
 
-- upload binary content through multipart/stream contracts;
-- do not embed large files as Base64 JSON;
-- use JSON metadata for document identity/version/type/size;
-- document/version/evidence semantics remain owned by the documents module;
-- downloads use explicit download/stream endpoints where implemented.
+A visible route must be supported by:
 
-## 21. Localization contract
+1. current backend capability;
+2. authenticated effective permissions;
+3. frontend implementation status.
 
-- API identifiers and enum values remain locale-neutral.
-- HidraWeb owns shell/action translations.
-- backend catalog-provided multilingual labels may be consumed where explicitly supported.
-- activated frontend locales are a product decision; implementation shall not hard-code business values as translated strings.
-- if Arabic is activated, RTL behavior is a frontend architecture requirement, not an API protocol change.
+Four-level operational display and ISA-101-inspired design are presentation patterns only. They do not authorize invented KPIs, mass balances, hydraulic profiles or process states.
 
-## 22. Contract acceptance gates
+## 23. Contract acceptance gates
 
-The contract is satisfied when:
+A frontend task satisfies this contract only when:
 
-- every implemented frontend API call is traceable to HidraAPI/OpenAPI and the evidence catalog;
-- generated TypeScript contracts compile against the selected HidraAPI OpenAPI artifact;
-- no feature component depends on backend persistence/domain implementation classes;
-- 401/403/404/409/validation behavior is handled centrally and predictably;
-- permissions are consumed client-side while remaining server-enforced;
-- topology is consumed through GeoJSON/layer contracts;
-- realtime delivery cannot create a second independent source of truth;
-- workflow actions are backend-driven;
-- `TARGET` capabilities are explicitly distinguishable from `IMPLEMENTED` capabilities.
+- the exact HidraAPI SHA is recorded;
+- the OpenAPI artifact/snapshot used is recorded;
+- generated transport types match the selected OpenAPI baseline;
+- API calls are traceable to OpenAPI/backend evidence;
+- no JPA/domain internals are used as transport contracts;
+- no backend rules are reimplemented in React;
+- backend `401/403` remains authoritative;
+- workflow actions come from backend metadata/contracts;
+- realtime subscriptions exist only for published backend event families;
+- `TARGET`, `OPTIONAL`, `NOT SUPPORTED`, and `MOCKED` capabilities are visibly distinguishable from `IMPLEMENTED`.
 
-## 23. Canonical relationship
+## 24. Supporting historical documents
 
-This document is authoritative for cross-cutting HidraAPI–HidraWeb interface rules.
+Documents such as `docs/02-Backend-Frontend-Contract.md`, API catalogs, spreadsheets, `handoff.md`, and older gap reports remain evidence/history only.
 
-`docs/02-Backend-Frontend-Contract.md`, API catalog spreadsheets and other static evidence remain implementation/evidence inventories. If a concrete endpoint in those artifacts conflicts with an example in this document, verified live HidraAPI/OpenAPI evidence takes precedence and this document shall be corrected.
+When they conflict with this canonical contract or live HidraAPI/OpenAPI, live HidraAPI wins and this contract is the current HidraWEB governance baseline.
