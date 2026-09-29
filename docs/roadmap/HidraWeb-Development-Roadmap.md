@@ -69,7 +69,7 @@ The new execution line is HWEB-R01 through HWEB-R17.
 | HWEB-R05 | `refactor(organization): align operational context with canonical scopes` | Replace stale Organization assumptions with dedicated reads plus `OperationalScope` / `ResponsibilityAssignment` contracts. | No retired scope tuple model; organization/operational context is backend-driven. | **Completed** |
 | HWEB-R06 | `refactor(workbench): align generic resource browsing` | Regenerate workbench contract and retain it as secondary/reference/admin UX only. | List/detail/search work against refreshed OpenAPI; no specialized workflow is replaced by workbench. | **Completed** |
 | HWEB-R07 | `refactor(topology): align network workspace with current map contract` | Revalidate current layer catalog/typed geometry/search, retain HidraMap/MapLibre, remove stale missing-layer assumptions. | Network workspace consumes only current topology API. | **Completed** |
-| HWEB-R08 | `refactor(operations): align telemetry and monitoring workspaces` | Regenerate telemetry/monitoring types and revalidate readings, quality/state, trend, rules and deviations. | REST/query behavior green; no invented realtime topics. | Planned |
+| HWEB-R08 | `refactor(operations): align telemetry and monitoring workspaces` | Regenerate telemetry/monitoring types and revalidate readings, quality/state, trend, rules and deviations. | REST/query behavior green; no invented realtime topics. | **Completed** |
 | HWEB-R09 | `refactor(workflow): align tasks with backend actions` | Revalidate task inbox/detail/available-actions/instance/timeline/transition execution. | All actions are backend-defined and concurrency/error states tested. | Planned |
 | HWEB-R10 | `refactor(alarm): align console with backend lifecycle` | Revalidate list/detail/ack/close/shelving behavior and accessible severity/state presentation. | Alarm console uses current backend lifecycle only; no fake realtime. | Planned |
 | HWEB-R11 | `refactor(events): align incident leak and hse workspaces` | Revalidate current HidraAPI incident/leak/HSE read contracts. | No direct LeakDetectionAPI dependency; events workspace remains HidraAPI-driven. | Planned |
@@ -268,10 +268,29 @@ HWEB-R07 revalidates the network workspace against the current typed HidraAPI to
 
 No backend code, telemetry/monitoring behavior, realtime behavior, or non-topology product workflow is changed by HWEB-R07.
 
-## 14. Next authorized task
+## 14. HWEB-R08 completion evidence
+
+HWEB-R08 revalidates the operations workspace against the current HidraAPI telemetry and monitoring query contracts:
+
+- HidraAPI source SHA: `260295c6eebc4b01922d2d488810a671305860a6`;
+- HidraWEB source SHA at task start: `fba372b6c08e5212cbb36c379791c9178966821a`;
+- OpenAPI evidence: `63f3f60974ce57eb8cd5e42910397615195624fb`;
+- telemetry/monitoring OpenAPI provenance now references the verified HidraAPI artifact/run used by the reconciled frontend baseline;
+- telemetry reads remain `GET /api/v1/telemetry/points/{pointId}/readings`, `/readings/latest`, and `/trend`;
+- telemetry reference metadata remains `GET /api/v1/telemetry/reference/reading-states` and `/quality-codes`;
+- monitoring reads remain `GET /api/v1/monitoring/rules`, `/rules/{id}`, `/deviations`, and `/deviations/{id}`;
+- adapter tests cover path-segment encoding, optional-filter compaction, history/trend date windows and pagination/limit transport;
+- the workspace remains query-first because no telemetry-point discovery endpoint is published in the accepted contract;
+- TanStack Query continues to own telemetry/monitoring server state; point/time/filter selection remains local presentation state;
+- the current realtime capability remains `transport-configured-no-domain-publishers` with `eventFamilies = []`; no telemetry or monitoring topic/event name is invented;
+- current polling/query refresh behavior therefore remains the supported frontend behavior.
+
+No backend code, workflow behavior, alarm lifecycle, realtime subscription contract, or deferred industrial-extension capability is changed by HWEB-R08.
+
+## 15. Next authorized task
 
 ```text
-HWEB-R08 — refactor(operations): align telemetry and monitoring workspaces
+HWEB-R09 — refactor(workflow): align tasks with backend actions
 ```
 
-Do not execute HWEB-R09 or later work in the same task.
+Do not execute HWEB-R10 or later work in the same task.
