@@ -68,7 +68,7 @@ The new execution line is HWEB-R01 through HWEB-R17.
 | HWEB-R04 | `refactor(authorization): align shell with effective permissions` | Align permission model/navigation guards with backend-enforced route catalog and current effective permissions. | No catalog-only assumption; 401/403 and permission-aware navigation tests pass. | **Completed** |
 | HWEB-R05 | `refactor(organization): align operational context with canonical scopes` | Replace stale Organization assumptions with dedicated reads plus `OperationalScope` / `ResponsibilityAssignment` contracts. | No retired scope tuple model; organization/operational context is backend-driven. | **Completed** |
 | HWEB-R06 | `refactor(workbench): align generic resource browsing` | Regenerate workbench contract and retain it as secondary/reference/admin UX only. | List/detail/search work against refreshed OpenAPI; no specialized workflow is replaced by workbench. | **Completed** |
-| HWEB-R07 | `refactor(topology): align network workspace with current map contract` | Revalidate current layer catalog/typed geometry/search, retain HidraMap/MapLibre, remove stale missing-layer assumptions. | Network workspace consumes only current topology API. | Planned |
+| HWEB-R07 | `refactor(topology): align network workspace with current map contract` | Revalidate current layer catalog/typed geometry/search, retain HidraMap/MapLibre, remove stale missing-layer assumptions. | Network workspace consumes only current topology API. | **Completed** |
 | HWEB-R08 | `refactor(operations): align telemetry and monitoring workspaces` | Regenerate telemetry/monitoring types and revalidate readings, quality/state, trend, rules and deviations. | REST/query behavior green; no invented realtime topics. | Planned |
 | HWEB-R09 | `refactor(workflow): align tasks with backend actions` | Revalidate task inbox/detail/available-actions/instance/timeline/transition execution. | All actions are backend-defined and concurrency/error states tested. | Planned |
 | HWEB-R10 | `refactor(alarm): align console with backend lifecycle` | Revalidate list/detail/ack/close/shelving behavior and accessible severity/state presentation. | Alarm console uses current backend lifecycle only; no fake realtime. | Planned |
@@ -250,10 +250,28 @@ HWEB-R06 revalidates the generic operational workbench against the current backe
 
 No backend code, primary navigation architecture, specialized domain workflow, topology behavior, or realtime behavior is changed by HWEB-R06.
 
-## 13. Next authorized task
+## 13. HWEB-R07 completion evidence
+
+HWEB-R07 revalidates the network workspace against the current typed HidraAPI topology map contract:
+
+- HidraAPI source SHA: `260295c6eebc4b01922d2d488810a671305860a6`;
+- HidraWEB source SHA at task start: `6ad16f9085182e9d5b60b2f937a974a9c98dd65f`;
+- OpenAPI evidence: `63f3f60974ce57eb8cd5e42910397615195624fb`;
+- topology OpenAPI provenance now references the verified HidraAPI artifact/run used by the reconciled frontend baseline;
+- verified backend layer catalog includes `pipeline-systems`, `pipelines`, `facilities`, `topology-nodes`, `pipeline-segments`, and `topology-connections`;
+- `pipeline-systems` and `pipelines` are first-class current backend layers, so historical missing-layer assumptions are obsolete;
+- geometry remains backend-owned and typed as Point, LineString, or MultiLineString; HidraWEB does not fabricate coordinates or convert topology semantics into client-owned geometry;
+- HidraMap remains the stable frontend abstraction and MapLibre remains an implementation detail behind that abstraction;
+- canonical frontend topology paths remain `/api/v1/topology/map/layers`, layer detail/features, `/geojson`, and `/search`;
+- contract tests cover canonical layer catalog/detail/features/GeoJSON/search URLs, encoded layer identifiers, pagination defaults, layer identifier transport, and search trimming;
+- no PostGIS-specific browser contract, LINESTRINGM assumption, or deferred industrial-extension dependency is introduced.
+
+No backend code, telemetry/monitoring behavior, realtime behavior, or non-topology product workflow is changed by HWEB-R07.
+
+## 14. Next authorized task
 
 ```text
-HWEB-R07 — refactor(topology): align network workspace with current map contract
+HWEB-R08 — refactor(operations): align telemetry and monitoring workspaces
 ```
 
-Do not execute HWEB-R08 or later work in the same task.
+Do not execute HWEB-R09 or later work in the same task.

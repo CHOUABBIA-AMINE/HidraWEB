@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { hidraHttpClient } from '@/api/client/hidraHttpClient';
+const httpClient = vi.hoisted(() => vi.fn());
+
+vi.mock('@/api/client/hidraHttpClient', () => ({
+  hidraHttpClient: httpClient,
+}));
+
 import {
   fetchTopologyGeoJson,
   fetchTopologyLayer,
@@ -9,38 +14,103 @@ import {
   searchTopology,
 } from '@/features/topology/api/topologyApi';
 
-vi.mock('@/api/client/hidraHttpClient', () => ({ hidraHttpClient: vi.fn() }));
+describe('topology API adapter', () => {
+  beforeEach(() => {
+    httpClient.mockReset();
+  });
 
-const http = vi.mocked(hidraHttpClient);
-
-describe('HWEB-005 topology API adapter', () => {
-  beforeEach(() => http.mockReset());
-
-  it('uses only the published topology map endpoints and backend paging parameters', async () => {
-    http.mockResolvedValue({});
+  it('uses the canonical layer catalog and detail endpoints with encoded layer ids', async () => {
+    httpClient
+      .mockResolvedValueOnce([{ id: 'pipeline-systems', label: 'Pipeline systems', geometryType: 'MultiLineString' }])
+      .mockResolvedValueOnce({ id: 'pipeline systems', label: 'Pipeline systems', geometryType: 'MultiLineString' });
 
     await fetchTopologyLayers();
-    await fetchTopologyLayer('pipeline-systems');
-    await fetchTopologyLayerFeatures({ layerId: 'pipeline-segments', page: 2, size: 25, query: 'SEG' });
-    await fetchTopologyGeoJson({ layers: ['pipeline-systems', 'facilities'], page: 0, size: 1000 });
-    await searchTopology({ query: ' station ', page: 0, size: 50 });
+    await fetchTopologyLayer('pipeline systems');
 
-    expect(http).toHaveBeenNthCalledWith(1, { method: 'GET', url: '/api/v1/topology/map/layers' });
-    expect(http).toHaveBeenNthCalledWith(2, { method: 'GET', url: '/api/v1/topology/map/layers/pipeline-systems' });
-    expect(http).toHaveBeenNthCalledWith(3, {
+    expect(httpClient).toHaveBeenNthCalledWith(1, {
       method: 'GET',
-      url: '/api/v1/topology/map/layers/pipeline-segments/features',
-      params: { page: 2, size: 25, q: 'SEG' },
+      url: '/api/v1/topology/map/layers',
     });
-    expect(http).toHaveBeenNthCalledWith(4, {
+    expect(httpClient).toHaveBeenNthCalledWith(2, {
+      method: 'GET',
+      url: '/api/v1/topology/map/layers/pipeline%20systems',
+    });
+  });
+
+  it('normalizes layer-feature pagination and query values without inventing geometry', async () => {
+    httpClient.mockResolvedValueOnce({
+      type: 'FeatureCollection',
+      layer: 'pipelines',
+      page: 0,
+      size: 25,
+      totalFeatures: 0,
+      totalPages: 0,
+      hasNext: false,
+      layers: ['pipelines'],
+      features: [],
+    });
+
+    await fetchTopologyLayerFeatures({
+      layerId: 'pipelines',
+      query: '  PL-1  ',
+    });
+
+    expect(httpClient).toHaveBeenCalledWith({
+      method: 'GET',
+      url: '/api/v1/topology/map/layers/pipelines/features',
+      params: { page: 0, size: 25, q: 'PL-1' },
+    });
+  });
+
+  it('passes only backend layer identifiers to the canonical GeoJSON endpoint', async () => {
+    httpClient.mockResolvedValueOnce({
+      type: 'FeatureCollection',
+      page: 0,
+      size: 1000,
+      totalFeatures: 0,
+      totalPages: 0,
+      hasNext: false,
+      layers: ['pipeline-systems', 'pipelines'],
+      features: [],
+    });
+
+    await fetchTopologyGeoJson({
+      layers: ['pipeline-systems', 'pipelines'],
+    });
+
+    expect(httpClient).toHaveBeenCalledWith({
       method: 'GET',
       url: '/api/v1/topology/map/geojson',
-      params: { layers: 'pipeline-systems,facilities', page: 0, size: 1000 },
+      params: {
+        layers: 'pipeline-systems,pipelines',
+        page: 0,
+        size: 1000,
+      },
     });
-    expect(http).toHaveBeenNthCalledWith(5, {
+  });
+
+  it('uses the backend search contract and trims the search term', async () => {
+    httpClient.mockResolvedValueOnce({
+      query: 'PS-1',
+      type: 'FeatureCollection',
+      page: 0,
+      size: 50,
+      totalFeatures: 0,
+      totalPages: 0,
+      hasNext: false,
+      features: [],
+    });
+
+    await searchTopology({ query: '  PS-1  ' });
+
+    expect(httpClient).toHaveBeenCalledWith({
       method: 'GET',
       url: '/api/v1/topology/map/search',
-      params: { q: 'station', page: 0, size: 50 },
+      params: {
+        q: 'PS-1',
+        page: 0,
+        size: 50,
+      },
     });
   });
 });
