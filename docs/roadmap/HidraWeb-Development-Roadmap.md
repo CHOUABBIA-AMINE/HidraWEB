@@ -72,7 +72,7 @@ The new execution line is HWEB-R01 through HWEB-R17.
 | HWEB-R08 | `refactor(operations): align telemetry and monitoring workspaces` | Regenerate telemetry/monitoring types and revalidate readings, quality/state, trend, rules and deviations. | REST/query behavior green; no invented realtime topics. | **Completed** |
 | HWEB-R09 | `refactor(workflow): align tasks with backend actions` | Revalidate task inbox/detail/available-actions/instance/timeline/transition execution. | All actions are backend-defined and concurrency/error states tested. | **Completed** |
 | HWEB-R10 | `refactor(alarm): align console with backend lifecycle` | Revalidate list/detail/ack/close/shelving behavior and accessible severity/state presentation. | Alarm console uses current backend lifecycle only; no fake realtime. | **Completed** |
-| HWEB-R11 | `refactor(events): align incident leak and hse workspaces` | Revalidate current HidraAPI incident/leak/HSE read contracts. | No direct LeakDetectionAPI dependency; events workspace remains HidraAPI-driven. | Planned |
+| HWEB-R11 | `refactor(events): align incident leak and hse workspaces` | Revalidate current HidraAPI incident/leak/HSE read contracts. | No direct LeakDetectionAPI dependency; events workspace remains HidraAPI-driven. | **Completed** |
 | HWEB-R12 | `refactor(planning): align planning and approval contracts` | Revalidate periods/plans/revisions/targets and backend approval actions. | No frontend-defined approval state machine. | Planned |
 | HWEB-R13 | `refactor(engineering): align integrity and assets contracts` | Regenerate assets/integrity schemas, remove handwritten backend DTO replicas and revalidate engineering composition. | No duplicated transport DTOs; workbench remains secondary. | Planned |
 | HWEB-R14 | `refactor(custody): align metering and custody contracts` | Revalidate custody command contracts and supporting workbench/reference data. | Current OpenAPI types and permissions used. | Planned |
@@ -329,10 +329,30 @@ HWEB-R10 revalidates the alarm console against the current HidraAPI alarm lifecy
 
 No backend code, incident lifecycle, workflow semantics, suppression capability, realtime contract, or non-alarm product behavior is changed by HWEB-R10.
 
-## 17. Next authorized task
+## 17. HWEB-R11 completion evidence
+
+HWEB-R11 revalidates the event workspace against the current HidraAPI incident, leak-detection, and HSE read contracts:
+
+- HidraAPI source SHA: `260295c6eebc4b01922d2d488810a671305860a6`;
+- HidraWEB source SHA at task start: `6719d682923378d9b31235937f0bd123217c42d4`;
+- OpenAPI evidence: `63f3f60974ce57eb8cd5e42910397615195624fb`;
+- incident, leak, and HSE OpenAPI provenance now reference the verified HidraAPI artifact/run used by the reconciled frontend baseline;
+- incident reads remain `GET /api/v1/incident/incidents` and `/incidents/{id}`;
+- leak reads remain `GET /api/v1/leakdetection/candidates`, `/candidates/{id}`, `/cases`, and `/cases/{id}`;
+- HSE reads remain `GET /api/v1/hse/cases`, `/cases/{id}`, `/capas`, and `/capas/{id}`;
+- event read permissions remain backend-published route permissions and continue to fail closed when a descriptor or effective grant is absent;
+- adapter tests cover backend pagination and encoded list/detail identifiers across incident, leak-candidate, leak-case, HSE-case, and CAPA reads;
+- production leak reads remain on HidraAPI `/api/v1/leakdetection/**`; no direct browser connection to the separate LeakDetectionAPI repository, no gRPC-Web stream, and no CPM/RTTM transport is introduced;
+- the workspace remains read-oriented for these surfaces; lifecycle mutations not explicitly included in the accepted R11 contract are not invented;
+- server state remains in TanStack Query and existing event-tab/page/selection state remains local UI state;
+- current realtime capabilities still publish no event families, so no incident/leak/HSE realtime topic is invented.
+
+No backend code, planning behavior, leak-compute sidecar integration, realtime contract, or event lifecycle state machine is changed by HWEB-R11.
+
+## 18. Next authorized task
 
 ```text
-HWEB-R11 — refactor(events): align incident leak and hse workspaces
+HWEB-R12 — refactor(planning): align planning and approval contracts
 ```
 
-Do not execute HWEB-R12 or later work in the same task.
+Do not execute HWEB-R13 or later work in the same task.
