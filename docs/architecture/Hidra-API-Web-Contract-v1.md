@@ -60,7 +60,7 @@ HidraAPI CI run `36573899231` succeeded and published:
 
 `hidra-api-openapi-63f3f60974ce57eb8cd5e42910397615195624fb`
 
-HidraWEB accepts this exact verified artifact as its current machine-contract baseline. HWEB-R02 repins all 18 checked-in feature contracts and Orval configurations to `63f3f60974ce57eb8cd5e42910397615195624fb`; later HWEB-R tasks may deliberately expand individual slices when they begin consuming newly available backend operations.
+HidraWEB accepts this exact verified artifact as its current machine-contract baseline. HWEB-R02 originally repinned 18 checked-in feature contracts and Orval configurations to `63f3f60974ce57eb8cd5e42910397615195624fb`; HWEB-R13 added dedicated Assets and Integrity contracts, bringing the reconciled release baseline to 20 feature contracts. Later contract expansion still requires deliberate roadmap authorization.
 
 ## 5. Core cross-cutting rules
 

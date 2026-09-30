@@ -78,7 +78,7 @@ The new execution line is HWEB-R01 through HWEB-R17.
 | HWEB-R14 | `refactor(custody): align metering and custody contracts` | Revalidate custody command contracts and supporting workbench/reference data. | Current OpenAPI types and permissions used. | **Completed** |
 | HWEB-R15 | `refactor(intelligence): align risk analytics simulation reporting` | Revalidate each intelligence workspace against current backend capability/workbench contracts. | No synthetic KPI/simulation semantics. | **Completed** |
 | HWEB-R16 | `refactor(administration): align governance workspaces` | Revalidate audit/configuration/documents/integration/notification administration. | Destructive actions permission-gated; provider capabilities not invented. | **Completed** |
-| HWEB-R17 | `test(release): harden reconciled HidraWEB` | Full accessibility, performance, E2E, OpenAPI compatibility, deployment and release-artifact review. | `npm run verify`, required E2E/performance gates and production-readiness checklist green. | Planned |
+| HWEB-R17 | `test(release): harden reconciled HidraWEB` | Full accessibility, performance, E2E, OpenAPI compatibility, deployment and release-artifact review. | `npm run verify`, required E2E/performance gates and production-readiness checklist green. | **Completed** |
 
 ## 5. HWEB-R01 completion evidence
 
@@ -452,10 +452,32 @@ HWEB-R16 revalidates Administration governance surfaces against the current Hidr
 
 No backend code, provider implementation, destructive backend mutation, administration lifecycle state machine, realtime contract, or release-hardening work is changed by HWEB-R16.
 
-## 23. Next authorized task
+## 23. HWEB-R17 completion evidence
+
+HWEB-R17 closes the reconciled HidraWEB roadmap with release-hardening evidence from the exact pre-R17 product head:
+
+- HidraAPI source SHA: `260295c6eebc4b01922d2d488810a671305860a6`;
+- HidraWEB source SHA at task start: `53fdaaa27bf6da4ad05b95726241c0a6d082e14f`;
+- OpenAPI evidence: `63f3f60974ce57eb8cd5e42910397615195624fb`;
+- HidraWEB CI #928 / run `36695054297` succeeded on the exact product head;
+- all 20 feature OpenAPI compatibility/generation gates passed;
+- lint, typecheck, unit/component tests, deterministic performance tests, production build, and bundle budgets passed;
+- performance suite: 2 files / 6 tests passed;
+- full Playwright Chromium regression suite: 60 tests passed, including the keyboard accessibility regression file;
+- release packaging and independent manifest verification passed for 54 files bound to the exact source SHA;
+- uploaded release artifact id `11087951409`, name `hidraweb-release-53fdaaa27bf6da4ad05b95726241c0a6d082e14f`, size `674691` bytes, digest `sha256:7966348b2df9ba78d243165c8877988572080400da0108485c5d9f1a226fb86e`;
+- deployment, security-header, accessibility, performance, Playwright, OpenAPI compatibility, artifact retention, and rollback requirements remain governed by the checked-in production-hardening documents;
+- no product routes, business behavior, backend contract, provider semantics, calculations, or realtime subscriptions are changed by R17;
+- the reconciled production-readiness record is `docs/deployment/Reconciled-Production-Readiness.md`.
+
+Repository readiness is conditional on the environment-specific OIDC, TLS, upstream, same-origin proxy, artifact-retention, compatibility, and post-deployment smoke prerequisites documented in the release record.
+
+No HWEB-R task remains after HWEB-R17.
+
+## 24. Roadmap completion
 
 ```text
-HWEB-R17 — test(release): harden reconciled HidraWEB
+HWEB-R01 through HWEB-R17 are complete.
 ```
 
-Do not execute HWEB-R17 or later work in the same task.
+Further frontend work requires a new explicitly authorized roadmap or maintenance task.
