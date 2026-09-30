@@ -27,7 +27,7 @@ Do not silently reopen an HWEB-R task.
 | Code | Scope | Exit criterion | Status |
 | --- | --- | --- | --- |
 | REL-001 | Freeze the R17 candidate and prepare staging/UAT deployment, smoke, acceptance, finding, and rollback evidence. | Exact artifact/SHA identified; staging inputs and UAT matrix documented; no claim of environment execution without evidence. | **Completed** |
-| ROADMAP-001 | Define HidraWEB vNext product roadmap from live HidraAPI capabilities plus actual UAT findings. | Prioritized capability/gap roadmap with backend prerequisites, task boundaries, exact commit messages, and no invented contracts. | **Next** |
+| ROADMAP-001 | Define the post-reconciliation HidraWEB product roadmap from live HidraAPI capabilities plus actual UAT findings. | Prioritized capability/gap roadmap with backend prerequisites, task boundaries, exact commit messages, and no invented contracts. | **Completed** |
 
 ## REL-001 evidence
 
@@ -42,10 +42,19 @@ Do not silently reopen an HWEB-R task.
 
 No environment-specific staging URL, OIDC tenant, certificate, upstream, secret, or UAT outcome is invented by REL-001.
 
+## ROADMAP-001 evidence
+
+- REL-001 CI #930 / run `36760874530`: SUCCESS;
+- HidraAPI main at roadmap creation: `260295c6eebc4b01922d2d488810a671305860a6`;
+- HidraWEB main at roadmap creation: `0f8992ce6635b6e1801331ebc0d7ecfd002bd3b1`;
+- verified OpenAPI evidence remains `63f3f60974ce57eb8cd5e42910397615195624fb`;
+- detailed product roadmap: `docs/roadmap/HidraWEB-Post-Reconciliation-Product-Roadmap.md`;
+- actual staging/UAT findings remain pending; BLOCKER/MAJOR findings take precedence through the HWEB-M maintenance lane.
+
 ## Next authorized task
 
 ```text
-ROADMAP-001 — define HidraWEB vNext product roadmap from current HidraAPI capabilities and UAT gaps
+HWEB-P01 — feat(identity): add first-class access administration workspace
 ```
 
-Do not execute ROADMAP-001 in the same task.
+Do not execute HWEB-P01 in the same task.
