@@ -77,7 +77,7 @@ The new execution line is HWEB-R01 through HWEB-R17.
 | HWEB-R13 | `refactor(engineering): align integrity and assets contracts` | Regenerate assets/integrity schemas, remove handwritten backend DTO replicas and revalidate engineering composition. | No duplicated transport DTOs; workbench remains secondary. | **Completed** |
 | HWEB-R14 | `refactor(custody): align metering and custody contracts` | Revalidate custody command contracts and supporting workbench/reference data. | Current OpenAPI types and permissions used. | **Completed** |
 | HWEB-R15 | `refactor(intelligence): align risk analytics simulation reporting` | Revalidate each intelligence workspace against current backend capability/workbench contracts. | No synthetic KPI/simulation semantics. | **Completed** |
-| HWEB-R16 | `refactor(administration): align governance workspaces` | Revalidate audit/configuration/documents/integration/notification administration. | Destructive actions permission-gated; provider capabilities not invented. | Planned |
+| HWEB-R16 | `refactor(administration): align governance workspaces` | Revalidate audit/configuration/documents/integration/notification administration. | Destructive actions permission-gated; provider capabilities not invented. | **Completed** |
 | HWEB-R17 | `test(release): harden reconciled HidraWEB` | Full accessibility, performance, E2E, OpenAPI compatibility, deployment and release-artifact review. | `npm run verify`, required E2E/performance gates and production-readiness checklist green. | Planned |
 
 ## 5. HWEB-R01 completion evidence
@@ -432,10 +432,30 @@ HWEB-R15 revalidates the Intelligence workspaces against the current HidraAPI ri
 
 No backend code, intelligence mutation workflow, risk scoring formula, analytics calculation, simulation engine, report generation engine, or realtime contract is changed by HWEB-R15.
 
-## 22. Next authorized task
+## 22. HWEB-R16 completion evidence
+
+HWEB-R16 revalidates Administration governance surfaces against the current HidraAPI audit, configuration, documents, integration, notification, and generic workbench contracts:
+
+- HidraAPI source SHA: `260295c6eebc4b01922d2d488810a671305860a6`;
+- HidraWEB source SHA at task start: `4f0023db4a098eff90c2a8ae03eccf49c45a5d97`;
+- OpenAPI evidence: `63f3f60974ce57eb8cd5e42910397615195624fb`;
+- audit, configuration, and documents OpenAPI slices now record the verified HidraAPI artifact/run provenance;
+- Audit keeps generic workbench search/detail for evidence plus the typed `POST /api/v1/audit/exports` request contract; no audit-artifact download endpoint is invented;
+- Configuration commands remain typed `POST /api/v1/configuration/definitions`, `/feature-flags`, and `/values`, with route metadata plus effective permission checks failing closed;
+- Documents retain typed register/link/upload contracts plus the current backend-owned binary content transfer behavior; the browser does not invent storage-object ownership, range support, or alternative provider semantics;
+- Integration remains evidence-only over runtime workbench resources for connectors, job runs, dead letters, retry attempts, and health snapshots; no retry, replay, cancel, restart, pause, or provider lifecycle action is exposed without a published contract;
+- Notification remains evidence-only over runtime workbench request/message/delivery-attempt resources; no read/unread, archive, dismiss, delete, resend, retry, preference, or realtime notification-center behavior is invented;
+- destructive-action confirmation remains an explicit frontend safety guard and does not substitute for backend route permission enforcement or backend audit evidence;
+- administration tests cover canonical typed Audit/Configuration/Documents command transport and Integration/Notification workbench-only evidence access;
+- backend route permissions remain authoritative, and Administration continues to fail closed when route metadata or effective grants are absent;
+- no provider-specific SMS/email/push connector capability is inferred from generic Integration or Notification records.
+
+No backend code, provider implementation, destructive backend mutation, administration lifecycle state machine, realtime contract, or release-hardening work is changed by HWEB-R16.
+
+## 23. Next authorized task
 
 ```text
-HWEB-R16 — refactor(administration): align governance workspaces
+HWEB-R17 — test(release): harden reconciled HidraWEB
 ```
 
 Do not execute HWEB-R17 or later work in the same task.
