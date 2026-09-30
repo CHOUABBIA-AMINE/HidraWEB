@@ -14,7 +14,10 @@ const routes = [
   { route: '/api/v1/workbench/{module}/{resource}', methods: ['GET'], module: 'dynamic-module', resource: 'dynamic-resource', action: 'read', permission: 'dynamic-module:dynamic-resource:read', enforcementStatus: 'backend-enforced' },
   { route: '/api/v1/workbench/{module}/{resource}/{id}', methods: ['GET'], module: 'dynamic-module', resource: 'dynamic-resource', action: 'read', permission: 'dynamic-module:dynamic-resource:read', enforcementStatus: 'backend-enforced' },
   { route: '/api/v1/workbench/{module}/{resource}/search', methods: ['POST'], module: 'dynamic-module', resource: 'dynamic-resource', action: 'search', permission: 'dynamic-module:dynamic-resource:search', enforcementStatus: 'backend-enforced' },
+  { route: '/api/v1/identity/users', methods: ['GET'], module: 'identity', resource: 'users', action: 'read', permission: 'identity:users:read', enforcementStatus: 'backend-enforced' },
   { route: '/api/v1/identity/users', methods: ['POST'], module: 'identity', resource: 'users', action: 'execute', permission: 'identity:users:execute', enforcementStatus: 'backend-enforced' },
+  { route: '/api/v1/identity/roles', methods: ['GET'], module: 'identity', resource: 'roles', action: 'read', permission: 'identity:roles:read', enforcementStatus: 'backend-enforced' },
+  { route: '/api/v1/identity/permissions', methods: ['GET'], module: 'identity', resource: 'permissions', action: 'read', permission: 'identity:permissions:read', enforcementStatus: 'backend-enforced' },
   { route: '/api/v1/identity/permissions/evaluations', methods: ['POST'], module: 'identity', resource: 'permissions', action: 'execute', permission: 'identity:permissions:execute', enforcementStatus: 'backend-enforced' },
   { route: '/api/v1/organization/units', methods: ['POST'], module: 'organization', resource: 'units', action: 'execute', permission: 'organization:units:execute', enforcementStatus: 'backend-enforced' },
   { route: '/api/v1/organization/employees', methods: ['POST'], module: 'organization', resource: 'employees', action: 'execute', permission: 'organization:employees:execute', enforcementStatus: 'backend-enforced' },
@@ -27,7 +30,10 @@ const effectivePermissions = [
   'dynamic-module:resources:read',
   'dynamic-module:dynamic-resource:read',
   'dynamic-module:dynamic-resource:search',
+  'identity:users:read',
   'identity:users:execute',
+  'identity:roles:read',
+  'identity:permissions:read',
   'identity:permissions:execute',
   'organization:units:execute',
   'organization:employees:execute',
@@ -53,7 +59,7 @@ const identityDescriptors = [
   { module: 'identity', resource: 'roles', entityName: 'RoleJpaEntity', javaType: 'dz.sh.hidra.modules.identity.infrastructure.persistence.entity.RoleJpaEntity', tableName: 'hidra_identity_role', idField: 'id', searchableFields: ['code', 'name'], listEndpoint: '/api/v1/workbench/identity/roles', detailEndpoint: '/api/v1/workbench/identity/roles/{id}', searchEndpoint: '/api/v1/workbench/identity/roles/search' },
   { module: 'identity', resource: 'permissions', entityName: 'PermissionJpaEntity', javaType: 'dz.sh.hidra.modules.identity.infrastructure.persistence.entity.PermissionJpaEntity', tableName: 'hidra_identity_permission', idField: 'id', searchableFields: ['code', 'name'], listEndpoint: '/api/v1/workbench/identity/permissions', detailEndpoint: '/api/v1/workbench/identity/permissions/{id}', searchEndpoint: '/api/v1/workbench/identity/permissions/search' },
 ];
-const identityUser = { module: 'identity', resource: 'users', id: 'u-1', attributes: { id: 'u-1', username: 'aoperator', displayName: 'Abir Operator', emailAddress: 'operator@hidra.local', status: 'ACTIVE' } };
+const identityUser = { id: 'u-1', username: 'aoperator', displayName: 'Abir Operator', emailAddress: 'operator@hidra.local', status: 'ACTIVE', userType: 'HUMAN', employeeReferenceId: 'emp-1' };
 
 const organizationDescriptors = [
   { module: 'organization', resource: 'organization-units', entityName: 'OrganizationUnitJpaEntity', javaType: 'dz.sh.hidra.modules.organization.infrastructure.persistence.entity.OrganizationUnitJpaEntity', tableName: 'hidra_org_unit', idField: 'id', searchableFields: ['code', 'nameFr', 'nameEn'], listEndpoint: '/api/v1/workbench/organization/organization-units', detailEndpoint: '/api/v1/workbench/organization/organization-units/{id}', searchEndpoint: '/api/v1/workbench/organization/organization-units/search' },
@@ -88,8 +94,8 @@ async function mockWorkbench(page: Page) {
 
 async function mockIdentityOrganization(page: Page) {
   await page.route('**/api/v1/workbench/identity/resources', (route) => route.fulfill({ json: identityDescriptors }));
-  await page.route('**/api/v1/workbench/identity/users?**', (route) => route.fulfill({
-    json: { module: 'identity', resource: 'users', page: 0, size: 50, totalElements: 1, totalPages: 1, items: [identityUser] },
+  await page.route('**/api/v1/identity/users?**', (route) => route.fulfill({
+    json: { content: [identityUser], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false },
   }));
   await page.route('**/api/v1/workbench/organization/resources', (route) => route.fulfill({ json: organizationDescriptors }));
   await page.route('**/api/v1/workbench/organization/organization-units?**', (route) => route.fulfill({
@@ -211,7 +217,14 @@ test('HWEB-004 exposes backend-supported identity and organization context works
 test('HWEB-004 surfaces backend 403 when an identity mutation is refused', async ({ page }) => {
   await mockPermissions(page);
   await mockIdentityOrganization(page);
-  await page.route('**/api/v1/identity/users', (route) => route.fulfill({ status: 403, json: { status: 403, title: 'Forbidden' } }));
+  await page.route('**/api/v1/identity/users', (route) => {
+    if (route.request().method() === 'POST') {
+      return route.fulfill({ status: 403, json: { status: 403, title: 'Forbidden' } });
+    }
+    return route.fulfill({
+      json: { content: [identityUser], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false },
+    });
+  });
   await signIn(page);
 
   await page.getByRole('button', { name: 'Identité & accès' }).click();
