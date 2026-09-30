@@ -37,9 +37,7 @@ export function IdentityAdministrationPage() {
       </Box>
 
       <Box sx={{ mt: 2 }}>
-        {resource === 'users' ? <FixedResourceWorkspace module="identity" resource="users" title={t('context.identity.users')} description={t('context.identity.usersDescription')} /> : null}
-        {resource === 'roles' ? <FixedResourceWorkspace module="identity" resource="roles" title={t('context.identity.roles')} description={t('context.identity.readOnlyDescription')} /> : null}
-        {resource === 'permissions' ? <FixedResourceWorkspace module="identity" resource="permissions" title={t('context.identity.permissions')} description={t('context.identity.readOnlyDescription')} /> : null}
+        <IdentityAccessWorkspace resource={resource} />
       </Box>
     </Container>
   );
