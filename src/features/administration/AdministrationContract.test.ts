@@ -32,9 +32,9 @@ describe('administration contract guardrails', () => {
     const exportRequest = { purposeId: 'COMPLIANCE', format: 'JSON' };
     await requestAuditExport(exportRequest);
 
-    const definition = { code: 'CFG-1', nameFr: 'Configuration' };
+    const definition = { key: 'CFG-1', displayNameFr: 'Configuration' };
     const flag = { code: 'FLAG-1', nameFr: 'Feature flag' };
-    const value = { configurationDefinitionId: 'cfg-1', value: 'enabled' };
+    const value = { definitionId: 'cfg-1', rawValue: 'enabled' };
     await createConfigurationDefinition(definition);
     await createFeatureFlag(flag);
     await setConfigurationValue(value);
