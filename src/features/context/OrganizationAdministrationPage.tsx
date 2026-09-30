@@ -2,8 +2,9 @@ import { Alert, Box, Container, Tab, Tabs, Typography } from '@mui/material';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { FixedResourceWorkspace } from '@/features/context/components/FixedResourceWorkspace';
+import { OrganizationAccessWorkspace } from '@/features/context/components/OrganizationAccessWorkspace';
 import { OrganizationCommandPanel } from '@/features/context/components/OrganizationCommandPanel';
+import { OrganizationResponsibilityPanel } from '@/features/context/components/OrganizationResponsibilityPanel';
 
 type OrganizationResource = 'organization-units' | 'employees' | 'employee-assignments';
 
@@ -20,6 +21,7 @@ export function OrganizationAdministrationPage() {
       <Alert severity="info" sx={{ mt: 2 }}>{t('context.organization.contractNotice')}</Alert>
 
       <Box sx={{ mt: 2 }}><OrganizationCommandPanel /></Box>
+      <Box sx={{ mt: 2 }}><OrganizationResponsibilityPanel /></Box>
 
       <Box sx={{ mt: 3 }}>
         <Tabs
@@ -35,9 +37,7 @@ export function OrganizationAdministrationPage() {
       </Box>
 
       <Box sx={{ mt: 2 }}>
-        {resource === 'organization-units' ? <FixedResourceWorkspace module="organization" resource="organization-units" title={t('context.organization.units')} description={t('context.organization.unitsDescription')} /> : null}
-        {resource === 'employees' ? <FixedResourceWorkspace module="organization" resource="employees" title={t('context.organization.employees')} description={t('context.organization.employeesDescription')} /> : null}
-        {resource === 'employee-assignments' ? <FixedResourceWorkspace module="organization" resource="employee-assignments" title={t('context.organization.assignments')} description={t('context.organization.assignmentsDescription')} /> : null}
+        <OrganizationAccessWorkspace resource={resource} />
       </Box>
     </Container>
   );

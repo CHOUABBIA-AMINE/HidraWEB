@@ -90,8 +90,8 @@ No HWEB-P task may introduce one of these as an implementation shortcut.
 | Code | Exact commit message | Scope | Backend prerequisite | Exit criterion | Status |
 | --- | --- | --- | --- | --- | --- |
 | HWEB-P01 | `feat(identity): add first-class access administration workspace` | Build dedicated user/role/permission administration using current identity query and command APIs. | Current Identity Administration query/command controllers remain published. | Users/roles/permissions are first-class typed UX; role/permission grants use backend contracts; no role-name inference. | **Completed** |
-| HWEB-P02 | `feat(organization): add first-class organization administration` | Add organization-unit creation, employee registration, employee assignment, and canonical responsibility administration around current dedicated reads. | Organization unit/employee/assignment and operational-scope/responsibility APIs remain current. | Organization administration no longer depends on generic workbench for first-class operations; operational responsibility stays separate from identity grants. | **Next** |
-| HWEB-P03 | `feat(risk): add governed risk authoring workflows` | Add risk-register creation, risk-assessment creation, and evidence attachment using current typed Risk commands with workbench/query evidence for reads. | `POST /api/v1/risk/registers`, `/assessments`, `/evidence` remain published. | Risk authoring is permission-gated and backend-owned; no browser risk scoring formula is introduced. | Planned |
+| HWEB-P02 | `feat(organization): add first-class organization administration` | Add organization-unit creation, employee registration, employee assignment, and canonical responsibility administration around current dedicated reads. | Organization unit/employee/assignment and operational-scope/responsibility APIs remain current. | Organization administration no longer depends on generic workbench for first-class operations; operational responsibility stays separate from identity grants. | **Completed** |
+| HWEB-P03 | `feat(risk): add governed risk authoring workflows` | Add risk-register creation, risk-assessment creation, and evidence attachment using current typed Risk commands with workbench/query evidence for reads. | `POST /api/v1/risk/registers`, `/assessments`, `/evidence` remain published. | Risk authoring is permission-gated and backend-owned; no browser risk scoring formula is introduced. | **Next** |
 | HWEB-P04 | `feat(reporting): add controlled report request lifecycle` | Add typed report definition/request/run/artifact actions around existing reporting evidence views. | Reporting definition/request/run/artifact command endpoints remain published. | Report lifecycle actions use backend contracts and permissions; frontend does not fabricate generation state/artifacts. | Planned |
 | HWEB-P05 | `feat(analytics): add governed analytics execution workflows` | Add dataset registration, insight creation, metric evaluation, and projection-run actions to the existing Analytics workspace. | Analytics command endpoints/capabilities remain published. | Analytics actions are typed and permission-gated; all calculated values remain backend-produced. | Planned |
 | HWEB-P06 | `feat(simulation): add governed scenario and run orchestration` | Add simulation model/scenario creation, run queueing, and recommendation publication around existing evidence views. | Simulation model/scenario/run/recommendation command endpoints remain published. | HidraWEB orchestrates backend simulation only; no solver/hydraulic engine runs in the browser. | Planned |
@@ -377,12 +377,32 @@ HWEB-P01 replaces generic-workbench Identity administration with first-class typ
 
 No HWEB-P02 organization administration work is included in HWEB-P01.
 
-## 19. Next authorized task
+## 20. HWEB-P02 completion evidence
+
+HWEB-P02 promotes Organization administration to dedicated HidraAPI contracts:
+
+- HidraAPI source SHA: `260295c6eebc4b01922d2d488810a671305860a6`;
+- HidraWEB source SHA at task start: `89cd529d124e71db572650f6346a93953c06af77`;
+- OpenAPI evidence remains `63f3f60974ce57eb8cd5e42910397615195624fb`;
+- organization-unit, employee, and assignment reads use dedicated `/api/v1/organization/**` query contracts instead of generic workbench records;
+- unit and employee detail inspection uses dedicated backend detail endpoints;
+- existing unit creation, employee registration, and employee assignment commands remain typed and now invalidate the dedicated organization-admin query cache;
+- canonical operational-scope registration uses `POST /api/v1/organization/operational-scopes`;
+- canonical responsibility assignment/revocation uses backend workflow-approved request contracts and exact backend permissions;
+- responsibility listing remains backend-owned and resolves canonical OperationalScope evidence;
+- Arabic/French/English fields remain on the same organization entities where published;
+- operational responsibility remains explicitly separate from Identity role/permission grants;
+- no physical pipeline ownership is inferred from OrganizationUnit hierarchy;
+- focused adapter and E2E fixtures cover dedicated reads and canonical responsibility mutations.
+
+No HWEB-P03 Risk authoring work is included in HWEB-P02.
+
+## 21. Next authorized task
 
 The next authorized product task is:
 
 ```text
-HWEB-P02 — feat(organization): add first-class organization administration
+HWEB-P03 — feat(risk): add governed risk authoring workflows
 ```
 
-If a BLOCKER or MAJOR staging/UAT finding is recorded before P02 begins, the corresponding HWEB-M task takes precedence.
+If a BLOCKER or MAJOR staging/UAT finding is recorded before P03 begins, the corresponding HWEB-M task takes precedence.

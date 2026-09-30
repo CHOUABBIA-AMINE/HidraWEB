@@ -8,4 +8,10 @@ export const IDENTITY_ORGANIZATION_PERMISSIONS = {
   permissionsExecute: 'identity:permissions:execute',
   createOrganizationUnit: 'organization:units:execute',
   manageEmployees: 'organization:employees:execute',
+  unitsRead: 'organization:units:read',
+  employeesRead: 'organization:employees:read',
+  assignmentsRead: 'organization:assignments:read',
+  registerOperationalScope: 'organization:operational-scope:register',
+  assignResponsibility: 'organization:responsibility:assign',
+  revokeResponsibility: 'organization:responsibility:revoke',
 } as const;

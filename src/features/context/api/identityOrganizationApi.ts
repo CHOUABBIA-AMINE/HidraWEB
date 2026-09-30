@@ -7,19 +7,29 @@ import type {
   GrantRoleToUser,
   CreateOrganizationUnitRequest,
   CreateUserRequest,
+  EmployeeAssignmentView,
   EmployeeResponse,
+  EmployeeView,
   EvaluatePermissionRequest,
   OrganizationUnitResponse,
+  OrganizationUnitView,
+  PageEmployeeAssignmentView,
+  PageEmployeeView,
+  PageOrganizationUnitView,
   OperationalScopeResponse,
   PagePermissionView,
   PageRoleView,
   PageUserView,
   PermissionView,
   PermissionDecisionResponse,
+  ResponsibilityMutationResponse,
   ResponsibilityResponse,
   RoleView,
   UserView,
   RegisterEmployeeRequest,
+  RegisterOperationalScopeRequest,
+  AssignResponsibilityRequest,
+  RevokeResponsibilityRequest,
   UserResponse,
 } from '@/api/generated/identity-organization/model';
 import { hidraHttpClient } from '@/api/client/hidraHttpClient';
@@ -103,4 +113,89 @@ export function grantPermissionToIdentityRole(request: GrantPermissionToRole): P
 
 export function grantPermissionToIdentityUser(request: GrantPermissionToUser): Promise<string> {
   return hidraHttpClient<string>({ method: 'POST', url: '/api/v1/identity/users/permission-grants', data: request });
+}
+
+
+export function fetchOrganizationUnits(q = '', page = 0, size = 50): Promise<PageOrganizationUnitView> {
+  return hidraHttpClient<PageOrganizationUnitView>({
+    method: 'GET',
+    url: '/api/v1/organization/units',
+    params: { q: q || undefined, page, size },
+  });
+}
+
+export function fetchOrganizationUnit(id: string): Promise<OrganizationUnitView> {
+  return hidraHttpClient<OrganizationUnitView>({
+    method: 'GET',
+    url: `/api/v1/organization/units/${encodeURIComponent(id)}`,
+  });
+}
+
+export function fetchOrganizationEmployees(q = '', page = 0, size = 50): Promise<PageEmployeeView> {
+  return hidraHttpClient<PageEmployeeView>({
+    method: 'GET',
+    url: '/api/v1/organization/employees',
+    params: { q: q || undefined, page, size },
+  });
+}
+
+export function fetchOrganizationEmployee(id: string): Promise<EmployeeView> {
+  return hidraHttpClient<EmployeeView>({
+    method: 'GET',
+    url: `/api/v1/organization/employees/${encodeURIComponent(id)}`,
+  });
+}
+
+export function fetchOrganizationAssignments(
+  employeeId = '',
+  organizationUnitId = '',
+  status = '',
+  page = 0,
+  size = 50,
+): Promise<PageEmployeeAssignmentView> {
+  return hidraHttpClient<PageEmployeeAssignmentView>({
+    method: 'GET',
+    url: '/api/v1/organization/assignments',
+    params: {
+      employeeId: employeeId || undefined,
+      organizationUnitId: organizationUnitId || undefined,
+      status: status || undefined,
+      page,
+      size,
+    },
+  });
+}
+
+export function fetchEmployeeAssignments(employeeId: string): Promise<EmployeeAssignmentView[]> {
+  return hidraHttpClient<EmployeeAssignmentView[]>({
+    method: 'GET',
+    url: `/api/v1/organization/employees/${encodeURIComponent(employeeId)}/assignments`,
+  });
+}
+
+export function registerOperationalScope(request: RegisterOperationalScopeRequest): Promise<OperationalScopeResponse> {
+  return hidraHttpClient<OperationalScopeResponse>({
+    method: 'POST',
+    url: '/api/v1/organization/operational-scopes',
+    data: request,
+  });
+}
+
+export function assignOrganizationResponsibility(request: AssignResponsibilityRequest): Promise<ResponsibilityMutationResponse> {
+  return hidraHttpClient<ResponsibilityMutationResponse>({
+    method: 'POST',
+    url: '/api/v1/organization/responsibilities',
+    data: request,
+  });
+}
+
+export function revokeOrganizationResponsibility(
+  assignmentId: string,
+  request: RevokeResponsibilityRequest,
+): Promise<ResponsibilityMutationResponse> {
+  return hidraHttpClient<ResponsibilityMutationResponse>({
+    method: 'POST',
+    url: `/api/v1/organization/responsibilities/${encodeURIComponent(assignmentId)}/revoke`,
+    data: request,
+  });
 }

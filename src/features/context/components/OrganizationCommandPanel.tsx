@@ -57,7 +57,7 @@ export function OrganizationCommandPanel() {
       };
       return createOrganizationUnit(request);
     },
-    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['hidra', 'workbench', 'organization'] }); },
+    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['hidra', 'organization-admin'] }); },
   });
 
   const registerEmployeeMutation = useMutation({
@@ -75,7 +75,7 @@ export function OrganizationCommandPanel() {
       };
       return registerEmployee(request);
     },
-    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['hidra', 'workbench', 'organization'] }); },
+    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['hidra', 'organization-admin'] }); },
   });
 
   const assignEmployeeMutation = useMutation({
@@ -90,7 +90,7 @@ export function OrganizationCommandPanel() {
       };
       return assignEmployee(request);
     },
-    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['hidra', 'workbench', 'organization'] }); },
+    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['hidra', 'organization-admin'] }); },
   });
 
   const employeeCommandAvailable = permissions.can(IDENTITY_ORGANIZATION_PERMISSIONS.manageEmployees);

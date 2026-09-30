@@ -61,11 +61,6 @@ const identityDescriptors = [
 ];
 const identityUser = { id: 'u-1', username: 'aoperator', displayName: 'Abir Operator', emailAddress: 'operator@hidra.local', status: 'ACTIVE', userType: 'HUMAN', employeeReferenceId: 'emp-1' };
 
-const organizationDescriptors = [
-  { module: 'organization', resource: 'organization-units', entityName: 'OrganizationUnitJpaEntity', javaType: 'dz.sh.hidra.modules.organization.infrastructure.persistence.entity.OrganizationUnitJpaEntity', tableName: 'hidra_org_unit', idField: 'id', searchableFields: ['code', 'nameFr', 'nameEn'], listEndpoint: '/api/v1/workbench/organization/organization-units', detailEndpoint: '/api/v1/workbench/organization/organization-units/{id}', searchEndpoint: '/api/v1/workbench/organization/organization-units/search' },
-  { module: 'organization', resource: 'employees', entityName: 'EmployeeJpaEntity', javaType: 'dz.sh.hidra.modules.organization.infrastructure.persistence.entity.EmployeeJpaEntity', tableName: 'hidra_org_employee', idField: 'id', searchableFields: ['employeeNumber', 'displayNameLt', 'emailAddress'], listEndpoint: '/api/v1/workbench/organization/employees', detailEndpoint: '/api/v1/workbench/organization/employees/{id}', searchEndpoint: '/api/v1/workbench/organization/employees/search' },
-  { module: 'organization', resource: 'employee-assignments', entityName: 'EmployeeAssignmentJpaEntity', javaType: 'dz.sh.hidra.modules.organization.infrastructure.persistence.entity.EmployeeAssignmentJpaEntity', tableName: 'hidra_org_employee_assignment', idField: 'id', searchableFields: ['employeeId', 'organizationUnitId'], listEndpoint: '/api/v1/workbench/organization/employee-assignments', detailEndpoint: '/api/v1/workbench/organization/employee-assignments/{id}', searchEndpoint: '/api/v1/workbench/organization/employee-assignments/search' },
-];
 const organizationUnit = { module: 'organization', resource: 'organization-units', id: 'ou-1', attributes: { id: 'ou-1', code: 'TRC', nameFr: 'Direction Transport', status: 'ACTIVE' } };
 
 async function mockPermissions(page: Page) {
