@@ -94,7 +94,7 @@ async function mockWorkbench(page: Page) {
 
 async function mockIdentityOrganization(page: Page) {
   await page.route('**/api/v1/workbench/identity/resources', (route) => route.fulfill({ json: identityDescriptors }));
-  await page.route('**/api/v1/identity/users?**', (route) => route.fulfill({
+  await page.route('**/api/v1/identity/users*', (route) => route.fulfill({
     json: { content: [identityUser], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false },
   }));
   await page.route('**/api/v1/workbench/organization/resources', (route) => route.fulfill({ json: organizationDescriptors }));
