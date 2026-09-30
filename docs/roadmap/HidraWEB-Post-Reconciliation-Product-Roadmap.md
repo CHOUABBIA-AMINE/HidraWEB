@@ -89,8 +89,8 @@ No HWEB-P task may introduce one of these as an implementation shortcut.
 
 | Code | Exact commit message | Scope | Backend prerequisite | Exit criterion | Status |
 | --- | --- | --- | --- | --- | --- |
-| HWEB-P01 | `feat(identity): add first-class access administration workspace` | Build dedicated user/role/permission administration using current identity query and command APIs. | Current Identity Administration query/command controllers remain published. | Users/roles/permissions are first-class typed UX; role/permission grants use backend contracts; no role-name inference. | **Next** |
-| HWEB-P02 | `feat(organization): add first-class organization administration` | Add organization-unit creation, employee registration, employee assignment, and canonical responsibility administration around current dedicated reads. | Organization unit/employee/assignment and operational-scope/responsibility APIs remain current. | Organization administration no longer depends on generic workbench for first-class operations; operational responsibility stays separate from identity grants. | Planned |
+| HWEB-P01 | `feat(identity): add first-class access administration workspace` | Build dedicated user/role/permission administration using current identity query and command APIs. | Current Identity Administration query/command controllers remain published. | Users/roles/permissions are first-class typed UX; role/permission grants use backend contracts; no role-name inference. | **Completed** |
+| HWEB-P02 | `feat(organization): add first-class organization administration` | Add organization-unit creation, employee registration, employee assignment, and canonical responsibility administration around current dedicated reads. | Organization unit/employee/assignment and operational-scope/responsibility APIs remain current. | Organization administration no longer depends on generic workbench for first-class operations; operational responsibility stays separate from identity grants. | **Next** |
 | HWEB-P03 | `feat(risk): add governed risk authoring workflows` | Add risk-register creation, risk-assessment creation, and evidence attachment using current typed Risk commands with workbench/query evidence for reads. | `POST /api/v1/risk/registers`, `/assessments`, `/evidence` remain published. | Risk authoring is permission-gated and backend-owned; no browser risk scoring formula is introduced. | Planned |
 | HWEB-P04 | `feat(reporting): add controlled report request lifecycle` | Add typed report definition/request/run/artifact actions around existing reporting evidence views. | Reporting definition/request/run/artifact command endpoints remain published. | Report lifecycle actions use backend contracts and permissions; frontend does not fabricate generation state/artifacts. | Planned |
 | HWEB-P05 | `feat(analytics): add governed analytics execution workflows` | Add dataset registration, insight creation, metric evaluation, and projection-run actions to the existing Analytics workspace. | Analytics command endpoints/capabilities remain published. | Analytics actions are typed and permission-gated; all calculated values remain backend-produced. | Planned |
@@ -356,14 +356,33 @@ npm run build
 
 Use `npm run test:e2e` for critical browser journeys and `npm run test:performance` when performance-sensitive behavior changes.
 
-## 18. ROADMAP-001 result
+## 18. HWEB-P01 completion evidence
 
-ROADMAP-001 creates the post-reconciliation product queue only. It does not implement HWEB-P01 or any later task.
+HWEB-P01 replaces generic-workbench Identity administration with first-class typed HidraAPI contracts:
+
+- HidraAPI source SHA: `260295c6eebc4b01922d2d488810a671305860a6`;
+- HidraWEB source SHA at task start: `37f52d541ca7fe47c2e581b30f89d4b0382a5a65`;
+- OpenAPI evidence: `63f3f60974ce57eb8cd5e42910397615195624fb`;
+- Identity consumer OpenAPI slice now includes dedicated user detail, role list/create, permission list/create, user-role grant, role-permission grant, and user-permission grant contracts;
+- the existing `/administration/users` route remains the first-class Identity & Access workspace;
+- user, role, and permission lists now use dedicated `/api/v1/identity/**` query APIs instead of generic workbench records;
+- user inspection uses `GET /api/v1/identity/users/{id}`;
+- role and permission creation use backend DTOs generated from the accepted OpenAPI slice;
+- user-role, role-permission, and direct-user-permission grants use only backend-defined request contracts;
+- existing create-user and permission-evaluation flows remain in the workspace;
+- frontend visibility is permission-gated while backend 401/403 remains authoritative;
+- Organization responsibility assignments remain separate from Identity authorization grants;
+- no role-name inference, revoke operation, credential handling, or frontend ABAC semantics are introduced;
+- focused adapter tests cover dedicated reads, encoded user IDs, role/permission creation, and all three grant endpoints.
+
+No HWEB-P02 organization administration work is included in HWEB-P01.
+
+## 19. Next authorized task
 
 The next authorized product task is:
 
 ```text
-HWEB-P01 — feat(identity): add first-class access administration workspace
+HWEB-P02 — feat(organization): add first-class organization administration
 ```
 
-If a BLOCKER or MAJOR staging/UAT finding is recorded before P01 begins, the corresponding HWEB-M task takes precedence.
+If a BLOCKER or MAJOR staging/UAT finding is recorded before P02 begins, the corresponding HWEB-M task takes precedence.

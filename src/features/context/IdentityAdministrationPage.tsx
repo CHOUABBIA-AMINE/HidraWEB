@@ -2,8 +2,9 @@ import { Alert, Box, Container, Tab, Tabs, Typography } from '@mui/material';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { IdentityAccessCommandPanel } from '@/features/context/components/IdentityAccessCommandPanel';
+import { IdentityAccessWorkspace } from '@/features/context/components/IdentityAccessWorkspace';
 import { IdentityCommandPanel } from '@/features/context/components/IdentityCommandPanel';
-import { FixedResourceWorkspace } from '@/features/context/components/FixedResourceWorkspace';
 
 type IdentityResource = 'users' | 'roles' | 'permissions';
 
@@ -20,6 +21,7 @@ export function IdentityAdministrationPage() {
       <Alert severity="info" sx={{ mt: 2 }}>{t('context.identity.contractNotice')}</Alert>
 
       <Box sx={{ mt: 2 }}><IdentityCommandPanel /></Box>
+      <Box sx={{ mt: 2 }}><IdentityAccessCommandPanel /></Box>
 
       <Box sx={{ mt: 3 }}>
         <Tabs
