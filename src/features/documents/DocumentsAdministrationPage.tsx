@@ -162,9 +162,10 @@ export function DocumentsAdministrationPage() {
   const registerMutation = useMutation({
     mutationFn: registerDocument,
     onSuccess: async (registered) => {
-      if (registered.id) {
-        setUploadForm((value) => ({ ...value, documentId: registered.id }));
-        setLinkForm((value) => ({ ...value, documentId: registered.id }));
+      const documentId = registered.id;
+      if (documentId) {
+        setUploadForm((value) => ({ ...value, documentId }));
+        setLinkForm((value) => ({ ...value, documentId }));
       }
       await invalidateEvidence();
     },
