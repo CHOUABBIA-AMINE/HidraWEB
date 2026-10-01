@@ -3,10 +3,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
 import type {
-  CreateReportDefinitionRequest,
   GenerateReportArtifactRequest,
   QueueReportRunRequest,
-  RequestReportRequest,
 } from '@/api/generated/reporting/model';
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
 import { usePermissions } from '@/features/permissions/usePermissions';
