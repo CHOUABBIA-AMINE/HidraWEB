@@ -22,6 +22,7 @@ import { useMemo, useState } from 'react';
 
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
 import { usePermissions } from '@/features/permissions/usePermissions';
+import { AnalyticsExecutionPanel } from '@/features/analytics/components/AnalyticsExecutionPanel';
 import {
   fetchWorkbenchRecord,
   fetchWorkbenchRecords,
@@ -258,8 +259,10 @@ export function AnalyticsWorkspacePage() {
         </Box>
 
         <Alert severity="info">
-          This task exposes analytics-owned read views only. The accepted generated analytics mutation contract is present for deterministic DTO evidence, but HWEB-013-03 does not trigger dataset creation, insight creation, projections, metric evaluations, or operational mutations.
+          Existing workbench views remain secondary analytics evidence. HWEB-P05 exposes only the four HidraAPI-published execution commands and does not calculate metrics, projections, confidence, or operational actions in the browser.
         </Alert>
+
+        <AnalyticsExecutionPanel />
 
         {resourcesQuery.isPending ? <CircularProgress size={24} /> : null}
         {resourcesQuery.isError ? <Alert severity="error">{errorMessage(resourcesQuery.error, 'analytics resources')}</Alert> : null}
