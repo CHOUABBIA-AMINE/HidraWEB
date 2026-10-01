@@ -22,6 +22,7 @@ import { useMemo, useState } from 'react';
 
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
 import { usePermissions } from '@/features/permissions/usePermissions';
+import { ReportingLifecyclePanel } from '@/features/reporting/components/ReportingLifecyclePanel';
 import {
   fetchWorkbenchRecord,
   fetchWorkbenchRecords,
@@ -259,8 +260,10 @@ export function ReportingWorkspacePage() {
         </Box>
 
         <Alert severity="info">
-          The accepted reporting contract publishes report creation/generation operations but no artifact retrieval or download endpoint. HWEB-013-05 therefore exposes read-only reporting metadata and does not create definitions, request reports, queue runs, generate artifacts, download files, or invent export semantics.
+          The accepted reporting contract publishes definition, request, run, and artifact commands but no artifact retrieval or download endpoint. HWEB-P04 exposes only those backend-owned lifecycle actions and does not invent completion, scheduling, export, storage, or download semantics.
         </Alert>
+
+        <ReportingLifecyclePanel />
 
         {resourcesQuery.isPending ? <CircularProgress size={24} /> : null}
         {resourcesQuery.isError ? <Alert severity="error">{errorMessage(resourcesQuery.error, 'reporting resources')}</Alert> : null}

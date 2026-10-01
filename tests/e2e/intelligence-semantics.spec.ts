@@ -133,7 +133,7 @@ test('HWEB-013-06 preserves read derive recommend semantics without operational 
   await navigate(page, '/intelligence/reports');
   await expect(page.getByRole('heading', { name: 'Reporting intelligence' })).toBeVisible();
   await expect(page.getByText(/no artifact retrieval or download endpoint/i)).toBeVisible();
-  await expect(page.getByText(/does not create definitions, request reports, queue runs, generate artifacts, download files, or invent export semantics/i)).toBeVisible();
+  await expect(page.getByText(/does not invent completion, scheduling, export, storage, or download semantics/i)).toBeVisible();
 
   expect(operationalWrites).toEqual([]);
 });

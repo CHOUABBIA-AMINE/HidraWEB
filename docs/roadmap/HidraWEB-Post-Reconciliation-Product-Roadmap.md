@@ -92,8 +92,8 @@ No HWEB-P task may introduce one of these as an implementation shortcut.
 | HWEB-P01 | `feat(identity): add first-class access administration workspace` | Build dedicated user/role/permission administration using current identity query and command APIs. | Current Identity Administration query/command controllers remain published. | Users/roles/permissions are first-class typed UX; role/permission grants use backend contracts; no role-name inference. | **Completed** |
 | HWEB-P02 | `feat(organization): add first-class organization administration` | Add organization-unit creation, employee registration, employee assignment, and canonical responsibility administration around current dedicated reads. | Organization unit/employee/assignment and operational-scope/responsibility APIs remain current. | Organization administration no longer depends on generic workbench for first-class operations; operational responsibility stays separate from identity grants. | **Completed** |
 | HWEB-P03 | `feat(risk): add governed risk authoring workflows` | Add risk-register creation, risk-assessment creation, and evidence attachment using current typed Risk commands with workbench/query evidence for reads. | `POST /api/v1/risk/registers`, `/assessments`, `/evidence` remain published. | Risk authoring is permission-gated and backend-owned; no browser risk scoring formula is introduced. | **Completed** |
-| HWEB-P04 | `feat(reporting): add controlled report request lifecycle` | Add typed report definition/request/run/artifact actions around existing reporting evidence views. | Reporting definition/request/run/artifact command endpoints remain published. | Report lifecycle actions use backend contracts and permissions; frontend does not fabricate generation state/artifacts. | **Next** |
-| HWEB-P05 | `feat(analytics): add governed analytics execution workflows` | Add dataset registration, insight creation, metric evaluation, and projection-run actions to the existing Analytics workspace. | Analytics command endpoints/capabilities remain published. | Analytics actions are typed and permission-gated; all calculated values remain backend-produced. | Planned |
+| HWEB-P04 | `feat(reporting): add controlled report request lifecycle` | Add typed report definition/request/run/artifact actions around existing reporting evidence views. | Reporting definition/request/run/artifact command endpoints remain published. | Report lifecycle actions use backend contracts and permissions; frontend does not fabricate generation state/artifacts. | **Completed** |
+| HWEB-P05 | `feat(analytics): add governed analytics execution workflows` | Add dataset registration, insight creation, metric evaluation, and projection-run actions to the existing Analytics workspace. | Analytics command endpoints/capabilities remain published. | Analytics actions are typed and permission-gated; all calculated values remain backend-produced. | **Next** |
 | HWEB-P06 | `feat(simulation): add governed scenario and run orchestration` | Add simulation model/scenario creation, run queueing, and recommendation publication around existing evidence views. | Simulation model/scenario/run/recommendation command endpoints remain published. | HidraWEB orchestrates backend simulation only; no solver/hydraulic engine runs in the browser. | Planned |
 | HWEB-P07 | `feat(integration): add controlled integration operations` | Add external-system registration, integration-job start, and exchange-message recording only where product/UAT requirements justify operator access. | Current Integration command endpoints remain published and permission metadata supports intended users. | Operations are explicit, typed, audited, and permission-gated; no retry/replay/cancel/provider controls are invented. | Planned |
 | HWEB-P08 | `feat(notification): add controlled notification operations` | Add notification request/message/delivery-attempt commands only where an approved operator/admin workflow exists. | Current Notification command endpoints remain published and product ownership is confirmed. | No consumer-style inbox semantics are invented; commands expose only backend-published lifecycle operations. | Planned |
@@ -415,12 +415,31 @@ HWEB-P03 adds governed Risk authoring while preserving HidraAPI ownership of cal
 
 No HWEB-P04 Reporting lifecycle work is included in HWEB-P03.
 
-## 22. Next authorized task
+## 22. HWEB-P04 completion evidence
+
+HWEB-P04 adds the controlled Reporting lifecycle using only current HidraAPI contracts:
+
+- HidraAPI source SHA: `260295c6eebc4b01922d2d488810a671305860a6`;
+- HidraWEB source SHA at task start: `84eb70f18eb11aeac4493cebcf99704406daa299`;
+- OpenAPI evidence remains `63f3f60974ce57eb8cd5e42910397615195624fb`;
+- definition creation uses `POST /api/v1/reporting/definitions` and generated `CreateReportDefinitionRequest` / `ReportDefinitionResponse`;
+- report requests use `POST /api/v1/reporting/requests` and generated `RequestReportRequest` / `ReportRequestResponse`;
+- run queueing uses `POST /api/v1/reporting/runs` and generated `QueueReportRunRequest` / `ReportRunResponse`;
+- artifact generation uses `POST /api/v1/reporting/artifacts` and generated `GenerateReportArtifactRequest` / `ReportOutputArtifactResponse`;
+- every command is permission-gated from backend-published route metadata, with backend 401/403 authoritative;
+- existing Reporting workbench views remain secondary read evidence and successful commands invalidate Reporting workbench query state;
+- HidraWEB does not fabricate run completion, artifact availability, schedules, storage objects, export formats, retrieval, or downloads beyond fields explicitly present in backend DTOs;
+- the published backend still has no artifact retrieval/download endpoint;
+- focused adapter tests cover all four canonical Reporting command endpoints and the intelligence E2E boundary text is updated.
+
+No HWEB-P05 Analytics execution work is included in HWEB-P04.
+
+## 23. Next authorized task
 
 The next authorized product task is:
 
 ```text
-HWEB-P04 — feat(reporting): add controlled report request lifecycle
+HWEB-P05 — feat(analytics): add governed analytics execution workflows
 ```
 
-If a BLOCKER or MAJOR staging/UAT finding is recorded before P04 begins, the corresponding HWEB-M task takes precedence.
+If a BLOCKER or MAJOR staging/UAT finding is recorded before P05 begins, the corresponding HWEB-M task takes precedence.
