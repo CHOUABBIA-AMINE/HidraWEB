@@ -159,11 +159,27 @@ export function DocumentsAdministrationPage() {
   });
 
   const invalidateEvidence = async () => queryClient.invalidateQueries({ queryKey: workbenchQueryKeys.resources(MODULE) });
-  const registerMutation = useMutation({ mutationFn: registerDocument, onSuccess: invalidateEvidence });
+  const registerMutation = useMutation({
+    mutationFn: registerDocument,
+    onSuccess: async (registered) => {
+      if (registered.id) {
+        setUploadForm((value) => ({ ...value, documentId: registered.id }));
+        setLinkForm((value) => ({ ...value, documentId: registered.id }));
+      }
+      await invalidateEvidence();
+    },
+  });
   const uploadMutation = useMutation({
     mutationFn: ({ metadata, file }: { metadata: UploadDocumentBinaryVersionRequest; file: File }) => uploadDocumentVersionContent(metadata, file),
-    onSuccess: async () => {
+    onSuccess: async (uploaded) => {
       setSelectedFile(null);
+      if (uploaded.documentId || uploaded.id) {
+        setLinkForm((value) => ({
+          ...value,
+          documentId: uploaded.documentId ?? value.documentId,
+          documentVersionId: uploaded.id ?? value.documentVersionId,
+        }));
+      }
       await invalidateEvidence();
     },
   });
@@ -192,7 +208,7 @@ export function DocumentsAdministrationPage() {
         <Typography color="text.secondary">HWEB-014-03 document registration, multipart version upload, binary retrieval, and target-link evidence.</Typography>
       </Box>
       <Alert severity="info">
-        Binary content is transferred only through HidraAPI. The backend owns storageObjectId, filename, MIME type, size, and SHA-256 evidence for multipart uploads; direct object-store URLs and range/resume behavior are not exposed.
+        Binary content is transferred only through HidraAPI. The backend owns storageObjectId, filename, MIME type, size, and SHA-256 evidence for multipart uploads; direct object-store URLs and range/resume behavior are not exposed. Backend-returned document/version IDs are reused to guide the next governed step instead of being inferred in the browser.
       </Alert>
 
       {resourcesQuery.isPending ? <CircularProgress size={24} /> : null}
@@ -220,7 +236,7 @@ export function DocumentsAdministrationPage() {
         <TextField label="confidentialityLevel" type="number" value={documentForm.confidentialityLevel ?? 0} onChange={(event) => setDocumentForm((value) => ({ ...value, confidentialityLevel: Number(event.target.value) }))} />
         <Button type="submit" variant="contained" disabled={!canRegister || registerMutation.isPending}>Register document</Button>
         {registerMutation.isError ? <Alert severity="error">{errorMessage(registerMutation.error, 'Document registration failed.')}</Alert> : null}
-        {registerMutation.data ? <Alert severity="success">Document {registerMutation.data.id ?? '—'} registered with status {registerMutation.data.status ?? '—'}.</Alert> : null}
+        {registerMutation.data ? <Alert severity="success">Document {registerMutation.data.id ?? '—'} registered with status {registerMutation.data.status ?? '—'}. Its backend ID is ready for version upload and target linking.</Alert> : null}
       </Stack></Paper>
 
       <Paper variant="outlined" sx={{ p: 2 }}><Stack component="form" spacing={1.5} onSubmit={(event: FormEvent) => { event.preventDefault(); if (canUpload && selectedFile && uploadForm.documentId) uploadMutation.mutate({ metadata: uploadForm, file: selectedFile }); }}>
@@ -236,11 +252,16 @@ export function DocumentsAdministrationPage() {
         <Typography variant="body2" color="text.secondary">{selectedFile ? `Selected: ${selectedFile.name}` : 'No file selected.'}</Typography>
         <Button type="submit" variant="contained" disabled={!canUpload || !selectedFile || !uploadForm.documentId || uploadMutation.isPending}>Upload version</Button>
         {uploadMutation.isError ? <Alert severity="error">{errorMessage(uploadMutation.error, 'Document version upload failed.')}</Alert> : null}
-        {uploadMutation.data ? <Alert severity="success">Version {uploadMutation.data.id ?? '—'} uploaded as {uploadMutation.data.originalFilename ?? '—'} with backend checksum {uploadMutation.data.checksumValue ?? '—'}.</Alert> : null}
+        {uploadMutation.data ? (
+          <Alert severity="success">
+            Version {uploadMutation.data.id ?? '—'} uploaded as {uploadMutation.data.originalFilename ?? '—'} ({uploadMutation.data.mimeType ?? 'unknown MIME'}, {uploadMutation.data.fileSizeBytes ?? 'unknown'} bytes) with backend checksum {uploadMutation.data.checksumValue ?? '—'}. Its backend version ID is ready for target linking.
+          </Alert>
+        ) : null}
       </Stack></Paper>
 
       <Paper variant="outlined" sx={{ p: 2 }}><Stack component="form" spacing={1.5} onSubmit={(event: FormEvent) => { event.preventDefault(); if (canLink) linkMutation.mutate(linkForm); }}>
         <Typography component="h2" variant="h6">Link document evidence to target</Typography>
+        <Typography color="text.secondary" variant="body2">Use backend-returned document/version IDs and the target module/type/id published by the owning domain. HidraWEB does not infer attachment ownership from names or hierarchy.</Typography>
         {!linkPermission ? <Alert severity="warning">Target-link route metadata is unavailable; action denied.</Alert> : !canLink ? <Alert severity="warning">Your grants do not allow document target linking.</Alert> : null}
         {(['documentId','documentVersionId','targetModule','targetTypeCode','targetId','targetCodeSnapshot','targetLabelSnapshot','linkRoleId','linkedByActorId'] as const).map((field) => <TextField key={field} label={field} value={linkForm[field] ?? ''} onChange={(event) => setLinkForm((value) => ({ ...value, [field]: event.target.value }))} />)}
         <FormControlLabel control={<Checkbox checked={linkForm.primaryLink ?? false} onChange={(event) => setLinkForm((value) => ({ ...value, primaryLink: event.target.checked }))} />} label="primaryLink" />

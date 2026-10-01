@@ -97,8 +97,8 @@ No HWEB-P task may introduce one of these as an implementation shortcut.
 | HWEB-P06 | `feat(simulation): add governed scenario and run orchestration` | Add simulation model/scenario creation, run queueing, and recommendation publication around existing evidence views. | Simulation model/scenario/run/recommendation command endpoints remain published. | HidraWEB orchestrates backend simulation only; no solver/hydraulic engine runs in the browser. | **Completed** |
 | HWEB-P07 | `feat(integration): add controlled integration operations` | Add external-system registration, integration-job start, and exchange-message recording only where product/UAT requirements justify operator access. | Current Integration command endpoints remain published and permission metadata supports intended users. | Operations are explicit, typed, audited, and permission-gated; no retry/replay/cancel/provider controls are invented. | **Completed — evidence-only boundary retained** |
 | HWEB-P08 | `feat(notification): add controlled notification operations` | Add notification request/message/delivery-attempt commands only where an approved operator/admin workflow exists. | Current Notification command endpoints remain published and product ownership is confirmed. | No consumer-style inbox semantics are invented; commands expose only backend-published lifecycle operations. | **Completed — evidence-only boundary retained** |
-| HWEB-P09 | `feat(documents): deepen governed document workflows` | Extend document UX around current register/upload/download/link contracts, version evidence, and domain attachment flows. | Documents content/metadata/link contracts remain current. | Document workflows remain storage-provider-neutral; binary handling and target links remain backend-owned. | **Next** |
-| HWEB-P10 | `feat(configuration): harden configuration governance UX` | Improve configuration definition/feature-flag/value administration with validation, sensitivity, scope/effective-date presentation, and permission-aware safeguards. | Current Configuration contracts remain published. | No secret value leakage or client-side policy invention; sensitive values remain governed by backend contract. | Planned |
+| HWEB-P09 | `feat(documents): deepen governed document workflows` | Extend document UX around current register/upload/download/link contracts, version evidence, and domain attachment flows. | Documents content/metadata/link contracts remain current. | Document workflows remain storage-provider-neutral; binary handling and target links remain backend-owned. | **Completed** |
+| HWEB-P10 | `feat(configuration): harden configuration governance UX` | Improve configuration definition/feature-flag/value administration with validation, sensitivity, scope/effective-date presentation, and permission-aware safeguards. | Current Configuration contracts remain published. | No secret value leakage or client-side policy invention; sensitive values remain governed by backend contract. | **Next** |
 | HWEB-P11 | `feat(operations): improve cross-surface operator workflows` | Use verified existing contracts to improve transitions among topology, telemetry/monitoring, alarm, workflow, events, planning, and documents. | No new backend contract required beyond already accepted APIs unless task audit identifies a gap. | Navigation/context composition improves without duplicating backend state or creating new business semantics. | Planned |
 | HWEB-P12 | `test(product): harden post-reconciliation product phase` | Full compatibility, accessibility, performance, E2E, deployment and release-artifact review after HWEB-P01..P11. | All preceding accepted tasks complete and compatible with live HidraAPI. | Full CI/release lifecycle green; updated staging/UAT candidate produced; known UAT findings dispositioned. | Planned |
 
@@ -508,12 +508,32 @@ HWEB-P08 revalidated Notification browser exposure and retained the governed evi
 
 HWEB-P08 therefore completes its required exposure review without inventing browser mutations. No HWEB-P09 Documents work is included.
 
-## 27. Next authorized task
+## 27. HWEB-P09 completion evidence
+
+HWEB-P09 deepens the existing governed Documents workflow without expanding the backend contract:
+
+- HidraAPI source SHA: `260295c6eebc4b01922d2d488810a671305860a6`;
+- HidraWEB source SHA at task start: `bf841a23c4c3f2f522ceba8aa7f6fdf2f40144bc`;
+- OpenAPI evidence remains `63f3f60974ce57eb8cd5e42910397615195624fb`;
+- registration remains `POST /api/v1/documents/documents`;
+- multipart binary version upload remains `POST /api/v1/documents/document-versions/upload` with metadata/file parts owned by HidraAPI;
+- content retrieval remains `GET /api/v1/documents/document-versions/{versionId}/content`, preserving backend filename/content-type evidence and no range/resume semantics;
+- domain attachment remains `POST /api/v1/documents/target-links`;
+- successful registration now reuses the backend-returned document ID to guide upload and linking;
+- successful upload now reuses the backend-returned document/version IDs to guide target linking;
+- upload success evidence surfaces backend filename, MIME type, byte size, and SHA-256 checksum without browser calculation;
+- attachment guidance explicitly requires target module/type/id evidence from the owning domain and does not infer ownership from names, hierarchy, or storage metadata;
+- storageObjectId and storage-provider semantics remain backend-owned and unavailable as editable frontend fields;
+- focused Playwright coverage verifies backend-returned ID chaining plus existing upload/download/link permission boundaries.
+
+No HWEB-P10 Configuration work is included in HWEB-P09.
+
+## 28. Next authorized task
 
 The next authorized product task is:
 
 ```text
-HWEB-P09 — feat(documents): deepen governed document workflows
+HWEB-P10 — feat(configuration): harden configuration governance UX
 ```
 
-P09 may deepen the already-typed register/upload/download/link UX, but must remain storage-provider-neutral and backend-owned for binary handling, target links, and document lifecycle semantics.
+P10 must preserve backend ownership of sensitive values, effective scope/date semantics, and feature-flag policy while adding permission-aware governance safeguards.

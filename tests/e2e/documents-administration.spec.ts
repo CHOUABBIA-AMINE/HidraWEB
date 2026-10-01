@@ -99,13 +99,16 @@ test('HWEB-014-03 uploads bytes with published multipart metadata, downloads con
   await page.getByLabel('createdByActorId', { exact: true }).fill('actor-1');
   await page.getByRole('button', { name: 'Register document' }).click();
   await expect(page.getByText(/Document doc-2 registered with status DRAFT/)).toBeVisible();
+  await expect(page.getByLabel('documentId', { exact: true }).first()).toHaveValue('doc-2');
+  await expect(page.getByLabel('documentId', { exact: true }).nth(1)).toHaveValue('doc-2');
 
   await page.getByLabel('documentId', { exact: true }).first().fill('doc-2');
   await page.getByLabel('versionLabel', { exact: true }).fill('v1');
   await page.getByLabel('versionNumber', { exact: true }).fill('1');
   await page.locator('input[type="file"]').setInputFiles({ name: 'evidence.txt', mimeType: 'text/plain', buffer: Buffer.from('evidence body') });
   await page.getByRole('button', { name: 'Upload version' }).click();
-  await expect(page.getByText(/Version version-2 uploaded as evidence.txt with backend checksum backend-sha256/)).toBeVisible();
+  await expect(page.getByText(/Version version-2 uploaded as evidence.txt \(text\/plain, 13 bytes\) with backend checksum backend-sha256/)).toBeVisible();
+  await expect(page.getByLabel('documentVersionId', { exact: true })).toHaveValue('version-2');
   await expect(page.getByLabel('storageObjectId', { exact: true })).toHaveCount(0);
   await expect(page.getByLabel('checksumValue', { exact: true })).toHaveCount(0);
   await expect(page.getByLabel('fileSizeBytes', { exact: true })).toHaveCount(0);
@@ -116,8 +119,8 @@ test('HWEB-014-03 uploads bytes with published multipart metadata, downloads con
   expect(request.method()).toBe('GET');
   await expect(page.getByText('Downloaded evidence.txt.')).toBeVisible();
 
-  await page.getByLabel('documentId', { exact: true }).nth(1).fill('doc-2');
-  await page.getByLabel('documentVersionId', { exact: true }).fill('version-2');
+  await expect(page.getByLabel('documentId', { exact: true }).nth(1)).toHaveValue('doc-2');
+  await expect(page.getByLabel('documentVersionId', { exact: true })).toHaveValue('version-2');
   await page.getByLabel('targetModule', { exact: true }).fill('integrity');
   await page.getByLabel('targetTypeCode', { exact: true }).fill('PIPELINE');
   await page.getByLabel('targetId', { exact: true }).fill('pipe-1');
