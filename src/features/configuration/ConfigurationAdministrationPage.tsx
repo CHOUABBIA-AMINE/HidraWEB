@@ -11,7 +11,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 
@@ -55,6 +55,15 @@ function errorMessage(error: unknown, fallback: string): string {
   return normalized.message || fallback;
 }
 
+function redactConfigurationEvidence(attributes: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(attributes).map(([key, value]) => {
+    if (['rawValue', 'jsonValue', 'secretReference'].includes(key)) {
+      return [key, value == null || value === '' ? value : '[redacted in HidraWEB]'];
+    }
+    return [key, value];
+  }));
+}
+
 function EvidenceList({ title, items }: { title: string; items: Array<{ id?: unknown; attributes: Record<string, unknown> }> }) {
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
@@ -63,7 +72,7 @@ function EvidenceList({ title, items }: { title: string; items: Array<{ id?: unk
         {items.length === 0 ? <Typography color="text.secondary">No records returned.</Typography> : null}
         {items.map((item, index) => (
           <Box component="pre" key={String(item.id ?? index)} sx={{ m: 0, p: 1, overflowX: 'auto', bgcolor: 'action.hover', whiteSpace: 'pre-wrap' }}>
-            {JSON.stringify({ id: item.id, ...item.attributes }, null, 2)}
+            {JSON.stringify({ id: item.id, ...redactConfigurationEvidence(item.attributes) }, null, 2)}
           </Box>
         ))}
       </Stack>
@@ -73,6 +82,7 @@ function EvidenceList({ title, items }: { title: string; items: Array<{ id?: unk
 
 export function ConfigurationAdministrationPage() {
   const permissions = usePermissions();
+  const queryClient = useQueryClient();
 
   const [definitionForm, setDefinitionForm] = useState<CreateConfigurationDefinitionRequest>({
     namespaceId: '', key: '', displayNameFr: '', displayNameAr: '', displayNameEn: '',
@@ -87,6 +97,7 @@ export function ConfigurationAdministrationPage() {
     definitionId: '', definitionVersionId: '', environment: '', rawValue: '', jsonValue: '',
     secretReference: '', effectiveFrom: '', effectiveTo: '', createdByActorId: '',
   });
+  const [valueSubmissionConfirmed, setValueSubmissionConfirmed] = useState(false);
 
   const listPermission = permissionForRoute(permissions.routes, WORKBENCH_LIST_ROUTE, 'GET');
   const definitionPermission = permissionForRoute(permissions.routes, DEFINITION_ROUTE, 'POST');
@@ -126,13 +137,23 @@ export function ConfigurationAdministrationPage() {
     enabled: canRead && Boolean(resources.values),
   });
 
-  const definitionMutation = useMutation({ mutationFn: createConfigurationDefinition });
-  const flagMutation = useMutation({ mutationFn: createFeatureFlag });
-  const valueMutation = useMutation({ mutationFn: setConfigurationValue });
+  const refreshEvidence = () => queryClient.invalidateQueries({ queryKey: workbenchQueryKeys.resources(MODULE) });
+  const definitionMutation = useMutation({ mutationFn: createConfigurationDefinition, onSuccess: refreshEvidence });
+  const flagMutation = useMutation({ mutationFn: createFeatureFlag, onSuccess: refreshEvidence });
+  const valueMutation = useMutation({
+    mutationFn: setConfigurationValue,
+    onSuccess: async () => {
+      setValueSubmissionConfirmed(false);
+      await refreshEvidence();
+    },
+  });
 
   function submitDefinition(event: FormEvent) { event.preventDefault(); if (canCreateDefinition) definitionMutation.mutate(definitionForm); }
   function submitFlag(event: FormEvent) { event.preventDefault(); if (canCreateFlag) flagMutation.mutate(flagForm); }
-  function submitValue(event: FormEvent) { event.preventDefault(); if (canSetValue) valueMutation.mutate(valueForm); }
+  function submitValue(event: FormEvent) {
+    event.preventDefault();
+    if (canSetValue && valueSubmissionConfirmed) valueMutation.mutate(valueForm);
+  }
 
   if (permissions.status !== 'ready') {
     return <Container maxWidth="xl"><Alert severity="info">Loading configuration permissions…</Alert></Container>;
@@ -147,7 +168,7 @@ export function ConfigurationAdministrationPage() {
         </Box>
 
         <Alert severity="info">
-          HidraAPI publishes create-definition, create-feature-flag, and set-configuration-value operations. It does not publish toggle, update, delete, promotion, rollback, activate/deactivate, or inheritance actions; those controls are intentionally absent.
+          HidraAPI publishes create-definition, create-feature-flag, and set-configuration-value operations. It does not publish toggle, update, delete, promotion, rollback, activate/deactivate, or inheritance actions; those controls are intentionally absent. Configuration evidence shown here redacts value-bearing raw/json/secret-reference fields to avoid accidental exposure in the administration UI.
         </Alert>
 
         {!listPermission ? <Alert severity="warning">Configuration workbench route-permission metadata is unavailable. Read evidence is denied by default.</Alert> : null}
@@ -216,13 +237,18 @@ export function ConfigurationAdministrationPage() {
             <TextField label="Definition ID" value={valueForm.definitionId ?? ''} onChange={(e) => setValueForm((v) => ({ ...v, definitionId: e.target.value }))} />
             <TextField label="Definition version ID" value={valueForm.definitionVersionId ?? ''} onChange={(e) => setValueForm((v) => ({ ...v, definitionVersionId: e.target.value }))} />
             <TextField label="Environment" value={valueForm.environment ?? ''} onChange={(e) => setValueForm((v) => ({ ...v, environment: e.target.value }))} />
-            <TextField label="Raw value" value={valueForm.rawValue ?? ''} onChange={(e) => setValueForm((v) => ({ ...v, rawValue: e.target.value }))} />
-            <TextField label="JSON value" value={valueForm.jsonValue ?? ''} onChange={(e) => setValueForm((v) => ({ ...v, jsonValue: e.target.value }))} />
-            <TextField label="Secret reference" value={valueForm.secretReference ?? ''} onChange={(e) => setValueForm((v) => ({ ...v, secretReference: e.target.value }))} />
-            <TextField label="Effective from" value={valueForm.effectiveFrom ?? ''} onChange={(e) => setValueForm((v) => ({ ...v, effectiveFrom: e.target.value }))} />
-            <TextField label="Effective to" value={valueForm.effectiveTo ?? ''} onChange={(e) => setValueForm((v) => ({ ...v, effectiveTo: e.target.value }))} />
+            <TextField label="Raw value" value={valueForm.rawValue ?? ''} onChange={(e) => setValueForm((v) => ({ ...v, rawValue: e.target.value }))} helperText="Use only when the selected backend definition expects a raw value." />
+            <TextField label="JSON value" value={valueForm.jsonValue ?? ''} onChange={(e) => setValueForm((v) => ({ ...v, jsonValue: e.target.value }))} helperText="HidraWEB does not interpret or validate domain JSON semantics." />
+            <TextField label="Secret reference" type="password" value={valueForm.secretReference ?? ''} onChange={(e) => setValueForm((v) => ({ ...v, secretReference: e.target.value }))} helperText="Enter an opaque backend-managed secret reference only; do not paste secret material." />
+            <TextField label="Effective from" type="datetime-local" value={valueForm.effectiveFrom ?? ''} onChange={(e) => setValueForm((v) => ({ ...v, effectiveFrom: e.target.value }))} slotProps={{ inputLabel: { shrink: true } }} />
+            <TextField label="Effective to" type="datetime-local" value={valueForm.effectiveTo ?? ''} onChange={(e) => setValueForm((v) => ({ ...v, effectiveTo: e.target.value }))} slotProps={{ inputLabel: { shrink: true } }} />
             <TextField label="Created by actor ID" value={valueForm.createdByActorId ?? ''} onChange={(e) => setValueForm((v) => ({ ...v, createdByActorId: e.target.value }))} />
-            <Button type="submit" variant="contained" disabled={!canSetValue || valueMutation.isPending}>Set configuration value</Button>
+            <FormControlLabel
+              control={<Switch checked={valueSubmissionConfirmed} onChange={(e) => setValueSubmissionConfirmed(e.target.checked)} />}
+              label="Confirm configuration value submission"
+            />
+            <Typography variant="body2" color="text.secondary">Confirmation is a frontend safety safeguard only; HidraAPI permissions and validation remain authoritative.</Typography>
+            <Button type="submit" variant="contained" disabled={!canSetValue || !valueSubmissionConfirmed || valueMutation.isPending}>Set configuration value</Button>
             {valueMutation.isError ? <Alert severity="error">{errorMessage(valueMutation.error, 'Configuration value creation failed.')}</Alert> : null}
             {valueMutation.data ? <Alert severity="success">Configuration value {valueMutation.data.id ?? '—'} recorded with status {valueMutation.data.status ?? '—'}.</Alert> : null}
           </Stack>

@@ -27,7 +27,7 @@ async function mockConfiguration(page: Page, grants = allGrants) {
   await page.route('**/api/v1/workbench/configuration/resources', (route) => route.fulfill({ json: descriptors }));
   await page.route('**/api/v1/workbench/configuration/configuration-definition?**', (route) => route.fulfill({ json: { module: 'configuration', resource: 'configuration-definition', page: 0, size: 25, totalElements: 1, totalPages: 1, items: [{ module: 'configuration', resource: 'configuration-definition', id: 'def-existing', attributes: { key: 'telemetry.retention', status: 'ACTIVE' } }] } }));
   await page.route('**/api/v1/workbench/configuration/feature-flag?**', (route) => route.fulfill({ json: { module: 'configuration', resource: 'feature-flag', page: 0, size: 25, totalElements: 1, totalPages: 1, items: [{ module: 'configuration', resource: 'feature-flag', id: 'flag-existing', attributes: { code: 'FLAG_EXISTING', status: 'ACTIVE' } }] } }));
-  await page.route('**/api/v1/workbench/configuration/configuration-value?**', (route) => route.fulfill({ json: { module: 'configuration', resource: 'configuration-value', page: 0, size: 25, totalElements: 1, totalPages: 1, items: [{ module: 'configuration', resource: 'configuration-value', id: 'value-existing', attributes: { environment: 'PROD', status: 'ACTIVE' } }] } }));
+  await page.route('**/api/v1/workbench/configuration/configuration-value?**', (route) => route.fulfill({ json: { module: 'configuration', resource: 'configuration-value', page: 0, size: 25, totalElements: 1, totalPages: 1, items: [{ module: 'configuration', resource: 'configuration-value', id: 'value-existing', attributes: { environment: 'PROD', status: 'ACTIVE', rawValue: 'sensitive-value', jsonValue: '{"token":"hidden"}', secretReference: 'vault://ops/secret' } }] } }));
 
   await page.route('**/api/v1/configuration/definitions', async (route) => {
     expect(route.request().postDataJSON()).toEqual({
@@ -70,6 +70,9 @@ test('HWEB-014-02 reads runtime configuration evidence and submits only publishe
   await expect(page.getByRole('heading', { name: 'Configuration administration' })).toBeVisible();
   await expect(page.getByText('telemetry.retention')).toBeVisible();
   await expect(page.getByText('FLAG_EXISTING')).toBeVisible();
+  await expect(page.getByText('sensitive-value')).toHaveCount(0);
+  await expect(page.getByText('vault://ops/secret')).toHaveCount(0);
+  await expect(page.getByText('[redacted in HidraWEB]', { exact: true })).toHaveCount(3);
 
   await page.getByLabel('Namespace ID').fill('ns-1');
   await page.getByLabel('Key').fill('ops.timeout');
@@ -92,8 +95,11 @@ test('HWEB-014-02 reads runtime configuration evidence and submits only publishe
   await page.getByLabel('Environment').fill('PROD');
   await page.getByLabel('Raw value').fill('PT45S');
   await page.getByLabel('Created by actor ID').fill('actor-1');
+  await expect(page.getByRole('button', { name: 'Set configuration value' })).toBeDisabled();
+  await page.getByLabel('Confirm configuration value submission').check();
   await page.getByRole('button', { name: 'Set configuration value' }).click();
   await expect(page.getByText(/Configuration value value-1 recorded with status DRAFT/)).toBeVisible();
+  await expect(page.getByLabel('Confirm configuration value submission')).not.toBeChecked();
 
   await expect(page.getByRole('button', { name: /toggle|delete|rollback|activate|deactivate/i })).toHaveCount(0);
 });

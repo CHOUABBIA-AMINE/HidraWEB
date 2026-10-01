@@ -98,8 +98,8 @@ No HWEB-P task may introduce one of these as an implementation shortcut.
 | HWEB-P07 | `feat(integration): add controlled integration operations` | Add external-system registration, integration-job start, and exchange-message recording only where product/UAT requirements justify operator access. | Current Integration command endpoints remain published and permission metadata supports intended users. | Operations are explicit, typed, audited, and permission-gated; no retry/replay/cancel/provider controls are invented. | **Completed — evidence-only boundary retained** |
 | HWEB-P08 | `feat(notification): add controlled notification operations` | Add notification request/message/delivery-attempt commands only where an approved operator/admin workflow exists. | Current Notification command endpoints remain published and product ownership is confirmed. | No consumer-style inbox semantics are invented; commands expose only backend-published lifecycle operations. | **Completed — evidence-only boundary retained** |
 | HWEB-P09 | `feat(documents): deepen governed document workflows` | Extend document UX around current register/upload/download/link contracts, version evidence, and domain attachment flows. | Documents content/metadata/link contracts remain current. | Document workflows remain storage-provider-neutral; binary handling and target links remain backend-owned. | **Completed** |
-| HWEB-P10 | `feat(configuration): harden configuration governance UX` | Improve configuration definition/feature-flag/value administration with validation, sensitivity, scope/effective-date presentation, and permission-aware safeguards. | Current Configuration contracts remain published. | No secret value leakage or client-side policy invention; sensitive values remain governed by backend contract. | **Next** |
-| HWEB-P11 | `feat(operations): improve cross-surface operator workflows` | Use verified existing contracts to improve transitions among topology, telemetry/monitoring, alarm, workflow, events, planning, and documents. | No new backend contract required beyond already accepted APIs unless task audit identifies a gap. | Navigation/context composition improves without duplicating backend state or creating new business semantics. | Planned |
+| HWEB-P10 | `feat(configuration): harden configuration governance UX` | Improve configuration definition/feature-flag/value administration with validation, sensitivity, scope/effective-date presentation, and permission-aware safeguards. | Current Configuration contracts remain published. | No secret value leakage or client-side policy invention; sensitive values remain governed by backend contract. | **Completed** |
+| HWEB-P11 | `feat(operations): improve cross-surface operator workflows` | Use verified existing contracts to improve transitions among topology, telemetry/monitoring, alarm, workflow, events, planning, and documents. | No new backend contract required beyond already accepted APIs unless task audit identifies a gap. | Navigation/context composition improves without duplicating backend state or creating new business semantics. | **Next** |
 | HWEB-P12 | `test(product): harden post-reconciliation product phase` | Full compatibility, accessibility, performance, E2E, deployment and release-artifact review after HWEB-P01..P11. | All preceding accepted tasks complete and compatible with live HidraAPI. | Full CI/release lifecycle green; updated staging/UAT candidate produced; known UAT findings dispositioned. | Planned |
 
 ## 6. HWEB-P01 — Identity administration
@@ -528,12 +528,33 @@ HWEB-P09 deepens the existing governed Documents workflow without expanding the 
 
 No HWEB-P10 Configuration work is included in HWEB-P09.
 
-## 28. Next authorized task
+## 28. HWEB-P10 completion evidence
+
+HWEB-P10 hardens Configuration governance without expanding backend semantics:
+
+- HidraAPI source SHA: `260295c6eebc4b01922d2d488810a671305860a6`;
+- HidraWEB source SHA at task start: `46f4d46ec7083cc82af0293c9d09fa6efdf67fcd`;
+- OpenAPI evidence remains `63f3f60974ce57eb8cd5e42910397615195624fb`;
+- configuration-definition creation remains `POST /api/v1/configuration/definitions`;
+- feature-flag creation remains `POST /api/v1/configuration/feature-flags`;
+- configuration-value creation remains `POST /api/v1/configuration/values`;
+- generic workbench evidence remains secondary read evidence;
+- HidraWEB redacts rawValue, jsonValue, and secretReference fields from rendered configuration evidence to reduce accidental value leakage;
+- secretReference input is presented as an opaque reference field with explicit guidance not to paste secret material;
+- effectiveFrom/effectiveTo use date-time controls while the backend remains authoritative for effective-date semantics and validation;
+- value submission requires an explicit frontend confirmation safeguard, without creating a new backend approval state or replacing backend authorization;
+- successful definition/flag/value commands invalidate Configuration workbench evidence for refresh;
+- toggle, update, delete, promotion, rollback, activate/deactivate, inheritance, secret resolution, and client-side feature evaluation remain absent because no accepted backend contracts publish those operations;
+- focused Playwright coverage verifies value-field redaction, explicit value-submission confirmation, and the existing permission fail-closed behavior.
+
+No HWEB-P11 cross-surface workflow work is included in HWEB-P10.
+
+## 29. Next authorized task
 
 The next authorized product task is:
 
 ```text
-HWEB-P10 — feat(configuration): harden configuration governance UX
+HWEB-P11 — feat(operations): improve cross-surface operator workflows
 ```
 
-P10 must preserve backend ownership of sensitive values, effective scope/date semantics, and feature-flag policy while adding permission-aware governance safeguards.
+P11 may compose navigation/context only where backend-published identifiers and references support the transition; it must not infer entity relationships or create frontend-owned operational state.
