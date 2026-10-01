@@ -91,8 +91,8 @@ No HWEB-P task may introduce one of these as an implementation shortcut.
 | --- | --- | --- | --- | --- | --- |
 | HWEB-P01 | `feat(identity): add first-class access administration workspace` | Build dedicated user/role/permission administration using current identity query and command APIs. | Current Identity Administration query/command controllers remain published. | Users/roles/permissions are first-class typed UX; role/permission grants use backend contracts; no role-name inference. | **Completed** |
 | HWEB-P02 | `feat(organization): add first-class organization administration` | Add organization-unit creation, employee registration, employee assignment, and canonical responsibility administration around current dedicated reads. | Organization unit/employee/assignment and operational-scope/responsibility APIs remain current. | Organization administration no longer depends on generic workbench for first-class operations; operational responsibility stays separate from identity grants. | **Completed** |
-| HWEB-P03 | `feat(risk): add governed risk authoring workflows` | Add risk-register creation, risk-assessment creation, and evidence attachment using current typed Risk commands with workbench/query evidence for reads. | `POST /api/v1/risk/registers`, `/assessments`, `/evidence` remain published. | Risk authoring is permission-gated and backend-owned; no browser risk scoring formula is introduced. | **Next** |
-| HWEB-P04 | `feat(reporting): add controlled report request lifecycle` | Add typed report definition/request/run/artifact actions around existing reporting evidence views. | Reporting definition/request/run/artifact command endpoints remain published. | Report lifecycle actions use backend contracts and permissions; frontend does not fabricate generation state/artifacts. | Planned |
+| HWEB-P03 | `feat(risk): add governed risk authoring workflows` | Add risk-register creation, risk-assessment creation, and evidence attachment using current typed Risk commands with workbench/query evidence for reads. | `POST /api/v1/risk/registers`, `/assessments`, `/evidence` remain published. | Risk authoring is permission-gated and backend-owned; no browser risk scoring formula is introduced. | **Completed** |
+| HWEB-P04 | `feat(reporting): add controlled report request lifecycle` | Add typed report definition/request/run/artifact actions around existing reporting evidence views. | Reporting definition/request/run/artifact command endpoints remain published. | Report lifecycle actions use backend contracts and permissions; frontend does not fabricate generation state/artifacts. | **Next** |
 | HWEB-P05 | `feat(analytics): add governed analytics execution workflows` | Add dataset registration, insight creation, metric evaluation, and projection-run actions to the existing Analytics workspace. | Analytics command endpoints/capabilities remain published. | Analytics actions are typed and permission-gated; all calculated values remain backend-produced. | Planned |
 | HWEB-P06 | `feat(simulation): add governed scenario and run orchestration` | Add simulation model/scenario creation, run queueing, and recommendation publication around existing evidence views. | Simulation model/scenario/run/recommendation command endpoints remain published. | HidraWEB orchestrates backend simulation only; no solver/hydraulic engine runs in the browser. | Planned |
 | HWEB-P07 | `feat(integration): add controlled integration operations` | Add external-system registration, integration-job start, and exchange-message recording only where product/UAT requirements justify operator access. | Current Integration command endpoints remain published and permission metadata supports intended users. | Operations are explicit, typed, audited, and permission-gated; no retry/replay/cancel/provider controls are invented. | Planned |
@@ -397,12 +397,30 @@ HWEB-P02 promotes Organization administration to dedicated HidraAPI contracts:
 
 No HWEB-P03 Risk authoring work is included in HWEB-P02.
 
-## 21. Next authorized task
+## 21. HWEB-P03 completion evidence
+
+HWEB-P03 adds governed Risk authoring while preserving HidraAPI ownership of calculations and semantics:
+
+- HidraAPI source SHA: `260295c6eebc4b01922d2d488810a671305860a6`;
+- HidraWEB source SHA at task start: `191532a1c4c1e54a7b81d90d08dfe99d8e1772b6`;
+- OpenAPI evidence remains `63f3f60974ce57eb8cd5e42910397615195624fb`;
+- risk-register creation uses `POST /api/v1/risk/registers` and generated `CreateRiskRegisterRequest` / `RiskRegisterResponse`;
+- risk-assessment creation uses `POST /api/v1/risk/assessments` and generated `CreateRiskAssessmentRequest` / `RiskAssessmentResponse`;
+- evidence attachment uses `POST /api/v1/risk/evidence` and generated `AddRiskEvidenceRequest`;
+- each authoring action is gated from HidraAPI-published route-permission metadata and backend 401/403 remains authoritative;
+- existing workbench risk-register and risk-assessment views remain secondary read evidence;
+- successful mutations invalidate Risk workbench query state;
+- no risk score, rating, methodology calculation, lifecycle transition, or approval behavior is implemented in the browser;
+- focused adapter tests cover all three canonical Risk endpoints and intelligence E2E wording is aligned with the new authoring boundary.
+
+No HWEB-P04 Reporting lifecycle work is included in HWEB-P03.
+
+## 22. Next authorized task
 
 The next authorized product task is:
 
 ```text
-HWEB-P03 — feat(risk): add governed risk authoring workflows
+HWEB-P04 — feat(reporting): add controlled report request lifecycle
 ```
 
-If a BLOCKER or MAJOR staging/UAT finding is recorded before P03 begins, the corresponding HWEB-M task takes precedence.
+If a BLOCKER or MAJOR staging/UAT finding is recorded before P04 begins, the corresponding HWEB-M task takes precedence.

@@ -22,6 +22,7 @@ import { useMemo, useState } from 'react';
 
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
 import { usePermissions } from '@/features/permissions/usePermissions';
+import { RiskAuthoringPanel } from '@/features/risk/components/RiskAuthoringPanel';
 import {
   fetchWorkbenchRecord,
   fetchWorkbenchRecords,
@@ -229,8 +230,10 @@ export function RiskWorkspacePage() {
         </Box>
 
         <Alert severity="info">
-          This task exposes read-only risk views. The accepted generated risk mutation contract is present for deterministic typing, but HWEB-013-02 does not invent approve, activate, retire, cancel, or other lifecycle actions from status values.
+          Existing workbench views remain secondary read evidence. HWEB-P03 adds only the three HidraAPI-published Risk authoring commands; it does not invent approve, activate, retire, cancel, scoring, or other lifecycle behavior.
         </Alert>
+
+        <RiskAuthoringPanel />
 
         {resourcesQuery.isPending ? <CircularProgress size={24} /> : null}
         {resourcesQuery.isError ? <Alert severity="error">{errorMessage(resourcesQuery.error, 'risk resources')}</Alert> : null}

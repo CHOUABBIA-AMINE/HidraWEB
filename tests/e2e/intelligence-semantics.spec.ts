@@ -117,7 +117,7 @@ test('HWEB-013-06 preserves read derive recommend semantics without operational 
 
   await navigate(page, '/intelligence/risk');
   await expect(page.getByRole('heading', { name: 'Risk intelligence' })).toBeVisible();
-  await expect(page.getByText(/read-only risk views/i)).toBeVisible();
+  await expect(page.getByText(/workbench views remain secondary read evidence/i)).toBeVisible();
   await expect(page.getByText(/HidraAPI remains authoritative for risk data, authorization, and lifecycle semantics/i)).toBeVisible();
 
   await navigate(page, '/intelligence/analytics');
