@@ -101,9 +101,11 @@ test('HWEB-013-04 renders runtime-discovered simulation scenarios, runs and resu
 
   await expect(page.getByRole('button', { name: /apply/i })).toHaveCount(0);
   await expect(page.getByRole('button', { name: /approve/i })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: /publish/i })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: /queue/i })).toHaveCount(0);
   await expect(page.getByRole('button', { name: /rerun/i })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Create simulation model' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Create simulation scenario' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Queue simulation run' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Publish simulation recommendation' })).toBeDisabled();
 });
 
 test('HWEB-013-04 fails closed without workbench read grants', async ({ page }) => {

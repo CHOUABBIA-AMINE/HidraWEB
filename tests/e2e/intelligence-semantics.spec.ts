@@ -128,7 +128,8 @@ test('HWEB-013-06 preserves read derive recommend semantics without operational 
   await navigate(page, '/intelligence/simulation');
   await expect(page.getByRole('heading', { name: 'Simulation intelligence' })).toBeVisible();
   await expect(page.getByText(/decision-support evidence rather than operational commands/i)).toBeVisible();
-  await expect(page.getByText(/does not create scenarios\/models, queue runs, publish recommendations, or apply changes to operational modules/i)).toBeVisible();
+  await expect(page.getByText(/workbench views remain secondary simulation evidence/i)).toBeVisible();
+  await expect(page.getByText(/does not execute solvers or apply simulation results to operational modules/i)).toBeVisible();
 
   await navigate(page, '/intelligence/reports');
   await expect(page.getByRole('heading', { name: 'Reporting intelligence' })).toBeVisible();
