@@ -93,9 +93,10 @@ test('HWEB-013-05 renders runtime-discovered reporting definitions, requests, ru
 
   await expect(page.getByRole('button', { name: /download/i })).toHaveCount(0);
   await expect(page.getByRole('button', { name: /export/i })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: /generate/i })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: /queue/i })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: /request report/i })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Create report definition' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Request report' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Queue report run' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Generate report artifact' })).toBeDisabled();
 });
 
 test('HWEB-013-05 fails closed without workbench read grants', async ({ page }) => {
