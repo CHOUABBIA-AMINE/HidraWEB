@@ -48,7 +48,8 @@ test('HWEB-014-05 shows runtime notification request, message, and delivery evid
   await signIn(page);
   await openNotificationCenter(page);
   await expect(page.getByRole('heading', { name: 'Notification center', exact: true })).toBeVisible();
-  await expect(page.getByText(/This center is evidence-only/)).toBeVisible();
+  await expect(page.getByText(/This center remains evidence-only/)).toBeVisible();
+  await expect(page.getByText(/current product\/UAT evidence does not authorize those delivery-pipeline operations for browser execution/)).toBeVisible();
   await expect(page.getByRole('heading', { name: /Requests — notification-request-runtime/ })).toBeVisible();
   await expect(page.getByRole('heading', { name: /Messages — notification-message-runtime/ })).toBeVisible();
   await expect(page.getByRole('heading', { name: /Delivery attempts — delivery-attempt-runtime/ })).toBeVisible();

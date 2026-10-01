@@ -96,8 +96,8 @@ No HWEB-P task may introduce one of these as an implementation shortcut.
 | HWEB-P05 | `feat(analytics): add governed analytics execution workflows` | Add dataset registration, insight creation, metric evaluation, and projection-run actions to the existing Analytics workspace. | Analytics command endpoints/capabilities remain published. | Analytics actions are typed and permission-gated; all calculated values remain backend-produced. | **Completed** |
 | HWEB-P06 | `feat(simulation): add governed scenario and run orchestration` | Add simulation model/scenario creation, run queueing, and recommendation publication around existing evidence views. | Simulation model/scenario/run/recommendation command endpoints remain published. | HidraWEB orchestrates backend simulation only; no solver/hydraulic engine runs in the browser. | **Completed** |
 | HWEB-P07 | `feat(integration): add controlled integration operations` | Add external-system registration, integration-job start, and exchange-message recording only where product/UAT requirements justify operator access. | Current Integration command endpoints remain published and permission metadata supports intended users. | Operations are explicit, typed, audited, and permission-gated; no retry/replay/cancel/provider controls are invented. | **Completed — evidence-only boundary retained** |
-| HWEB-P08 | `feat(notification): add controlled notification operations` | Add notification request/message/delivery-attempt commands only where an approved operator/admin workflow exists. | Current Notification command endpoints remain published and product ownership is confirmed. | No consumer-style inbox semantics are invented; commands expose only backend-published lifecycle operations. | **Next** |
-| HWEB-P09 | `feat(documents): deepen governed document workflows` | Extend document UX around current register/upload/download/link contracts, version evidence, and domain attachment flows. | Documents content/metadata/link contracts remain current. | Document workflows remain storage-provider-neutral; binary handling and target links remain backend-owned. | Planned |
+| HWEB-P08 | `feat(notification): add controlled notification operations` | Add notification request/message/delivery-attempt commands only where an approved operator/admin workflow exists. | Current Notification command endpoints remain published and product ownership is confirmed. | No consumer-style inbox semantics are invented; commands expose only backend-published lifecycle operations. | **Completed — evidence-only boundary retained** |
+| HWEB-P09 | `feat(documents): deepen governed document workflows` | Extend document UX around current register/upload/download/link contracts, version evidence, and domain attachment flows. | Documents content/metadata/link contracts remain current. | Document workflows remain storage-provider-neutral; binary handling and target links remain backend-owned. | **Next** |
 | HWEB-P10 | `feat(configuration): harden configuration governance UX` | Improve configuration definition/feature-flag/value administration with validation, sensitivity, scope/effective-date presentation, and permission-aware safeguards. | Current Configuration contracts remain published. | No secret value leakage or client-side policy invention; sensitive values remain governed by backend contract. | Planned |
 | HWEB-P11 | `feat(operations): improve cross-surface operator workflows` | Use verified existing contracts to improve transitions among topology, telemetry/monitoring, alarm, workflow, events, planning, and documents. | No new backend contract required beyond already accepted APIs unless task audit identifies a gap. | Navigation/context composition improves without duplicating backend state or creating new business semantics. | Planned |
 | HWEB-P12 | `test(product): harden post-reconciliation product phase` | Full compatibility, accessibility, performance, E2E, deployment and release-artifact review after HWEB-P01..P11. | All preceding accepted tasks complete and compatible with live HidraAPI. | Full CI/release lifecycle green; updated staging/UAT candidate produced; known UAT findings dispositioned. | Planned |
@@ -490,12 +490,30 @@ HWEB-P07 revalidated Integration browser exposure and retained the governed evid
 
 HWEB-P07 therefore completes its required exposure review without inventing browser mutations. No HWEB-P08 Notification operations work is included.
 
-## 26. Next authorized task
+## 26. HWEB-P08 completion evidence
+
+HWEB-P08 revalidated Notification browser exposure and retained the governed evidence-only boundary:
+
+- HidraAPI source SHA: `260295c6eebc4b01922d2d488810a671305860a6`;
+- HidraWEB source SHA at task start: `3a95eba41edd9dbf2801cc3a67a8c4b8182ddedd`;
+- current Notification capability publishes `POST /api/v1/notification/requests`, `POST /api/v1/notification/messages`, and `POST /api/v1/notification/delivery-attempts`;
+- request DTO semantics show these operations belong to the asynchronous notification-delivery pipeline: event/request intake, rendered-message creation, and provider delivery-attempt evidence;
+- the current Notification center is a read/evidence surface rather than an approved operator/admin command workflow;
+- current staging/UAT evidence explicitly requires the Notification center to remain evidence-only;
+- no product/UAT finding or approved browser workflow authorizes execution of the three Notification POST operations;
+- no checked-in Notification feature OpenAPI/Orval consumer slice currently exists in HidraWEB, so no handwritten DTO/client substitute was introduced;
+- the Notification center now states the non-exposure boundary explicitly;
+- read/unread, archive, dismiss, delete, resend, retry, preference, and realtime inbox semantics remain unexposed because HidraAPI does not publish those contracts;
+- focused E2E evidence verifies the governed evidence-only message.
+
+HWEB-P08 therefore completes its required exposure review without inventing browser mutations. No HWEB-P09 Documents work is included.
+
+## 27. Next authorized task
 
 The next authorized product task is:
 
 ```text
-HWEB-P08 — feat(notification): add controlled notification operations
+HWEB-P09 — feat(documents): deepen governed document workflows
 ```
 
-Before P08 implementation, re-confirm the intended actor/persona, product ownership, and whether each Notification command is appropriate for a browser workflow. If those conditions are not established, retain the existing evidence-only UX.
+P09 may deepen the already-typed register/upload/download/link UX, but must remain storage-provider-neutral and backend-owned for binary handling, target links, and document lifecycle semantics.

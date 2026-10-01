@@ -68,7 +68,9 @@ export function NotificationCenterPage() {
         <Typography component="h1" variant="h4">Notification center</Typography>
         <Typography color="text.secondary">HWEB-014-05 notification request, message, and delivery-attempt evidence from runtime workbench resources.</Typography>
       </Box>
-      <Alert severity="info">This center is evidence-only. HidraAPI publishes no read/unread, archive, dismiss, delete, resend, retry, preference, or realtime notification-center contract, so no such behavior is exposed here.</Alert>
+      <Alert severity="info">
+        This center remains evidence-only. HidraAPI publishes notification-request intake, message creation, and delivery-attempt recording commands, but current product/UAT evidence does not authorize those delivery-pipeline operations for browser execution. Read/unread, archive, dismiss, delete, resend, retry, preference, and realtime notification-center behaviors also remain unavailable because no such backend contract is published.
+      </Alert>
       {resourcesQuery.isPending ? <CircularProgress size={24} /> : null}
       {resourcesQuery.isError ? <Alert severity="error">{errorMessage(resourcesQuery.error)}</Alert> : null}
       {firstError ? <Alert severity="error">{errorMessage(firstError)}</Alert> : null}
