@@ -95,8 +95,8 @@ No HWEB-P task may introduce one of these as an implementation shortcut.
 | HWEB-P04 | `feat(reporting): add controlled report request lifecycle` | Add typed report definition/request/run/artifact actions around existing reporting evidence views. | Reporting definition/request/run/artifact command endpoints remain published. | Report lifecycle actions use backend contracts and permissions; frontend does not fabricate generation state/artifacts. | **Completed** |
 | HWEB-P05 | `feat(analytics): add governed analytics execution workflows` | Add dataset registration, insight creation, metric evaluation, and projection-run actions to the existing Analytics workspace. | Analytics command endpoints/capabilities remain published. | Analytics actions are typed and permission-gated; all calculated values remain backend-produced. | **Completed** |
 | HWEB-P06 | `feat(simulation): add governed scenario and run orchestration` | Add simulation model/scenario creation, run queueing, and recommendation publication around existing evidence views. | Simulation model/scenario/run/recommendation command endpoints remain published. | HidraWEB orchestrates backend simulation only; no solver/hydraulic engine runs in the browser. | **Completed** |
-| HWEB-P07 | `feat(integration): add controlled integration operations` | Add external-system registration, integration-job start, and exchange-message recording only where product/UAT requirements justify operator access. | Current Integration command endpoints remain published and permission metadata supports intended users. | Operations are explicit, typed, audited, and permission-gated; no retry/replay/cancel/provider controls are invented. | **Next** |
-| HWEB-P08 | `feat(notification): add controlled notification operations` | Add notification request/message/delivery-attempt commands only where an approved operator/admin workflow exists. | Current Notification command endpoints remain published and product ownership is confirmed. | No consumer-style inbox semantics are invented; commands expose only backend-published lifecycle operations. | Planned |
+| HWEB-P07 | `feat(integration): add controlled integration operations` | Add external-system registration, integration-job start, and exchange-message recording only where product/UAT requirements justify operator access. | Current Integration command endpoints remain published and permission metadata supports intended users. | Operations are explicit, typed, audited, and permission-gated; no retry/replay/cancel/provider controls are invented. | **Completed — evidence-only boundary retained** |
+| HWEB-P08 | `feat(notification): add controlled notification operations` | Add notification request/message/delivery-attempt commands only where an approved operator/admin workflow exists. | Current Notification command endpoints remain published and product ownership is confirmed. | No consumer-style inbox semantics are invented; commands expose only backend-published lifecycle operations. | **Next** |
 | HWEB-P09 | `feat(documents): deepen governed document workflows` | Extend document UX around current register/upload/download/link contracts, version evidence, and domain attachment flows. | Documents content/metadata/link contracts remain current. | Document workflows remain storage-provider-neutral; binary handling and target links remain backend-owned. | Planned |
 | HWEB-P10 | `feat(configuration): harden configuration governance UX` | Improve configuration definition/feature-flag/value administration with validation, sensitivity, scope/effective-date presentation, and permission-aware safeguards. | Current Configuration contracts remain published. | No secret value leakage or client-side policy invention; sensitive values remain governed by backend contract. | Planned |
 | HWEB-P11 | `feat(operations): improve cross-surface operator workflows` | Use verified existing contracts to improve transitions among topology, telemetry/monitoring, alarm, workflow, events, planning, and documents. | No new backend contract required beyond already accepted APIs unless task audit identifies a gap. | Navigation/context composition improves without duplicating backend state or creating new business semantics. | Planned |
@@ -472,12 +472,30 @@ HWEB-P06 adds governed Simulation orchestration using only current HidraAPI cont
 
 No HWEB-P07 Integration operations work is included in HWEB-P06.
 
-## 25. Next authorized task
+## 25. HWEB-P07 completion evidence
+
+HWEB-P07 revalidated Integration browser exposure and retained the governed evidence-only boundary:
+
+- HidraAPI source SHA: `260295c6eebc4b01922d2d488810a671305860a6`;
+- HidraWEB source SHA at task start: `5d309f6e82701a1cb00becd33c2670b4f3edea34`;
+- current Integration capability publishes `POST /api/v1/integration/external-systems`, `POST /api/v1/integration/job-runs`, and `POST /api/v1/integration/exchange-messages`;
+- the existing Integration administration surface is assigned to Administrators and remains a monitoring/evidence workspace;
+- the backend DTOs show external-system registration is governance-oriented, while job-run start and exchange-message recording can represent integration-runtime/system activities;
+- current staging/UAT evidence explicitly requires Integration monitoring to remain evidence-only;
+- no product/UAT finding or approved browser workflow authorizes execution of the three Integration POST operations;
+- no checked-in Integration feature OpenAPI/Orval consumer slice currently exists in HidraWEB, so no handwritten DTO/client substitute was introduced;
+- the Integration page now states the non-exposure boundary explicitly;
+- retry, replay, cancel, restart, pause, dead-letter, provider, and other lifecycle actions remain unexposed because HidraAPI does not publish those contracts;
+- focused E2E evidence verifies the governed evidence-only message.
+
+HWEB-P07 therefore completes its required exposure review without inventing browser mutations. No HWEB-P08 Notification operations work is included.
+
+## 26. Next authorized task
 
 The next authorized product task is:
 
 ```text
-HWEB-P07 — feat(integration): add controlled integration operations
+HWEB-P08 — feat(notification): add controlled notification operations
 ```
 
-Before P07 implementation, re-confirm the intended browser actor/persona and that exposing each Integration command is appropriate. If those conditions are not established, keep the existing evidence-only UX.
+Before P08 implementation, re-confirm the intended actor/persona, product ownership, and whether each Notification command is appropriate for a browser workflow. If those conditions are not established, retain the existing evidence-only UX.

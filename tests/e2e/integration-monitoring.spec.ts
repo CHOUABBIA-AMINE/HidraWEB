@@ -42,7 +42,8 @@ test('HWEB-014-04 monitors runtime connector, job, dead-letter, retry, and healt
   await signIn(page);
   await openIntegration(page);
   await expect(page.getByRole('heading', { name: 'Integration monitoring', exact: true })).toBeVisible();
-  await expect(page.getByText(/Monitoring is evidence-only/)).toBeVisible();
+  await expect(page.getByText(/Monitoring remains evidence-only/)).toBeVisible();
+  await expect(page.getByText(/current product\/UAT evidence does not authorize those operations for browser execution/)).toBeVisible();
   await expect(page.getByRole('heading', { name: /Connectors — connector-instance/ })).toBeVisible();
   await expect(page.getByRole('heading', { name: /Job runs — job-run/ })).toBeVisible();
   await expect(page.getByRole('heading', { name: /Dead letters — dead-letter/ })).toBeVisible();

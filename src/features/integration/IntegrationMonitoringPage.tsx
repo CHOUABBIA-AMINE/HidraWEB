@@ -72,7 +72,9 @@ export function IntegrationMonitoringPage() {
         <Typography component="h1" variant="h4">Integration monitoring</Typography>
         <Typography color="text.secondary">HWEB-014-04 connector, job-run, dead-letter, retry-attempt, and health evidence from runtime workbench resources.</Typography>
       </Box>
-      <Alert severity="info">Monitoring is evidence-only. HidraAPI publishes no retry, replay, cancel, restart, pause, or dead-letter lifecycle mutation endpoint, so no such action is exposed here.</Alert>
+      <Alert severity="info">
+        Monitoring remains evidence-only. HidraAPI publishes external-system registration, job-run start, and exchange-message recording commands, but current product/UAT evidence does not authorize those operations for browser execution. Retry, replay, cancel, restart, pause, and dead-letter lifecycle controls also remain unavailable because no such backend contract is published.
+      </Alert>
       {resourcesQuery.isPending ? <CircularProgress size={24} /> : null}
       {resourcesQuery.isError ? <Alert severity="error">{errorMessage(resourcesQuery.error)}</Alert> : null}
       {firstError ? <Alert severity="error">{errorMessage(firstError)}</Alert> : null}
