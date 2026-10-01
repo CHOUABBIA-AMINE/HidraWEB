@@ -19,6 +19,7 @@ const routes = [
   { route: '/api/v1/identity/roles', methods: ['GET'], module: 'identity', resource: 'roles', action: 'read', permission: 'identity:roles:read', enforcementStatus: 'backend-enforced' },
   { route: '/api/v1/identity/permissions', methods: ['GET'], module: 'identity', resource: 'permissions', action: 'read', permission: 'identity:permissions:read', enforcementStatus: 'backend-enforced' },
   { route: '/api/v1/identity/permissions/evaluations', methods: ['POST'], module: 'identity', resource: 'permissions', action: 'execute', permission: 'identity:permissions:execute', enforcementStatus: 'backend-enforced' },
+  { route: '/api/v1/organization/units', methods: ['GET'], module: 'organization', resource: 'units', action: 'read', permission: 'organization:units:read', enforcementStatus: 'backend-enforced' },
   { route: '/api/v1/organization/units', methods: ['POST'], module: 'organization', resource: 'units', action: 'execute', permission: 'organization:units:execute', enforcementStatus: 'backend-enforced' },
   { route: '/api/v1/organization/employees', methods: ['POST'], module: 'organization', resource: 'employees', action: 'execute', permission: 'organization:employees:execute', enforcementStatus: 'backend-enforced' },
   { route: '/api/v1/organization/employees/assignments', methods: ['POST'], module: 'organization', resource: 'employees', action: 'execute', permission: 'organization:employees:execute', enforcementStatus: 'backend-enforced' },
@@ -35,6 +36,7 @@ const effectivePermissions = [
   'identity:roles:read',
   'identity:permissions:read',
   'identity:permissions:execute',
+  'organization:units:read',
   'organization:units:execute',
   'organization:employees:execute',
 ];
@@ -61,7 +63,7 @@ const identityDescriptors = [
 ];
 const identityUser = { id: 'u-1', username: 'aoperator', displayName: 'Abir Operator', emailAddress: 'operator@hidra.local', status: 'ACTIVE', userType: 'HUMAN', employeeReferenceId: 'emp-1' };
 
-const organizationUnit = { module: 'organization', resource: 'organization-units', id: 'ou-1', attributes: { id: 'ou-1', code: 'TRC', nameFr: 'Direction Transport', status: 'ACTIVE' } };
+const organizationUnit = { id: 'ou-1', code: 'TRC', nameAr: null, nameFr: 'Direction Transport', nameEn: 'Transport Directorate', unitTypeId: 'direction', parentUnitId: null, status: 'ACTIVE', validFrom: null, validTo: null };
 
 async function mockPermissions(page: Page) {
   await page.route('**/api/v1/security/permissions/routes', (route) => route.fulfill({ json: routes }));
@@ -92,9 +94,8 @@ async function mockIdentityOrganization(page: Page) {
   await page.route('**/api/v1/identity/users*', (route) => route.fulfill({
     json: { content: [identityUser], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false },
   }));
-  await page.route('**/api/v1/workbench/organization/resources', (route) => route.fulfill({ json: organizationDescriptors }));
-  await page.route('**/api/v1/workbench/organization/organization-units?**', (route) => route.fulfill({
-    json: { module: 'organization', resource: 'organization-units', page: 0, size: 50, totalElements: 1, totalPages: 1, items: [organizationUnit] },
+  await page.route('**/api/v1/organization/units?**', (route) => route.fulfill({
+    json: { content: [organizationUnit], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false },
   }));
 }
 
