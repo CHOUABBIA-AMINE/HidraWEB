@@ -1,3 +1,4 @@
+import type { GenerateReportArtifactRequest, QueueReportRunRequest } from '@/api/generated/reporting/model';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const httpClient = vi.hoisted(() => vi.fn());
@@ -18,8 +19,8 @@ describe('reporting lifecycle API', () => {
 
     const definition = { code: 'OPS-DAILY', nameFr: 'Rapport quotidien' };
     const request = { reportDefinitionId: 'def-1', purpose: 'Operations review' };
-    const run = { reportDefinitionId: 'def-1', reportRequestId: 'req-1', runMode: 'MANUAL' };
-    const artifact = { reportRunId: 'run-1', artifactType: 'PRIMARY_REPORT', format: 'PDF', fileName: 'ops.pdf' };
+    const run: QueueReportRunRequest = { reportDefinitionId: 'def-1', reportRequestId: 'req-1', runMode: 'MANUAL' };
+    const artifact: GenerateReportArtifactRequest = { reportRunId: 'run-1', artifactType: 'PRIMARY_REPORT', format: 'PDF', fileName: 'ops.pdf' };
 
     await createReportDefinition(definition);
     await requestReport(request);
