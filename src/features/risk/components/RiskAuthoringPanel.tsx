@@ -88,7 +88,7 @@ function Fields<T extends Record<string, string>>({
           type={dateFields.includes(key) ? 'datetime-local' : 'text'}
           value={value[key]}
           onChange={(event) => onChange(key, event.target.value)}
-          InputLabelProps={dateFields.includes(key) ? { shrink: true } : undefined}
+          slotProps={dateFields.includes(key) ? { inputLabel: { shrink: true } } : undefined}
         />
       ))}
     </Box>
