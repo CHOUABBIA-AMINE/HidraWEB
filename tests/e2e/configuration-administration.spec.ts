@@ -72,7 +72,10 @@ test('HWEB-014-02 reads runtime configuration evidence and submits only publishe
   await expect(page.getByText('FLAG_EXISTING')).toBeVisible();
   await expect(page.getByText('sensitive-value')).toHaveCount(0);
   await expect(page.getByText('vault://ops/secret')).toHaveCount(0);
-  await expect(page.getByText('[redacted in HidraWEB]', { exact: true })).toHaveCount(3);
+  const valueEvidence = page.getByRole('heading', { name: 'Configuration values' }).locator('xpath=..').locator('pre').first();
+  await expect(valueEvidence).toContainText('"rawValue": "[redacted in HidraWEB]"');
+  await expect(valueEvidence).toContainText('"jsonValue": "[redacted in HidraWEB]"');
+  await expect(valueEvidence).toContainText('"secretReference": "[redacted in HidraWEB]"');
 
   await page.getByLabel('Namespace ID').fill('ns-1');
   await page.getByLabel('Key').fill('ops.timeout');
