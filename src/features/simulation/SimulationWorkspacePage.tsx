@@ -22,6 +22,7 @@ import { useMemo, useState } from 'react';
 
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
 import { usePermissions } from '@/features/permissions/usePermissions';
+import { SimulationOrchestrationPanel } from '@/features/simulation/components/SimulationOrchestrationPanel';
 import {
   fetchWorkbenchRecord,
   fetchWorkbenchRecords,
@@ -271,8 +272,10 @@ export function SimulationWorkspacePage() {
         </Box>
 
         <Alert severity="info">
-          This task exposes simulation-owned read views only. The accepted generated simulation mutation contract is present for deterministic DTO evidence, but HWEB-013-04 does not create scenarios/models, queue runs, publish recommendations, or apply changes to operational modules.
+          Existing workbench views remain secondary simulation evidence. HWEB-P06 exposes only the four HidraAPI-published orchestration commands and does not execute solvers or apply simulation results to operational modules.
         </Alert>
+
+        <SimulationOrchestrationPanel />
 
         {resourcesQuery.isPending ? <CircularProgress size={24} /> : null}
         {resourcesQuery.isError ? <Alert severity="error">{errorMessage(resourcesQuery.error, 'simulation resources')}</Alert> : null}
