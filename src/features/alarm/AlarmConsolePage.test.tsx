@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App } from '@/app/App';
@@ -72,7 +72,18 @@ describe('HWEB-008 alarm console', () => {
     expect(await screen.findByText('Aucun historique de suppression pour cette alarme.')).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText(/ID motif de suppression/), { target: { value: 'MAINT' } });
     fireEvent.click(screen.getByRole('button', { name: 'Créer la suppression' }));
-    expect(hidraHttpClient).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ alarmId: 'alarm-1', scopeReferenceId: 'alarm-1', scopeType: 'ALARM', suppressionReasonId: 'MAINT' }), method: 'POST', url: '/api/v1/alarm/suppressions' }));
+    await waitFor(() => {
+      expect(hidraHttpClient).toHaveBeenCalledWith(expect.objectContaining({
+        data: expect.objectContaining({
+          alarmId: 'alarm-1',
+          scopeReferenceId: 'alarm-1',
+          scopeType: 'ALARM',
+          suppressionReasonId: 'MAINT',
+        }),
+        method: 'POST',
+        url: '/api/v1/alarm/suppressions',
+      }));
+    });
 
     fireEvent.click(screen.getByRole('button', { name: 'Acquitter' }));
 
