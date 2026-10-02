@@ -70,7 +70,7 @@ describe('HWEB-008 alarm console', () => {
     expect(screen.getByText(/dérive l’identité de l’acteur/)).toBeInTheDocument();
     expect(screen.queryByLabelText('Référence acteur')).not.toBeInTheDocument();
     expect(await screen.findByText('Aucun historique de suppression pour cette alarme.')).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText('ID motif de suppression'), { target: { value: 'MAINT' } });
+    fireEvent.change(screen.getByLabelText(/ID motif de suppression/), { target: { value: 'MAINT' } });
     fireEvent.click(screen.getByRole('button', { name: 'Créer la suppression' }));
     expect(hidraHttpClient).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ alarmId: 'alarm-1', scopeReferenceId: 'alarm-1', scopeType: 'ALARM', suppressionReasonId: 'MAINT' }), method: 'POST', url: '/api/v1/alarm/suppressions' }));
 
