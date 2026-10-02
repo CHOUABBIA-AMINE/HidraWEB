@@ -35,7 +35,7 @@ async function signIn(page: Page) {
   await expect(page.getByRole('heading', { name: /Vue d/ })).toBeVisible();
 }
 
-test('HWEB-008 presents backend-governed alarm response without invented suppression or realtime semantics', async ({ page }) => {
+test('HWEB-008 presents backend-governed alarm response and suppression semantics', async ({ page }) => {
   await mockAlarm(page);
   await signIn(page);
 
@@ -44,7 +44,7 @@ test('HWEB-008 presents backend-governed alarm response without invented suppres
   await expect(page.getByRole('heading', { name: 'Console des alarmes' })).toBeVisible();
   await expect(page.getByText('Pression élevée')).toBeVisible();
   await expect(page.getByText('SEV-CRITICAL')).toBeVisible();
-  await expect(page.getByText(/Aucune opération de suppression/)).toBeVisible();
+  await expect(page.getByText(/HidraAPI expose désormais la suppression gouvernée/)).toBeVisible();
   await expect(page.getByText(/événements temps réel métier/)).toBeVisible();
 
   await page.getByRole('button', { name: 'Ouvrir' }).click();
