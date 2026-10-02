@@ -9,9 +9,12 @@ vi.mock('@/api/client/hidraHttpClient', () => ({
 import {
   acknowledgeAlarm,
   closeAlarm,
+  createSuppression,
   fetchAlarm,
   fetchAlarms,
   fetchShelvings,
+  fetchSuppressions,
+  releaseSuppression,
   shelveAlarm,
   unshelveAlarm,
 } from '@/features/alarm/api/alarmApi';
@@ -60,6 +63,18 @@ describe('alarm API adapter', () => {
       method: 'GET',
       url: '/api/v1/alarm/alarms/alarm%2F1/shelvings',
     });
+  });
+
+  it('uses canonical suppression query/create/release routes without actor fields', async () => {
+    httpClient.mockResolvedValueOnce({ content: [], page: 0, size: 50, totalElements: 0, totalPages: 0, hasNext: false }).mockResolvedValueOnce({ id: 'suppression-1', status: 'ACTIVE' }).mockResolvedValueOnce({ id: 'suppression-1', status: 'RELEASED' });
+    await fetchSuppressions({ alarmId: 'alarm/1', status: '', page: 0, size: 50 });
+    const request = { scopeType: 'ALARM' as const, scopeReferenceId: 'alarm/1', alarmId: 'alarm/1', suppressionReasonId: 'MAINT', suppressedUntil: '2026-10-03T12:00:00Z' };
+    await createSuppression(request, 'corr-1');
+    await releaseSuppression('suppression/1', 'corr-2');
+    expect(httpClient).toHaveBeenNthCalledWith(1, { method: 'GET', url: '/api/v1/alarm/suppressions', params: { alarmId: 'alarm/1', page: 0, size: 50 } });
+    expect(httpClient).toHaveBeenNthCalledWith(2, { method: 'POST', url: '/api/v1/alarm/suppressions', data: request, headers: { 'X-Correlation-Id': 'corr-1' } });
+    expect(httpClient).toHaveBeenNthCalledWith(3, { method: 'POST', url: '/api/v1/alarm/suppressions/suppression%2F1/release', headers: { 'X-Correlation-Id': 'corr-2' } });
+    expect(request).not.toHaveProperty('actorId');
   });
 
   it('uses server-derived actor identity for acknowledgement and closure payloads', async () => {

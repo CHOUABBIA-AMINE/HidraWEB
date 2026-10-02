@@ -8,10 +8,12 @@ const fixtures = vi.hoisted(() => {
   const routes = [
     { route: '/api/v1/alarm/alarms', methods: ['GET'], module: 'alarm', resource: 'alarms', action: 'read', permission: 'alarm:alarms:read', enforcementStatus: 'backend-enforced' },
     { route: '/api/v1/alarm/alarms/acknowledgements', methods: ['POST'], module: 'alarm', resource: 'alarms', action: 'execute', permission: 'alarm:alarms:execute', enforcementStatus: 'backend-enforced' },
+    { route: '/api/v1/alarm/suppressions', methods: ['GET'], module: 'alarm', resource: 'suppressions', action: 'read', permission: 'alarm:suppressions:read', enforcementStatus: 'backend-enforced' },
+    { route: '/api/v1/alarm/suppressions', methods: ['POST'], module: 'alarm', resource: 'suppressions', action: 'execute', permission: 'alarm:suppressions:execute', enforcementStatus: 'backend-enforced' },
   ];
   return {
     routes,
-    permissions: ['alarm:alarms:read', 'alarm:alarms:execute'],
+    permissions: ['alarm:alarms:read', 'alarm:alarms:execute', 'alarm:suppressions:read', 'alarm:suppressions:execute'],
     alarm: {
       id: 'alarm-1', alarmNumber: 'ALM-001', alarmTypeId: 'PRESSURE', severityId: 'SEV-CRITICAL', priorityId: 'P1',
       titleFr: 'Pression élevée', titleEn: 'High pressure', currentState: 'ACTIVE', raisedAt: '2026-09-11T10:00:00Z',
@@ -29,6 +31,8 @@ const hidraHttpClient = vi.hoisted(() => vi.fn(async (config: { url?: string; me
   if (config.url === '/api/v1/alarm/alarms' && config.method === 'GET') return { content: [fixtures.alarm], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false };
   if (config.url === '/api/v1/alarm/alarms/alarm-1' && config.method === 'GET') return fixtures.alarm;
   if (config.url === '/api/v1/alarm/alarms/alarm-1/shelvings' && config.method === 'GET') return [{ id: 'shelf-1', alarmId: 'alarm-1', shelvingReasonId: 'MAINT', reasonText: 'Inspection', shelvedByActorId: 'actor-1', shelvedAt: '2026-09-11T08:00:00Z', shelvedUntil: '2026-09-11T12:00:00Z', status: 'ACTIVE' }];
+  if (config.url === '/api/v1/alarm/suppressions' && config.method === 'GET') return { content: [], page: 0, size: 50, totalElements: 0, totalPages: 0, hasNext: false };
+  if (config.url === '/api/v1/alarm/suppressions' && config.method === 'POST') return { id: 'suppression-1', alarmId: 'alarm-1', scopeType: 'ALARM', scopeReferenceId: 'alarm-1', suppressionReasonId: 'MAINT', status: 'ACTIVE' };
   if (config.url === '/api/v1/alarm/alarms/acknowledgements' && config.method === 'POST') return 'ack-1';
   if (config.url?.endsWith('/shelvings/shelf-1/unshelve') && config.method === 'POST') return 'unshelve-1';
   throw new Error(`Unexpected request ${config.method} ${config.url}`);
@@ -56,7 +60,7 @@ describe('HWEB-008 alarm console', () => {
 
     expect(await screen.findByText('Pression élevée')).toBeInTheDocument();
     expect(screen.getByText('SEV-CRITICAL')).toBeInTheDocument();
-    expect(screen.getByText(/Aucune opération de suppression/)).toBeInTheDocument();
+    expect(screen.getByText(/HidraAPI expose désormais la suppression gouvernée/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Ouvrir' }));
 
     expect(await screen.findByText('Pipeline Nord')).toBeInTheDocument();
@@ -65,6 +69,10 @@ describe('HWEB-008 alarm console', () => {
     expect(screen.getByRole('button', { name: 'Ouvrir mes tâches' })).toBeInTheDocument();
     expect(screen.getByText(/dérive l’identité de l’acteur/)).toBeInTheDocument();
     expect(screen.queryByLabelText('Référence acteur')).not.toBeInTheDocument();
+    expect(await screen.findByText('Aucun historique de suppression pour cette alarme.')).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('ID motif de suppression'), { target: { value: 'MAINT' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Créer la suppression' }));
+    expect(hidraHttpClient).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ alarmId: 'alarm-1', scopeReferenceId: 'alarm-1', scopeType: 'ALARM', suppressionReasonId: 'MAINT' }), method: 'POST', url: '/api/v1/alarm/suppressions' }));
 
     fireEvent.click(screen.getByRole('button', { name: 'Acquitter' }));
 

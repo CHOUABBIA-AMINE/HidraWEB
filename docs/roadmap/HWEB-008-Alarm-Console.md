@@ -104,11 +104,13 @@ ESCALATED_TO_INCIDENT
 
 ## Deliberate backend gaps
 
-### Alarm suppression command
+### Alarm suppression — reconciled 2026-10-02
 
-The domain state model contains `SUPPRESSED`, but the accepted OpenAPI artifact exposes no alarm suppression mutation. HWEB-008 therefore renders no suppression control and explicitly informs the operator that suppression is unavailable through the accepted backend contract.
+The backend gap is now CLOSED. Verified HidraAPI CI #451 / run `36996917162` published artifact `hidra-api-openapi-5028a90248ddf3a04d344308f6cfc2510f1d0ca2` with digest `sha256:ad6950fc33d4756d59bed3c2162bdcee0d98275bb25c4678faf5dcb31ea3dbed`.
 
-This remains an OPEN backend gap until HidraAPI publishes an exact suppression command contract including authorization, request fields, lifecycle validation, result/error semantics, and tests.
+HidraWeb consumes `GET /api/v1/alarm/suppressions`, `GET /api/v1/alarm/suppressions/{suppressionId}`, `POST /api/v1/alarm/suppressions`, and `POST /api/v1/alarm/suppressions/{suppressionId}/release`. The operator console exposes ALARM-scoped history, creation, and release for the selected alarm. Broad-scope matching, restoration state, expiry, overlap detection, Workflow approval interpretation, and actor attribution remain backend-owned.
+
+Canonical permissions are `alarm:suppressions:read` and `alarm:suppressions:execute`. Open-ended requests may carry `workflowInstanceId`; HidraAPI remains authoritative for approval validation.
 
 ### Trusted actor attribution for acknowledgement and closure
 
@@ -144,4 +146,13 @@ Playwright E2E           : 13/13 PASS
 
 ## Exit decision
 
-HWEB-008 is complete for the backend-supported operator response scope. Suppression remains unavailable because no command contract exists, trusted server-derived acknowledgement/closure actor attribution remains a backend hardening gap, and alarm realtime domain events remain deferred. None of those gaps is filled with frontend-owned semantics.
+HWEB-008 remains complete after the 2026-10-02 suppression reconciliation. The console now consumes backend-governed suppression read/create/release contracts with separate permissions and no client-side lifecycle semantics. Alarm realtime domain events remain deferred; the console therefore remains query/refetch correct.
+
+
+## Post-completion suppression reconciliation — 2026-10-02
+
+Frontend baseline before change: `9d9903c398c516a597e9a5fd648af77742099a7f`.
+
+Backend source of truth: HidraAPI `5028a90248ddf3a04d344308f6cfc2510f1d0ca2`, CI #451 / run `36996917162` SUCCESS, artifact `hidra-api-openapi-5028a90248ddf3a04d344308f6cfc2510f1d0ca2`, digest `sha256:ad6950fc33d4756d59bed3c2162bdcee0d98275bb25c4678faf5dcb31ea3dbed`.
+
+The Alarm Orval input is repinned to the verified suppression-capable contract. Successful create/release invalidates the Alarm query family so visible state is re-read from HidraAPI rather than predicted locally. Broad-scope suppression remains a backend generation/evaluation concern and is not reimplemented in the browser.

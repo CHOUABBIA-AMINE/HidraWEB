@@ -39,6 +39,7 @@ import {
   unshelveAlarm,
 } from '@/features/alarm/api/alarmApi';
 import { ALARM_PERMISSIONS } from '@/features/alarm/api/alarmPermissions';
+import { AlarmSuppressionPanel } from '@/features/alarm/AlarmSuppressionPanel';
 import { usePermissions } from '@/features/permissions/usePermissions';
 
 const PAGE_SIZE = 50;
@@ -127,9 +128,12 @@ export function AlarmConsolePage() {
   const [ackForm, setAckForm] = useState({ organizationUnitId: '', organizationUnitCode: '', comment: '' });
   const [closeForm, setCloseForm] = useState({ closureType: 'NORMALIZED', closureReasonId: '', closureComment: '', requiresReview: false, reviewWorkflowInstanceId: '' });
   const [shelveForm, setShelveForm] = useState({ shelvingReasonId: '', reasonText: '', shelvedUntil: '' });
+  const [suppressionBusy, setSuppressionBusy] = useState(false);
 
   const canRead = permissions.can(ALARM_PERMISSIONS.read);
   const canExecute = permissions.can(ALARM_PERMISSIONS.execute);
+  const canSuppressionRead = permissions.can(ALARM_PERMISSIONS.suppressionRead);
+  const canSuppressionExecute = permissions.can(ALARM_PERMISSIONS.suppressionExecute);
   const listParams = useMemo(() => ({
     view,
     state: optional(filters.state),
@@ -194,7 +198,8 @@ export function AlarmConsolePage() {
     onSuccess: refreshAlarmData,
   });
 
-  const mutationBusy = acknowledgeMutation.isPending || closeMutation.isPending || shelveMutation.isPending || unshelveMutation.isPending;
+  const alarmMutationBusy = acknowledgeMutation.isPending || closeMutation.isPending || shelveMutation.isPending || unshelveMutation.isPending;
+  const mutationBusy = alarmMutationBusy || suppressionBusy;
   const mutationError = acknowledgeMutation.error ?? closeMutation.error ?? shelveMutation.error ?? unshelveMutation.error;
   const mutationSucceeded = Boolean(acknowledgeMutation.data ?? closeMutation.data ?? shelveMutation.data ?? unshelveMutation.data);
   const firstError = alarmsQuery.error ?? detailQuery.error ?? shelvingQuery.error;
@@ -297,6 +302,9 @@ export function AlarmConsolePage() {
                       <Typography component="h3" variant="subtitle1">{t('alarm.shelvingHistory')}</Typography>
                       {shelvings.length ? <TableContainer sx={{ mt: 1 }}><Table size="small"><TableHead><TableRow><TableCell>{t('alarm.status')}</TableCell><TableCell>{t('alarm.reason')}</TableCell><TableCell>{t('alarm.when')}</TableCell><TableCell>{t('alarm.shelvedUntil')}</TableCell><TableCell>{t('alarm.actor')}</TableCell><TableCell /></TableRow></TableHead><TableBody>{shelvings.map((shelving, index) => <ShelvingRow busy={mutationBusy} canExecute={canExecute} key={shelving.id ?? `shelving-${index}`} onUnshelve={() => shelving.id && unshelveMutation.mutate(shelving.id)} shelving={shelving} t={t} />)}</TableBody></Table></TableContainer> : !shelvingQuery.isLoading && !shelvingQuery.error ? <Typography color="text.secondary" sx={{ mt: 1 }}>{t('alarm.noShelving')}</Typography> : null}
                     </Box>
+
+                    <Divider />
+                    <AlarmSuppressionPanel alarmId={selectedAlarmId} canExecute={canSuppressionExecute} canRead={canSuppressionRead} disabled={alarmMutationBusy} onBusyChange={setSuppressionBusy} />
 
                     <Divider />
                     <Typography component="h3" variant="subtitle1">{t('alarm.actions')}</Typography>

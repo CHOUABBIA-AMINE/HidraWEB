@@ -8,6 +8,8 @@ const fixtures = vi.hoisted(() => {
   const routes = [
     { route: '/api/v1/alarm/alarms', methods: ['GET'], module: 'alarm', resource: 'alarms', action: 'read', permission: 'alarm:alarms:read', enforcementStatus: 'backend-enforced' },
     { route: '/api/v1/alarm/alarms/acknowledgements', methods: ['POST'], module: 'alarm', resource: 'alarms', action: 'execute', permission: 'alarm:alarms:execute', enforcementStatus: 'backend-enforced' },
+    { route: '/api/v1/alarm/suppressions', methods: ['GET'], module: 'alarm', resource: 'suppressions', action: 'read', permission: 'alarm:suppressions:read', enforcementStatus: 'backend-enforced' },
+    { route: '/api/v1/alarm/suppressions', methods: ['POST'], module: 'alarm', resource: 'suppressions', action: 'execute', permission: 'alarm:suppressions:execute', enforcementStatus: 'backend-enforced' },
   ];
   return {
     routes,
@@ -73,5 +75,7 @@ describe('HWEB-008 alarm console read-only authorization', () => {
     expect(screen.queryByRole('button', { name: 'Acquitter' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Clôturer' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Mettre en étagère' })).not.toBeInTheDocument();
+    expect(screen.getByText('Vous ne disposez pas de l’autorisation de lire les suppressions.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Créer la suppression' })).not.toBeInTheDocument();
   });
 });

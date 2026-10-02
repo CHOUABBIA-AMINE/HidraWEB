@@ -2,11 +2,24 @@ import { hidraHttpClient } from '@/api/client/hidraHttpClient';
 import type {
   AcknowledgeAlarmRequest,
   AlarmView,
+  AlarmSuppressionDto,
+  AlarmSuppressionPageDto,
   CloseAlarmRequest,
+  CreateSuppressionRequest,
   PageAlarmView,
   ShelveAlarmRequest,
   ShelvingView,
 } from '@/api/generated/alarm/model';
+
+export interface AlarmSuppressionListParams {
+  suppressionId?: string;
+  scopeType?: string;
+  scopeReferenceId?: string;
+  alarmId?: string;
+  status?: string;
+  page?: number;
+  size?: number;
+}
 
 export interface AlarmListParams {
   view?: string;
@@ -28,6 +41,7 @@ export const alarmQueryKeys = {
   list: (params: AlarmListParams) => ['hidra', 'alarm', 'alarms', params] as const,
   detail: (id: string) => ['hidra', 'alarm', 'alarms', id] as const,
   shelvings: (id: string) => ['hidra', 'alarm', 'alarms', id, 'shelvings'] as const,
+  suppressions: (params: AlarmSuppressionListParams) => ['hidra', 'alarm', 'suppressions', params] as const,
 };
 
 export function fetchAlarms(params: AlarmListParams): Promise<PageAlarmView> {
@@ -40,6 +54,18 @@ export function fetchAlarm(id: string): Promise<AlarmView> {
 
 export function fetchShelvings(id: string): Promise<ShelvingView[]> {
   return hidraHttpClient<ShelvingView[]>({ method: 'GET', url: `/api/v1/alarm/alarms/${encodeURIComponent(id)}/shelvings` });
+}
+
+export function fetchSuppressions(params: AlarmSuppressionListParams): Promise<AlarmSuppressionPageDto> {
+  return hidraHttpClient<AlarmSuppressionPageDto>({ method: 'GET', url: '/api/v1/alarm/suppressions', params: compactParams(params) });
+}
+
+export function createSuppression(request: CreateSuppressionRequest, correlationId?: string): Promise<AlarmSuppressionDto> {
+  return hidraHttpClient<AlarmSuppressionDto>({ method: 'POST', url: '/api/v1/alarm/suppressions', data: request, headers: correlationId ? { 'X-Correlation-Id': correlationId } : undefined });
+}
+
+export function releaseSuppression(suppressionId: string, correlationId?: string): Promise<AlarmSuppressionDto> {
+  return hidraHttpClient<AlarmSuppressionDto>({ method: 'POST', url: `/api/v1/alarm/suppressions/${encodeURIComponent(suppressionId)}/release`, headers: correlationId ? { 'X-Correlation-Id': correlationId } : undefined });
 }
 
 export function acknowledgeAlarm(request: AcknowledgeAlarmRequest): Promise<string> {
