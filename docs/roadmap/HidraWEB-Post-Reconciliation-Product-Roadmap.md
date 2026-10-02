@@ -100,7 +100,7 @@ No HWEB-P task may introduce one of these as an implementation shortcut.
 | HWEB-P09 | `feat(documents): deepen governed document workflows` | Extend document UX around current register/upload/download/link contracts, version evidence, and domain attachment flows. | Documents content/metadata/link contracts remain current. | Document workflows remain storage-provider-neutral; binary handling and target links remain backend-owned. | **Completed** |
 | HWEB-P10 | `feat(configuration): harden configuration governance UX` | Improve configuration definition/feature-flag/value administration with validation, sensitivity, scope/effective-date presentation, and permission-aware safeguards. | Current Configuration contracts remain published. | No secret value leakage or client-side policy invention; sensitive values remain governed by backend contract. | **Completed** |
 | HWEB-P11 | `feat(operations): improve cross-surface operator workflows` | Use verified existing contracts to improve transitions among topology, telemetry/monitoring, alarm, workflow, events, planning, and documents. | No new backend contract required beyond already accepted APIs unless task audit identifies a gap. | Navigation/context composition improves without duplicating backend state or creating new business semantics. | **Completed** |
-| HWEB-P12 | `test(product): harden post-reconciliation product phase` | Full compatibility, accessibility, performance, E2E, deployment and release-artifact review after HWEB-P01..P11. | All preceding accepted tasks complete and compatible with live HidraAPI. | Full CI/release lifecycle green; updated staging/UAT candidate produced; known UAT findings dispositioned. | **Next** |
+| HWEB-P12 | `test(product): harden post-reconciliation product phase` | Full compatibility, accessibility, performance, E2E, deployment and release-artifact review after HWEB-P01..P11. | All preceding accepted tasks complete and compatible with live HidraAPI. | Full CI/release lifecycle green; updated staging/UAT candidate produced; known UAT findings dispositioned. | **Completed** |
 
 ## 6. HWEB-P01 — Identity administration
 
@@ -570,12 +570,37 @@ Existing document target links remain governed by their backend target-module/ty
 
 No HWEB-P12 hardening/release work is included in HWEB-P11.
 
-## 30. Next authorized task
+## 30. HWEB-P12 completion evidence
 
-The next authorized product task is:
+HWEB-P12 closes the planned post-reconciliation product phase on verified repository evidence:
+
+- HidraAPI main remains `260295c6eebc4b01922d2d488810a671305860a6`;
+- HidraWEB source SHA used for the immutable product-phase candidate is `99e03a193441ea26dcf4d155e729f92ab429a1a8`;
+- CI #954 / run `36972384582` completed successfully;
+- the successful workflow executed OpenAPI compatibility, all accepted Orval regenerations, lint, typecheck, unit/component tests, performance tests, production build/bundle-budget checks, release packaging, release verification, and the full Chromium Playwright regression suite;
+- verified release artifact ID: `11212301950`;
+- artifact name: `hidraweb-release-99e03a193441ea26dcf4d155e729f92ab429a1a8`;
+- artifact digest: `sha256:1c63a5358a47cf327aedb0a8ac6f491a4500900d4f918d68f9058b40d534c877`;
+- artifact size: `684148` bytes;
+- artifact expiry: `2026-12-31T06:11:40Z`;
+- `docs/deployment/HidraWEB-Staging-UAT-Product-Phase.md` records the immutable candidate and promotion prerequisites;
+- REL-001 remains historical evidence and is not rewritten;
+- no staging/UAT findings are currently recorded, so none are silently treated as resolved;
+- the repository has no standalone automated accessibility scanner/test command; HWEB-P12 records this limitation explicitly and preserves manual staging/UAT accessibility acceptance as required;
+- repository CI success is not represented as staging/UAT acceptance.
+
+The planned HWEB-P01..P12 product-development sequence is complete. Further work requires either a recorded HWEB-M staging/UAT finding or an explicitly authorized new roadmap phase.
+
+## 31. Current authorization boundary
+
+There is no automatically authorized HWEB-P13 task in this roadmap.
+
+Next work must begin from one of these evidence-based triggers:
 
 ```text
-HWEB-P12 — test(product): harden post-reconciliation product phase
+1. a real staging/UAT finding -> create the next HWEB-M task;
+2. an explicit owner request for a new product roadmap phase -> audit live HidraAPI/HidraWEB and create that roadmap;
+3. a material HidraAPI contract change -> reconcile the affected HidraWEB slice before further feature work.
 ```
 
-P12 is the product-phase hardening task: re-run full compatibility, accessibility/performance/E2E/release checks, update staging/UAT candidate evidence, and disposition only findings supported by actual CI/UAT evidence.
+Do not invent a next feature task solely to continue the sequence.
