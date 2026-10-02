@@ -2,6 +2,7 @@ import { Alert, Box, Button, Chip, CircularProgress, Container, Paper, Stack, Te
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router';
 
 import type { Feature } from '@/api/generated/topology/model';
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
@@ -41,10 +42,12 @@ export function NetworkTopologyPage() {
   const { t } = useTranslation();
   const permissions = usePermissions();
   const drawer = useContextDrawer();
+  const [searchParams] = useSearchParams();
+  const linkedQuery = searchParams.get('query')?.trim() ?? '';
   const [hiddenLayerIds, setHiddenLayerIds] = useState<Set<string>>(() => new Set());
   const [focusedLayerId, setFocusedLayerId] = useState('');
-  const [searchInput, setSearchInput] = useState('');
-  const [committedSearch, setCommittedSearch] = useState('');
+  const [searchInput, setSearchInput] = useState(linkedQuery);
+  const [committedSearch, setCommittedSearch] = useState(linkedQuery);
   const [selectedFeatureId, setSelectedFeatureId] = useState<string>();
 
   const canRead = permissions.can(TOPOLOGY_PERMISSIONS.read);

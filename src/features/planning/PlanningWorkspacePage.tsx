@@ -21,6 +21,7 @@ import {
 } from '@mui/material';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
+import { Link as RouterLink } from 'react-router';
 
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
 import type { Action as PlanningApprovalAction } from '@/api/generated/planning/model';
@@ -268,7 +269,7 @@ export function PlanningWorkspacePage() {
               </TableBody></Table></TableContainer></Paper>
               <PaginationControls page={planPage} totalPages={plansQuery.data?.totalPages} hasNext={plansQuery.data?.hasNext} onPrevious={() => setPlanPage((value) => Math.max(0, value - 1))} onNext={() => setPlanPage((value) => value + 1)} />
 
-              {planDetailQuery.data ? <Paper variant="outlined" sx={{ p: 2 }}><Stack spacing={1}><Typography component="h2" variant="h6">{preferredName(planDetailQuery.data)}</Typography><Typography>Status: {valueOrDash(planDetailQuery.data.status)}</Typography><Typography>Current revision: {valueOrDash(planDetailQuery.data.currentRevisionId)}</Typography></Stack></Paper> : null}
+              {planDetailQuery.data ? <Paper variant="outlined" sx={{ p: 2 }}><Stack spacing={1}><Typography component="h2" variant="h6">{preferredName(planDetailQuery.data)}</Typography><Typography>Status: {valueOrDash(planDetailQuery.data.status)}</Typography><Typography>Current revision: {valueOrDash(planDetailQuery.data.currentRevisionId)}</Typography>{planDetailQuery.data.topologyScopeCode || planDetailQuery.data.topologyScopeId ? <Button component={RouterLink} to={`/network?query=${encodeURIComponent(planDetailQuery.data.topologyScopeCode ?? planDetailQuery.data.topologyScopeId ?? '')}`} size="small" variant="outlined">Open topology context</Button> : null}</Stack></Paper> : null}
 
               {selectedPlanId ? (
                 <Stack spacing={1.5}>
@@ -287,7 +288,7 @@ export function PlanningWorkspacePage() {
                   {revisionDetailQuery.isError ? <Alert severity="error">{errorMessage(revisionDetailQuery.error, 'revision detail')}</Alert> : null}
                   {revisionDetailQuery.data ? (
                     <Stack spacing={2}>
-                      <Paper variant="outlined" sx={{ p: 2 }}><Stack spacing={1}><Typography component="h3" variant="h6">{revisionDetailQuery.data.revisionCode ?? `Revision ${valueOrDash(revisionDetailQuery.data.revisionNumber)}`}</Typography><Typography>Status: {valueOrDash(revisionDetailQuery.data.status)}</Typography><Typography>Workflow instance: {valueOrDash(revisionDetailQuery.data.workflowInstanceId)}</Typography><Button onClick={() => { setSelectedRevisionId(undefined); resetApprovalForm(); }} size="small">Close</Button></Stack></Paper>
+                      <Paper variant="outlined" sx={{ p: 2 }}><Stack spacing={1}><Typography component="h3" variant="h6">{revisionDetailQuery.data.revisionCode ?? `Revision ${valueOrDash(revisionDetailQuery.data.revisionNumber)}`}</Typography><Typography>Status: {valueOrDash(revisionDetailQuery.data.status)}</Typography><Typography>Workflow instance: {valueOrDash(revisionDetailQuery.data.workflowInstanceId)}</Typography>{revisionDetailQuery.data.workflowInstanceId ? <Button component={RouterLink} to={`/work/tasks?instanceId=${encodeURIComponent(revisionDetailQuery.data.workflowInstanceId)}`} size="small" variant="outlined">Open workflow context</Button> : null}<Button onClick={() => { setSelectedRevisionId(undefined); resetApprovalForm(); }} size="small">Close</Button></Stack></Paper>
 
                       <PlannedVsActualPanel revisionId={selectedRevisionId ?? ''} />
 

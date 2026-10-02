@@ -131,6 +131,8 @@ test('HWEB-010-04 executes only backend-published revision approval actions with
   await signIn(page);
   await openRevision(page);
   await expect(page.getByRole('heading', { name: 'Revision approval' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Open workflow context' })).toHaveAttribute('href', '/work/tasks?instanceId=wf-plan-2');
+  await expect(page.getByRole('link', { name: 'Open topology context' })).toHaveAttribute('href', '/network?query=PL-NORTH');
   await expect(page.getByText('task-plan-2')).toBeVisible();
   await page.getByRole('button', { name: 'APPROVE' }).click();
   await page.getByLabel('Comment').fill('Approved in browser test.');

@@ -53,6 +53,10 @@ test('HWEB-008 presents backend-governed alarm response without invented suppres
   await expect(page.getByRole('button', { name: 'Retirer de l’étagère' })).toBeVisible();
   await expect(page.getByText(/dérive l’identité de l’acteur/)).toBeVisible();
   await expect(page.getByLabel('Référence acteur')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Open topology context' })).toBeVisible();
+  await page.getByRole('button', { name: 'Ouvrir les tâches' }).click();
+  await expect(page).toHaveURL(/\/work\/tasks\?instanceId=wf-1$/);
+  await page.goBack();
 
   await page.getByRole('button', { name: 'Acquitter' }).click();
   await expect(page.getByRole('button', { name: 'Clôturer' })).toBeDisabled();

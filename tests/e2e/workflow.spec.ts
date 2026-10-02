@@ -69,3 +69,16 @@ test('HWEB-007 executes only a backend-permitted workflow transition with the ta
   await page.getByRole('button', { name: 'Action: APPROVE' }).click();
   await expect(page.getByText('APPROVE · APPROVED')).toBeVisible();
 });
+
+test('HWEB-P11 opens a backend-published workflow instance from shareable route context', async ({ page }) => {
+  await mockWorkflow(page);
+  await signIn(page);
+  await page.evaluate(() => {
+    window.history.pushState({}, '', '/work/tasks?instanceId=instance-1');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  });
+  await expect(page).toHaveURL(/\/work\/tasks\?instanceId=instance-1$/);
+  await expect(page.getByRole('heading', { name: 'Workflow instance instance-1' })).toBeVisible();
+  await expect(page.getByText('Pressure deviation DEV-1')).toBeVisible();
+  await expect(page.getByText(/1 timeline entries loaded from HidraAPI/)).toBeVisible();
+});

@@ -19,6 +19,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router';
 
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
 import type { AvailableActionView, TaskView, TimelineEntry } from '@/api/generated/workflow/model';
@@ -72,6 +73,7 @@ export function WorkflowTasksPage() {
   const { t } = useTranslation();
   const permissions = usePermissions();
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
   const [selectedTaskId, setSelectedTaskId] = useState('');
   const [selectedTransitionId, setSelectedTransitionId] = useState('');
   const [reasonId, setReasonId] = useState('');
@@ -85,7 +87,8 @@ export function WorkflowTasksPage() {
   const tasksQuery = useQuery({ queryKey: workflowQueryKeys.tasks(inboxParams), queryFn: () => fetchTasks(inboxParams), enabled: canTasks });
   const taskQuery = useQuery({ queryKey: workflowQueryKeys.task(selectedTaskId), queryFn: () => fetchTask(selectedTaskId), enabled: canTasks && Boolean(selectedTaskId) });
   const actionsQuery = useQuery({ queryKey: workflowQueryKeys.actions(selectedTaskId), queryFn: () => fetchAvailableActions(selectedTaskId), enabled: canTasks && Boolean(selectedTaskId) });
-  const instanceId = taskQuery.data?.instanceId ?? '';
+  const linkedInstanceId = searchParams.get('instanceId')?.trim() ?? '';
+  const instanceId = taskQuery.data?.instanceId ?? linkedInstanceId;
   const instanceQuery = useQuery({ queryKey: workflowQueryKeys.instance(instanceId), queryFn: () => fetchInstance(instanceId), enabled: canInstances && Boolean(instanceId) });
   const timelineQuery = useQuery({ queryKey: workflowQueryKeys.timeline(instanceId), queryFn: () => fetchTimeline(instanceId), enabled: canInstances && Boolean(instanceId) });
 
@@ -146,6 +149,16 @@ export function WorkflowTasksPage() {
         {firstError ? <Alert severity="error">{workflowErrorMessage(firstError)}</Alert> : null}
         {transitionMutation.error ? <Alert severity="error">{workflowErrorMessage(transitionMutation.error)}</Alert> : null}
         {successMessage ? <Alert severity="success">{successMessage}</Alert> : null}
+        {canInstances && linkedInstanceId && !selectedTaskId ? (
+          <Paper variant="outlined" sx={{ p: 2 }}>
+            <Stack spacing={1}>
+              <Typography color="text.secondary" variant="overline">Cross-surface context</Typography>
+              <Typography component="h2" variant="h6">Workflow instance {linkedInstanceId}</Typography>
+              {instanceQuery.data ? <><Typography>{instanceQuery.data.targetLabel ?? instanceQuery.data.targetCode ?? instanceQuery.data.targetId ?? '—'}</Typography><Typography>{t('workflow.status')}: {instanceQuery.data.status ?? '—'}</Typography><Typography>{t('workflow.step')}: {instanceQuery.data.currentStepId ?? '—'}</Typography></> : null}
+              {timeline.length ? <Typography color="text.secondary" variant="body2">{timeline.length} timeline entries loaded from HidraAPI.</Typography> : null}
+            </Stack>
+          </Paper>
+        ) : null}
 
         {canTasks ? (
           <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', lg: selectedTaskId ? 'minmax(0, 1fr) minmax(360px, 0.8fr)' : '1fr' } }}>

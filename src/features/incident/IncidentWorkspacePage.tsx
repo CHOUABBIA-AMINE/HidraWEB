@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
+import { Link as RouterLink } from 'react-router';
 
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
 import type { CapaView, HseCaseView } from '@/api/generated/hse/model';
@@ -102,6 +103,10 @@ function IncidentDetail({ incident, onClose }: { incident: IncidentView; onClose
           <Box><Typography color="text.secondary" variant="caption">Escalation level</Typography><Typography>{valueOrDash(incident.currentEscalationLevel)}</Typography></Box>
         </Box>
         {incident.description ? <><Divider /><Typography>{incident.description}</Typography></> : null}
+        <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
+          {incident.topologyAssetCode || incident.topologyAssetId ? <Button component={RouterLink} to={`/network?query=${encodeURIComponent(incident.topologyAssetCode ?? incident.topologyAssetId ?? '')}`} size="small" variant="outlined">Open topology context</Button> : null}
+          {incident.workflowInstanceId ? <Button component={RouterLink} to={`/work/tasks?instanceId=${encodeURIComponent(incident.workflowInstanceId)}`} size="small" variant="outlined">Open workflow context</Button> : null}
+        </Stack>
       </Stack>
     </Paper>
   );
@@ -193,6 +198,7 @@ function HseCaseDetail({ hseCase, onClose }: { hseCase: HseCaseView; onClose: ()
           <Box><Typography color="text.secondary" variant="caption">Controlled / Resolved / Closed</Typography><Typography>{valueOrDash(hseCase.controlledAt)} / {valueOrDash(hseCase.resolvedAt)} / {valueOrDash(hseCase.closedAt)}</Typography></Box>
         </Box>
         {hseCase.description ? <><Divider /><Typography>{hseCase.description}</Typography></> : null}
+        {hseCase.workflowInstanceId ? <Button component={RouterLink} to={`/work/tasks?instanceId=${encodeURIComponent(hseCase.workflowInstanceId)}`} size="small" variant="outlined">Open workflow context</Button> : null}
       </Stack>
     </Paper>
   );

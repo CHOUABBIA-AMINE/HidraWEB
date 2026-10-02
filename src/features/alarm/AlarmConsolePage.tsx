@@ -289,7 +289,8 @@ export function AlarmConsolePage() {
                     ) : null}
 
                     {detail?.topologyAssetId ? <><Divider /><Box><Typography component="h3" variant="subtitle1">{t('alarm.topologyContext')}</Typography><Typography>{detail.topologyAssetName ?? detail.topologyAssetCode ?? detail.topologyAssetId}</Typography><Button onClick={() => navigate('/network')} size="small">{t('alarm.openNetwork')}</Button></Box></> : null}
-                    {detail?.workflowInstanceId ? <Box><Typography component="h3" variant="subtitle1">{t('alarm.workflowContext')}</Typography><Typography>{detail.workflowInstanceId}</Typography><Button onClick={() => navigate('/work/tasks')} size="small">{t('alarm.openTasks')}</Button></Box> : null}
+                    {detail?.workflowInstanceId ? <Box><Typography component="h3" variant="subtitle1">{t('alarm.workflowContext')}</Typography><Typography>{detail.workflowInstanceId}</Typography><Button onClick={() => navigate(`/work/tasks?instanceId=${encodeURIComponent(detail.workflowInstanceId ?? '')}`)} size="small">{t('alarm.openTasks')}</Button></Box> : null}
+                    {detail?.topologyAssetCode || detail?.topologyAssetId ? <Button onClick={() => navigate(`/network?query=${encodeURIComponent(detail.topologyAssetCode ?? detail.topologyAssetId ?? '')}`)} size="small">Open topology context</Button> : null}
 
                     <Divider />
                     <Box>

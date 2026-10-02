@@ -99,8 +99,8 @@ No HWEB-P task may introduce one of these as an implementation shortcut.
 | HWEB-P08 | `feat(notification): add controlled notification operations` | Add notification request/message/delivery-attempt commands only where an approved operator/admin workflow exists. | Current Notification command endpoints remain published and product ownership is confirmed. | No consumer-style inbox semantics are invented; commands expose only backend-published lifecycle operations. | **Completed — evidence-only boundary retained** |
 | HWEB-P09 | `feat(documents): deepen governed document workflows` | Extend document UX around current register/upload/download/link contracts, version evidence, and domain attachment flows. | Documents content/metadata/link contracts remain current. | Document workflows remain storage-provider-neutral; binary handling and target links remain backend-owned. | **Completed** |
 | HWEB-P10 | `feat(configuration): harden configuration governance UX` | Improve configuration definition/feature-flag/value administration with validation, sensitivity, scope/effective-date presentation, and permission-aware safeguards. | Current Configuration contracts remain published. | No secret value leakage or client-side policy invention; sensitive values remain governed by backend contract. | **Completed** |
-| HWEB-P11 | `feat(operations): improve cross-surface operator workflows` | Use verified existing contracts to improve transitions among topology, telemetry/monitoring, alarm, workflow, events, planning, and documents. | No new backend contract required beyond already accepted APIs unless task audit identifies a gap. | Navigation/context composition improves without duplicating backend state or creating new business semantics. | **Next** |
-| HWEB-P12 | `test(product): harden post-reconciliation product phase` | Full compatibility, accessibility, performance, E2E, deployment and release-artifact review after HWEB-P01..P11. | All preceding accepted tasks complete and compatible with live HidraAPI. | Full CI/release lifecycle green; updated staging/UAT candidate produced; known UAT findings dispositioned. | Planned |
+| HWEB-P11 | `feat(operations): improve cross-surface operator workflows` | Use verified existing contracts to improve transitions among topology, telemetry/monitoring, alarm, workflow, events, planning, and documents. | No new backend contract required beyond already accepted APIs unless task audit identifies a gap. | Navigation/context composition improves without duplicating backend state or creating new business semantics. | **Completed** |
+| HWEB-P12 | `test(product): harden post-reconciliation product phase` | Full compatibility, accessibility, performance, E2E, deployment and release-artifact review after HWEB-P01..P11. | All preceding accepted tasks complete and compatible with live HidraAPI. | Full CI/release lifecycle green; updated staging/UAT candidate produced; known UAT findings dispositioned. | **Next** |
 
 ## 6. HWEB-P01 — Identity administration
 
@@ -549,12 +549,33 @@ HWEB-P10 hardens Configuration governance without expanding backend semantics:
 
 No HWEB-P11 cross-surface workflow work is included in HWEB-P10.
 
-## 29. Next authorized task
+## 29. HWEB-P11 completion evidence
+
+HWEB-P11 improves cross-surface navigation using only explicit identifiers already returned by HidraAPI:
+
+- HidraAPI source SHA remains `260295c6eebc4b01922d2d488810a671305860a6`;
+- HidraWEB source SHA at task start: `afac2fd564c4825318d22708ad88bb59691bb218`;
+- no backend contract or generated DTO was expanded;
+- Alarm detail carries its published `workflowInstanceId` into `/work/tasks?instanceId=...` and its published topology asset code/id into `/network?query=...`;
+- Incident detail carries its published topology asset code/id and workflow instance ID into the same shareable destinations;
+- HSE case detail carries its published workflow instance ID to Workflow without inferring a topology relation from generic target fields;
+- Planning plan detail carries its published topology-scope code/id to Topology search;
+- Planning revision detail carries its published workflow instance ID to Workflow;
+- Workflow consumes an explicit `instanceId` route parameter and loads the authoritative instance/timeline directly from HidraAPI even when no task was selected locally;
+- Topology consumes an explicit `query` route parameter only as an initial backend search query;
+- no frontend entity graph, cross-module scan, state-machine inference, correlation fabrication, or operational mutation is introduced;
+- focused Playwright coverage verifies shareable Workflow context plus Alarm/Planning handoff URLs.
+
+Existing document target links remain governed by their backend target-module/type/id fields; P11 does not infer additional attachment relationships.
+
+No HWEB-P12 hardening/release work is included in HWEB-P11.
+
+## 30. Next authorized task
 
 The next authorized product task is:
 
 ```text
-HWEB-P11 — feat(operations): improve cross-surface operator workflows
+HWEB-P12 — test(product): harden post-reconciliation product phase
 ```
 
-P11 may compose navigation/context only where backend-published identifiers and references support the transition; it must not infer entity relationships or create frontend-owned operational state.
+P12 is the product-phase hardening task: re-run full compatibility, accessibility/performance/E2E/release checks, update staging/UAT candidate evidence, and disposition only findings supported by actual CI/UAT evidence.
