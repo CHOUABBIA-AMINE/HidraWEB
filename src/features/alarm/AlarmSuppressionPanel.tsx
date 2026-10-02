@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
-import type { AlarmSuppressionDto, CreateSuppressionRequest } from '@/api/generated/alarm/model';
+import type { CreateSuppressionRequest } from '@/api/generated/alarm/model';
 import { alarmQueryKeys, createSuppression, fetchSuppressions, releaseSuppression } from '@/features/alarm/api/alarmApi';
 
 function optional(value: string): string | undefined {
