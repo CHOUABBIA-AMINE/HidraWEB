@@ -207,3 +207,110 @@ Only a formal owner-approved HidraAPI roadmap transition plus verified real simu
 **Next eligible candidate:** HWEB-F01 — cross-repository source-backed contract pin and gap verification, following exact-head documentation/CI verification and formal HidraAPI roadmap disposition. F01 remains **PROPOSED — NOT SELECTED** until a separate owner selection and precise task registration.
 
 On publication, record actual commit SHA and exact-head CI outcome externally; do not predeclare their success in this file.
+
+
+## 2026-10-11 — HWEB-F01 owner selection and current-machine-contract verification gate
+
+### Authority, task identity and concurrency lease
+
+Owner instruction \`next\` following the cross-repository continuation audit selects
+**HWEB-F01 only**, for a strictly documentary contract/capability verification
+preflight. This append-only section is the bounded registration; it does **not**
+select HWEB-F02–F10, a backend implementation, source-code refactoring,
+simulator work, data imports, a production release or deployment. Earlier
+HWEB-R01–R17 and HWEB-P01–P12 acceptance and the original proposed F-task
+registry remain preserved historical evidence. This later selection supersedes
+the earlier HWEB-F01 "PROPOSED — NOT SELECTED" statement for *selection only*.
+
+- Selected task: **HWEB-F01 — API contract, capability and gap verification**.
+- Owner: HidraWEB frontend contract steward, with HidraAPI as independent
+  business, authorization and published-machine-contract authority.
+- Initial HidraWEB \`main\`: \`ffb890a01957bec5422c54b86a3778e9500c7ad4\`.
+- Initial HidraAPI \`main\`: \`a691843f359126a9f439217862f780b5806c5fd2\`.
+- Governance registration commit message:
+  \`docs(roadmap): select HWEB-F01 contract verification gate\`.
+- This registration's **exact write allowlist**:
+  \`docs/roadmap/ULTIMATE_ROADMAP.md\` only, append-only.
+- This registration's **read/test scope**: the existing ultimate roadmaps,
+  normative API–WEB contract §25, ENG gap register, verified OpenAPI manifest,
+  existing feature-specific Orval configurations/clients, live GitHub Actions
+  conclusions, and existing backend controllers/security source.
+- Excluded writes: all \`src/**\`, \`openapi/**\`, generated clients, tests,
+  \`package.json\`, lockfile, CI workflows, deployment, backend and simulator
+  files. No guessed route, DTO, permission or schema is created.
+- Next *contract-verification completion* commit message, **only after its
+  prerequisite is met**:
+  \`docs(contract): verify HWEB-F01 engineering API capability baseline\`.
+  Before that separate publication, register its exact file/test allowlist and
+  expected-head lease based on actual discovered artifacts. This registration
+  does not authorize that follow-up commit or an F02 implementation.
+
+### Verified status at selection
+
+| Gate | Exact observed evidence | Disposition |
+|---|---|---|
+| Frontend exact-head code CI | HidraWEB Code CI #972, run 38134848753, \`ffb890a...\`, completed SUCCESS | PASS for existing frontend code, not new engineering-editor acceptance |
+| Frontend exact-head docs CI | HidraWEB Documentation #1, run 38134848756, same head, completed SUCCESS | PASS for preceding documentation |
+| Backend exact-head docs CI | HidraAPI Documentation #213, run 38135231550, \`a691843...\`, completed SUCCESS | PASS for documentation only |
+| Backend full code CI | Latest observed HidraAPI CI #643, run 38131248148, \`93539be...\`, FAILURE in database-dictionary evidence capture | BLOCKED: current code HEAD has no observed full production CI SUCCESS |
+| Formal simulator disposition | HidraAPI \`0fdba2d...\` committed deferral; \`b6f0d...\` HPR-P25-018 preflight; \`a691843...\` HPR-P25-019 preflight | SATISFIED for independent *planning*; no operator editing API proven |
+| Earlier accepted backend OpenAPI | HidraAPI \`5028a90248ddf3a04d344308f6cfc2510f1d0ca2\`, successful run 36996917162; artifact 11222466884; \`sha256:ad6950fc33d4756d59bed3c2162bdcee0d98275bb25c4678faf5dcb31ea3dbed\` | VERIFIED historical artifact only; not recertified current HEAD |
+| Frontend checked-in machine contract | \`openapi/compatibility/hidra-api-baseline.json\` pins \`5028a902...\`; full spec SHA-256 \`4ff8659ac2f19c04bae0c44001371a4c4c8c604bd10f4f324a9c4e4702e83031\`; 20 Orval feature contracts | Historical consumer pin; CI #972 verifies compatibility against this pin, not against API \`a691843...\` |
+| Narrative contract metadata | Canonical contract §4 and older deployment guide still describe \`63f3f609...\` | Historical documentation drift; do not substitute it for actual checked-in manifest or claim current backend equivalence |
+
+The live Topology \`SpringTopologyController\` at this preflight has
+\`GET /api/v1/topology/capabilities\`, pipeline-system POST and facility
+registration POST. It does not itself expose the full physical draft,
+surveyed-profile, individual equipment and cross-owner baseline editing
+lifecycle. The existing map and asset frontends remain reusable, not proof of
+complete new authoring. Explicit backend-generated OpenAPI and actual
+authorization evidence govern any later claims.
+
+### ENG-001–012 verification and non-inference matrix
+
+The following is the existing canonical contract §25 / gap-register
+*planning disposition*, not a newly verified current-HEAD API inventory:
+
+| ENG | Initial gap position | F01 evidence still required before activating associated UI |
+|---|---|---|
+| ENG-001 | IN_PROGRESS | Graph/node/segment create/read/revise/validate/publish methods, DTOs, grants and negative tests |
+| ENG-002 | IN_PROGRESS | Station/header/unit incidence authoring and distinct installed-unit version contracts |
+| ENG-003 | OPEN | Real route/profile writer with declared CRS, chainage, vertical datum and history |
+| ENG-004 | IN_PROGRESS | Typed pipe-section attributes, units, controlled revisions and conflict handling |
+| ENG-005 | IN_PROGRESS | Topology installed unit versus Assets maintenance identity and Party manufacturer reference contracts |
+| ENG-006 | IN_PROGRESS | Approved type-specific manufacturer curve/table source writer, units, provenance and revisions |
+| ENG-007 | IN_PROGRESS | Canonical Custody product/composition/source authoring; supported product types and explicit unsupported states |
+| ENG-008 | IN_PROGRESS | Cross-owner immutable engineering freeze, exact revision/digest and historical replay API |
+| ENG-009 | IN_PROGRESS | Approved telemetry-to-asset binding, timestamps, quality, freshness and effective grants |
+| ENG-010 | IN_PROGRESS | Engineering validation, authorized approval/publication, concurrency and audit transitions |
+| ENG-011 | OPEN | Bounded typed import/export, dry-run, diagnostics, atomic rollback, grants |
+| ENG-012 | IN_PROGRESS | Machine-readable editor completeness, availability and effective permissions |
+
+Each row requires an exact accepted backend method/path, request and response
+schema, permission/role-independent effective grant, applicable source/test,
+OpenAPI-producing commit/artifact digest, and positive/negative contract
+compatibility evidence before status can move to IMPLEMENTED/VERIFIED. No
+permission name, DTO, lifecycle enum or route is inferred from this table.
+
+### Selection outcome and resumption boundary
+
+**HWEB-F01 status: SELECTED — BLOCKED for exact-current contract
+recertification.** This documentation-only selection is not HWEB-F01
+completion. The missing prerequisite is a successful relevant HidraAPI
+full-code CI at the applicable code-equivalent HEAD and its deterministic
+published OpenAPI artifact. The failed #643 dictionary-evidence stage must be
+diagnosed or a separately authorized repair verified; success of the
+documentation workflow cannot waive this gate. The existing earlier artifact
+may still support historical features only.
+
+When that backend gate is satisfied, independently recover both latest
+\`main\` HEADs and the new artifact SHA/digest; enumerate actual routes, DTOs,
+effective permissions, generated Orval consumers, relevant negative tests and
+ENG gaps; update the normative contract/gap register by separately authorized
+exact allowlist; and run the specified compatibility/documentation/CI checks.
+If required current endpoints are absent, remain explicitly blocked rather
+than implement frontend substitutes. HWEB-F02–F10 remain NOT SELECTED.
+
+This one-file registration changes no accepted runtime functionality.
+Only new-head Documentation CI can verify this publication; its result must be
+observed after commit rather than predicted.
