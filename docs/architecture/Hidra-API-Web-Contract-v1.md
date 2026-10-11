@@ -503,3 +503,61 @@ The HidraAPI engineering-foundation track prioritizes operator provisioning, geo
 HidraWEB may restructure or replace **unreleased** components where source-backed contracts and task-specific evidence demonstrate a benefit. Preserve backend business truth, permissions, versioned data, working tested workflows, existing release evidence and accessibility/security guarantees; do not delete the frontend, its canonical contract or current feature code solely because it is not production deployed. Destructive refactors require a bounded implementation task, explicit file allowlist, migration/rollback assessment and tests.
 
 **Immediate next authorized work from this contract:** a separate source-backed HidraAPI ↔ HidraWEB gap/roadmap reconciliation to turn ENG-001–012 into independently verifiable API and frontend tasks. This contract does not authorize feature implementation, backend mutation or simulation reactivation.
+
+
+## 26. HWEB-F01 machine-contract verification (2026-10-11; no consumer repin)
+
+**Verified backend evidence:** HidraAPI code `a691843f359126a9f439217862f780b5806c5fd2`,
+full CI #644/run 38135634129 SUCCESS; documentation-only succeeding
+main `dc01eeb3d8a2ea2fe0115a589948dd1eb8f77d67`.
+Artifact `hidra-api-openapi-a691843f359126a9f439217862f780b5806c5fd2`,
+ID `11701445061`, ZIP SHA-256
+`f1b0a07819b4103b29c219a566acdb7e7afc1becdd38d146f15030d60c433524`,
+embedded JSON SHA-256
+`6bd2a642420b0c7cda3de61e158ff97906f05665c415e1c179c7cbbd7d1ec83f`.
+Verified artifact does **not** imply an approved HidraWEB pin.
+The checked-in `openapi/compatibility/hidra-api-baseline.json` currently
+pins `5028a90248ddf3a04d344308f6cfc2510f1d0ca2`. Historical §4
+text naming `63f3f609...` is not the effective manifest.
+
+Current backend contracts include the exact
+`POST /api/v1/topology/pipeline-systems` with
+`CreatePipelineSystemRequest`, `POST /api/v1/topology/facilities`
+with `RegisterFacilityRequest`, Topology Map `GET` views,
+`POST /api/v1/assets/maintainable-assets` /
+`PATCH /api/v1/assets/maintainable-assets/{assetId}`,
+`POST /api/v1/party/parties`,
+`GET /api/v1/telemetry/points/{pointId}/readings/latest`
+(`ReadingView`), `GET /api/v1/workflow/tasks/{id}/available-actions`,
+and `GET /api/v1/identity/me/permissions`. None alone is proof of a
+complete engineering authoring/approval/baseline workflow. Inspected
+protected operations declare `hidraBearerJwt`, **not** exact per-ENG
+effective resource/action grants; backend authorization remains final.
+
+Comparing *both retrieved deterministic JSON artifacts* yields 240→244
+paths, 259→263 HTTP operations, and 227→231 component schemas.
+The newly added operations are
+`POST /api/v1/identity/authentication/oidc/evaluate` and
+`POST /api/v1/risk/assessments/{id}/approve`, `/score` and `/submit`.
+No previously published HTTP operation or named component schema was
+removed. Nevertheless, the six changed existing schemas require explicit
+consumer review:
+
+| Schema | Exact field-level difference |
+|---|---|
+| `CreateOrganizationUnitRequest` | `validFrom` changed from optional to required |
+| `CreatePipelineSystemRequest` | `systemType` removed, `systemTypeCode` added |
+| `PipelineSystemResponse` | `systemType` removed; `systemTypeCode`, `systemTypeId` and localized type names added |
+| `StartIntegrationJobRunRequest` | `runNumber` removed |
+| `CreateRiskAssessmentRequest` | optional `scopes` collection added |
+| `AnalyticsProjectionRunResponse` | `projectionDefinitionVersion` added |
+
+At least the now-required organization `validFrom` affects an actual
+checked-in consumer slice that treats it as optional. Contract changes
+must be resolved against backend policy and tested, not guessed.
+No automatic upgrade of the 20 Orval slices, no new generic permissions,
+no fabricated unsupported engineering endpoints, no simulator physics
+and no production acceptance are authorized. **HWEB-F01 remains in
+progress pending compatible source-backed consumer pin plus complete
+permission and acceptance evidence.** See the corresponding dated ENG gap
+register delta and Ultimate Roadmap task status.

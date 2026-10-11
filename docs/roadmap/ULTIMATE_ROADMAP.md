@@ -314,3 +314,64 @@ than implement frontend substitutes. HWEB-F02–F10 remain NOT SELECTED.
 This one-file registration changes no accepted runtime functionality.
 Only new-head Documentation CI can verify this publication; its result must be
 observed after commit rather than predicted.
+
+
+## 2026-10-11 — HWEB-F01 artifact-verified capability assessment; compatibility gate remains open
+
+The owner instruction `next` continues **selected HWEB-F01 only** under the
+previously recorded task registration. This is its bounded documentation
+verification, not F02 selection or a code/client migration. Exact allowed
+write scope for this commit: this Ultimate Roadmap, the normative
+`docs/architecture/Hidra-API-Web-Contract-v1.md` and the
+`docs/roadmap/HidraAPI-Frontend-Backend-Gap-Register.md`, all append-only.
+Exact registered message:
+`docs(contract): verify HWEB-F01 engineering API capability baseline`.
+No source, generated client, OpenAPI manifest, tests, CI or backend files
+may be changed.
+
+Source lease: HidraWEB `9ece03254f978343ba21c8e4a04d05e07440242f`;
+HidraAPI `dc01eeb3d8a2ea2fe0115a589948dd1eb8f77d67`, whose change
+relative to code head `a691843f359126a9f439217862f780b5806c5fd2`
+is limited to roadmap/reconciliation documentation. Full HidraAPI CI #644
+(run 38135634129) completed **SUCCESS** at that exact code head; the
+deterministic OpenAPI artifact `11701445061` was published with archive
+SHA-256 `f1b0a07819b4103b29c219a566acdb7e7afc1becdd38d146f15030d60c433524`
+and `hidra-api.json` SHA-256
+`6bd2a642420b0c7cda3de61e158ff97906f05665c415e1c179c7cbbd7d1ec83f`.
+Current backend Documentation #214 also passed. The earlier full CI #643
+failure is historical; its previous gate is resolved by successful #644.
+
+The actual HidraWEB machine-contract pin remains the older
+`5028a90248ddf3a04d344308f6cfc2510f1d0ca2`, artifact
+`11222466884`, whose embedded full JSON SHA-256 is
+`4ff8659ac2f19c04bae0c44001371a4c4c8c604bd10f4f324a9c4e4702e83031`.
+Existing HidraWEB Code CI #972 verified the old pin, not a new current-API
+consumer migration. Inspected old versus current backend OpenAPI:
+240→244 paths, 259→263 operations, 227→231 schemas; four new operations,
+six changed existing schemas. The old operations and schema names remain,
+but `CreateOrganizationUnitRequest.validFrom` became required;
+`CreatePipelineSystemRequest.systemType` changed to `systemTypeCode`;
+`PipelineSystemResponse.systemType` was replaced with type identity fields;
+`StartIntegrationJobRunRequest.runNumber` disappeared. The current
+identity/organization frontend slice still treats `validFrom` as optional.
+Do not silently promote this artifact: the current 20 frontend Orval
+consumers have not passed an accepted exact-new-artifact compatibility run.
+
+The source-backed ENG-001–012 verification is recorded below in the
+canonical contract and gap register. Existing system/facility creation,
+read-only Topology Map, Assets, Telemetry, Workflow and Identity APIs remain
+real **limited** contracts; no complete physical graph, surveyed route,
+manufacturer curve, multi-product or engineering baseline editor is proven.
+The new OpenAPI marks inspected protected operations with
+`hidraBearerJwt`; it does not publish the complete per-ENG action/resource
+grant matrix or forbidden-user integration evidence.
+
+**HWEB-F01 current status: SELECTED — IN PROGRESS; consumer contract
+reconciliation BLOCKED.** Resolve the concrete schema/permission changes
+through owner-approved, independently tested compatibility work before any
+new pin, Orval generation or F01 closure. A future contract migration
+requires a separate exact file/test scope, current HEAD lease, reviewed
+backend authoritative behavior, frontend typecheck/unit/E2E and exact-head
+CI. F02–F10 remain PROPOSED — NOT SELECTED; simulation remains deferred.
+This documentation update itself requires exact-head Documentation CI
+after publication and makes no advance claim about its result.

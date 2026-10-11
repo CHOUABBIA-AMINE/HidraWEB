@@ -426,3 +426,51 @@ Do not expand HWEB-009 closure into alarm suppression, realtime, HSE mutations, 
 - Generic JPA attributes, JSON fields, OpenAPI type names and documentation proposals are insufficient by themselves to certify an operator authoring lifecycle.
 - Existing HWEB-R and HWEB-P completed evidence remains historical and unmodified; working pages may be reused or refactored only through a separately selected scoped task.
 - Proposed simulator deferral affects new numerical development only; engineering data, historic source revisions and qualified telemetry remain independent. No hydraulic output, OT write or fake realtime event is authorized.
+
+
+## 2026-10-11 — HWEB-F01 artifact-backed ENG-001–012 capability audit
+
+Backend code head `a691843f359126a9f439217862f780b5806c5fd2`:
+HidraAPI CI #644 SUCCESS; code-equivalent documentation-only main
+`dc01eeb3d8a2ea2fe0115a589948dd1eb8f77d67`.
+OpenAPI artifact `11701445061`, ZIP SHA-256
+`f1b0a07819b4103b29c219a566acdb7e7afc1becdd38d146f15030d60c433524`,
+JSON SHA-256
+`6bd2a642420b0c7cda3de61e158ff97906f05665c415e1c179c7cbbd7d1ec83f`.
+This is *published backend truth*, not successful HidraWEB repinning.
+The existing 20 feature Orval contracts remain historical accepted
+frontend inputs and require separate current compatibility testing.
+
+| ENG | Existing backend contract evidence | Missing target or verification | Disposition |
+|---|---|---|---|
+| ENG-001 | `POST /api/v1/topology/pipeline-systems` | Physical graph draft/read/validate/revise/publish and grants | PARTIAL; NOT EDITOR-READY |
+| ENG-002 | `POST /api/v1/topology/facilities` | Station headers, independent units/incidence, revision writer | PARTIAL; NOT EDITOR-READY |
+| ENG-003 | `GET /api/v1/topology/map/geojson` | CRS/datum/chainage/intermediate survey and profile write/history | OPEN; NOT EDITOR-READY |
+| ENG-004 | Internal physical source stores; limited system POST | Pipe-section engineering property writer/history, units/conflicts | PARTIAL; NOT EDITOR-READY |
+| ENG-005 | Assets maintainable-asset POST/PATCH and Party registration | Canonical installed-unit/model/manufacturer typed binding and history | PARTIAL; NOT EDITOR-READY |
+| ENG-006 | Existing Simulation metadata endpoints | Manufacturer curve/table/limit authoring/approval without solver | PARTIAL; NOT EDITOR-READY |
+| ENG-007 | `POST /api/v1/custody/transfer-tickets` | Canonical product/composition/method revision writer | PARTIAL; NOT EDITOR-READY |
+| ENG-008 | Existing internal bounded immutable source records | Multi-owner baseline freeze, digest, compare/history/replay API | PARTIAL; NOT EDITOR-READY |
+| ENG-009 | Telemetry latest/history/trend GET | Qualified asset/location binding, freshness and permission acceptance | PARTIAL; READER ONLY |
+| ENG-010 | Workflow available-actions and transitions | Engineering-specific validation, publication/approval and concurrency | PARTIAL; NOT EDITOR-READY |
+| ENG-011 | `POST /api/v1/audit/exports` is **audit only** | Engineering typed import/export, dry-run, rollback and diagnostics | OPEN; NOT EDITOR-READY |
+| ENG-012 | Topology capabilities and Identity effective-permissions GET | Per-editor missing-value/eligibility/grant machine contract | PARTIAL; NOT COMPLETE |
+
+Published `hidraBearerJwt` marks inspected protected operations but
+does not provide the required fine-grained action/resource grant matrix;
+do not invent specific permission codes. Schema comparison adds four
+operations and four named schemas, but six changed schemas include
+breaking request/response changes:
+`CreateOrganizationUnitRequest.validFrom` now required,
+`CreatePipelineSystemRequest.systemType` replaced by
+`systemTypeCode`, `PipelineSystemResponse.systemType` replaced with
+typed identity fields, and `StartIntegrationJobRunRequest.runNumber`
+removed. See normative contract §26 for the full six-item delta.
+Actual frontend consumer compatibility with this new artifact was **not
+executed**; the old manifest stays pinned to `5028a902...`.
+
+**Current HWEB-F01: SELECTED — IN PROGRESS / BLOCKED FOR CONSUMER PIN.**
+The missing backend CI and artifact are resolved; owner-reviewed
+compatibility, permission-negative tests, affected Orval consumer regeneration
+and measured frontend CI remain necessary before F01 closure.
+All HWEB-F02–F10 stay PROPOSED / NOT SELECTED.
