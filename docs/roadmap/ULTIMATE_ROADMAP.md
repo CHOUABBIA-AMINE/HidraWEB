@@ -375,3 +375,42 @@ backend authoritative behavior, frontend typecheck/unit/E2E and exact-head
 CI. F02–F10 remain PROPOSED — NOT SELECTED; simulation remains deferred.
 This documentation update itself requires exact-head Documentation CI
 after publication and makes no advance claim about its result.
+
+
+## 2026-10-11 — HWEB-F01 organization-unit effective-date consumer correction
+
+The owner instruction `next` continues **the already SELECTED HWEB-F01**
+with one narrowly scoped compatibility remediation, not HWEB-F02 or a
+new backend/simulation task. Full backend CI #644 (38135634129, SUCCESS)
+published verified code commit `a691843f359126a9f439217862f780b5806c5fd2`
+with `CreateOrganizationUnitRequest.validFrom` required (the backend
+record has `@NotNull Instant validFrom`, and command validation rejects
+null). Latest backend `dc01eeb3d8a2ea2fe0115a589948dd1eb8f77d67`
+is documentation-only beyond that verified code. The existing HidraWEB form
+uses `optionalInstant`, initially leaves `validFrom` empty, and permits
+submitting `undefined`. The actual published backend contract therefore
+requires a consumer correction before adopting the new OpenAPI.
+
+**Execution scope and exact commit message:** `fix(organization): require explicit unit validFrom`.
+Exact write allowlist:
+- `src/features/context/components/OrganizationCommandPanel.tsx`
+- `src/features/context/components/OrganizationCommandPanel.test.tsx` (new)
+- `src/features/context/model/organizationUnitValidFrom.ts` (new)
+- `src/features/context/model/organizationUnitValidFrom.test.ts` (new)
+- `docs/roadmap/ULTIMATE_ROADMAP.md` (this append-only record)
+
+The correction requires an explicitly supplied, valid local date/time;
+it disables creation until supplied and refuses to synthesize a fallback.
+The command must carry a converted ISO instant. New pure validation and
+component submission tests cover missing, malformed and valid input.
+No backend endpoint/DTO, static permission, implied effective date,
+engineering data, simulator state or unapproved integration is introduced.
+The old frontend OpenAPI manifest and all generated-client inputs remain
+unchanged, keeping the existing 20-feature compatibility gate stable.
+
+**Acceptance:** exact commit parent/allowlist/diff verification, new-head
+Code CI test/typecheck/build/Playwright and Documentation CI results.
+This registration is not advance evidence of CI success. HWEB-F01 remains
+**IN PROGRESS**: the full current backend OpenAPI repin, all affected
+consumer slices and effective-permission/negative-case acceptance are
+still separate prerequisites; HWEB-F02–F10 remain NOT SELECTED.

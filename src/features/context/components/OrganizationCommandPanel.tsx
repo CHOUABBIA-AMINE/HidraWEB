@@ -3,6 +3,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { parseOrganizationUnitValidFrom } from '@/features/context/model/organizationUnitValidFrom';
+
 import type {
   AssignEmployeeRequest,
   CreateOrganizationUnitRequest,
@@ -43,8 +45,12 @@ export function OrganizationCommandPanel() {
     employeeId: '', organizationUnitId: '', positionId: '', assignmentType: 'PRIMARY', validFrom: '', validTo: '',
   });
 
+  const unitValidFrom = parseOrganizationUnitValidFrom(unit.validFrom);
+
   const createUnitMutation = useMutation({
     mutationFn: () => {
+      const validFrom = parseOrganizationUnitValidFrom(unit.validFrom);
+      if (!validFrom) throw new Error('Organization unit validFrom must be supplied.');
       const request: CreateOrganizationUnitRequest = {
         code: optional(unit.code),
         nameAr: optional(unit.nameAr),
@@ -53,7 +59,7 @@ export function OrganizationCommandPanel() {
         unitTypeId: optional(unit.unitTypeId),
         parentUnitId: optional(unit.parentUnitId),
         status: unit.status as CreateOrganizationUnitRequest['status'],
-        validFrom: optionalInstant(unit.validFrom),
+        validFrom,
       };
       return createOrganizationUnit(request);
     },
@@ -111,9 +117,9 @@ export function OrganizationCommandPanel() {
           <TextField label={t('context.fields.status')} onChange={(event) => setUnit({ ...unit, status: event.target.value })} select size="small" value={unit.status}>
             {UNIT_STATUSES.map((value) => <MenuItem key={value} value={value}>{value}</MenuItem>)}
           </TextField>
-          <TextField slotProps={{ inputLabel: { shrink: true } }} label={t('context.fields.validFrom')} onChange={(event) => setUnit({ ...unit, validFrom: event.target.value })} size="small" type="datetime-local" value={unit.validFrom} />
+          <TextField required error={unit.validFrom.length > 0 && !unitValidFrom} slotProps={{ inputLabel: { shrink: true } }} label={t('context.fields.validFrom')} onChange={(event) => setUnit({ ...unit, validFrom: event.target.value })} size="small" type="datetime-local" value={unit.validFrom} />
         </Box>
-        <Button disabled={!permissions.can(IDENTITY_ORGANIZATION_PERMISSIONS.createOrganizationUnit) || createUnitMutation.isPending} onClick={() => createUnitMutation.mutate()} sx={{ mt: 2 }} variant="contained">{t('context.organization.createUnit')}</Button>
+        <Button disabled={!permissions.can(IDENTITY_ORGANIZATION_PERMISSIONS.createOrganizationUnit) || !unitValidFrom || createUnitMutation.isPending} onClick={() => createUnitMutation.mutate()} sx={{ mt: 2 }} variant="contained">{t('context.organization.createUnit')}</Button>
         {createUnitMutation.error ? <Alert severity="error" sx={{ mt: 2 }}>{String(createUnitMutation.error)}</Alert> : null}
         {createUnitMutation.data ? <Alert severity="success" sx={{ mt: 2 }}>{t('context.organization.unitCreated', { id: createUnitMutation.data.id ?? '—' })}</Alert> : null}
       </Paper>
