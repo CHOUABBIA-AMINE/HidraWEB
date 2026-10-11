@@ -420,7 +420,7 @@ When they conflict with this canonical contract or live HidraAPI/OpenAPI, live H
 
 ## 25. Foundation-first API–WEB extension contract — 2026-10-11 (TARGET; not a live endpoint inventory)
 
-**Planning baseline:** HidraAPI \`c3f47c79248d8e645e1fbe924ede79782dda6c17\`; HidraWEB \`c7dd3d2a0a4ca6b414a1ce57b59ac8542aade7b6\`.
+**Planning baseline:** HidraAPI `c3f47c79248d8e645e1fbe924ede79782dda6c17`; HidraWEB `c7dd3d2a0a4ca6b414a1ce57b59ac8542aade7b6`.
 **Decision boundary:** The owner has requested planning for operator engineering-data provisioning before deferred simulator work. A separate HidraAPI roadmap amendment must formally approve and register simulator deferral; this section does **not** claim that deferral has already been committed to HidraAPI or that planned endpoints exist.
 **Contract status:** TARGET / design baseline. Sections 1–24 remain authoritative for currently implemented transports, subject to live HidraAPI and verified OpenAPI overriding stale historical SHAs. No runtime interface, endpoint, frontend screen, permission or production API was changed by this contract amendment.
 
@@ -439,15 +439,15 @@ The following controller mappings were checked in live HidraAPI source for the p
 
 | Area | Source-backed route | Boundary |
 |---|---|---|
-| Topology | \`GET /api/v1/topology/capabilities\` | Capability discovery only |
-| Topology | \`POST /api/v1/topology/pipeline-systems\` | Existing pipeline-system creation; **not** a complete network editor |
-| Topology | \`POST /api/v1/topology/facilities\` | Existing facility registration; **not** station-internal engineering authoring |
-| Map | \`GET /api/v1/topology/map/layers\` | Published read-only layer catalog |
-| Map | \`GET /api/v1/topology/map/layers/{layerId}/features\` | Source-backed map features, not proof of a surveyed alignment |
-| Map | \`GET /api/v1/topology/map/geojson\` | Published visualization, not complete profile authoring |
-| Map | \`GET /api/v1/topology/map/search\` | Published map search |
-| Identity | \`GET /api/v1/identity/me\` and \`GET /api/v1/identity/me/permissions\` | User and effective grants |
-| Simulation | \`POST /api/v1/simulation/models\`, \`/scenarios\`, \`/runs\` | Existing model/scenario/queueing commands; **not** executing numerical runs |
+| Topology | `GET /api/v1/topology/capabilities` | Capability discovery only |
+| Topology | `POST /api/v1/topology/pipeline-systems` | Existing pipeline-system creation; **not** a complete network editor |
+| Topology | `POST /api/v1/topology/facilities` | Existing facility registration; **not** station-internal engineering authoring |
+| Map | `GET /api/v1/topology/map/layers` | Published read-only layer catalog |
+| Map | `GET /api/v1/topology/map/layers/{layerId}/features` | Source-backed map features, not proof of a surveyed alignment |
+| Map | `GET /api/v1/topology/map/geojson` | Published visualization, not complete profile authoring |
+| Map | `GET /api/v1/topology/map/search` | Published map search |
+| Identity | `GET /api/v1/identity/me` and `GET /api/v1/identity/me/permissions` | User and effective grants |
+| Simulation | `POST /api/v1/simulation/models`, `/scenarios`, `/runs` | Existing model/scenario/queueing commands; **not** executing numerical runs |
 
 The existing frontend Topology Workspace is a read/inspect implementation, not a verified physical network design/editor. Existing HidraWEB OpenAPI feature slices are historical pinned transport evidence; regenerate only after sourcing a new exact-head verified HidraAPI artifact, checking compatibility and satisfying the relevant task gate.
 
@@ -476,7 +476,7 @@ A backend entity, existing JPA mapping or generic JSON value alone is **insuffic
 
 - Browser engineering operations call only published, generated HidraAPI clients through typed feature adapters. Never construct undocumented endpoints, fabricate HTTP verbs, reuse a read-only mapping for mutation, or duplicate numeric engineering calculations in React.
 - Each editor separates local **unsaved draft**, backend **validated draft**, **approved effective baseline**, and **historical revision**. Editing approved engineering truth must create a governed new revision, not mutate historical simulation/evidence inputs.
-- Permission-aware navigation comes from \`GET /api/v1/identity/me/permissions\`; backend authorization remains final. Backend ProblemDetail and 400/401/403/404/409/422 (where actually published) must lead to explicit UX, including field-level validation/conflict resolution.
+- Permission-aware navigation comes from `GET /api/v1/identity/me/permissions`; backend authorization remains final. Backend ProblemDetail and 400/401/403/404/409/422 (where actually published) must lead to explicit UX, including field-level validation/conflict resolution.
 - Every measurement field presents an explicit unit; convert with validated backend rules and render original units/reference conditions when needed. Pressure gauge versus absolute, pipe nominal versus internal diameter, CRS/vertical datum and characteristic-map reference frames must never be silently conflated.
 - Map features are a visual projection of authoritative geometry; do not synthesize the actual surveyed pipeline route from two endpoints or display accuracy unsupported by the source.
 - UI never alters manufacturer-certified curves via calibration, equipment updates or scenario experimentation; preserve separately revisioned evidence.
