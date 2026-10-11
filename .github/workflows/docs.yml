@@ -1,0 +1,87 @@
+name: HidraWEB Documentation Validation
+
+on:
+  push:
+    branches:
+      - main
+      - 'hweb-*'
+    paths:
+      - 'docs/**'
+      - '**/*.md'
+      - '.github/workflows/docs.yml'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - '**/*.md'
+      - '.github/workflows/docs.yml'
+      - '.github/workflows/ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hidraweb-docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Roadmap and contract documentation verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Check canonical documentation consistency
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          required = [
+              Path('README.md'),
+              Path('docs/architecture/Hidra-API-Web-Contract-v1.md'),
+              Path('docs/roadmap/ULTIMATE_ROADMAP.md'),
+              Path('docs/roadmap/HidraAPI-Frontend-Backend-Gap-Register.md'),
+              Path('docs/roadmap/HidraWEB-Post-Reconciliation-Product-Roadmap.md'),
+              Path('docs/roadmap/HidraWeb-Development-Roadmap.md'),
+          ]
+          failures = []
+          for path in required:
+              if not path.is_file():
+                  failures.append(f'Missing canonical documentation: {path}')
+                  continue
+              data = path.read_text(encoding='utf-8')
+              if not data.strip():
+                  failures.append(f'Empty canonical document: {path}')
+              if any(line.startswith(('<<<<<<< ', '=======', '>>>>>>> ')) for line in data.splitlines()):
+                  failures.append(f'Merge-conflict marker: {path}')
+              if not data.lstrip().startswith('# '):
+                  failures.append(f'Missing top-level Markdown title: {path}')
+
+          roadmap = Path('docs/roadmap/ULTIMATE_ROADMAP.md')
+          contract = Path('docs/architecture/Hidra-API-Web-Contract-v1.md')
+          gaps = Path('docs/roadmap/HidraAPI-Frontend-Backend-Gap-Register.md')
+          if all(p.is_file() for p in (roadmap, contract, gaps)):
+              roadmap_text = roadmap.read_text(encoding='utf-8')
+              contract_text = contract.read_text(encoding='utf-8')
+              gap_text = gaps.read_text(encoding='utf-8')
+              for i in range(1, 13):
+                  code = f'ENG-{i:03d}'
+                  if code not in contract_text or code not in gap_text or code not in roadmap_text:
+                      failures.append(f'Missing cross-document engineering contract identifier: {code}')
+              for i in range(1, 11):
+                  code = f'HWEB-F{i:02d}'
+                  if code not in roadmap_text:
+                      failures.append(f'Missing planned frontend task: {code}')
+              if 'PROPOSED' not in roadmap_text or 'NOT SELECTED' not in roadmap_text:
+                  failures.append('Roadmap must preserve unselected task governance.')
+
+          if failures:
+              raise SystemExit('\n'.join(failures))
+          print('HidraWEB documentation contract/roadmap checks PASSED.')
+          PY
