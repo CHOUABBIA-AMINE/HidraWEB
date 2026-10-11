@@ -414,3 +414,92 @@ A frontend task satisfies this contract only when:
 Documents such as `docs/02-Backend-Frontend-Contract.md`, API catalogs, spreadsheets, `handoff.md`, and older gap reports remain evidence/history only.
 
 When they conflict with this canonical contract or live HidraAPI/OpenAPI, live HidraAPI wins and this contract is the current HidraWEB governance baseline.
+
+
+---
+
+## 25. Foundation-first API–WEB extension contract — 2026-10-11 (TARGET; not a live endpoint inventory)
+
+**Planning baseline:** HidraAPI \`c3f47c79248d8e645e1fbe924ede79782dda6c17\`; HidraWEB \`c7dd3d2a0a4ca6b414a1ce57b59ac8542aade7b6\`.
+**Decision boundary:** The owner has requested planning for operator engineering-data provisioning before deferred simulator work. A separate HidraAPI roadmap amendment must formally approve and register simulator deferral; this section does **not** claim that deferral has already been committed to HidraAPI or that planned endpoints exist.
+**Contract status:** TARGET / design baseline. Sections 1–24 remain authoritative for currently implemented transports, subject to live HidraAPI and verified OpenAPI overriding stale historical SHAs. No runtime interface, endpoint, frontend screen, permission or production API was changed by this contract amendment.
+
+### 25.1 Source-of-truth and feature boundary
+
+1. **Topology** owns authoritative physical graph, stations/facilities, geospatial route and elevation/section source facts, installed hydraulic incidence, and effective physical configurations.
+2. **Assets** owns maintainable asset identity, model/manufacturer and lifecycle evidence as established by its current contracts; **Party** remains the authoritative manufacturer-party identity where appropriate.
+3. **Custody/product-owning context** owns canonical product/composition/method source revisions; **Simulation** owns existing numerical equipment-characteristic revision records. These ownership assignments must be confirmed in each authorized implementation preflight; no duplicate frontend-owned catalog is permitted.
+4. **Telemetry/Workflow/Identity** retain their respective measurement, approval and authorization authority.
+5. HidraWEB owns interaction and presentation state only. It must never create a second persistent topology/product/asset truth in browser storage, infer absent physical facts, or present simulated forecasts as measured SCADA.
+6. Simulator numerical execution, manual/automated simulation triggers, calibration and product-specific physics are **DEFERRED TARGET** when and only when corresponding owner-roadmap deferral is approved. Existing simulation metadata/run queue contracts may be shown only as the limited currently published capability, never as proof that numerical execution occurred.
+
+### 25.2 Current verified entry points (limited evidence)
+
+The following controller mappings were checked in live HidraAPI source for the planning baseline. Method bodies, permissions, complete DTO schema and runtime acceptance remain governed by the exact OpenAPI artifact and backend tests:
+
+| Area | Source-backed route | Boundary |
+|---|---|---|
+| Topology | \`GET /api/v1/topology/capabilities\` | Capability discovery only |
+| Topology | \`POST /api/v1/topology/pipeline-systems\` | Existing pipeline-system creation; **not** a complete network editor |
+| Topology | \`POST /api/v1/topology/facilities\` | Existing facility registration; **not** station-internal engineering authoring |
+| Map | \`GET /api/v1/topology/map/layers\` | Published read-only layer catalog |
+| Map | \`GET /api/v1/topology/map/layers/{layerId}/features\` | Source-backed map features, not proof of a surveyed alignment |
+| Map | \`GET /api/v1/topology/map/geojson\` | Published visualization, not complete profile authoring |
+| Map | \`GET /api/v1/topology/map/search\` | Published map search |
+| Identity | \`GET /api/v1/identity/me\` and \`GET /api/v1/identity/me/permissions\` | User and effective grants |
+| Simulation | \`POST /api/v1/simulation/models\`, \`/scenarios\`, \`/runs\` | Existing model/scenario/queueing commands; **not** executing numerical runs |
+
+The existing frontend Topology Workspace is a read/inspect implementation, not a verified physical network design/editor. Existing HidraWEB OpenAPI feature slices are historical pinned transport evidence; regenerate only after sourcing a new exact-head verified HidraAPI artifact, checking compatibility and satisfying the relevant task gate.
+
+### 25.3 Foundation API contracts to be discovered and implemented
+
+**These are requirement identifiers, not invented HTTP paths.** Exact REST paths, methods, DTOs, permission names, versioning and ownership are to be discovered from live source or admitted by separate backend implementation tasks before UI authoring.
+
+| Requirement ID | Operator capability / backend contract | Required semantics | Status |
+|---|---|---|---|
+| ENG-001 | Physical network draft authoring, node/segment/connectivity validation, read/revise/publish | Atomic graph consistency, immutable effective versions, identity and conflict handling | PARTIAL / TARGET |
+| ENG-002 | Station/facility and hydraulic header/connectivity management | Independently referenced installed units, series/parallel incidence, effective versions | PARTIAL / TARGET |
+| ENG-003 | Geospatial route/chainage and elevation-profile authoring/import/export | Declared CRS, datum/vertical datum, ordered points, survey provenance, precision and uncertainty | TARGET |
+| ENG-004 | Pipe-section physical properties | Supplied inner diameter, wall/material/roughness and length with source units/validity; no inferred values | PARTIAL / TARGET |
+| ENG-005 | Installed equipment type/model/manufacturer/attributes | Canonical Assets/Party relationships, typed required fields, documented provenance and lifecycle | PARTIAL / TARGET |
+| ENG-006 | Manufacturer curves/tables and immutable characteristic revisions | Units, operating envelope, applicability, characteristic reference conditions and approval lineage; no formulas invented in browser | PARTIAL / TARGET |
+| ENG-007 | Product/fluid composition and source/property-method revisions | Canonical product owner, exact composition and reference conditions, qualification status, unknown values explicit | PARTIAL / TARGET |
+| ENG-008 | Complete engineering baseline freeze, historical read and comparison | Version-pinned graph, route/profile, station, equipment, manufacturer and fluid references plus digests | TARGET |
+| ENG-009 | Trusted telemetry-to-asset/location binding and operator monitoring | Quality, freshness, timestamp/source and permission controls, no fake realtime event family | PARTIAL / TARGET |
+| ENG-010 | Engineering configuration validation, approvals, revision activation and audit | Backend authoritative validation/Workflow, optimistic concurrency, event/effective dates, replay | PARTIAL / TARGET |
+| ENG-011 | Batch engineering data import/export | Schema/units validation, dry-run diagnostics, atomicity/rollback, evidence and historical provenance | TARGET |
+| ENG-012 | Operator-facing completeness/capability discovery | Machine-readable unsupported/missing-input diagnostics; feature gating by backend capabilities and effective grants | TARGET |
+
+A backend entity, existing JPA mapping or generic JSON value alone is **insufficient** evidence for a browser-authorable, correctly validated feature. No target workflow may be relabeled IMPLEMENTED without published request/response transport and integration acceptance.
+
+### 25.4 UI/API interaction rules
+
+- Browser engineering operations call only published, generated HidraAPI clients through typed feature adapters. Never construct undocumented endpoints, fabricate HTTP verbs, reuse a read-only mapping for mutation, or duplicate numeric engineering calculations in React.
+- Each editor separates local **unsaved draft**, backend **validated draft**, **approved effective baseline**, and **historical revision**. Editing approved engineering truth must create a governed new revision, not mutate historical simulation/evidence inputs.
+- Permission-aware navigation comes from \`GET /api/v1/identity/me/permissions\`; backend authorization remains final. Backend ProblemDetail and 400/401/403/404/409/422 (where actually published) must lead to explicit UX, including field-level validation/conflict resolution.
+- Every measurement field presents an explicit unit; convert with validated backend rules and render original units/reference conditions when needed. Pressure gauge versus absolute, pipe nominal versus internal diameter, CRS/vertical datum and characteristic-map reference frames must never be silently conflated.
+- Map features are a visual projection of authoritative geometry; do not synthesize the actual surveyed pipeline route from two endpoints or display accuracy unsupported by the source.
+- UI never alters manufacturer-certified curves via calibration, equipment updates or scenario experimentation; preserve separately revisioned evidence.
+- No direct OT actuation, SCADA write, simulated automatic regulation, undocumented alarm publication, or fabricated telemetry stream.
+- Accessibility, responsive GIS, bounded map/grid fetches, optimistic concurrency, error recovery and audit provenance are mandatory release criteria.
+
+### 25.5 API-contract conformance and release gates
+
+Before making a new engineering editor production-ready:
+
+1. Pin exact HidraAPI commit and successful relevant backend CI; fetch its published deterministic OpenAPI artifact, digest and backend permission catalog.
+2. Diff against current HidraWEB consumed OpenAPI slices and generated Orval types; fail on unexplained breaking changes; use deliberate versioned contract changes, never handwritten type divergence.
+3. Verify create → validate → save → retrieve → revise → historical replay and forbidden-user paths against actual backend/DB integration, not just MSW mocks.
+4. Verify route/chainage/elevation/CRS and custom equipment/product unit round trips, null/missing behavior, consistency errors, old-version retention, and source provenance.
+5. Exercise concurrency conflicts, expired grants, failed imports and rollback with live integration evidence.
+6. Run documented HidraWEB lint, typecheck, unit/component, performance, build and Playwright suites plus an environment-specific OIDC/TLS/proxy integration smoke and UAT.
+7. Feature activation is explicit and fail-closed if required backend paths, permissions, approved parameter schemas or runtime mode are absent.
+8. Never declare production readiness from a successful frontend build or contract document alone.
+
+### 25.6 Roadmap dependency and migration policy
+
+The HidraAPI engineering-foundation track prioritizes operator provisioning, geospatial profiles, stations/equipment, manufacturer parameters, products and immutable engineering baselines (HPR-P25-018–023 design obligations and separately registered implementation envelopes), with independent telemetry/monitoring. These are **planned dependencies**, not currently accepted end-to-end endpoints. Solver registry, execution and calibration tasks (HPR-P25-024–027 and unfinished 008 scopes) remain outside the foundation-first UI milestone if formally deferred.
+
+HidraWEB may restructure or replace **unreleased** components where source-backed contracts and task-specific evidence demonstrate a benefit. Preserve backend business truth, permissions, versioned data, working tested workflows, existing release evidence and accessibility/security guarantees; do not delete the frontend, its canonical contract or current feature code solely because it is not production deployed. Destructive refactors require a bounded implementation task, explicit file allowlist, migration/rollback assessment and tests.
+
+**Immediate next authorized work from this contract:** a separate source-backed HidraAPI ↔ HidraWEB gap/roadmap reconciliation to turn ENG-001–012 into independently verifiable API and frontend tasks. This contract does not authorize feature implementation, backend mutation or simulation reactivation.
