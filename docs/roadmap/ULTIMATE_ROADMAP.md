@@ -414,3 +414,36 @@ This registration is not advance evidence of CI success. HWEB-F01 remains
 **IN PROGRESS**: the full current backend OpenAPI repin, all affected
 consumer slices and effective-permission/negative-case acceptance are
 still separate prerequisites; HWEB-F02–F10 remain NOT SELECTED.
+
+
+## 2026-10-11 — HWEB-F01 CI #973 failure: existing Playwright contract expectation reconciled
+
+Owner reported failure of HidraWEB Code CI #973, run `38137156051`, at
+commit `a51651b429043e34f734e7a148bf497abd7b9a25`.
+Exact job logs: OpenAPI compatibility, all generated clients, lint,
+TypeScript typecheck, unit tests, performance, build and release package
+checks **PASS**; Playwright suite 60/61 passed. The single failed case,
+`tests/e2e/bootstrap.spec.ts:195`, expects the `Créer une unité`
+button to be enabled without entering `validFrom`. The HWEB-F01
+backend-contract correction deliberately disables that action until a
+supplied valid date exists; backend `CreateOrganizationUnitRequest`
+uses `@NotNull Instant validFrom`. Retaining the old test expectation
+would reauthorize a request the backend no longer accepts.
+
+**Selected action:** Repair only CI #973's stale regression expectation,
+not the implementation, backend or another roadmap task.
+**Exact commit message:** `test(organization): align effective-date Playwright regression`.
+**Allowed writes:** `tests/e2e/bootstrap.spec.ts` (replace the stale
+single assertion with a negative check, an explicit local effective
+date entry and a positive enablement check), plus append-only
+`docs/roadmap/ULTIMATE_ROADMAP.md` evidence. The test uses the
+existing mocked permission grant; it does not invent a new endpoint,
+date default, permission or persisted record. No OpenAPI repin, client
+generation, code/feature change, CI workflow modification, numerical
+simulation, or HWEB-F02–F10 selection.
+
+Publication acceptance requires verifying the exact parent commit,
+two-file diff, and new-head GitHub Actions Code CI startup. CI success
+must be observed before accepting this regression repair; do not
+declare it prematurely. HWEB-F01 remains IN PROGRESS until its broader
+backend-consumer compatibility and authorization checks pass.

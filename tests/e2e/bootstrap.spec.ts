@@ -207,7 +207,11 @@ test('HWEB-004 exposes backend-supported identity and organization context works
   await expect(page).toHaveURL(/\/administration\/organization$/);
   await expect(page.getByRole('heading', { name: 'Organisation' })).toBeVisible();
   await expect(page.getByText('Direction Transport')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Créer une unité' })).toBeEnabled();
+  const createUnit = page.getByRole('button', { name: 'Créer une unité' });
+  // HWEB-F01: backend now requires an explicitly entered organization-unit validFrom.
+  await expect(createUnit).toBeDisabled();
+  await page.getByLabel('Valide à partir de').first().fill('2026-10-11T14:30');
+  await expect(createUnit).toBeEnabled();
 });
 
 test('HWEB-004 surfaces backend 403 when an identity mutation is refused', async ({ page }) => {
