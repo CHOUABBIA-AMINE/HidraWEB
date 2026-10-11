@@ -604,3 +604,43 @@ Next work must begin from one of these evidence-based triggers:
 ```
 
 Do not invent a next feature task solely to continue the sequence.
+
+
+---
+
+## 2026-10-11 — HWEB-CONTRACT-001 foundation-first engineering workbench roadmap (proposed task registry)
+
+**Planning baseline:** HidraAPI `c3f47c79248d8e645e1fbe924ede79782dda6c17`; HidraWEB `23693ce520f6df2d6c1143ab65d703da2a0a01d0` with canonical §25 addendum and CI #967 SUCCESS. This is a prospective phase following the existing completed HWEB-R and HWEB-P history, **not** a reopening of those tasks or a representation that the new backend endpoints exist. The proposed simulator deferral still requires formal approval/recording in HidraAPI's Ultimate Roadmap. This addition does not authorize feature implementation, destructive refactoring or numerical simulation.
+
+**Authority:** live HidraAPI implementation → exact successfully published backend OpenAPI + permissions → generated HidraWEB clients → canonical [API–WEB Contract §25](../architecture/Hidra-API-Web-Contract-v1.md) → [ENG gap register](HidraAPI-Frontend-Backend-Gap-Register.md) → this roadmap. Existing production-readiness and release/UAT gates continue unchanged.
+
+### Milestones and executable future authorizations
+
+The codes below are **PROPOSED / NOT SELECTED**. Before any implementation, verify against all existing HWEB/HWEB-M task codes and complete an explicit task registration with exact file allowlist, commit message, tests, backend OpenAPI evidence and owner selection. They are intentionally not represented as executable registered commits.
+
+| Candidate code | Feature and contract IDs | Dependency | Acceptance requirement | Status |
+|---|---|---|---|---|
+| HWEB-F01 | Contract/source pin and API capability matrix — ENG-001–012 | Formal HidraAPI foundation/deferred-track disposition; accepted relevant API baseline | Exact feature contract/permissions/delta catalog, identified frontend reuse; no invented routes | PROPOSED — NOT SELECTED |
+| HWEB-F02 | Physical network draft/read/validation workbench — ENG-001/004/010/012 | F01; accepted Topology graph and pipe editing endpoints | Real save/read/revise, conflict and unauthorized tests | PROPOSED — NOT SELECTED |
+| HWEB-F03 | Geospatial route/chainage/elevation workspace — ENG-003/004 | F01/F02 as applicable; accepted route/profile API | CRS/datum round trip; intermediate elevation and revision replay; bounded GIS | PROPOSED — NOT SELECTED |
+| HWEB-F04 | Station and individual equipment workspace — ENG-002/005 | F01; accepted Topology/Assets/Party bindings | Three stations × three distinguishable units and header relationships, validated writes | PROPOSED — NOT SELECTED |
+| HWEB-F05 | Manufacturer parameter and curve editor — ENG-006 | F04; accepted characteristic authoring and approval APIs | Round trip units/curves/revisions; immutable certified originals | PROPOSED — NOT SELECTED |
+| HWEB-F06 | Product/composition authoring — ENG-007 | F01; accepted canonical product-owner authoring APIs | Composition/unit/effective revision round trip; unsupported products shown clearly | PROPOSED — NOT SELECTED |
+| HWEB-F07 | Engineering baseline/history workbench — ENG-008/010 | F02–F06 and accepted baseline API | Multi-owner version/digest freeze, historical retrieval and governed publication | PROPOSED — NOT SELECTED |
+| HWEB-F08 | Qualified monitoring location/history UX — ENG-009/012 | F01, telemetry/source/binding capabilities | Source/time/quality/staleness displayed; no fabricated realtime subscriptions | PROPOSED — NOT SELECTED |
+| HWEB-F09 | Engineering-data import/export UX — ENG-011 | Accepted domain import/export contract; applicable editors | Dry-run, atomic upload, precise errors, rollback and authorization | PROPOSED — NOT SELECTED |
+| HWEB-F10 | Engineering workbench integrated UAT/release gate — ENG-001–012 | Completed, accepted applicable F02–F09, remaining requirements dispositioned | End-to-end operator round-trip, security, OIDC/TLS/proxy, Playwright, accessibility, performance and rollback evidence | PROPOSED — NOT SELECTED |
+
+F03/F04/F06 and F08 can advance independently when their actual backend prerequisites are accepted. Dependencies on F02 in F03 concern integrated physical editing only and must be revised if actual APIs permit an independent geospatial workflow. No engineering foundation task is allowed to depend on HPR-P25-024–027 or new transient/solver work. Historical run-queue UI is not evidence of numerical execution.
+
+### Backend-first blockers
+
+HidraAPI's HPR-P25-018–023 are currently documented as **design/preflight obligations**; their completion alone will not make ENG-001–012 implementation-ready. Each web feature waits for its *resulting* authorized backend implementation/API, exact successful CI and published transport types. A current map GET does not authorize GIS editing; a facility POST does not authorize station-internal hydraulic modeling. Add missing source facts as backend tasks instead of inventing browser state machines or persistence.
+
+### Controlled refactor rule
+
+HidraWEB is not production deployed, so bounded refactors, interface changes or replacements can be proposed where justified. Preserve tested authentication, topology visualization, generated OpenAPI plumbing, accessibility and governance evidence unless the task demonstrates a safer, simpler replacement. Any deletion requires explicit implementation scope, backward compatibility/rollback assessment and complete verification; this roadmap update deletes nothing.
+
+### Next eligible task
+
+HWEB-F01 is the first **candidate for explicit selection**, not an automatically authorized implementation. Precondition: latest HidraAPI roadmap disposition verified; exact current backend artifact and frontend CI checked; precise task definition/allowlist and permissions matrix registered. Stop after this governance amendment and do not implement F01.
