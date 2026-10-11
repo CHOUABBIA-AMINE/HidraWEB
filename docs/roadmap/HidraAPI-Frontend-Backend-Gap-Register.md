@@ -395,3 +395,34 @@ Before every HWEB phase:
 HWEB-009 implementation is complete for the accepted read-composition scope and is at its final exact-head CI / PR #16 merge / post-merge verification gate. `GAP-ALARM-004` suppression remains OPEN and `GAP-REALTIME-001` remains DEFERRED. `GAP-ALARM-005` is backend IMPLEMENTED and requires a separate focused frontend reconciliation before it may be marked VERIFIED.
 
 Do not expand HWEB-009 closure into alarm suppression, realtime, HSE mutations, leak mutations, or any other new lifecycle surface.
+
+
+---
+
+## 2026-10-11 — HWEB-CONTRACT-001 foundation-first delta register (planning; not implementation acceptance)
+
+**Source baselines:** HidraAPI `c3f47c79248d8e645e1fbe924ede79782dda6c17`; HidraWEB `23693ce520f6df2d6c1143ab65d703da2a0a01d0` (contract-addendum and CI #967 SUCCESS). Read this section as a current **delta** to historical gap records and pinned feature artifacts above; do not rewrite or promote the older baselines. HidraAPI's simulator-deferral decision remains **proposed until formally recorded in its own roadmap**. Existing simulation metadata/run-queue interfaces do not prove a running numerical solver.
+
+**Evidence:** [canonical Contract v1 §25](../architecture/Hidra-API-Web-Contract-v1.md), [HidraAPI Ultimate Roadmap](https://github.com/CHOUABBIA-AMINE/HidraAPI/blob/main/doc/roadmap/ULTIMATE_ROADMAP.md), [current Topology controller](https://github.com/CHOUABBIA-AMINE/HidraAPI/blob/main/src/main/java/dz/sh/hidra/modules/topology/api/rest/controller/SpringTopologyController.java), [current map controller](https://github.com/CHOUABBIA-AMINE/HidraAPI/blob/main/src/main/java/dz/sh/hidra/modules/topology/api/rest/controller/TopologyMapController.java), [HWEB-005 topology workspace](HWEB-005-Network-Topology-Workspace.md). Controller mapping evidence does not certify request/response completeness, production deployment, or current OpenAPI publication. Exact transport contracts require an accepted backend-produced artifact.
+
+| Requirement | Source-backed boundary | Gap decision | Dependent API design | Frontend target |
+|---|---|---|---|---|
+| ENG-001 Physical network authoring | Topology publishes pipeline-system creation; immutable physical revision persistence exists internally | IN_PROGRESS | Draft graph create/read/validate/revise/publish contracts and permissions; no existing full editor claim | Network editor only after API acceptance |
+| ENG-002 Station/unit connectivity | Facility registration exists; installed equipment references exist; complete station internals not proven | IN_PROGRESS | Station header/link and independent installed unit revision write/read | Station & unit configuration workspace |
+| ENG-003 Geographic route/elevation profiles | Node/facility coordinates/elevations and map reads exist; full surveyed route/profile authoring not established | OPEN | CRS/datum, ordered route geometry, chainage, elevation profile, source precision/evidence and revision APIs | GIS route/profile authoring; never infer surveyed geometry |
+| ENG-004 Pipe sections | Segment endpoints/length and revision-bound internal diameter/roughness exist, not complete operator authoring | IN_PROGRESS | Typed physical section attributes, units/validity and immutable changes | Pipe section forms |
+| ENG-005 Installed equipment identity/model | Topology/Assets JPA and APIs provide partial identity/lifecycle capability | IN_PROGRESS | Resolve authoritative installed unit, Assets model and Party manufacturer without duplication | Equipment registry/editor |
+| ENG-006 Manufacturer characteristics | Simulation immutable characteristic revisions exist for supported families, but no full operator import/revision workflow verified | IN_PROGRESS | Type-validated curves, units, reference conditions, provenance, approval and exact binding; no solver extension | Manufacturer engineering-data editor |
+| ENG-007 Products/composition | Custody exact gas-fluid revision storage exists; complete operator product authoring and additional product families not proven | IN_PROGRESS | Product record/import/revision, source/method applicability and explicit unsupported states | Product configuration workspace |
+| ENG-008 Immutable engineering baseline | Bounded Topology/Custody/equipment revision stores exist; full multi-owner baseline not yet proven | IN_PROGRESS | Atomic manifest of exact owner revisions/digests, effective selection and historical replay; keep independent from numerical run snapshots | Baseline compare/revision browser |
+| ENG-009 Telemetry location linkage | Trusted reads and point binding services exist; whole operator workflow and production event family not proven | IN_PROGRESS | Approved binding, source/quality/freshness semantics, query recovery and authorization | Monitoring with explicit stale/unknown states |
+| ENG-010 Validation, approvals, audit | Identity/Workflow/exception and some authoring routes implemented, but integrated engineering publish flow not proven | IN_PROGRESS | Backend authoritative validation, revision transitions, conflict and permissions; no frontend approvals invented | Guided authoring/publish UX |
+| ENG-011 Batch import/export | No accepted complete typed engineering import/export workflow established in inspected contract | OPEN | Dry run, field-level diagnostics, unit/CRS validation, atomicity and rollback | Bounded import/export UX |
+| ENG-012 Capability/completeness discovery | Topology capabilities exists; complete per-editor machine-readable eligibility not established | IN_PROGRESS | Published required fields/unsupported states, active feature and permission availability | Fail-closed navigation, completion diagnostics |
+
+### Acceptance rules for the delta register
+
+- `OPEN` and `IN_PROGRESS` are **not** frontend implementation authority. Before progressing to `IMPLEMENTED`, cite exact accepted backend method/path, OpenAPI schema/artifact SHA, permissions, backend tests, migration if needed and CI. Before `VERIFIED`, cite generated HidraWEB client, positive/negative integration and browser tests and exact CI.
+- Generic JPA attributes, JSON fields, OpenAPI type names and documentation proposals are insufficient by themselves to certify an operator authoring lifecycle.
+- Existing HWEB-R and HWEB-P completed evidence remains historical and unmodified; working pages may be reused or refactored only through a separately selected scoped task.
+- Proposed simulator deferral affects new numerical development only; engineering data, historic source revisions and qualified telemetry remain independent. No hydraulic output, OT write or fake realtime event is authorized.
