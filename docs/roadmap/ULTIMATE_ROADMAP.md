@@ -1442,3 +1442,76 @@ contract configurations updated and twelve still to reconcile,
 plus cross-module integration, effective-permission review
 and a common source-backed full OpenAPI baseline repin.
 HWEB-F02–F10 remain unselected.
+
+## 2026-10-14 — HWEB-F01 verified Assets contract-source activation
+
+**Selected bounded implementation:** repin the existing Assets
+Orval transport generator to a byte-verified HidraAPI Full CI
+OpenAPI source; preserve existing maintenance/engineering semantics,
+backend-authoritative permissions and frontend behavior. This is
+contract reconciliation only, not selection of HWEB-F02–F10 or
+operator-enabled maintainable-asset/condition/work-order controls.
+
+**Exact preflight:** HidraWEB `main`
+`981e00acc1033cd4851e405ea87bdd1d9322670c`,
+Code CI #998 `38571321340` SUCCESS and Documentation CI #21
+`38571321183` SUCCESS. The latest accepted HidraAPI full
+OpenAPI production run is Full CI #686 `38569456312` SUCCESS,
+source SHA `76b14cda4520f1eff242bd474c02ce4db317d385`.
+Published API-contract artifact ID `11897156166` with GitHub
+ZIP digest
+`sha256:191d763d086c078c0029a61c4c2991247d2db86e75d329991ce009352feeff33`.
+Its extracted `hidra-api.json` has 244 paths/231 schemas,
+457,784 bytes and raw SHA-256
+`d00252b93751b1d8cfdbd4eafaeeb6691aff31b70e507b72d1a192c6d45add5f`.
+The later documentation-only backend `main` is a distinct
+checkpoint, not a substituted source of this artifact.
+
+**Source extraction:** select all eight
+`/api/v1/assets/` routes and seven transitively referenced
+schemas from the exact published full OpenAPI 3.1 artifact.
+Preserve original operation IDs, request/response shape,
+enums, required-field ordering, bearer security and
+update concurrency metadata; remove only server-local or
+display-source metadata and sort JSON object keys.
+Canonical source
+`openapi/candidates/hidra-assets-76b14cda4520f1eff242bd474c02ce4db317d385.json`
+is 7,045 bytes, SHA-256
+`ba9cca93db79451a7fedfd35a322ddd71c837273a6ffe3fd5e47d5d0706bfc11`,
+Git blob `a5ab4d1384a2f80f4e1c73343479cf6c78f40d57`.
+This Git blob was independently reproduced from the old checked-in
+Assets slice plus the verified artifact deltas. The exact identity
+was achieved only after restoring source-defined enums, operation
+IDs and the required-field order; earlier reconstruction candidates
+were not selected.
+
+**Transport coverage:** preserve typed POST maintainable-asset
+registration, condition evidence, maintenance-work-order creation
+and PATCH optimistic update. Add source-backed aliases and
+capabilities GET. No generated endpoint is treated as an operator
+permission or as proof of real deployment/calibration.
+
+**Exact write scope:** create the candidate JSON and
+`scripts/verify-assets-candidate.test.mjs`; update
+`orval.assets.config.ts`,
+`scripts/check-openapi-compatibility.mjs`, `package.json`,
+and append this roadmap section only. Exact commit message:
+`fix(contract): activate verified Assets OpenAPI source pin`.
+The compatibility checker fails closed on wrong pinned path,
+SHA-256, OpenAPI version, 8-route/7-schema coverage or
+out-of-prefix routes. The previous eight source hash locks and
+full historical baseline comparison for the eleven remaining
+contract configs remain enforced. Four Node regression tests
+cover provenance, PATCH concurrency, typed work orders/
+condition evidence, bearer security and previous contract
+preservation; existing CI handles Orval regeneration,
+TypeScript, unit, performance, build/release and browser tests.
+
+**Exit:** publish directly to expected `main` through
+compare-and-swap, verify parent/tree/exact six-file scope,
+confirm Code and Documentation CI startup then STOP without
+waiting. A queued or running CI is not a pass. HWEB-F01
+remains IN PROGRESS with nine of twenty feature contract
+source pins updated and eleven outstanding, plus a coordinated
+single-artifact full-baseline repin and integration/permission
+acceptance. No branch, PR, runtime UI write or code comments.

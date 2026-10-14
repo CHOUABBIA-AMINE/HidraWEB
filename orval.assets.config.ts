@@ -2,7 +2,7 @@ import { defineConfig } from 'orval';
 
 export default defineConfig({
   assets: {
-    input: { target: './openapi/hidra-assets-63f3f60974ce57eb8cd5e42910397615195624fb.json' },
+    input: { target: './openapi/candidates/hidra-assets-76b14cda4520f1eff242bd474c02ce4db317d385.json' },
     output: {
       mode: 'single',
       target: './src/api/generated/assets/assets.ts',
