@@ -260,6 +260,11 @@ export function LoginPage() {
                 : auth.mode === 'jwt' ? t('auth.login.oidcDescription')
                   : t('auth.login.credentialDescription')}
             </Typography>
+            {auth.mode === 'basic' ? (
+              <Typography sx={{ color: colors.muted, fontSize: 12, mt: 1.5 }}>
+                {auth.credentialProvider}
+              </Typography>
+            ) : null}
 
             {error ? <Alert severity="error" role="alert" sx={{ mt: 3, borderRadius: 2 }}>{error}</Alert> : null}
 
@@ -385,7 +390,7 @@ export function LoginPage() {
                     },
                   }}
                 >
-                  {checking ? <CircularProgress size={22} color="inherit" /> : t('auth.jwt.submit')}
+                  {checking ? <CircularProgress size={22} color="inherit" /> : t('auth.jwt.submit', { defaultValue: 'Sign in with enterprise identity' })}
                 </Button>
               </Box>
             ) : null}
