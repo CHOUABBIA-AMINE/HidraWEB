@@ -1515,3 +1515,66 @@ remains IN PROGRESS with nine of twenty feature contract
 source pins updated and eleven outstanding, plus a coordinated
 single-artifact full-baseline repin and integration/permission
 acceptance. No branch, PR, runtime UI write or code comments.
+
+## 2026-10-14 — HWEB-F01 activate verified Integrity OpenAPI source
+
+**Selected bounded implementation:** update only the Integrity
+Orval source to the exact latest fully CI-published HidraAPI
+Integrity contract. This is a client-transport reconciliation
+stage; it does not add Integrity operator actions, loosen existing
+route permissions, mutate engineering data or select HWEB-F02–F10.
+
+**Preflight:** HidraWEB `main`
+`9b47ccd6c6d0e51c9bb5dcad7f29f8cd44fa00f6`,
+Code CI #1000 `38574786288` SUCCESS after the Assets status-enum
+consumer repair. HidraAPI Full CI #686 `38569456312`
+SUCCESS at source `76b14cda4520f1eff242bd474c02ce4db317d385`.
+Its exact API-contract artifact #11897156166 has ZIP digest
+`sha256:191d763d086c078c0029a61c4c2991247d2db86e75d329991ce009352feeff33`.
+The independently inspected ZIP contains `hidra-api.json` with
+244 paths, 231 schemas, 457,784 bytes and raw SHA-256
+`d00252b93751b1d8cfdbd4eafaeeb6691aff31b70e507b72d1a192c6d45add5f`.
+Later HidraAPI documentation-only main commits do not silently
+supersede this confirmed full-contract production artifact.
+
+**Exact extraction:** all seven `/api/v1/integrity/` routes and
+six transitive referenced schemas from the verified full OpenAPI,
+with original request/response fields, enum values, operation IDs
+and JWT bearer security retained. Remove only server-local and
+slice display metadata and canonicalize JSON object-key order.
+The resulting 5,725-byte candidate
+`openapi/candidates/hidra-integrity-76b14cda4520f1eff242bd474c02ce4db317d385.json`
+has SHA-256
+`67e7cedbd59587b1f3af15ec83c3f9718f7c783dc40bc01597b0aef0ae3ebd79`
+and Git blob SHA `5401be12772d12b0ce07517aafdfbc4591c32d49`.
+Reconstruction from the old pinned Integrity contract plus the
+published enum, alias/capabilities and security deltas produced
+exactly the same Git blob, independently confirming byte identity.
+
+**Changes:** repin `orval.integrity.config.ts` to the immutable
+candidate; extend the fail-closed compatibility gate with the exact
+path, SHA-256, OpenAPI 3.1, seven routes/six schemas and
+Integrity-only prefix. Preserve the earlier nine source locks and
+the historical full-baseline comparison for ten remaining sources.
+Add four Node regression tests for artifact integrity, typed
+program/assessment/case transport, published lifecycle enums and
+the preserved permission/compatibility boundaries; include the
+tests in `npm test`. No production UI change, new work order,
+simulation feature, CI-workflow change or code comments.
+
+**Commit:** `fix(contract): activate verified Integrity OpenAPI source pin`.
+**Exact allowlist:** create
+`openapi/candidates/hidra-integrity-76b14cda4520f1eff242bd474c02ce4db317d385.json`
+and `scripts/verify-integrity-candidate.test.mjs`; update
+`orval.integrity.config.ts`,
+`scripts/check-openapi-compatibility.mjs`, `package.json`,
+and this roadmap (append only).
+
+**Acceptance:** publish only to expected `main` head by
+compare-and-swap; verify commit parent/tree and six-file scope;
+observe Code and Documentation CI startup and stop without waiting.
+CI must validate all 20 generated client slices, lint, TypeScript,
+Node/Vitest, performance, build/release and Playwright before the
+stage is CI-accepted. HWEB-F01 remains IN PROGRESS with ten of
+twenty source pins updated and ten remaining, plus coordinated
+complete baseline repin and consumer/authorization acceptance.
