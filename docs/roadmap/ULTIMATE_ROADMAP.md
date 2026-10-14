@@ -1054,3 +1054,87 @@ inferred from merely starting workflows. HWEB-F01 stays
 IN PROGRESS pending all remaining source-backed transport
 repins, business permission/consumer reconciliation and
 integrated acceptance. F02–F10 and simulator remain unselected.
+
+## 2026-10-14 — HWEB-F01 activate verified Workflow OpenAPI source
+
+**Selected one bounded source-backed contract stage:** replace the
+legacy Workflow Orval input with an immutable, byte-verified slice
+of HidraAPI's published full OpenAPI artifact. Preserve existing
+task inbox/action/transition APIs and user-level authorization;
+do not invent new workflow create, execute, decision or approval
+controls in HidraWEB and do not advance F02–F10.
+
+**Exact preflight:** HidraWEB `main`
+`966156e4295df570a1a50789b89b262fe2329e2e`,
+Code CI #993 `38562135392` SUCCESS and Documentation CI
+#16 `38562135605` SUCCESS. HidraAPI last full published
+source commit `da4ce33ead7db40776049c861027947b61b96270`;
+Full CI #685 `38559065173` SUCCESS, source-generated
+API-contract ZIP artifact #11891417141 with artifact digest
+`sha256:41415af15d2809ab71996cb5b6e2ba74c8f22dd3eaa8407975810a873c7098e3`.
+Its raw `hidra-api.json` has SHA-256
+`e0f4e27c4ee84675b7a99fce55454c275b5e320e0f63c1202fe63b4d7a8553b3`.
+Current backend main `ae9f639fe55cfc15cf571b5b6e5fa6cd47532cdc`
+has newer documentation; it is not silently equated with the
+Full-CI OpenAPI production artifact.
+
+**Deterministic extraction and exactness:** choose all
+`/api/v1/workflow/` paths and their transitive schema references
+from that same published `hidra-api.json`, preserve operation IDs,
+backend security, required inputs, query parameters and response
+shapes, remove local server/source-display metadata and unrelated
+global metadata, and serialize objects in sorted-key canonical JSON.
+The resulting candidate contains **12 routes, 13 schemas and
+13,126 bytes**, SHA-256
+`becdd0505299b437d743fe71ffabb56bca26211435ce43dc2669ac8095f975f5`,
+Git blob SHA `c4d02468a7a6b66ef60bd5517084de81db5fb168`.
+This Git blob identity was independently reconstructed from the
+original checked-in Workflow specification plus the verified current
+source's added schema and operation shapes, including the current
+backend `info` metadata. An initial candidate mismatch was
+corrected **before publishing**; only the exact matching object
+may become the active source.
+
+**Verified scope:** retain GET task inbox/detail/available-actions
+and instance/timeline reads, POST action recording and optimistic
+transition execution with required `expectedTaskUpdatedAt`.
+Add the backend's typed instance start and task create requests,
+responses and alias transport routes and capabilities read.
+The presence of bearer security in OpenAPI does not grant a
+specific operator a workflow permission or imply a completed
+business process. New generated transport operations must not
+automatically create UI write actions.
+
+**Bounded implementation:** create
+`openapi/candidates/hidra-workflow-da4ce33ead7db40776049c861027947b61b96270.json`;
+repin `orval.workflow.config.ts` to it; enforce exact path,
+SHA-256, OpenAPI 3.1, 12-route/13-schema coverage and workflow
+prefix in the existing compatibility checker. Preserve independent
+Risk, Topology and Telemetry/Monitoring source locks and the other
+16 historical feature slice comparisons and whole-original
+baseline digest validations. Four independent Node regression tests
+cover immutable artifact digest, typed workflow create requests
+and response enums, historical read/transition preservation,
+source pin and fail-closed compatibility integrity. Add tests
+to existing `npm test` without changing CI workflows.
+
+**Registered commit message:**
+`fix(contract): activate verified Workflow OpenAPI source pin`.
+**Exact path allowlist:**
+`openapi/candidates/hidra-workflow-da4ce33ead7db40776049c861027947b61b96270.json` CREATE;
+`orval.workflow.config.ts`;
+`scripts/check-openapi-compatibility.mjs`;
+`scripts/verify-workflow-candidate.test.mjs` CREATE;
+`package.json`;
+`docs/roadmap/ULTIMATE_ROADMAP.md` APPEND ONLY.
+
+**Acceptance:** compare-and-swap expected `main` head,
+verify exact commit parent/tree/changed-file scope, observe Code
+CI and Documentation CI start for that SHA and STOP. Existing
+compatibility, all 20 Orval generation passes, lint, TypeScript,
+unit/Node tests, performance, build/release and Playwright are
+mandatory; no claim of CI pass until its actual completion.
+HWEB-F01 remains IN PROGRESS pending the other source-backed
+contract migrations, full current backend baseline repin,
+cross-module consumers and effective-permission acceptance.
+HWEB-F02–F10 and numerical simulation remain unselected.
