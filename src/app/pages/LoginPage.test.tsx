@@ -41,12 +41,12 @@ describe('HidraWEB multi-provider login selection', () => {
 
   it('dispatches only the explicitly selected directory provider and clears old passwords', async () => {
     render(<MemoryRouter initialEntries={['/login']}><LoginPage /></MemoryRouter>);
-    fireEvent.change(screen.getByLabelText('Username'), { target: { value: 'operator' } });
-    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'old-secret' } });
+    fireEvent.change(screen.getByLabelText(/^Username/), { target: { value: 'operator' } });
+    fireEvent.change(screen.getByLabelText(/^Password/), { target: { value: 'old-secret' } });
     fireEvent.mouseDown(screen.getByRole('combobox', { name: 'Authentication method' }));
     fireEvent.click(screen.getByRole('option', { name: 'LDAP' }));
-    expect(screen.getByLabelText('Password')).toHaveValue('');
-    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'ldap-secret' } });
+    expect(screen.getByLabelText(/^Password/)).toHaveValue('');
+    fireEvent.change(screen.getByLabelText(/^Password/), { target: { value: 'ldap-secret' } });
     fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
     await waitFor(() => expect(authentication.authenticateCredentials).toHaveBeenCalledWith(
       'LDAP', 'operator', 'ldap-secret',
