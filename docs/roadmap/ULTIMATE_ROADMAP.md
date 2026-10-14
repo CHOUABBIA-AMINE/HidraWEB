@@ -1210,3 +1210,74 @@ are now pinned to more recent source-backed contracts and
 15 still need reconciliation. Backend-owned incident execution
 permissions, user workflows, deployment validation and a
 fully coordinated current OpenAPI repin remain outstanding.
+
+## 2026-10-14 — HWEB-F01 verified Custody OpenAPI source activation
+
+**Selected bounded stage:** repin only the existing Custody Orval
+transport contract to a source-verified HidraAPI OpenAPI slice,
+while preserving all current business ownership, execution
+permissions and existing frontend workflow behavior. No new
+browser Custody write or approval action is introduced.
+
+**Exact preflight:** HidraWEB `main`
+`cc2b806aa8329e7b01358aca2252c30fb8ba6e65`;
+Code CI #995 `38566480203` SUCCESS and Documentation CI
+#18 `38566480172` SUCCESS. Latest source-producing backend
+Full CI #685 `38559065173` SUCCESS at HidraAPI commit
+`da4ce33ead7db40776049c861027947b61b96270`;
+API-contract artifact ID `11891417141`, GitHub ZIP digest
+`sha256:41415af15d2809ab71996cb5b6e2ba74c8f22dd3eaa8407975810a873c7098e3`.
+Raw `hidra-api.json` SHA-256:
+`e0f4e27c4ee84675b7a99fce55454c275b5e320e0f63c1202fe63b4d7a8553b3`;
+244 paths and 231 schemas. Current backend
+`ae9f639fe55cfc15cf571b5b6e5fa6cd47532cdc`
+must not silently replace the published source artifact.
+
+**Exact source extraction:** all seven `/api/v1/custody/`
+paths and six referenced schemas from published Full CI #685.
+Preserve endpoint IDs, request/response content, schema types,
+status enums, request-body requirements and bearer-security
+metadata. Strip local server/source-display metadata and
+canonicalize sorted object keys. Exact resulting artifact:
+`openapi/candidates/hidra-custody-da4ce33ead7db40776049c861027947b61b96270.json`;
+5,333 bytes; SHA-256
+`9a5daa35cd1bbe1750eef998553ba925d5cfb008d40d309f47fd86889bb5dfe1`;
+Git blob `d7cfcd0bc4b9760e90301cbfceed7afb23f6043f`.
+This Git blob was independently reproduced from the existing
+legacy Custody transport and the verified Full CI #685 alias
+routes/capabilities/security additions before publication.
+The existing transfer-ticket, measurement-period and discrepancy
+commands remain intact.
+
+**Implementation scope:** activate that immutable source in
+`orval.custody.config.ts` and add exact byte-digest,
+source-path, OpenAPI 3.1, 7-path/6-schema and custody-only
+prefix verification in the fail-closed compatibility checker.
+The previous five source locks (Risk, Topology,
+Telemetry/Monitoring, Workflow and Incident), original full
+backend historical manifest/hash checks and remaining fourteen
+legacy contract comparisons must stay enforced. Add four
+synthetic-free Node contract tests for the artifact fingerprint,
+typed and secured Custody commands, route/alias compatibility
+and integrity gate; append the new test to `npm test`.
+Existing Orval generation, lint, TypeScript, unit/Node,
+performance, build/release and Playwright CI remain unchanged.
+OpenAPI presence alone is not operator permission to perform
+hydrocarbon custody operations.
+
+**Commit:** `fix(contract): activate verified Custody OpenAPI source pin`.
+**Exact six-file scope:** create
+`openapi/candidates/hidra-custody-da4ce33ead7db40776049c861027947b61b96270.json`
+and `scripts/verify-custody-candidate.test.mjs`; update
+`orval.custody.config.ts`,
+`scripts/check-openapi-compatibility.mjs`, `package.json`,
+and append this roadmap entry only.
+
+**Exit criteria:** commit directly to expected `main` head
+using compare-and-swap, verify parent/tree/scope and Code CI
+startup, then stop without waiting for completion. This
+stage is not CI-accepted until successful completion of its
+new run. HWEB-F01 remains IN PROGRESS; six of twenty
+contract sources have a newer source-backed pin and
+fourteen remain to reconcile, plus global-source alignment,
+business consumer integration and permissions acceptance.
