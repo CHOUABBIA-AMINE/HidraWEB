@@ -1362,3 +1362,83 @@ regressions. HWEB-F01 remains IN PROGRESS with seven of
 twenty source configurations updated and thirteen to reconcile,
 plus global backend contract alignment and authorization and
 client-consumer integration acceptance. No PR or branch.
+
+## 2026-10-14 — HWEB-F01 activate verified HSE OpenAPI contract source
+
+**Selected bounded HWEB-F01 stage:** activate source-verified
+HidraAPI HSE case and corrective/preventive-action (CAPA)
+transport definitions in HidraWEB's existing Orval generation.
+This change does not authorize any new HSE write, approval
+or closure feature in the browser, nor physical operations.
+
+**Verified baseline:** HidraWEB main
+`46b8fa79c7110c92a8641633ec8f5b81f17ddc98`;
+Code CI #997 `38569333183` SUCCESS and Documentation
+CI #20 `38569333159` SUCCESS. Last successful published
+HidraAPI Full CI #685 `38559065173`, source commit
+`da4ce33ead7db40776049c861027947b61b96270`,
+API-contract artifact ID `11891417141`, artifact digest
+`sha256:41415af15d2809ab71996cb5b6e2ba74c8f22dd3eaa8407975810a873c7098e3`.
+Raw `hidra-api.json` SHA-256
+`e0f4e27c4ee84675b7a99fce55454c275b5e320e0f63c1202fe63b4d7a8553b3`.
+Newer HidraAPI main `76b14cda4520f1eff242bd474c02ce4db317d385`
+has Full CI #686 IN PROGRESS at preflight; no assumption
+that its source has a successfully published full OpenAPI
+contract.
+
+**Immutable source extraction:** all nine `/api/v1/hse/`
+routes and nine transitive schema definitions from the
+Full CI #685 JSON, preserving GET case/CAPA query semantics,
+operation IDs, typed inputs/responses, source enumerations,
+optional fields and bearer-security metadata. Strip only
+the server URL and display-only source annotation, serialize
+with sorted JSON keys. Exact 10,056-byte candidate:
+`openapi/candidates/hidra-hse-da4ce33ead7db40776049c861027947b61b96270.json`;
+raw SHA-256
+`137b5f0f0020a20c3ed956a489ac08d798f0b29f5085e5a28d8abd7102d869ed`;
+Git blob `8fa2f2d6cb8294a73dabdd5a3c424b1449a4c1bf`.
+The Git blob was independently reproduced from the checked-in
+old HSE read contract plus published source changes.
+Initial reconstruction differences in the cases operation ID
+and OpenAPI version were resolved before publication; only
+the exact matching candidate is accepted.
+
+**Coverage:** preserve existing HSE case/CAPA list and detail
+reads; add typed open-case, create-CAPA and close-case wire
+contracts and canonical/alias routes, with the capabilities
+read. Bearer authentication in OpenAPI is not proof of an
+effective user permission grant or authority to issue an HSE
+decision. No new domain execution UI, simulation or
+operational-data migration is included.
+
+**Implementation:** activate the candidate in
+`orval.hse.config.ts`; add a fail-closed verifier for the
+exact source path, byte SHA-256, OpenAPI 3.1, nine routes,
+nine schemas and HSE-only route prefix. All seven preceding
+source locks and historical full-baseline checks for twelve
+remaining feature contract sources remain in force.
+Four Node regression tests verify candidate provenance,
+typed HSE and CAPA inputs, backend-owned closure
+requests and legacy read behavior. They run via existing
+`npm test`; unchanged GitHub CI must execute full Orval
+generation, lint, TypeScript, unit, performance, package/
+release and Playwright verification.
+
+**Exact commit:** `fix(contract): activate verified HSE OpenAPI source pin`.
+
+**Exact six-file write allowlist:**
+`openapi/candidates/hidra-hse-da4ce33ead7db40776049c861027947b61b96270.json` CREATE;
+`orval.hse.config.ts`;
+`scripts/check-openapi-compatibility.mjs`;
+`scripts/verify-hse-candidate.test.mjs` CREATE;
+`package.json`;
+`docs/roadmap/ULTIMATE_ROADMAP.md` APPEND-ONLY.
+
+**Gate:** compare-and-swap expected main head, verify
+parent/tree/allowlist, observe new Code and Documentation CI
+startup and stop. Do not claim CI acceptance until completion.
+HWEB-F01 remains IN PROGRESS with eight of twenty
+contract configurations updated and twelve still to reconcile,
+plus cross-module integration, effective-permission review
+and a common source-backed full OpenAPI baseline repin.
+HWEB-F02–F10 remain unselected.
