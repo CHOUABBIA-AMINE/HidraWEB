@@ -136,10 +136,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   const authenticateCredentials = useCallback(
     async (provider: HidraCredentialProvider, principal: string, credentials: string) => {
-      if (runtimeConfig.authMode !== 'basic') {
-        throw new Error('Credential authentication is not enabled for this HidraWeb runtime.');
-      }
-      if (provider !== runtimeConfig.credentialProvider) {
+      if ((runtimeConfig.authMode !== 'basic' && runtimeConfig.authMode !== 'multi') ||
+          !runtimeConfig.enabledAuthProviders.includes(provider)) {
         throw new Error(`Authentication provider ${provider} is not enabled for this HidraWeb runtime.`);
       }
 
@@ -162,7 +160,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   );
 
   const beginOidcSignIn = useCallback(async (returnTo?: string) => {
-    if (runtimeConfig.authMode !== 'jwt') throw new Error('OIDC is available only in JWT mode.');
+    if (!runtimeConfig.enabledAuthProviders.includes('OIDC')) throw new Error('OIDC is not enabled for this HidraWeb runtime.');
     setError(undefined);
     setStatus('checking');
     try {
@@ -177,7 +175,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   const completeOidcSignIn = useCallback(
     async (search: string) => {
-      if (runtimeConfig.authMode !== 'jwt') throw new Error('OIDC is available only in JWT mode.');
+      if (!runtimeConfig.enabledAuthProviders.includes('OIDC')) throw new Error('OIDC is not enabled for this HidraWeb runtime.');
       setStatus('checking');
       setError(undefined);
       try {
@@ -200,6 +198,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     () => ({
       mode: runtimeConfig.authMode,
       credentialProvider: runtimeConfig.credentialProvider,
+      enabledAuthProviders: runtimeConfig.enabledAuthProviders,
       status,
       session,
       error,

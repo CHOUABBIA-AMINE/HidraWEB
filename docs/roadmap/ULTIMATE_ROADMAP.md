@@ -447,3 +447,54 @@ two-file diff, and new-head GitHub Actions Code CI startup. CI success
 must be observed before accepting this regression repair; do not
 declare it prematurely. HWEB-F01 remains IN PROGRESS until its broader
 backend-consumer compatibility and authorization checks pass.
+
+
+## 2026-10-14 — Authorized authentication enhancement: unified, explicitly approved provider choices
+
+Owner explicitly requested and authorized simultaneous HidraWEB provider selection,
+independent of the still-open HWEB-F01 full OpenAPI reconciliation. This
+stage does not select F02, change HidraAPI, migrate real deployments or
+reactivate numerical simulation.
+
+**Backend truth:** HidraAPI main `545ec4e60a0c92099bedd36892b993ed6df2a4b9`.
+`HidraSecurityConfiguration` permits
+`POST /api/v1/identity/authentication/login` in JWT server security mode
+and separately verifies OIDC external assertions on
+`POST /api/v1/identity/authentication/oidc/complete`.
+`IdentityAuthenticationRequestRouter` selects LOCAL or LDAP/AD
+by explicit providerType without fallback. This is code-level capability,
+**not** evidence that a specific enterprise directory/IdP is deployed.
+No public endpoint for available login providers is accepted, so browser
+availability is an explicitly approved deployment allowlist, not discovery.
+
+**One scoped implementation:** `feat(auth): add deployment-approved multi-provider login`.
+Exact write allowlist:
+- `src/app/bootstrap/runtimeConfig.ts`
+- `src/app/bootstrap/runtimeConfig.test.ts`
+- `src/app/auth/authContext.ts`
+- `src/app/auth/AuthProvider.tsx`
+- `src/app/pages/LoginPage.tsx`
+- `src/app/pages/LoginPage.test.tsx` (new)
+- `src/shared/i18n/resources.ts`
+- `.env.example`
+- `.env.production.example`
+- `docs/roadmap/ULTIMATE_ROADMAP.md` (append-only)
+
+New browser-only opt-in: `VITE_HIDRA_AUTH_MODE=multi` together with a
+mandatory `VITE_HIDRA_ENABLED_AUTH_PROVIDERS` list of at least two from
+LOCAL, LDAP, ACTIVE_DIRECTORY, OIDC. If OIDC is selected, a deployment-approved
+`VITE_HIDRA_OIDC_REDIRECT_URI` is required. Reject missing, malformed,
+duplicate or unknown providers at startup. Existing `basic`, `jwt`, and
+`disabled` modes are preserved; non-multi mode cannot silently enable other
+providers. OIDC remains Authorization Code + PKCE and swaps the temporary
+external token for a Hidra-issued session. Direct credentials go only to
+the explicitly selected LOCAL/LDAP/AD route; switching providers clears the
+password. Access and provider readiness remain enforced by HidraAPI and the
+real external systems; no fallback, secret storage or invented endpoints.
+
+**Verification:** targeted runtime configuration/selection tests, previous
+authentication/security tests, exact-new-HEAD OpenAPI compatibility,
+lint/typecheck/unit/performance/build/package verification, full Playwright
+regression and release artifacts via Code CI. This registration does
+**not** predeclare success. Deployment OIDC/LDAP/AD smoke and user acceptance
+remain unverified without owner-provided environment configuration.

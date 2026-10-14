@@ -1,7 +1,7 @@
 import { createContext } from 'react';
 
 import type { HidraPrincipalView, ProviderType } from '@/app/auth/authenticationGateway';
-import type { HidraAuthMode, HidraCredentialProvider } from '@/app/bootstrap/runtimeConfig';
+import type { HidraAuthMode, HidraAuthProvider, HidraCredentialProvider } from '@/app/bootstrap/runtimeConfig';
 
 export type AuthStatus = 'anonymous' | 'checking' | 'authenticated';
 export type AuthSessionSource = 'basic' | 'jwt' | 'disabled';
@@ -19,6 +19,7 @@ export interface AuthSession {
 export interface AuthContextValue {
   mode: HidraAuthMode;
   credentialProvider: HidraCredentialProvider;
+  enabledAuthProviders: readonly HidraAuthProvider[];
   status: AuthStatus;
   session?: AuthSession;
   error?: string;
