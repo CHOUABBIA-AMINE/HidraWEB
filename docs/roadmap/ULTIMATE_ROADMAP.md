@@ -1138,3 +1138,75 @@ HWEB-F01 remains IN PROGRESS pending the other source-backed
 contract migrations, full current backend baseline repin,
 cross-module consumers and effective-permission acceptance.
 HWEB-F02–F10 and numerical simulation remain unselected.
+
+## 2026-10-14 — HWEB-F01 activate verified Incident OpenAPI source
+
+**Selected bounded HWEB-F01 execution:** source-pin the current
+HidraAPI Incident transport shape for frontend code generation.
+No new UI Incident authoring/closure/response buttons or lifecycle
+assumptions are authorized by this transport-only update.
+
+**Preflight:** HidraWEB main
+`711eb8da0f914727d3fa0f3dfb51634e10f25f9f`;
+Code CI #994 `38564715381` and Documentation CI #17
+`38564715460` SUCCESS. HidraAPI's last successfully completed
+full OpenAPI-producing source revision at preflight is
+`da4ce33ead7db40776049c861027947b61b96270`,
+Full CI #685 `38559065173` SUCCESS; artifact ID
+`11891417141`, GitHub artifact digest
+`sha256:41415af15d2809ab71996cb5b6e2ba74c8f22dd3eaa8407975810a873c7098e3`.
+The published full `hidra-api.json` digest is
+`e0f4e27c4ee84675b7a99fce55454c275b5e320e0f63c1202fe63b4d7a8553b3`.
+A later documentation-only backend head must not be substituted
+for the published contract's recorded source SHA.
+
+**Canonical exact extraction:** all eight
+`/api/v1/incident/` routes and six recursively referenced
+schemas from the verified full JSON, retaining their operation
+IDs, response/request schemas, explicit bearer security and
+existing GET incident list/detail query parameters. Strip the
+server URL and source-display metadata, serialize sorted JSON
+object keys. The resulting 8,508-byte candidate
+`openapi/candidates/hidra-incident-da4ce33ead7db40776049c861027947b61b96270.json`
+has SHA-256
+`54dd4419087f18f52804bb3924fef3ada98c71c16b3b612984f28764dbc7c3eb`
+and Git blob
+`7da5d1750b307f316207c9ca17e74402f5183e77`.
+The exact Git blob identity was independently reconstructed from
+the previously pinned read slice and the published command contract,
+including the OpenAPI 3.1 version correction, and verified before
+publication.
+
+**Implementation:** select the candidate in
+`orval.incident.config.ts`; enforce its exact source path,
+SHA-256, OpenAPI version, path/schema counts and Incident-only
+route prefix in the fail-closed compatibility gate. Preserve
+the independent Risk, Topology, Telemetry/Monitoring and Workflow
+digest locks and the full historical baseline validation of
+the remaining 15 source configurations. Four Node tests
+check artifact integrity, existing reads, typed incident creation,
+closure and response-action contracts and the integrity gate.
+Add the test to the existing npm test script. The existing
+20 client generation steps, TypeScript, lint, unit, performance,
+build, release and browser checks remain mandatory in Code CI.
+
+**Commit message:**
+`fix(contract): activate verified Incident OpenAPI source pin`.
+
+**Exact six-file allowlist:**
+`openapi/candidates/hidra-incident-da4ce33ead7db40776049c861027947b61b96270.json` CREATE;
+`orval.incident.config.ts`;
+`scripts/check-openapi-compatibility.mjs`;
+`scripts/verify-incident-candidate.test.mjs` CREATE;
+`package.json`;
+`docs/roadmap/ULTIMATE_ROADMAP.md` APPEND ONLY.
+
+**Exit:** publish only via expected-main compare-and-swap,
+verify exact commit head/parent/tree/file scope, observe Code CI
+and Documentation CI startup and stop without waiting for completion.
+Do not call this stage CI-confirmed until the new Code CI passes.
+HWEB-F01 remains IN PROGRESS: 5 of 20 source configurations
+are now pinned to more recent source-backed contracts and
+15 still need reconciliation. Backend-owned incident execution
+permissions, user workflows, deployment validation and a
+fully coordinated current OpenAPI repin remain outstanding.

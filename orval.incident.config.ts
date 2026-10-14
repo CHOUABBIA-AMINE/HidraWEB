@@ -2,7 +2,7 @@ import { defineConfig } from 'orval';
 
 export default defineConfig({
   incident: {
-    input: { target: './openapi/hidra-incident-63f3f60974ce57eb8cd5e42910397615195624fb.json' },
+    input: { target: './openapi/candidates/hidra-incident-da4ce33ead7db40776049c861027947b61b96270.json' },
     output: {
       mode: 'single',
       target: './src/api/generated/incident/incident.ts',
