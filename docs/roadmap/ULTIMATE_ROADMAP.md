@@ -981,3 +981,76 @@ HWEB-F01 remains IN PROGRESS: coordinated complete source-backed
 OpenAPI baseline repinning and all other generated client/
 consumer and permission reconciliation are outstanding;
 HWEB-F02–F10 remain unselected.
+
+## 2026-10-14 — HWEB-F01 activate source-verified Telemetry/Monitoring Orval contract
+
+**Selected one bounded contract-reconciliation slice:** source-pin
+Telemetry/Monitoring generated transport to the exact latest
+HidraAPI Full CI artifact, preserving the existing operational
+read-only browser workflows and declining any automatic new writes,
+simulation or industrial control effects.
+
+**Exact preflight:** HidraWEB `main`
+`335981e86e58254a8a2674a1275103c9fbdc8bba`,
+Code CI #992 `38560725477` SUCCESS,
+Documentation CI #15 `38560725490` SUCCESS.
+HidraAPI `main` `da4ce33ead7db40776049c861027947b61b96270`,
+Full CI #685 `38559065173` SUCCESS, Fast Feedback #18 SUCCESS,
+Documentation CI #290 SUCCESS. Exact published backend
+API-contract artifact ID `11891417141`, artifact digest
+`sha256:41415af15d2809ab71996cb5b6e2ba74c8f22dd3eaa8407975810a873c7098e3`.
+The verified ZIP contains `hidra-api.json` (457,784 bytes),
+with SHA-256
+`e0f4e27c4ee84675b7a99fce55454c275b5e320e0f63c1202fe63b4d7a8553b3`,
+OpenAPI 3.1, 244 paths and 231 schemas. The ZIP digest
+and JSON digest are distinct evidence.
+
+**Source exactness:** extract both `/api/v1/telemetry/`
+and `/api/v1/monitoring/` operations and transitive referenced
+schemas from the published full JSON, removing local server URL
+and source-display metadata. Canonical sorted-key serialization
+has 15,825 bytes, exactly 17 paths / 16 schemas, SHA-256
+`55f5ea67d7dfecb6c2b5a88bd6619a58081d653d92d44518aacbdace03b792f3`,
+Git blob SHA `94f3a91a9a2725588a333334501edacd901e22c3`.
+A completely reconstructed candidate from the old checked-in
+Telemetry/Monitoring contract and current-source additions
+reproduced this exact Git object identity before publication.
+The new contract includes typed source and point authoring,
+monitoring rule/deviation requests and responses, aliases,
+capabilities and all existing query routes. It does not prove
+SCADA write access, live OT telemetry, simulation triggering,
+calibration or domain realtime event publishers.
+
+**Bounded implementation:** pin
+`orval.telemetry-monitoring.config.ts` to
+`openapi/candidates/hidra-telemetry-monitoring-da4ce33ead7db40776049c861027947b61b96270.json`;
+extend `scripts/check-openapi-compatibility.mjs` to enforce
+the exact path, hash, version, 17-route/16-schema coverage and
+Telemetry/Monitoring prefix. Risk and Topology source SHA locks
+remain unchanged; all other 17 legacy Orval sources continue
+to use the original full baseline comparison and its hash checks.
+An independent Node regression covers raw source digest, typed
+requests, backend bearer requirement, enum contract, existing
+read endpoints and the mixed-source gate. Add the test to
+`npm test` without changing GitHub workflow definitions.
+
+**Commit message:**
+`fix(contract): activate verified Telemetry Monitoring source pin`.
+**Exact allowed writes:**
+`openapi/candidates/hidra-telemetry-monitoring-da4ce33ead7db40776049c861027947b61b96270.json` CREATE;
+`orval.telemetry-monitoring.config.ts`;
+`scripts/check-openapi-compatibility.mjs`;
+`scripts/verify-telemetry-candidate.test.mjs` CREATE;
+`package.json`;
+`docs/roadmap/ULTIMATE_ROADMAP.md` APPEND ONLY.
+
+**Publication/acceptance:** only `main`, expected-head
+compare-and-swap, exact parent/tree/scope verification,
+observe Code and Documentation CI startup then stop.
+CI will rerun the unchanged full compatibility/Orval
+generation, lint, TypeScript, Node/Vitest, performance,
+build/release and Playwright gates. No CI success may be
+inferred from merely starting workflows. HWEB-F01 stays
+IN PROGRESS pending all remaining source-backed transport
+repins, business permission/consumer reconciliation and
+integrated acceptance. F02–F10 and simulator remain unselected.
