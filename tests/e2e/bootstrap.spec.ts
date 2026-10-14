@@ -237,9 +237,10 @@ test('Hidra login floats Arabic field labels on the right in RTL mode', async ({
   await page.goto('/login');
   await page.getByRole('button', { name: 'العربية' }).click();
   await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
-  const username = page.getByLabel('اسم المستخدم', { exact: true });
-  await username.focus();
+  const username = page.getByRole('textbox', { name: /اسم المستخدم/ });
   const label = page.locator('label.MuiInputLabel-root').filter({ hasText: 'اسم المستخدم' });
+  await expect(label).toBeVisible();
+  await username.focus();
   await expect.poll(async () => {
     const [fieldBounds, labelBounds] = await Promise.all([username.boundingBox(), label.boundingBox()]);
     if (!fieldBounds || !labelBounds) return -1;
