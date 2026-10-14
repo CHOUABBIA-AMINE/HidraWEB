@@ -121,6 +121,13 @@ const SIMULATION_CURRENT_PROOF = {
   paths: 9,
   schemas: 8,
 };
+const ALARM_CURRENT_PROOF = {
+  config: 'orval.alarm.config.ts',
+  path: 'openapi/candidates/hidra-alarm-76b14cda4520f1eff242bd474c02ce4db317d385.json',
+  sha256: 'sha256:85bebb810ae40e8250dc316ab1f8dde60ac1d17cff2f6c7aa0f8c95f3c0dd6a1',
+  paths: 13,
+  schemas: 11,
+};
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'openapi/compatibility/hidra-api-baseline.json'), 'utf8'));
 const artifactBase64 = manifest.fullContractGzipBase64Parts
@@ -361,12 +368,23 @@ for (const config of configs) {
       || Object.keys(slice.paths ?? {}).some((route) => !route.startsWith('/api/v1/simulation/'))) {
       errors.push(`${config}: Simulation contract structure differs from the verified artifact`);
     }
+  } else if (config === ALARM_CURRENT_PROOF.config) {
+    if (target !== ALARM_CURRENT_PROOF.path) errors.push(`${config}: Alarm pin must use the verified current source`);
+    if (hash(fs.readFileSync(file)) !== ALARM_CURRENT_PROOF.sha256) {
+      errors.push(`${config}: source-backed Alarm contract digest mismatch`);
+    }
+    if (slice.openapi !== '3.1.0'
+      || Object.keys(slice.paths ?? {}).length !== ALARM_CURRENT_PROOF.paths
+      || Object.keys(slice.components?.schemas ?? {}).length !== ALARM_CURRENT_PROOF.schemas
+      || Object.keys(slice.paths ?? {}).some((route) => !route.startsWith('/api/v1/alarm/'))) {
+      errors.push(`${config}: Alarm contract structure differs from the verified artifact`);
+    }
   } else {
     compareSlice(config, slice);
   }
   const paths = Object.keys(slice.paths ?? {}).length;
   const schemas = Object.keys(slice.components?.schemas ?? {}).length;
-  const proof = [RISK_CURRENT_PROOF.config, TOPOLOGY_CURRENT_PROOF.config, TELEMETRY_CURRENT_PROOF.config, WORKFLOW_CURRENT_PROOF.config, INCIDENT_CURRENT_PROOF.config, CUSTODY_CURRENT_PROOF.config, LEAK_CURRENT_PROOF.config, HSE_CURRENT_PROOF.config, ASSETS_CURRENT_PROOF.config, INTEGRITY_CURRENT_PROOF.config, AUDIT_CURRENT_PROOF.config, CONFIGURATION_CURRENT_PROOF.config, DOCUMENTS_CURRENT_PROOF.config, REPORTING_CURRENT_PROOF.config, ANALYTICS_CURRENT_PROOF.config, SIMULATION_CURRENT_PROOF.config].includes(config)
+  const proof = [RISK_CURRENT_PROOF.config, TOPOLOGY_CURRENT_PROOF.config, TELEMETRY_CURRENT_PROOF.config, WORKFLOW_CURRENT_PROOF.config, INCIDENT_CURRENT_PROOF.config, CUSTODY_CURRENT_PROOF.config, LEAK_CURRENT_PROOF.config, HSE_CURRENT_PROOF.config, ASSETS_CURRENT_PROOF.config, INTEGRITY_CURRENT_PROOF.config, AUDIT_CURRENT_PROOF.config, CONFIGURATION_CURRENT_PROOF.config, DOCUMENTS_CURRENT_PROOF.config, REPORTING_CURRENT_PROOF.config, ANALYTICS_CURRENT_PROOF.config, SIMULATION_CURRENT_PROOF.config, ALARM_CURRENT_PROOF.config].includes(config)
     ? 'current-artifact SHA-256' : 'historical full OpenAPI baseline';
   console.log(`[openapi:compat] ${config}: ${paths} paths, ${schemas} schemas, ${proof}, ${errors.length === before ? 'compatible' : 'FAILED'}`);
 }
@@ -376,7 +394,7 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exit(1);
 }
-console.log(`\nOpenAPI compatibility gate passed for ${configs.length} contracts: Risk and Topology from verified HidraAPI 81d46bcb8bc8821f67eafbb26cd1279f6d091457; Telemetry/Monitoring, Workflow, Incident, Custody, Leak Detection and HSE from verified HidraAPI da4ce33ead7db40776049c861027947b61b96270; Assets, Integrity, Audit, Configuration, Documents, Reporting, Analytics and Simulation from verified HidraAPI 76b14cda4520f1eff242bd474c02ce4db317d385; other slices against HidraAPI ${manifest.backendCommit}.`);
+console.log(`\nOpenAPI compatibility gate passed for ${configs.length} contracts: Risk and Topology from verified HidraAPI 81d46bcb8bc8821f67eafbb26cd1279f6d091457; Telemetry/Monitoring, Workflow, Incident, Custody, Leak Detection and HSE from verified HidraAPI da4ce33ead7db40776049c861027947b61b96270; Assets, Integrity, Audit, Configuration, Documents, Reporting, Analytics, Simulation and Alarm from verified HidraAPI 76b14cda4520f1eff242bd474c02ce4db317d385; other slices against HidraAPI ${manifest.backendCommit}.`);
 
 function checkEvidence() {
   const required = ['repository', 'backendCommit', 'workflowRunId', 'artifactId', 'artifactName', 'artifactDigest', 'fullSpecSha256', 'fullContractGzipBase64Parts', 'fullContractGzipSha256', 'expectedOrvalContracts'];
