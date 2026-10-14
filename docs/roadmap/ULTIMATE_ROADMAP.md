@@ -774,3 +774,69 @@ IN PROGRESS: next bounded implementation is a verified, full
 artifact-backed repin of the current backend contract with regenerated
 affected Orval clients and integration tests, keeping any unsupported
 operator engineering authoring unselected.
+
+## 2026-10-14 — HWEB-F01 source-verified current Risk OpenAPI candidate
+
+**Selected bounded scope:** import the exact current published HidraAPI
+Risk contract slice as a versioned, nonactive candidate and test its
+provenance, schema coverage and additive differences before migrating
+the live Orval pin. This is an incremental HWEB-F01 evidence stage,
+not final whole-platform repinning, implicit approval of new Risk
+lifecycle controls or HWEB-F02–F10 selection.
+
+**Verified starting points:** HidraWEB `main`
+`8d4d92a8e33e50a8614d0ca376175bfc0cd78ff9`, Code CI #989
+`38556023357` SUCCESS. HidraAPI `main`
+`97c60fed8aabafda71a63ccbd2c772ba484c4739` is subsequent
+documentation; the latest source-backed published full OpenAPI
+was produced by successful HidraAPI Full CI #683
+`38552443731` at
+`81d46bcb8bc8821f67eafbb26cd1279f6d091457`.
+Artifact ID `11887551780` has GitHub artifact digest
+`sha256:9e03c889893ae69ffcc9bb52a37e2103555d3350c2579f6cec46649188aec632`.
+Its `hidra-api.json` raw SHA-256 is
+`59e2881d5d84dea902bf0c7aa5c773a83a0ba47246838b30769ed645c7228969`.
+All ten `/api/v1/risk/` operations plus the transitive closure of their
+nine schema references were extracted with original fields,
+operation IDs, response types and bearer security, canonicalized with
+sorted JSON object keys. The resulting 8,462-byte candidate has
+SHA-256 `c4b5e87473bea32fa7d2724e4871ca0017a0e43ae76dd063a459f69d6e94b3f0`
+and exact Git blob SHA
+`9799e93131a768280f3e099bc496437ce2b0b5ed`.
+The Git blob digest was independently reproduced by rebuilding the
+canonical candidate from the current checked-in Risk input plus
+the specific latest-source deltas; byte identity was verified before
+publication, not inferred from schema-name similarity.
+
+**Coverage:** an optional, typed `scopes` array on
+`CreateRiskAssessmentRequest` referencing
+`RiskAssessmentScopeInput` (scope type/id, topology snapshot,
+time bounds, inclusion flag, note); separate approve/score/submit
+Risk governance operations with their own explicit wire requests
+and bearer authentication requirement. Publishing route shapes
+does **not** establish a current user's effective route-permission
+grant, governance eligibility or permission to add browser actions.
+No new frontend Risk action button, client DTO, scoring or approval
+command is activated by this evidence stage.
+
+**Exact committed scope:**
+`openapi/candidates/hidra-risk-81d46bcb8bc8821f67eafbb26cd1279f6d091457.json` (create),
+`scripts/verify-risk-candidate.test.mjs` (create),
+`package.json` (append Node regression entry),
+`docs/roadmap/ULTIMATE_ROADMAP.md` (append only).
+**Registered commit message:**
+`test(contract): pin verified Risk OpenAPI candidate for HWEB-F01`.
+Source comments, security/authentication logic, the current active
+`orval.risk.config.ts`, old pinned source slice, full baseline manifest,
+generated clients, CI definitions and unrelated business pages remain
+untouched.
+
+**Acceptance:** exact parent, tree, blob and four-file allowlist;
+current GitHub Code/Documentation CI with compatibility, generation,
+lint, TypeScript, Node/Vitest, performance/build/Playwright.
+CI acceptance requires observed completion; starting a workflow
+does not prove success. HWEB-F01 remains IN PROGRESS. Next separately
+bounded stage is the coordinated active full OpenAPI baseline repin,
+affected generated Orval clients, consumer reconciliation and
+permissions/integration acceptance; retain old source-backed
+contracts until the new verified baseline can pass the full gate.
