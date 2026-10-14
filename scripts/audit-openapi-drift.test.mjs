@@ -26,8 +26,12 @@ const base = {
   },
 };
 
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
 test('reports optional newly published risk scopes without classifying them as breaking', () => {
-  const backend = structuredClone(base);
+  const backend = clone(base);
   backend.components.schemas.CreateRiskAssessmentRequest.properties.scopes = {
     type: 'array',
     items: { $ref: '#/components/schemas/RiskAssessmentScopeInput' },
@@ -44,7 +48,7 @@ test('reports optional newly published risk scopes without classifying them as b
 });
 
 test('flags required fields and incompatible schema changes', () => {
-  const backend = structuredClone(base);
+  const backend = clone(base);
   const request = backend.components.schemas.CreateRiskAssessmentRequest;
   request.required = ['assessmentNumber'];
   request.properties.riskRegisterId.type = 'integer';
@@ -54,10 +58,10 @@ test('flags required fields and incompatible schema changes', () => {
 });
 
 test('detects removed operations and schema fields', () => {
-  const backend = structuredClone(base);
+  const backend = clone(base);
   delete backend.paths['/api/v1/risk/assessments'].post;
   assert.equal(compareContractSlice('risk', base, backend)[0].kind, 'method_removed');
-  backend.paths = structuredClone(base.paths);
+  backend.paths = clone(base.paths);
   delete backend.components.schemas.CreateRiskAssessmentRequest.properties.riskRegisterId;
   assert.ok(compareContractSlice('risk', base, backend).some((item) => item.kind === 'field_removed'));
 });
@@ -66,7 +70,7 @@ test('requires source artifact integrity and reads pinned Orval input from disk'
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'hidra-contract-'));
   try {
     fs.mkdirSync(path.join(root, 'openapi'));
-    const backend = structuredClone(base);
+    const backend = clone(base);
     backend.components.schemas.CreateRiskAssessmentRequest.properties.scopes = { type: 'array', items: { type: 'string' } };
     const full = path.join(root, 'backend.json');
     const bytes = JSON.stringify(backend);
