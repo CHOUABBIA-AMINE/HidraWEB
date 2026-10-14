@@ -1649,3 +1649,76 @@ configurations updated, nine still outstanding, and a
 single-artifact backend OpenAPI baseline and integrated
 permission/consumer acceptance still pending. No PR, branch
 or code comments.
+
+## 2026-10-14 — HWEB-F01 verified Configuration OpenAPI source activation
+
+**Selected one bounded HWEB-F01 stage:** replace only the existing
+Configuration Orval transport source with an exact versioned slice
+from HidraAPI's latest successfully published full OpenAPI artifact.
+Preserve the existing definition, feature-flag and value consumers
+and all effective backend route/grant enforcement. Do not introduce
+new administrative write controls, changes to runtime authorization,
+feature-flag behavior, numerical simulation or new subphases.
+
+**Preflight:** HidraWEB main
+`4936cb32c7aa6b86744e476bdb205e0deaf704af` with
+Code CI #1002 `38579016317` SUCCESS and Documentation CI
+#24 `38579016336` SUCCESS. HidraAPI last completed full
+OpenAPI-producing CI #686 `38569456312` SUCCESS at
+`76b14cda4520f1eff242bd474c02ce4db317d385`.
+Published API-contract artifact ID `11897156166`, ZIP digest
+`sha256:191d763d086c078c0029a61c4c2991247d2db86e75d329991ce009352feeff33`.
+Actual `hidra-api.json` is 457,784 bytes, 244 paths, 231 schemas;
+SHA-256 `d00252b93751b1d8cfdbd4eafaeeb6691aff31b70e507b72d1a192c6d45add5f`.
+Subsequent HidraAPI documentation commits do not replace the
+provenance or guarantee a newer published full OpenAPI artifact.
+
+**Deterministic extraction:** all seven
+`/api/v1/configuration/` routes and six transitive schema
+definitions from the exact successful Full CI #686 JSON,
+preserving operation IDs, request/response types, all published
+enums and bearer security. Drop only the server URL and
+display-source metadata and serialize with sorted JSON keys.
+The canonical 5,741-byte source at
+`openapi/candidates/hidra-configuration-76b14cda4520f1eff242bd474c02ce4db317d385.json`
+has raw SHA-256
+`c38a1a6a5e351ce53bb953811cde71d1fa784b73e1150820c1cc52474728ca84`
+and Git blob SHA `b64ba80e2eddf8865e6f389e3fd4cb2c28500533`.
+This exact blob was independently reconstructed from the prior
+checked-in Configuration slice and the three published alias
+POST paths plus authenticated route metadata and matched the
+artifact extracted directly from the actual ZIP.
+
+**Implementation:** repin `orval.configuration.config.ts`;
+extend the fail-closed compatibility gate to verify exact path,
+SHA-256, OpenAPI version, 7 paths, 6 schemas and only
+Configuration-prefixed routes. Preserve eleven independent
+already-activated source hash locks and the original full
+historical backend artifact checks for eight remaining sources.
+Add four Node regression tests for source evidence, existing
+definition/feature-flag/value request types and enums,
+published alias operations, capability security and the
+preservation of all existing integrity locks. Include the test
+in the existing `npm test` script. Do not alter generated
+client files, application forms, access controls or workflows.
+
+**Exact commit message:**
+`fix(contract): activate verified Configuration OpenAPI source pin`.
+
+**Exact six-file allowlist:**
+`openapi/candidates/hidra-configuration-76b14cda4520f1eff242bd474c02ce4db317d385.json` CREATE;
+`orval.configuration.config.ts`;
+`scripts/check-openapi-compatibility.mjs`;
+`scripts/verify-configuration-candidate.test.mjs` CREATE;
+`package.json`;
+`docs/roadmap/ULTIMATE_ROADMAP.md` APPEND ONLY.
+
+**Exit:** compare-and-swap publish to expected `main`,
+verify commit parent/tree/exact scope, observe new Code and
+Documentation CI startup and stop without waiting. This is
+not CI-confirmed until Code CI finishes successfully, including
+client generation, typecheck, unit/Node, lint, Playwright,
+performance and release checks. HWEB-F01 remains IN PROGRESS
+with twelve of twenty source pins updated, eight still pending,
+and fully coordinated backend baseline/consumer/authorization
+acceptance not yet completed. No branch, PR or code comments.
