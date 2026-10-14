@@ -59,9 +59,16 @@ test('candidate governance operations do not grant browser authorization by them
   }
 });
 
-test('candidate is an additive risk delta and the active pinned transport stays separate', () => {
+test('active Risk generation uses only the verified artifact while preserving legacy evidence', () => {
   const changes = compareContractSlice('risk', pinned, candidate);
   assert.equal(changes.some((item) => item.kind === 'field_removed' || item.kind === 'method_removed'), false);
   assert.ok(changes.some((item) => item.kind === 'field_added' && item.detail.endsWith('.scopes')));
   assert.equal(pinned.components.schemas.CreateRiskAssessmentRequest.properties.scopes, undefined);
+  const source = fs.readFileSync(path.join(root, 'orval.risk.config.ts'), 'utf8');
+  assert.ok(source.includes("./openapi/candidates/hidra-risk-81d46bcb8bc8821f67eafbb26cd1279f6d091457.json"));
+  assert.ok(!source.includes('hidra-risk-63f3f60974ce57eb8cd5e42910397615195624fb.json'));
+  const gate = fs.readFileSync(path.join(root, 'scripts/check-openapi-compatibility.mjs'), 'utf8');
+  assert.ok(gate.includes('RISK_CURRENT_PROOF'));
+  assert.ok(gate.includes('source-backed Risk contract digest mismatch'));
+  assert.ok(gate.includes('compareSlice(config, slice);'));
 });

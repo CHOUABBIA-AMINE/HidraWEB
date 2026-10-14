@@ -2,7 +2,7 @@ import { defineConfig } from 'orval';
 
 export default defineConfig({
   risk: {
-    input: { target: './openapi/hidra-risk-63f3f60974ce57eb8cd5e42910397615195624fb.json' },
+    input: { target: './openapi/candidates/hidra-risk-81d46bcb8bc8821f67eafbb26cd1279f6d091457.json' },
     output: {
       mode: 'single',
       target: './src/api/generated/risk/risk.ts',

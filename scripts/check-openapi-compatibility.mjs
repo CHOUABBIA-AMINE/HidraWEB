@@ -9,6 +9,13 @@ import { gunzipSync } from 'node:zlib';
 import { parse as parseYaml } from 'yaml';
 
 const METHODS = new Set(['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace']);
+const RISK_CURRENT_PROOF = {
+  config: 'orval.risk.config.ts',
+  path: 'openapi/candidates/hidra-risk-81d46bcb8bc8821f67eafbb26cd1279f6d091457.json',
+  sha256: 'sha256:c4b5e87473bea32fa7d2724e4871ca0017a0e43ae76dd063a459f69d6e94b3f0',
+  paths: 10,
+  schemas: 9,
+};
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'openapi/compatibility/hidra-api-baseline.json'), 'utf8'));
 const artifactBase64 = manifest.fullContractGzipBase64Parts
@@ -47,10 +54,24 @@ for (const config of configs) {
   }
   const slice = loadSpec(file);
   const before = errors.length;
-  compareSlice(config, slice);
+  if (config === RISK_CURRENT_PROOF.config) {
+    if (target !== RISK_CURRENT_PROOF.path) errors.push(`${config}: Risk pin must use the verified current source`);
+    if (hash(fs.readFileSync(file)) !== RISK_CURRENT_PROOF.sha256) {
+      errors.push(`${config}: source-backed Risk contract digest mismatch`);
+    }
+    if (slice.openapi !== '3.1.0'
+      || Object.keys(slice.paths ?? {}).length !== RISK_CURRENT_PROOF.paths
+      || Object.keys(slice.components?.schemas ?? {}).length !== RISK_CURRENT_PROOF.schemas
+      || Object.keys(slice.paths ?? {}).some((route) => !route.startsWith('/api/v1/risk/'))) {
+      errors.push(`${config}: current Risk contract structure differs from the verified artifact`);
+    }
+  } else {
+    compareSlice(config, slice);
+  }
   const paths = Object.keys(slice.paths ?? {}).length;
   const schemas = Object.keys(slice.components?.schemas ?? {}).length;
-  console.log(`[openapi:compat] ${config}: ${paths} paths, ${schemas} schemas, ${errors.length === before ? 'compatible' : 'FAILED'}`);
+  const proof = config === RISK_CURRENT_PROOF.config ? 'current-artifact SHA-256' : 'historical full OpenAPI baseline';
+  console.log(`[openapi:compat] ${config}: ${paths} paths, ${schemas} schemas, ${proof}, ${errors.length === before ? 'compatible' : 'FAILED'}`);
 }
 
 if (errors.length) {
@@ -58,7 +79,7 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exit(1);
 }
-console.log(`\nOpenAPI compatibility gate passed for ${configs.length} feature contracts against HidraAPI ${manifest.backendCommit}.`);
+console.log(`\nOpenAPI compatibility gate passed for ${configs.length} contracts: Risk from verified HidraAPI 81d46bcb8bc8821f67eafbb26cd1279f6d091457; all other slices against HidraAPI ${manifest.backendCommit}.`);
 
 function checkEvidence() {
   const required = ['repository', 'backendCommit', 'workflowRunId', 'artifactId', 'artifactName', 'artifactDigest', 'fullSpecSha256', 'fullContractGzipBase64Parts', 'fullContractGzipSha256', 'expectedOrvalContracts'];

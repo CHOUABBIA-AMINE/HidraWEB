@@ -840,3 +840,68 @@ bounded stage is the coordinated active full OpenAPI baseline repin,
 affected generated Orval clients, consumer reconciliation and
 permissions/integration acceptance; retain old source-backed
 contracts until the new verified baseline can pass the full gate.
+
+## 2026-10-14 — HWEB-F01 activate immutable source-verified Risk Orval contract
+
+**Selected one bounded integration stage:** activate the Risk-only
+OpenAPI contract candidate previously accepted in the successful
+Documentation #13 / Code #990 evidence, without prematurely changing
+the other 19 generated transport inputs or enabling additional
+workflow/approval/scoring commands in browser pages.
+
+**Exact starting point:** HidraWEB `main`
+`8da5113e4585b7715c5de66bdb55070c8720cd9c`;
+HidraWEB Code CI #990 `38557759422` and
+Documentation CI #13 `38557759534` SUCCESS.
+HidraAPI code-source baseline
+`81d46bcb8bc8821f67eafbb26cd1279f6d091457`
+had verified Full CI #683 `38552443731`, publishing API
+OpenAPI artifact #11887551780. Subsequent backend main commits
+are *not* silently assumed to be reflected by this pinned slice;
+a later current-head, complete-full-contract repin remains required.
+
+**Bounded implementation:**
+`orval.risk.config.ts` now selects exactly
+`openapi/candidates/hidra-risk-81d46bcb8bc8821f67eafbb26cd1279f6d091457.json`
+as the active generation input. The existing checked-in Risk source
+from 63f3f609 remains immutable historical evidence. The 8,462-byte
+candidate has previously verified SHA-256
+`c4b5e87473bea32fa7d2724e4871ca0017a0e43ae76dd063a459f69d6e94b3f0`
+and 10 operations/9 referenced schemas. A bounded upgrade to
+`scripts/check-openapi-compatibility.mjs` enforces all of:
+the exact Risk source path, source byte digest, OpenAPI 3.1 structure,
+exact route/schema counts and a Risk-only path prefix. Failure
+remains fatal to CI. Every other Orval configuration continues to
+pass the original full historical HidraAPI baseline comparison and
+all original full-payload hashes. This is **two explicit source pins**,
+not a claim of one globally repinned current backend.
+
+The existing Node contract regression asserts that the active
+Orval Risk input has changed to the immutable source, preserved
+legacy artifacts are still compared and the compatibility gate
+retains both the Risk hash assertion and existing historical full
+slice checks. The generators run during the established GitHub
+Code CI and compile the resulting TypeScript types, including
+Risk assessment scope inputs and the newly published governance
+wire requests. UI Risk actions remain restricted to the existing
+HidraAPI-backed register/assessment/evidence commands; the mere
+presence of a generated governance operation grants no permission.
+
+**Exact commit message:**
+`fix(contract): activate verified Risk OpenAPI source pin`.
+**Exact path allowlist:**
+`orval.risk.config.ts`,
+`scripts/check-openapi-compatibility.mjs`,
+`scripts/verify-risk-candidate.test.mjs`,
+`docs/roadmap/ULTIMATE_ROADMAP.md` (append-only).
+No code comments, no CI/workflow alteration, no PR or new branch,
+no change to runtime authorization, simulation or business state.
+
+**Acceptance:** publish to expected `main` parent,
+verify exact tree/path/blob scope, then observe Code CI startup.
+Lint, full 20-slice generation, TypeScript, unit tests, performance,
+build/release and full Playwright all remain mandatory.
+Do not mark this stage VERIFIED from a merely started run.
+HWEB-F01 remains IN PROGRESS; next bounded slice is the
+full current source-backed OpenAPI baseline repin plus affected
+generated consumer/API and permission integration reconciliation.
