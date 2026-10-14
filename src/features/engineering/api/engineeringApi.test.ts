@@ -18,12 +18,12 @@ describe('engineering typed API adapters', () => {
   it('uses generated assets request/response contracts on canonical endpoints', async () => {
     httpClient.mockResolvedValue({});
     await registerMaintainableAsset({ assetCode: 'A-1', assetName: 'Pump' });
-    await recordAssetCondition({ maintainableAssetId: 'asset-1', conditionStatus: 'GOOD', conditionScore: 98 });
+    await recordAssetCondition({ maintainableAssetId: 'asset-1', conditionStatus: 'NORMAL', conditionScore: 98 });
     await createMaintenanceWorkOrder({ maintainableAssetId: 'asset-1', title: 'Inspect' });
     await updateMaintainableAsset('asset/1', { expectedUpdatedAt: '2026-09-29T20:00:00Z', assetName: 'Pump A' });
 
     expect(httpClient).toHaveBeenNthCalledWith(1, { method: 'POST', url: '/api/v1/assets/maintainable-assets', data: { assetCode: 'A-1', assetName: 'Pump' } });
-    expect(httpClient).toHaveBeenNthCalledWith(2, { method: 'POST', url: '/api/v1/assets/asset-conditions', data: { maintainableAssetId: 'asset-1', conditionStatus: 'GOOD', conditionScore: 98 } });
+    expect(httpClient).toHaveBeenNthCalledWith(2, { method: 'POST', url: '/api/v1/assets/asset-conditions', data: { maintainableAssetId: 'asset-1', conditionStatus: 'NORMAL', conditionScore: 98 } });
     expect(httpClient).toHaveBeenNthCalledWith(3, { method: 'POST', url: '/api/v1/assets/maintenance-work-orders', data: { maintainableAssetId: 'asset-1', title: 'Inspect' } });
     expect(httpClient).toHaveBeenNthCalledWith(4, { method: 'PATCH', url: '/api/v1/assets/maintainable-assets/asset%2F1', data: { expectedUpdatedAt: '2026-09-29T20:00:00Z', assetName: 'Pump A' } });
   });

@@ -124,7 +124,7 @@ async function mockAssets(page: Page, historyItems = lifecycleItems) {
 
   await page.route('**/api/v1/assets/asset-conditions', async (route) => {
     expect(await route.request().postDataJSON()).toEqual({
-      maintainableAssetId: 'asset-1', conditionStatus: 'GOOD', conditionTypeId: 'VISUAL', sourceModule: 'assets',
+      maintainableAssetId: 'asset-1', conditionStatus: 'NORMAL', conditionTypeId: 'VISUAL', sourceModule: 'assets',
       sourceReferenceId: 'inspection-42', summary: 'No visible degradation', conditionScore: 92,
     });
     await route.fulfill({ json: { id: 'condition-1' } });
@@ -178,7 +178,8 @@ test('HWEB-011-03 reads assets from workbench and uses backend-owned create cont
   await expect(page.getByText(/Maintainable asset registered/)).toBeVisible();
 
   await page.getByRole('textbox', { name: 'maintainableAssetId', exact: true }).nth(0).fill('asset-1');
-  await page.getByRole('textbox', { name: 'conditionStatus', exact: true }).fill('GOOD');
+  await page.getByRole('combobox', { name: 'conditionStatus', exact: true }).click();
+  await page.getByRole('option', { name: 'NORMAL', exact: true }).click();
   await page.getByRole('textbox', { name: 'conditionTypeId', exact: true }).fill('VISUAL');
   await page.getByRole('textbox', { name: 'sourceModule', exact: true }).fill('assets');
   await page.getByRole('textbox', { name: 'sourceReferenceId', exact: true }).fill('inspection-42');

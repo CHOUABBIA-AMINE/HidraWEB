@@ -33,6 +33,11 @@ const WORKBENCH_SEARCH_ROUTE = '/api/v1/workbench/{module}/{resource}/search';
 const REGISTER_ASSET_ROUTE = '/api/v1/assets/maintainable-assets';
 const RECORD_CONDITION_ROUTE = '/api/v1/assets/asset-conditions';
 const CREATE_WORK_ORDER_ROUTE = '/api/v1/assets/maintenance-work-orders';
+const CONDITION_STATUSES = ['NORMAL', 'WATCH', 'DEGRADED', 'CRITICAL', 'UNKNOWN'] as const satisfies readonly NonNullable<RecordAssetConditionRequest['conditionStatus']>[];
+
+function isConditionStatus(value: string): value is NonNullable<RecordAssetConditionRequest['conditionStatus']> {
+  return CONDITION_STATUSES.some((status) => status === value);
+}
 
 type RouteMethod = 'GET' | 'POST';
 type FormState = Record<string, string>;
@@ -162,7 +167,7 @@ export function EngineeringAssetsPage({ renderSelectedContext }: EngineeringAsse
   const recordCondition = () => {
     const request: RecordAssetConditionRequest = {
       maintainableAssetId: clean(conditionForm.maintainableAssetId),
-      conditionStatus: clean(conditionForm.conditionStatus),
+      conditionStatus: isConditionStatus(conditionForm.conditionStatus) ? conditionForm.conditionStatus : undefined,
       conditionTypeId: clean(conditionForm.conditionTypeId),
       sourceModule: clean(conditionForm.sourceModule),
       sourceReferenceId: clean(conditionForm.sourceReferenceId),
@@ -322,7 +327,16 @@ function CommandPanel({ title, permission, allowed, mutation, success, form, set
         {mutation.isError && <Alert severity="error">{errorMessage(mutation.error, title)}</Alert>}
         {mutation.isSuccess && <Alert severity="success">{success}</Alert>}
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} useFlexGap sx={{ flexWrap: 'wrap' }}>
-          {Object.entries(form).map(([field, value]) => (
+          {Object.entries(form).map(([field, value]) => field === 'conditionStatus' ? (
+            <TextField
+              key={field} size="small" label={field} select value={value}
+              onChange={(event) => setForm((current) => ({ ...current, [field]: event.target.value }))}
+              sx={{ minWidth: 180 }}
+            >
+              <MenuItem value="">Not specified</MenuItem>
+              {CONDITION_STATUSES.map((status) => <MenuItem key={status} value={status}>{status}</MenuItem>)}
+            </TextField>
+          ) : (
             <TextField
               key={field} size="small" label={field} type={dateFields.includes(field) ? 'datetime-local' : 'text'} value={value}
               onChange={(event) => setForm((current) => ({ ...current, [field]: event.target.value }))}
