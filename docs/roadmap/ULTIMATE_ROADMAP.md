@@ -498,3 +498,45 @@ lint/typecheck/unit/performance/build/package verification, full Playwright
 regression and release artifacts via Code CI. This registration does
 **not** predeclare success. Deployment OIDC/LDAP/AD smoke and user acceptance
 remain unverified without owner-provided environment configuration.
+
+## 2026-10-14 — HWEB-F01 narrow identity-organization Orval contract correction
+
+Owner `next` resumes the already selected HWEB-F01 compatibility work after
+the separate authentication enhancement was Code CI #976 SUCCESS on
+`5fba56b7fb0bcf73afa3aed6cccb75cfd37fc900`.
+The latest checked HidraAPI full-code CI #678, run `38466217702`,
+completed SUCCESS on backend code
+`e1695a0848e005f3fac272dd80d2a80f03f5ce2c`.
+The published `hidra-api-openapi-...` artifact ID `11848803507`
+(api-contract variant, archive SHA-256
+`9e449c26cf44309ce67b23401fecb7b9ba743468107b09b3b14ca56d2a042791`)
+contains `CreateOrganizationUnitRequest.validFrom` as a required
+`date-time` string. Its JSON SHA-256 is
+`cde077455aec099d07d39c4fff7cd3740039baeb6f67dd0bdfa08a831ae4e7df`.
+The other paths and component schema shape match the previously reviewed
+post-HPR baseline except the documented six changed DTOs and new operations.
+HidraAPI latest `main` is documentation/CI-only beyond the verified
+source contract; exact head must still be verified before follow-up tasks.
+
+**Selected bounded implementation:** correct only the checked-in
+identity/organization Orval request schema for `validFrom` so its generated
+TypeScript DTO cannot accept omission. The existing command form already
+supplies an explicit validated ISO instant, and no new business action or
+authentication behavior is introduced. Added a typechecked Vitest regression
+against the generated `CreateOrganizationUnitRequest`.
+
+**Exact commit message:**
+`fix(contract): require organization validFrom in Orval slice`.
+
+**Exact file allowlist:**
+- `openapi/hidra-identity-organization-63f3f60974ce57eb8cd5e42910397615195624fb.json` (only `CreateOrganizationUnitRequest.required`)
+- `src/features/context/model/organizationUnitValidFrom.test.ts`
+- `docs/roadmap/ULTIMATE_ROADMAP.md` (append only)
+
+**Gate:** new-head Code CI must regenerate the client, validate old pinned
+compatibility, typecheck the mandatory field, run unit tests and Playwright.
+This narrow contract correction is **not** a claim that the full backend
+contract has been repinned; HWEB-F01 still needs accepted current full
+artifact evidence, all consumer slices, permission-negative tests and
+integration acceptance. HWEB-F02–F10 remain unselected and simulation
+remains deferred. CI success is not assumed before observation.
