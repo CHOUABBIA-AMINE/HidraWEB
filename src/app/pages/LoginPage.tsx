@@ -149,7 +149,7 @@ export function LoginPage() {
             }}
           />
           <Box sx={{ position: 'relative', zIndex: 1 }}>
-            <Stack direction="row" alignItems="center" spacing={1.5}>
+            <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
               <Box
                 aria-hidden="true"
                 sx={{
@@ -191,7 +191,7 @@ export function LoginPage() {
             </Typography>
           </Box>
 
-          <Stack direction="row" alignItems="center" spacing={1} sx={{ position: 'relative', zIndex: 1 }}>
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center', position: 'relative', zIndex: 1 }}>
             <Box sx={{ width: 7, height: 7, borderRadius: '50%', bgcolor: colors.orange }} />
             <Typography sx={{ color: alpha('#fff', 0.77), fontSize: 12, letterSpacing: '0.02em' }}>
               {t('auth.login.brandFooter')}
@@ -210,7 +210,7 @@ export function LoginPage() {
             flexDirection: 'column',
           }}
         >
-          <Stack direction="row" justifyContent="flex-end" spacing={0.5} sx={{ mb: { xs: 3, md: 5 } }}>
+          <Stack direction="row" spacing={0.5} sx={{ justifyContent: 'flex-end', mb: { xs: 3, md: 5 } }}>
             {languages.map((language) => (
               <Button
                 key={language.code}
