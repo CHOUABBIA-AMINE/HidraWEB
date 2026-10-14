@@ -32,8 +32,8 @@ vi.mock('react-i18next', () => ({
       'auth.basic.username': 'Username',
       'auth.basic.password': 'Password',
       'auth.basic.submit': 'Sign in',
-      'auth.login.showPassword': 'Show password',
-      'auth.login.hidePassword': 'Hide password',
+      'auth.login.showPassword': 'Show entered characters',
+      'auth.login.hidePassword': 'Hide entered characters',
       'auth.login.brandTitle': 'Operational intelligence for hydrocarbon transportation.',
       'auth.login.brandDescription': 'One workspace for Hidra.',
       'auth.login.brandFooter': 'Transportation · Operations · Engineering',
@@ -75,10 +75,11 @@ describe('HidraWEB multi-provider login selection', () => {
     const password = screen.getByLabelText(/^Password/);
     fireEvent.change(password, { target: { value: 'private-passphrase' } });
     expect(password).toHaveAttribute('type', 'password');
-    fireEvent.click(screen.getByRole('button', { name: 'Show password' }));
+    expect(screen.getByRole('button', { name: 'Show entered characters' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Show entered characters' }));
     expect(password).toHaveAttribute('type', 'text');
     expect(password).toHaveValue('private-passphrase');
-    fireEvent.click(screen.getByRole('button', { name: 'Hide password' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Hide entered characters' }));
     expect(password).toHaveAttribute('type', 'password');
   });
 
