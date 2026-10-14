@@ -1281,3 +1281,84 @@ new run. HWEB-F01 remains IN PROGRESS; six of twenty
 contract sources have a newer source-backed pin and
 fourteen remain to reconcile, plus global-source alignment,
 business consumer integration and permissions acceptance.
+
+## 2026-10-14 — HWEB-F01 activate verified Leak Detection contract source
+
+**Authorized bounded scope:** activate the latest fully verified
+HidraAPI Leak Detection OpenAPI transport source in the existing
+HidraWEB Orval generator, preserving current read capabilities.
+This is transport reconciliation, not permission for the browser
+to create leak candidates, open cases, escalate incidents or
+execute physical-network actions. No leak-detection model,
+numerical solver, SCADA connector or live alarm command is added.
+
+**Verified preflight:** HidraWEB main
+`1869a0969c79d23f2bf147f298aaf5103834354d`;
+Code CI #996 `38567635176` and Documentation CI #19
+`38567634928` SUCCESS. Latest source-backed HidraAPI
+OpenAPI Full CI #685 `38559065173` SUCCESS at commit
+`da4ce33ead7db40776049c861027947b61b96270`;
+contract ZIP artifact ID `11891417141` GitHub digest
+`sha256:41415af15d2809ab71996cb5b6e2ba74c8f22dd3eaa8407975810a873c7098e3`.
+Raw full `hidra-api.json` SHA-256:
+`e0f4e27c4ee84675b7a99fce55454c275b5e320e0f63c1202fe63b4d7a8553b3`.
+Later documentation-only backend main
+`ae9f639fe55cfc15cf571b5b6e5fa6cd47532cdc`
+is not automatically a new contract production source.
+
+**Exact artifact extraction:** choose all nine
+`/api/v1/leakdetection/` paths and the nine reachable schema
+definitions from the successful Full CI JSON; preserve method
+operation IDs, query/response semantics, source enum values,
+bearer security and optional request fields. Remove the local
+server URL and display-only source metadata, then serialize
+with sorted JSON object keys. The canonical result is 9,049
+bytes, SHA-256
+`4c55a76cdf581954c2a35fce197ce4c0df3b0f827c09752fe9091b3649bfc91c`,
+Git blob `cb607f009631e54a27ee2231ed9086fbc293382f`.
+An independently reconstructed candidate from the immutable old
+query-only slice plus the published command and reference-schema
+additions reproduced this exact Git object SHA; the initial
+candidate mismatch in the capability operation ID was corrected
+before selecting the matching source.
+
+**New transport coverage:** preserve the existing candidate
+and case list/detail GET routes; include capabilities GET and
+explicit create-candidate, open-case and escalate-case POST
+paths and aliases. These transport declarations do not
+themselves grant actor permissions, validate leak hydraulics,
+or prove live leak-detection deployment.
+
+**Changes in this stage:** add versioned
+`openapi/candidates/hidra-leak-da4ce33ead7db40776049c861027947b61b96270.json`;
+repin `orval.leak.config.ts` to it; extend
+`scripts/check-openapi-compatibility.mjs` to fail on any
+source-path, byte-hash, OpenAPI version, nine-route/nine-schema
+coverage or prefix mismatch. All six previously updated source
+locks and the historical full baseline manifest and comparisons
+for thirteen remaining legacy source configurations remain
+enforced. Four Node tests verify exact fingerprint, typed
+request/response contracts, escalation enum and original read
+preservation, and are included in existing `npm test`.
+No generated client files, runtime page behavior, CI workflows
+or code comments are directly changed.
+
+**Exact commit message:** `fix(contract): activate verified Leak Detection source pin`.
+
+**Exact six-file allowlist:**
+`openapi/candidates/hidra-leak-da4ce33ead7db40776049c861027947b61b96270.json` CREATE;
+`orval.leak.config.ts`;
+`scripts/check-openapi-compatibility.mjs`;
+`scripts/verify-leak-candidate.test.mjs` CREATE;
+`package.json`;
+`docs/roadmap/ULTIMATE_ROADMAP.md` APPEND-ONLY.
+
+**Acceptance:** verify expected `main` parent and tree,
+publish using compare-and-swap, verify exact six-file scope,
+confirm new Code and Documentation CI startup and STOP.
+Only a completed successful Code CI confirms generated types,
+full static/unit/performance/build/release and Playwright
+regressions. HWEB-F01 remains IN PROGRESS with seven of
+twenty source configurations updated and thirteen to reconcile,
+plus global backend contract alignment and authorization and
+client-consumer integration acceptance. No PR or branch.
