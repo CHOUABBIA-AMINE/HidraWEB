@@ -540,3 +540,47 @@ contract has been repinned; HWEB-F01 still needs accepted current full
 artifact evidence, all consumer slices, permission-negative tests and
 integration acceptance. HWEB-F02–F10 remain unselected and simulation
 remains deferred. CI success is not assumed before observation.
+
+
+## 2026-10-14 — Local clean-checkout build bootstrap remediation
+
+Owner reported 132 TypeScript errors from direct `npm run build` after
+HWEB-F01 Orval request-schema correction. On exact current HidraWEB
+`9c92efa2b8c864b3cb2e34b7b86f9b88084bd125`, Code CI #977
+(run `38535952756`) passed **SUCCESS**, including all 20 generated
+Orval clients and full production build. The checked-in source tree
+contains only `src/api/generated/.gitkeep` and does not version any
+generated TypeScript client. CI explicitly runs 20 `api:generate:*`
+commands prior to `npm run build`, but the local `build` script runs
+`tsc -b` immediately, so a direct clean-checkout invocation has no
+generated imports. This mismatch is a verified reproducible precondition
+for missing-module errors, although the owner's exact 132 diagnostics
+were not provided and their complete composition cannot be asserted.
+
+**Authorized bounded correction:** attach an npm `prebuild` script
+that inventories the 20 checked-in `orval.*.config.ts` sources and
+their pinned OpenAPI inputs, detects missing/outdated generated entry
+points and schema index files, runs `openapi:compatibility` before
+generation, and invokes only corresponding checked-in npm Orval
+generators. When all outputs are current (normal CI path), it skips
+all regeneration. A failing generator or invalid contract stops the
+build rather than silently suppressing TypeScript errors. The
+implementation uses `process.execPath` plus `npm_execpath` for
+cross-platform npm/Windows compatibility and does not contact
+HidraAPI or change any REST contract.
+
+**Exact commit message:** `fix(build): bootstrap pinned Orval clients for local builds`.
+**Exact write allowlist:** `package.json`,
+`scripts/ensure-generated-clients.mjs` (new),
+`scripts/ensure-generated-clients.test.mjs` (new),
+`README.md`, `docs/roadmap/ULTIMATE_ROADMAP.md`
+(append only). Node-native preflight regression tests are wired into
+the existing `npm run test` lifecycle and exercise fresh,
+incomplete, stale, and invalid generator inventory behavior. No
+backend, physics, authoring feature, security or CI workflow
+changes are introduced.
+
+Accept only after new-head Code CI OpenAPI/generator/lint/typecheck/test/
+performance/build/Playwright/package/release gates pass; do not infer
+user-local success without their environment output. HWEB-F01
+remains IN PROGRESS pending full current HidraAPI contract repin.

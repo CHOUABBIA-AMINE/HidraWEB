@@ -39,11 +39,19 @@ Node baseline: **24 LTS**.
 
 ```bash
 cp .env.example .env.local
-npm install
-npm run api:generate:workbench
-npm run verify
+npm ci
+npm run build
 npm run dev
 ```
+
+A clean checkout intentionally contains no committed files under `src/api/generated/`
+apart from `.gitkeep`. `npm run build` now checks all 20 pinned Orval
+contracts, generates only missing/outdated clients, and then runs TypeScript
+and Vite. The pinned contract inputs are local files; the build does not
+require a running HidraAPI. Existing generated clients are reused to avoid
+20 redundant generation steps in CI. `npm run verify` still performs full
+contract generation and the complete validation suite. Use Node 24 and
+`npm ci` before running either command.
 
 HidraAPI development CORS currently allows `http://localhost:5173`, and the default development authentication mode is Basic.
 
