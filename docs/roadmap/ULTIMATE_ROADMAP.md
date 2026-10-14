@@ -623,3 +623,42 @@ Vite build/release package, and complete Playwright regression
 through exact new-head Code CI. Enterprise directory and OIDC
 deployment smoke tests remain environment-specific. HWEB-F01
 machine-contract reconciliation remains in progress and unaffected.
+
+## 2026-10-14 — Login Arabic RTL floating-label and provider localization correction
+
+Owner accepted the new SONATRACH-aligned login design and identified two
+remaining usability defects: Arabic Material UI floating labels remained on
+the left and credential provider choices were English-only. Verified
+HidraWEB Code CI #983 was SUCCESS on exact preflight `main`
+`2dd506715864552a8d82e80a3930c465aeb9ce04`.
+
+**Implemented scope:** the login content switches its direction with
+the active FR/EN/AR language. Arabic MUI outlined input labels use
+right-origin positioning for initial and floating states, while field
+notches, helper text, entered text, select icons and selected text adopt
+right-aligned presentation. The dropdown options explicitly adopt
+Arabic direction even when their MUI popover is portaled. Three
+translation sets provide meaningful localized names for the exact
+LOCAL, LDAP and ACTIVE_DIRECTORY choices without changing the
+backend-bound identifiers. The existing deployment-approved provider
+allowlist, password clearing on provider switch, authentication
+submission, OIDC PKCE, session lifecycle and default login modes remain
+unchanged. EN and FR retain their normal LTR layout.
+
+**Regression evidence to be tested:** mocked multi-provider component
+case asserts the Arabic labels, RTL dropdown and canonical LDAP
+transport value; a Chromium Playwright login case measures Arabic
+username label geometry after focus. All existing sign-in journeys,
+unit/performance tests, OpenAPI compatibility, production build and
+release verification must pass on the published head.
+
+**Exact commit message:**
+`fix(auth-ui): align Arabic RTL fields and localize provider choices`.
+**Exact paths:** `src/app/pages/LoginPage.tsx`,
+`src/app/pages/LoginPage.test.tsx`, `src/shared/i18n/resources.ts`,
+`tests/e2e/bootstrap.spec.ts`,
+`docs/roadmap/ULTIMATE_ROADMAP.md` (append only).
+
+This change adds no source-code comments, branch or PR. CI success is
+not assumed until observed. HWEB-F01 backend-contract reconciliation
+remains in progress independently.

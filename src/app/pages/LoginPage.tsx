@@ -38,11 +38,47 @@ const colors = {
   border: '#E7E3DE',
 };
 
-const credentialProviderLabels: Record<HidraCredentialProvider, string> = {
-  LOCAL: 'Hidra Local',
-  LDAP: 'LDAP',
-  ACTIVE_DIRECTORY: 'Active Directory',
+const credentialProviderKeys: Record<HidraCredentialProvider, string> = {
+  LOCAL: 'auth.login.providers.local',
+  LDAP: 'auth.login.providers.ldap',
+  ACTIVE_DIRECTORY: 'auth.login.providers.activeDirectory',
 };
+
+const arabicFieldSx = {
+  '& .MuiInputLabel-root': {
+    left: 'auto',
+    right: 14,
+    transformOrigin: 'top right',
+    transform: 'translate(0, 16px) scale(1)',
+    '&.MuiInputLabel-shrink': {
+      transform: 'translate(0, -9px) scale(0.75)',
+    },
+  },
+  '& .MuiOutlinedInput-input': {
+    textAlign: 'right',
+  },
+  '& .MuiOutlinedInput-notchedOutline': {
+    direction: 'rtl',
+    textAlign: 'right',
+  },
+  '& .MuiOutlinedInput-notchedOutline legend': {
+    textAlign: 'right',
+  },
+  '& .MuiFormHelperText-root': {
+    textAlign: 'right',
+    marginRight: 1.75,
+    marginLeft: 0,
+  },
+  '& .MuiSelect-select': {
+    textAlign: 'right',
+    paddingRight: '14px !important',
+    paddingLeft: '32px !important',
+  },
+  '& .MuiSelect-icon': {
+    right: 'auto',
+    left: 7,
+  },
+} as const;
 
 const languages = [
   { code: 'fr', label: 'FR', name: 'Français' },
@@ -76,6 +112,8 @@ export function LoginPage() {
     ? selectedProvider : credentialProviders[0];
   const checking = auth.status === 'checking';
   const activeLanguage = i18n.resolvedLanguage?.slice(0, 2) ?? i18n.language.slice(0, 2);
+  const isArabic = activeLanguage === 'ar';
+  const providerLabel = (provider: HidraCredentialProvider) => t(credentialProviderKeys[provider]);
   const error = showPreviousError ? auth.error : undefined;
 
   if (auth.status === 'authenticated' || auth.mode === 'disabled') {
@@ -200,6 +238,7 @@ export function LoginPage() {
         </Box>
 
         <Box
+          dir={isArabic ? 'rtl' : 'ltr'}
           sx={{
             minWidth: 0,
             bgcolor: '#fff',
@@ -253,7 +292,7 @@ export function LoginPage() {
             >
               {auth.mode === 'multi' ? t('auth.multi.title')
                 : auth.mode === 'jwt' ? t('auth.jwt.title')
-                  : credentialProviderLabels[auth.credentialProvider]}
+                  : providerLabel(auth.credentialProvider)}
             </Typography>
             <Typography sx={{ color: colors.muted, mt: 1.4, lineHeight: 1.7, fontSize: 14 }}>
               {auth.mode === 'multi' ? t('auth.multi.description')
@@ -278,6 +317,8 @@ export function LoginPage() {
                   <TextField
                     fullWidth
                     label={t('auth.multi.provider')}
+                    dir={isArabic ? 'rtl' : 'ltr'}
+                    sx={isArabic ? arabicFieldSx : undefined}
                     select
                     size="medium"
                     disabled={checking}
@@ -293,18 +334,27 @@ export function LoginPage() {
                     }}
                   >
                     {credentialProviders.map((provider) => (
-                      <MenuItem key={provider} value={provider}>{credentialProviderLabels[provider]}</MenuItem>
+                      <MenuItem
+                        key={provider}
+                        value={provider}
+                        dir={isArabic ? 'rtl' : 'ltr'}
+                        sx={{ textAlign: isArabic ? 'right' : 'left' }}
+                      >
+                        {providerLabel(provider)}
+                      </MenuItem>
                     ))}
                   </TextField>
                 ) : auth.mode === 'multi' && effectiveProvider ? (
                   <Typography sx={{ fontSize: 13, color: colors.muted, fontWeight: 600 }}>
-                    {t('auth.multi.provider')}: {credentialProviderLabels[effectiveProvider]}
+                    {t('auth.multi.provider')}: {providerLabel(effectiveProvider)}
                   </Typography>
                 ) : null}
 
                 <TextField
                   autoComplete="username"
                   autoFocus
+                  dir={isArabic ? 'rtl' : 'ltr'}
+                  sx={isArabic ? arabicFieldSx : undefined}
                   disabled={checking}
                   fullWidth
                   label={t('auth.basic.username')}
@@ -314,6 +364,8 @@ export function LoginPage() {
                 />
                 <TextField
                   autoComplete="current-password"
+                  dir={isArabic ? 'rtl' : 'ltr'}
+                  sx={isArabic ? arabicFieldSx : undefined}
                   disabled={checking}
                   fullWidth
                   label={t('auth.basic.password')}

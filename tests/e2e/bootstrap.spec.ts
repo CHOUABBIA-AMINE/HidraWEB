@@ -232,3 +232,17 @@ test('HWEB-004 surfaces backend 403 when an identity mutation is refused', async
   await page.getByRole('button', { name: 'Créer un utilisateur' }).click();
   await expect(page.getByText(/Forbidden/)).toBeVisible();
 });
+
+test('Hidra login floats Arabic field labels on the right in RTL mode', async ({ page }) => {
+  await page.goto('/login');
+  await page.getByRole('button', { name: 'العربية' }).click();
+  await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+  const username = page.getByLabel('اسم المستخدم', { exact: true });
+  await username.focus();
+  const label = page.locator('label.MuiInputLabel-root').filter({ hasText: 'اسم المستخدم' });
+  await expect.poll(async () => {
+    const [fieldBounds, labelBounds] = await Promise.all([username.boundingBox(), label.boundingBox()]);
+    if (!fieldBounds || !labelBounds) return -1;
+    return labelBounds.x - (fieldBounds.x + fieldBounds.width / 2);
+  }).toBeGreaterThan(0);
+});
