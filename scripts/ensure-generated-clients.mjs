@@ -1,4 +1,6 @@
 import { spawnSync } from 'node:child_process';
+import console from 'node:console';
+import process from 'node:process';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
