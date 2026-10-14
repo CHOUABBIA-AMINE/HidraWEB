@@ -1578,3 +1578,74 @@ Node/Vitest, performance, build/release and Playwright before the
 stage is CI-accepted. HWEB-F01 remains IN PROGRESS with ten of
 twenty source pins updated and ten remaining, plus coordinated
 complete baseline repin and consumer/authorization acceptance.
+
+## 2026-10-14 — HWEB-F01 verified Audit OpenAPI contract activation
+
+**Selected one bounded stage:** activate the verified, published
+HidraAPI Audit contract as the input to HidraWEB's existing
+Audit Orval generator. Keep request/export behavior and effective
+backend permission boundaries unchanged; do not expose new audit
+recording controls, claim user export authorization, alter workflow,
+or select HWEB-F02–F10.
+
+**Preflight:** HidraWEB main
+`884e11866afac71973402dd50f2bbde7019edd71`,
+Code CI #1001 `38577672082` SUCCESS and Documentation CI
+#23 `38577671863` SUCCESS. HidraAPI latest verified Full CI
+#686 `38569456312` SUCCESS on source commit
+`76b14cda4520f1eff242bd474c02ce4db317d385`.
+API contract artifact ID `11897156166`, ZIP digest
+`sha256:191d763d086c078c0029a61c4c2991247d2db86e75d329991ce009352feeff33`,
+raw `hidra-api.json` 457,784 bytes / 244 paths / 231
+schemas and SHA-256
+`d00252b93751b1d8cfdbd4eafaeeb6691aff31b70e507b72d1a192c6d45add5f`.
+Later backend documentation-only heads do not silently replace
+this verified full OpenAPI source.
+
+**Exact source extraction:** all seven
+`/api/v1/audit/` routes and the six schemas transitively
+referenced in the verified full contract, retaining audit event
+and access payloads, enum values, operation IDs, required flags,
+bearer security and export status types. Remove only server-local
+and display-only source metadata, then sort JSON object keys.
+The 6,435-byte canonical candidate
+`openapi/candidates/hidra-audit-76b14cda4520f1eff242bd474c02ce4db317d385.json`
+has SHA-256
+`2d08cfb549d5ca4bccb2905eccede642c5d5b344ccd4c4cb1abdc5a8b35fe663`,
+Git blob SHA `fa8033cd3926c7daf2ac15b4f2fb025fee7ce5ee`.
+Independent reconstruction from the old Audit source plus the
+published new access/event request/response schemas and routes
+reproduced this exact Git blob identity before selecting it.
+
+**Implementation scope:** pin `orval.audit.config.ts` to the
+versioned source, extend the fail-closed compatibility gate to
+check exact Audit pin, raw SHA-256, OpenAPI 3.1, seven paths,
+six schemas and the audit route prefix. Preserve all ten
+prior source locks and remaining nine old-baseline full-source
+compatibility checks. Add four Node contract tests covering
+source digest, typed event and access records, export response,
+the old public path compatibility and all existing source locks.
+Include tests in existing `npm test`. No new frontend page
+or runtime permission change; the Code CI's unchanged full Orval
+regeneration, TypeScript, lint, unit/performance/build/release
+and Playwright suites remain acceptance gates.
+
+**Commit message:**
+`fix(contract): activate verified Audit OpenAPI source pin`.
+**Exact six-file change set:**
+`openapi/candidates/hidra-audit-76b14cda4520f1eff242bd474c02ce4db317d385.json` CREATE;
+`orval.audit.config.ts`;
+`scripts/check-openapi-compatibility.mjs`;
+`scripts/verify-audit-candidate.test.mjs` CREATE;
+`package.json`;
+`docs/roadmap/ULTIMATE_ROADMAP.md` APPEND ONLY.
+
+**Exit:** publish directly to expected `main` head with
+compare-and-swap, verify the exact parent/tree and six-file scope,
+observe new Code and Documentation CI startup, and STOP. Do not
+claim CI acceptance until Code CI has actually succeeded.
+HWEB-F01 remains IN PROGRESS with eleven of twenty source
+configurations updated, nine still outstanding, and a
+single-artifact backend OpenAPI baseline and integrated
+permission/consumer acceptance still pending. No PR, branch
+or code comments.
