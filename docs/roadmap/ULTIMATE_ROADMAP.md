@@ -584,3 +584,42 @@ Accept only after new-head Code CI OpenAPI/generator/lint/typecheck/test/
 performance/build/Playwright/package/release gates pass; do not infer
 user-local success without their environment output. HWEB-F01
 remains IN PROGRESS pending full current HidraAPI contract repin.
+
+## 2026-10-14 — SONATRACH-aligned, accessible HidraWEB login experience
+
+Owner directly selected a visual/UX enhancement of the current unified
+login page, requested SONATRACH colors and no source-code comments.
+This is an independent UI refinement, not a new authentication
+provider/protocol, HidraAPI change, current OpenAPI repin or simulation task.
+At the preflight source lease, `main` was
+`5e3ed03cb0274828cf436646e8dd3846c51d344f` and Code CI #979
+(run `38538306817`) was SUCCESS.
+
+**Implementation:** use the brand's orange (#FF8500), dark neutral and
+white primary palette in this login screen. Do not fabricate an official
+SONATRACH logo asset or ship unlicensed fonts; the typographic product
+mark is an interface treatment, not the official corporate logotype.
+A responsive split desktop layout collapses to a compact branded
+header on mobile. Provide a single clear heading, approved-provider
+selector, localized field descriptions, an accessible password
+visibility toggle, form completeness gating, a distinctly separated
+OIDC SSO entry point, keyboard-visible focus, retry/error display
+and language switching (FR/EN/AR) via the existing i18n instance.
+Changing credential providers clears the entered password and hides
+the stale error display until retry. Login requests, OIDC PKCE,
+provider allowlist, Hidra-issued session contract, permissions and
+redirect are all unchanged. No comments are introduced in the
+updated TypeScript or TSX files.
+
+**Exact authorized files:** `src/app/pages/LoginPage.tsx`,
+`src/app/pages/LoginPage.test.tsx`,
+`src/shared/i18n/resources.ts`,
+`docs/roadmap/ULTIMATE_ROADMAP.md` (append-only).
+**Commit message:** `feat(auth-ui): refresh login with Sonatrach palette and accessible flows`.
+
+**Acceptance:** exact commit parent/allowlist verification, client
+OpenAPI gate, lint, typecheck, component and unit tests, performance,
+Vite build/release package, and complete Playwright regression
+through exact new-head Code CI. Enterprise directory and OIDC
+deployment smoke tests remain environment-specific. HWEB-F01
+machine-contract reconciliation remains in progress and unaffected.
