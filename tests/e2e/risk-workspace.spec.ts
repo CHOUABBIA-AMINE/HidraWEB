@@ -21,12 +21,23 @@ const descriptors = [
   searchEndpoint: `/api/v1/workbench/risk/${resource}/search`,
 }));
 
-async function mockRisk(page: Page, allowRead = true) {
-  await page.route('**/api/v1/security/permissions/routes', (route) => route.fulfill({ json: routes }));
+const riskAuthoringRoutes = [
+  { route: '/api/v1/risk/registers', methods: ['POST'], module: 'risk', resource: 'registers', action: 'execute', permission: 'risk:registers:execute', enforcementStatus: 'backend-enforced' },
+  { route: '/api/v1/risk/assessments', methods: ['POST'], module: 'risk', resource: 'assessments', action: 'execute', permission: 'risk:assessments:execute', enforcementStatus: 'backend-enforced' },
+  { route: '/api/v1/risk/evidence', methods: ['POST'], module: 'risk', resource: 'evidence', action: 'execute', permission: 'risk:evidence:execute', enforcementStatus: 'backend-enforced' },
+];
+
+async function mockRisk(page: Page, allowRead = true, authoring: 'unpublished' | 'denied' | 'granted' = 'unpublished') {
+  const published = authoring === 'unpublished' ? routes : [...routes, ...riskAuthoringRoutes];
+  const grants = [
+    ...(allowRead ? ['workbench:resources:read'] : []),
+    ...(authoring === 'granted' ? riskAuthoringRoutes.map((route) => route.permission) : []),
+  ];
+  await page.route('**/api/v1/security/permissions/routes', (route) => route.fulfill({ json: published }));
   await page.route('**/api/v1/security/permissions/catalog', (route) => route.fulfill({
-    json: { strategy: 'derived-route-permission-catalog', enforcement: 'backend-enforced', permissionFormat: '<module>:<resource>:<action>', routes },
+    json: { strategy: 'derived-route-permission-catalog', enforcement: 'backend-enforced', permissionFormat: '<module>:<resource>:<action>', routes: published },
   }));
-  await page.route('**/api/v1/identity/me/permissions', (route) => route.fulfill({ json: allowRead ? ['workbench:resources:read'] : [] }));
+  await page.route('**/api/v1/identity/me/permissions', (route) => route.fulfill({ json: grants }));
   await page.route('**/api/v1/workbench/risk/resources', (route) => route.fulfill({ json: descriptors }));
   await page.route('**/api/v1/workbench/risk/risk-register?**', (route) => route.fulfill({
     json: {
@@ -85,4 +96,38 @@ test('HWEB-013-02 fails closed without workbench read grants', async ({ page }) 
 
   await expect(page.getByText('Your current HidraAPI grants do not allow risk workbench reads.')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Risk intelligence' })).toHaveCount(0);
+});
+
+test('HWEB-F01 denies all risk authoring when routes exist but effective grants are absent', async ({ page }) => {
+  await mockRisk(page, true, 'denied');
+  let attemptedWrites = 0;
+  for (const routePath of ['/api/v1/risk/registers', '/api/v1/risk/assessments', '/api/v1/risk/evidence']) {
+    await page.route(`**${routePath}`, (route) => {
+      attemptedWrites += 1;
+      return route.fulfill({ status: 403, json: { status: 403, title: 'Forbidden' } });
+    });
+  }
+  await signIn(page);
+  await openRiskWorkspace(page);
+  await expect(page.getByRole('heading', { name: 'Risk intelligence' })).toBeVisible();
+  for (const action of ['Create risk register', 'Create risk assessment', 'Attach risk evidence']) {
+    await expect(page.getByRole('button', { name: action })).toBeDisabled();
+  }
+  expect(attemptedWrites).toBe(0);
+});
+
+test('HWEB-F01 preserves backend 403 despite a published and granted risk assessment action', async ({ page }) => {
+  await mockRisk(page, true, 'granted');
+  let attemptedWrites = 0;
+  await page.route('**/api/v1/risk/assessments', (route) => {
+    attemptedWrites += 1;
+    return route.fulfill({ status: 403, json: { status: 403, title: 'Forbidden' } });
+  });
+  await signIn(page);
+  await openRiskWorkspace(page);
+  const create = page.getByRole('button', { name: 'Create risk assessment' });
+  await expect(create).toBeEnabled();
+  await create.click();
+  await expect(page.getByText('HidraAPI refused this Risk authoring operation.')).toBeVisible();
+  expect(attemptedWrites).toBe(1);
 });

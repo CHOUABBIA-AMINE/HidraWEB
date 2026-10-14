@@ -662,3 +662,57 @@ release verification must pass on the published head.
 This change adds no source-code comments, branch or PR. CI success is
 not assumed until observed. HWEB-F01 backend-contract reconciliation
 remains in progress independently.
+
+## 2026-10-14 — HWEB-F01 risk authoring permission-negative browser acceptance
+
+**Selected bounded HWEB-F01 implementation:** add an executable,
+synthetic-only Playwright authorization-negative slice for the three
+already supported Risk authoring commands. This is HWEB-F01
+verification work, not HWEB-F02/F03 or new Risk capability design.
+
+**Preflight:** exact HidraWEB `main`
+`2b009be6b959943e937dcd02f16080b76a5a9ceb`;
+Code CI #986 `38551966210` SUCCESS. HidraAPI latest
+`81d46bcb8bc8821f67eafbb26cd1279f6d091457`;
+Fast Feedback #16 and Documentation #287 SUCCESS,
+Full CI #683 still in progress at preflight. Latest completed
+backend Full CI #682 was SUCCESS on
+`3facf12aef110cb33f0b896398c9b1cee51af5f3`,
+publishing exact source-generated OpenAPI artifact
+`11884823777` for run `38547562367`, digest
+`sha256:f5afaffef63acf743443f692f6d9b2d91a61679ab3301edde77a2737cda3e113`.
+Retrieved artifact `hidra-api.json` SHA-256
+`df6d88c188e63cb39182ff1fee424c06de5e0f6e0c03556ff8cfa65fe26b7e3c`,
+244 paths and 231 schemas. The artifact exposes the three existing
+Risk POST authoring endpoints plus an optional `scopes` array on
+`CreateRiskAssessmentRequest` whose items carry explicit scope,
+topology snapshot, temporal window, inclusion and note fields.
+The current pinned Risk Orval slice omits `scopes`: this is a
+recorded compatibility backlog item, **not** acceptance of full
+current contract alignment and not license for an untyped editor.
+No Risk frontend generator inputs are repinned in this stage.
+
+**Executed scope:** expand the existing Risk browser regression fixture
+to distinguish unpublished Risk command route metadata, published
+metadata without effective user permission, and apparently granted
+metadata followed by actual HidraAPI 403 denial. New negative tests
+require all three authoring buttons to remain disabled and send no
+writes without grants, and require a simulated 403 on assessment
+creation to remain a visible authorization refusal. Test permissions
+and mock request responses are **synthetic**, not declarations of the
+current live permission strings or proof of deployed authentication.
+No new Risk lifecycle, scoring, physical simulation, source migration
+or business authoring capability is introduced.
+
+**Exact commit message:**
+`test(risk): verify backend-governed authoring denials`.
+**Exact path allowlist:**
+`tests/e2e/risk-workspace.spec.ts`,
+`docs/roadmap/ULTIMATE_ROADMAP.md` (append-only).
+
+**Acceptance gate:** exact parent/scope/head, compatibility,
+regeneration, lint/typecheck, unit/performance, production
+build/package and full browser suite on the new Code CI run.
+HWEB-F01 remains IN PROGRESS until full current-backend
+contract repin, all affected slices and comprehensive permission/
+negative-case evidence are accepted. Do not presume CI success.
