@@ -16,6 +16,13 @@ const RISK_CURRENT_PROOF = {
   paths: 10,
   schemas: 9,
 };
+const TOPOLOGY_CURRENT_PROOF = {
+  config: 'orval.topology.config.ts',
+  path: 'openapi/candidates/hidra-topology-81d46bcb8bc8821f67eafbb26cd1279f6d091457.json',
+  sha256: 'sha256:d13552357918e27dd51d6377e5fef6eaaff621be953bfa50ad9f7f7247440904',
+  paths: 10,
+  schemas: 13,
+};
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'openapi/compatibility/hidra-api-baseline.json'), 'utf8'));
 const artifactBase64 = manifest.fullContractGzipBase64Parts
@@ -65,12 +72,26 @@ for (const config of configs) {
       || Object.keys(slice.paths ?? {}).some((route) => !route.startsWith('/api/v1/risk/'))) {
       errors.push(`${config}: current Risk contract structure differs from the verified artifact`);
     }
+  } else if (config === TOPOLOGY_CURRENT_PROOF.config) {
+    if (target !== TOPOLOGY_CURRENT_PROOF.path) {
+      errors.push(`${config}: Topology pin must use the verified current source`);
+    }
+    if (hash(fs.readFileSync(file)) !== TOPOLOGY_CURRENT_PROOF.sha256) {
+      errors.push(`${config}: source-backed Topology contract digest mismatch`);
+    }
+    if (slice.openapi !== '3.1.0'
+      || Object.keys(slice.paths ?? {}).length !== TOPOLOGY_CURRENT_PROOF.paths
+      || Object.keys(slice.components?.schemas ?? {}).length !== TOPOLOGY_CURRENT_PROOF.schemas
+      || Object.keys(slice.paths ?? {}).some((route) => !route.startsWith('/api/v1/topology/'))) {
+      errors.push(`${config}: current Topology contract structure differs from the verified artifact`);
+    }
   } else {
     compareSlice(config, slice);
   }
   const paths = Object.keys(slice.paths ?? {}).length;
   const schemas = Object.keys(slice.components?.schemas ?? {}).length;
-  const proof = config === RISK_CURRENT_PROOF.config ? 'current-artifact SHA-256' : 'historical full OpenAPI baseline';
+  const proof = [RISK_CURRENT_PROOF.config, TOPOLOGY_CURRENT_PROOF.config].includes(config)
+    ? 'current-artifact SHA-256' : 'historical full OpenAPI baseline';
   console.log(`[openapi:compat] ${config}: ${paths} paths, ${schemas} schemas, ${proof}, ${errors.length === before ? 'compatible' : 'FAILED'}`);
 }
 
@@ -79,7 +100,7 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exit(1);
 }
-console.log(`\nOpenAPI compatibility gate passed for ${configs.length} contracts: Risk from verified HidraAPI 81d46bcb8bc8821f67eafbb26cd1279f6d091457; all other slices against HidraAPI ${manifest.backendCommit}.`);
+console.log(`\nOpenAPI compatibility gate passed for ${configs.length} contracts: Risk and Topology from verified HidraAPI 81d46bcb8bc8821f67eafbb26cd1279f6d091457; remaining slices against HidraAPI ${manifest.backendCommit}.`);
 
 function checkEvidence() {
   const required = ['repository', 'backendCommit', 'workflowRunId', 'artifactId', 'artifactName', 'artifactDigest', 'fullSpecSha256', 'fullContractGzipBase64Parts', 'fullContractGzipSha256', 'expectedOrvalContracts'];

@@ -905,3 +905,79 @@ Do not mark this stage VERIFIED from a merely started run.
 HWEB-F01 remains IN PROGRESS; next bounded slice is the
 full current source-backed OpenAPI baseline repin plus affected
 generated consumer/API and permission integration reconciliation.
+
+## 2026-10-14 — HWEB-F01 source-verified Topology contract activation
+
+**Selected one bounded HWEB-F01 slice:** activate the exact
+latest accepted backend Topology transport contract with reproducible
+artifact integrity checks, without selecting HWEB-F02, adding a browser
+physical-network editor, or modifying business write privileges.
+
+**Starting point:** HidraWEB main
+`5ebfa3b0887c9d3d709dc174accd3ae7ae8eb21a`;
+HidraWEB Code CI #991 `38559148849` SUCCESS and Documentation CI
+#14 `38559148819` SUCCESS. HidraAPI last fully verified
+OpenAPI-producing commit
+`81d46bcb8bc8821f67eafbb26cd1279f6d091457`,
+Full CI #683 `38552443731` SUCCESS, published API-contract artifact
+#11887551780. Its raw `hidra-api.json` SHA-256 is
+`59e2881d5d84dea902bf0c7aa5c773a83a0ba47246838b30769ed645c7228969`.
+Current HidraAPI main `da4ce33ead7db40776049c861027947b61b96270`
+had Full CI #685 IN PROGRESS at preflight; do not claim its
+completion or conflate its head with source #683. Compare-current
+evidence includes test and inventory revisions outside the
+previous published API source.
+
+**Source artifact reconstruction:** select all ten
+`/api/v1/topology/` routes and their transitive referenced
+thirteen schemas from the exact verified full backend JSON,
+preserve operation IDs and response/parameter/security shape,
+remove server-local URL and source display metadata, serialize
+with sorted keys, and verify Git blob digest
+`ae0ac711c6693a6c01f05423559c98f2128c273f`
+identical to independently reconstructed canonical slice.
+Exact raw candidate SHA-256:
+`d13552357918e27dd51d6377e5fef6eaaff621be953bfa50ad9f7f7247440904`.
+The candidate contains the five previously used map read endpoints,
+a capabilities read, alias and canonical create routes for pipeline
+systems, and alias and canonical facility-registration routes.
+This is evidence of exposed **transport shapes**, not completeness of
+ENG-001–012 engineering authoring.
+
+**Implementation scope:** update
+`orval.topology.config.ts` to use the immutable versioned
+candidate; update the machine compatibility checker to require
+Topology exact path, SHA-256, 10 route and 13 schema counts,
+OpenAPI version and topology-prefix restriction. Preserve the
+Risk #683 pin and its digest, preserve all other 18 legacy
+full-source baseline checks/hashes, and fail closed on mismatch.
+An independent Node regression test verifies the candidate hash,
+typed pipeline system and facility request/response contracts,
+bearer security, continued map reads, additive delta and the
+active source lock. Integrate it into the existing Node test
+stage without changing workflow definitions.
+
+**Exact commit message:**
+`fix(contract): activate verified Topology OpenAPI source pin`.
+
+**Exact path allowlist:**
+`openapi/candidates/hidra-topology-81d46bcb8bc8821f67eafbb26cd1279f6d091457.json` (create),
+`orval.topology.config.ts`,
+`scripts/check-openapi-compatibility.mjs`,
+`scripts/verify-topology-candidate.test.mjs` (create),
+`package.json`,
+`docs/roadmap/ULTIMATE_ROADMAP.md` (append-only).
+
+No simulated engineering data, editor implementation, new UI
+permissions, numerical solver, changed existing map queries, source
+comments, PR or new branch. CI regenerates Topology Orval types from
+the accepted candidate, then runs existing unit/TypeScript,
+Playwright, performance, build/release and compatibility gates.
+
+**Acceptance:** verify exact parent, tree, changed-file allowlist
+and workflow startup on published main. Only a completed
+successful Code CI promotes the active Topology source to VERIFIED.
+HWEB-F01 remains IN PROGRESS: coordinated complete source-backed
+OpenAPI baseline repinning and all other generated client/
+consumer and permission reconciliation are outstanding;
+HWEB-F02–F10 remain unselected.

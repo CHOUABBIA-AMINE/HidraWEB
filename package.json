@@ -20,7 +20,7 @@
     "preview": "vite preview",
     "typecheck": "tsc -b --pretty false",
     "lint": "eslint .",
-    "test": "vitest run && node --test scripts/ensure-generated-clients.test.mjs scripts/audit-openapi-drift.test.mjs scripts/verify-risk-candidate.test.mjs",
+    "test": "vitest run && node --test scripts/ensure-generated-clients.test.mjs scripts/audit-openapi-drift.test.mjs scripts/verify-risk-candidate.test.mjs scripts/verify-topology-candidate.test.mjs",
     "test:watch": "vitest",
     "test:performance": "vitest run --config vitest.performance.config.ts",
     "test:e2e": "playwright test",
