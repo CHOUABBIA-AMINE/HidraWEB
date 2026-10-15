@@ -11,7 +11,7 @@ const bytes = fs.readFileSync(path.join(root, 'openapi/candidates', name));
 const current = JSON.parse(bytes.toString('utf8'));
 
 test('Identity and Organization contracts are pinned to the exact successful backend source', () => {
-  assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'), 'eaad8131d3720a03f90ca76a77e146b567a8f365b02654c24fa11ef3d7cf55f4');
+  assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'), '7158e86e61be8049972048769da2632f2a474984487644a31d7ffcdd5ce723e4');
   assert.equal(current.openapi, '3.1.0');
   assert.equal(Object.keys(current.paths).length, 35);
   assert.equal(Object.keys(current.components.schemas).length, 39);

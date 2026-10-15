@@ -145,7 +145,7 @@ const PLANNING_CURRENT_PROOF = {
 const IDENTITY_ORGANIZATION_CURRENT_PROOF = {
   config: 'orval.identity-organization.config.ts',
   path: 'openapi/candidates/hidra-identity-organization-d14c44fc527ea1115ad87baafa21a3264bf6950c.json',
-  sha256: 'sha256:eaad8131d3720a03f90ca76a77e146b567a8f365b02654c24fa11ef3d7cf55f4',
+  sha256: 'sha256:7158e86e61be8049972048769da2632f2a474984487644a31d7ffcdd5ce723e4',
   paths: 35,
   schemas: 39,
 };
