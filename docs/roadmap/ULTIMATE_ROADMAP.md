@@ -2080,3 +2080,33 @@ loopback-only opt-in proxy and normal-mode absence. Playwright discovery found e
 3 native cases; missing mandatory inputs failed discovery as required. Native result
 report asserts3 expected,0 unexpected/flaky/skipped. These are local wiring/source
 checks, not executed native browsers or PostgreSQL proof; hosted CI remains pending.
+
+
+### W1 / HWEB-F11 same-task CI1016 repair — owner Fail, 2026-11-05
+
+Live main537914d33fa9473431ecc7fb1ab2fadba659dc8e, parent33b8c051a8bff7e83f9af55160dd3c41c5008ccc,
+treed44487c24eab7e1a93978c6a47613aa3da740869. Code1016/run42038487373 FAILED;
+verify job127282758140 SUCCESS; native job127282758107 FAILED before catalogs/browser
+execution. Docs41/run42038487476 SUCCESS. Native logs show Flyway/JPA startup reached
+Started, then LocalAdministratorBootstrapRunner audit insertion was rejected by
+JpaAuditCatalogEligibilityAdapter: unknown required Audit catalog. No native browser
+pass or W1 acceptance exists. This is synthetic fixture ordering/catalog incompleteness.
+
+Repair scope: MODIFY .github/workflows/ci.yml, scripts/foundation-native-fixture.sql,
+and this append-only roadmap only. Preserve API18e7a75, all backend source/migrations,
+real bootstrap transaction/audit checks, native JWT/permission checks, three mandatory
+browser cases, zero retry/skip acceptance and the successful regular verify lane.
+First start uses the real Flyway/JPA chain with administrator bootstrap temporarily
+unselected. Seed the exact disposable database's required EVENT_TYPE and EVENT_CATEGORY
+references plus the existing synthetic catalogs, then stop that process and restart
+with the existing enabled real bootstrap. Require its committed audit evidence and
+health before browser tests. No SQL user/credential/grant or fabricated audit event,
+no production catalog migration, backend mutation, audit bypass or new stage.
+Exact registered W1 message remains `feat(context): complete identity organization and party administration`.
+W1 remains IMPLEMENTED / LIVE_QUALIFICATION_PENDING; W2 and A1 stay dependency-gated.
+
+Repair validation: YAML parse, bash -n on every native step, embedded Python parse,
+and whitespace checks PASS. Source confirms both exact Audit IDs/families and the
+real runner's transactional event write. New readiness requires that committed event,
+not merely an open health endpoint. No local PostgreSQL/bootstrap/browser execution
+is claimed; authoritative runtime validation remains the replacement exact-SHA CI.

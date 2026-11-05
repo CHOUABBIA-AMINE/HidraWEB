@@ -194,7 +194,7 @@ jobs:
               output.write('HIDRA_SECURITY_BOOTSTRAP_PASSWORD=' + password + '\n')
               output.write('HIDRA_JWT_HMAC_SECRET=' + signing + '\n')
           PY
-      - name: Build and start pinned native API
+      - name: Build pinned API and migrate fresh schema before administrator bootstrap
         shell: bash
         run: |
           set -euo pipefail
@@ -206,6 +206,7 @@ jobs:
           test -n "${APP_JAR}"
           java -jar "${APP_JAR}" --server.port=8080 --management.server.port=8080 \
             --springdoc.api-docs.enabled=true --springdoc.swagger-ui.enabled=false \
+            --hidra.security.bootstrap.enabled=false \
             --hidra.platform.security.jwt.token-issuer=https://foundation.synthetic.invalid \
             > "${RUNNER_TEMP}/w1-api.log" 2>&1 &
           echo "$!" > "${RUNNER_TEMP}/w1-api.pid"
@@ -230,6 +231,42 @@ jobs:
             sudo apt-get install --yes --no-install-recommends postgresql-client
           fi
           psql -v ON_ERROR_STOP=1 --file scripts/foundation-native-fixture.sql
+      - name: Restart native API with real audited administrator bootstrap
+        shell: bash
+        run: |
+          set -euo pipefail
+          OLD_PID="$(cat "${RUNNER_TEMP}/w1-api.pid")"
+          kill "${OLD_PID}"
+          for attempt in $(seq 1 60); do
+            if ! kill -0 "${OLD_PID}" 2>/dev/null; then break; fi
+            sleep 1
+          done
+          if kill -0 "${OLD_PID}" 2>/dev/null; then
+            echo "Schema initialization process did not stop"
+            exit 1
+          fi
+          APP_JAR="$(find .native-api/target -maxdepth 1 -type f -name '*.jar' ! -name '*.original' | head -n 1)"
+          test -n "${APP_JAR}"
+          java -jar "${APP_JAR}" --server.port=8080 --management.server.port=8080 \
+            --springdoc.api-docs.enabled=true --springdoc.swagger-ui.enabled=false \
+            --hidra.security.bootstrap.enabled=true \
+            --hidra.platform.security.jwt.token-issuer=https://foundation.synthetic.invalid \
+            > "${RUNNER_TEMP}/w1-api.log" 2>&1 &
+          echo "$!" > "${RUNNER_TEMP}/w1-api.pid"
+          for attempt in $(seq 1 60); do
+            if ! kill -0 "$(cat "${RUNNER_TEMP}/w1-api.pid")" 2>/dev/null; then
+              tail -n 100 "${RUNNER_TEMP}/w1-api.log"
+              exit 1
+            fi
+            if curl --fail --silent http://127.0.0.1:8080/actuator/health >/dev/null &&
+              [ "$(psql -Atqc "SELECT EXISTS (SELECT 1 FROM public.hidra_audit_event WHERE event_type_id='IDENTITY_LOCAL_ADMIN_BOOTSTRAP' AND event_category_id='SECURITY_ADMINISTRATION')")" = t ]; then
+              echo "Native administrator bootstrap committed its required audit event"
+              exit 0
+            fi
+            sleep 2
+          done
+          tail -n 100 "${RUNNER_TEMP}/w1-api.log"
+          exit 1
       - name: Run mandatory W1 browser journeys against native JWT and PostgreSQL
         shell: bash
         run: |

@@ -11,6 +11,14 @@ BEGIN
     END IF;
 END $$;
 
+-- The real audited bootstrap requires these exact reference IDs/families. Seed
+-- catalogs only; the bootstrap itself must create the committed audit event.
+INSERT INTO public.hidra_audit_catalog_entry
+(id,catalog_name,code,active,sort_order,system_defined,created_at,updated_at)
+VALUES
+('IDENTITY_LOCAL_ADMIN_BOOTSTRAP','EVENT_TYPE','W1_SYNTHETIC_ADMIN_BOOTSTRAP',true,0,false,now(),now()),
+('SECURITY_ADMINISTRATION','EVENT_CATEGORY','W1_SYNTHETIC_SECURITY_ADMIN',true,0,false,now(),now());
+
 -- The real bootstrap provisions its administrator/credential/grant; only provide
 -- the active LOCAL provider needed for actual native authentication routing.
 INSERT INTO public.hidra_identity_provider
