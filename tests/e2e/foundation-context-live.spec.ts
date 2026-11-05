@@ -29,8 +29,8 @@ test.beforeAll(async ({ request }) => {
 
 async function login(page: Page) {
   await page.goto(`${web}/administration/users`);
-  await page.getByLabel(/^(Nom d’utilisateur|Username|اسم المستخدم)$/).fill(administrator!);
-  await page.getByLabel(/^(Mot de passe|Password|كلمة المرور)$/).fill(password!);
+  await page.getByLabel(/^(Nom d’utilisateur|Username|اسم المستخدم)(?:\s*\*)?$/).fill(administrator!);
+  await page.getByLabel(/^(Mot de passe|Password|كلمة المرور)(?:\s*\*)?$/).fill(password!);
   await page.getByRole('button', { name: /^(Se connecter|Sign in|تسجيل الدخول)$/ }).click();
   await expect(page.getByRole('heading', { name: /Identité & accès|Identity & Access|الهوية والوصول/ })).toBeVisible();
 }
@@ -42,7 +42,7 @@ test('native LOCAL user creation, credential initialization, activation and real
   await login(page);
   const name = `w1-${Date.now()}`;
   const secret = ordinaryPassword ?? `Synthetic-W1-${crypto.randomUUID()}`;
-  await page.getByLabel(/^(Nom d’utilisateur|Username|اسم المستخدم)$/).fill(name);
+  await page.getByLabel(/^(Nom d’utilisateur|Username|اسم المستخدم)(?:\s*\*)?$/).fill(name);
   await page.getByLabel(/^(Adresse e-mail|Email address|البريد الإلكتروني)$/).first().fill(`${name}@synthetic.invalid`);
   await page.getByLabel(/^(Nom affiché|Display name|الاسم المعروض)$/).fill(name);
   await page.getByRole('button', { name: /^(Créer un utilisateur|Create user|إنشاء مستخدم)$/ }).click();

@@ -2110,3 +2110,33 @@ and whitespace checks PASS. Source confirms both exact Audit IDs/families and th
 real runner's transactional event write. New readiness requires that committed event,
 not merely an open health endpoint. No local PostgreSQL/bootstrap/browser execution
 is claimed; authoritative runtime validation remains the replacement exact-SHA CI.
+
+
+### W1 / HWEB-F11 same-task CI1017 selector repair — owner Fail, 2026-11-05
+
+Live main35d8242e11280b5442c15ba2635bfce2ed41d43f (parent537914d33fa9473431ecc7fb1ab2fadba659dc8e,
+tree04014791b2829b53fd5db3ffa7bf727cab5244c2). Code1017/run42040043231 FAILED,
+regular verify job127288149190 SUCCESS; Docs42/run42040043190 SUCCESS. Native job
+127288148675 now passes real Flyway/JPA, catalog seeding and audited administrator
+bootstrap; its log confirms committed bootstrap audit evidence. Native beforeAll
+login/issued JWT/effective administrator permission assertions passed before all three
+browser cases failed at login's exact username label selector (90s timeout each).
+LoginPage renders required MUI TextFields, whose associated label includes the
+required asterisk; the spec's end-anchored untranslated-suffix-free regex omitted it.
+
+Same-task repair scope before mutation: MODIFY tests/e2e/foundation-context-live.spec.ts,
+src/app/pages/LoginPage.test.tsx and this append-only roadmap. Match the exact localized
+username/password label with an optional whitespace/required-asterisk suffix and prove
+those selectors against actual rendered English/Arabic required login inputs.
+No native bootstrap/JWT/permission bypass, API mutation, mock substitution, retries,
+timeout increase, skipped case, new stage or W2 selection. Preserve all three native
+journeys and no-skip result gate. Exact W1 message remains
+`feat(context): complete identity organization and party administration`.
+W1 remains IMPLEMENTED / LIVE_QUALIFICATION_PENDING pending replacement exact-SHA CI.
+
+Local repair validation:15 tests passed across LoginPage.test.tsx and
+FoundationAdministration.test.tsx. Actual English/Arabic MUI required username and
+password inputs resolve using the corrected native regex; Arabic form submission
+still calls the selected real gateway interface. Native config/spec TypeScript
+compilation, focused ESLint and whitespace checks PASS. These are component/source
+checks; no replacement hosted native-browser or PostgreSQL pass is claimed locally.

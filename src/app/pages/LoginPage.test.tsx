@@ -92,13 +92,13 @@ describe('HidraWEB multi-provider login selection', () => {
     render(<MemoryRouter initialEntries={['/login']}><LoginPage /></MemoryRouter>);
     const selector = screen.getByRole('combobox', { name: 'طريقة المصادقة' });
     expect(selector.closest('[dir="rtl"]')).toBeInTheDocument();
-    expect(screen.getByLabelText(/^اسم المستخدم/).closest('[dir="rtl"]')).toBeInTheDocument();
-    expect(screen.getByLabelText(/^كلمة المرور/).closest('[dir="rtl"]')).toBeInTheDocument();
+    expect(screen.getByLabelText(/^(Nom d’utilisateur|Username|اسم المستخدم)(?:\s*\*)?$/).closest('[dir="rtl"]')).toBeInTheDocument();
+    expect(screen.getByLabelText(/^(Mot de passe|Password|كلمة المرور)(?:\s*\*)?$/).closest('[dir="rtl"]')).toBeInTheDocument();
     fireEvent.mouseDown(selector);
     expect(screen.getByRole('option', { name: 'الدليل النشط (Active Directory)' })).toHaveAttribute('dir', 'rtl');
     fireEvent.click(screen.getByRole('option', { name: 'دليل LDAP' }));
-    fireEvent.change(screen.getByLabelText(/^اسم المستخدم/), { target: { value: 'operator' } });
-    fireEvent.change(screen.getByLabelText(/^كلمة المرور/), { target: { value: 'ldap-secret' } });
+    fireEvent.change(screen.getByLabelText(/^(Nom d’utilisateur|Username|اسم المستخدم)(?:\s*\*)?$/), { target: { value: 'operator' } });
+    fireEvent.change(screen.getByLabelText(/^(Mot de passe|Password|كلمة المرور)(?:\s*\*)?$/), { target: { value: 'ldap-secret' } });
     fireEvent.click(screen.getByRole('button', { name: 'تسجيل الدخول' }));
     await waitFor(() => expect(authentication.authenticateCredentials).toHaveBeenCalledWith(
       'LDAP', 'operator', 'ldap-secret',
@@ -128,6 +128,8 @@ describe('HidraWEB multi-provider login selection', () => {
 
   it('does not submit an incomplete credentials form', () => {
     render(<MemoryRouter initialEntries={['/login']}><LoginPage /></MemoryRouter>);
+    expect(screen.getByLabelText(/^(Nom d’utilisateur|Username|اسم المستخدم)(?:\s*\*)?$/)).toBeRequired();
+    expect(screen.getByLabelText(/^(Mot de passe|Password|كلمة المرور)(?:\s*\*)?$/)).toBeRequired();
     expect(screen.getByRole('button', { name: 'Sign in' })).toBeDisabled();
     expect(authentication.authenticateCredentials).not.toHaveBeenCalled();
   });
