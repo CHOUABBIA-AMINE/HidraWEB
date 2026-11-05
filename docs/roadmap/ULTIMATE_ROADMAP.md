@@ -2170,3 +2170,39 @@ two failures then third-attempt success, and terminal failure after exactly3 att
 All3 cases PASS, with --version-only invocation verified and no real local toolchain
 provisioning. Whitespace checks PASS. Hosted wrapper fetch/build/native browser
 validation remains pending; no new application or PostgreSQL pass is claimed.
+
+
+### W1 / HWEB-F11 same-task CI1019 browser origin repair — owner Fail, 2026-11-05
+
+Live main78ec58c27eb68855040cad953e70016bc2f78bb9 (parent13af27a8653a2cff992106b84842ce0786be0fe7,
+treea07f87a264cb21526a26f0645d00607bb3ba4981). Code1019/run42044865509 FAILED;
+verify job127304963256 SUCCESS; Docs44/run42044865563 SUCCESS. Native job127304963327
+passes Maven/bootstrap/catalog/startup and non-browser native JWT checks. All three
+browser cases now fill and submit login but fail to find the Identity heading.
+The CI log does not include the browser HTTP status or error-context content.
+Source establishes an actual configuration mismatch: application-test.properties
+sets allowed CORS origins empty; Vite's test proxy changes Host to8080 but preserves
+the browser Origin5173; Spring enables its CORS filter and exact origin validation.
+This explains browser POST rejection while origin-free APIRequestContext login works,
+but a new hosted status assertion is required to establish that runtime verdict.
+
+Scope before mutation: MODIFY .github/workflows/ci.yml,
+tests/e2e/foundation-context-live.spec.ts and this append-only roadmap. Configure only
+http://127.0.0.1:5173 as allowed origin via CLI on both disposable API starts (CLI
+is needed because the test profile overrides the common property). Exercise the
+real native login with the configured browser Origin and require its exact allowed
+origin response. Browser login explicitly requires HTTP200; safe diagnostics list
+only fixed bootstrap endpoint paths/statuses, never credentials, tokens or bodies.
+Do not suppress/strip Origin, disable CORS, add wildcard origins, bypass auth,
+intercept API responses, alter retries/timeouts or waive any browser acceptance.
+Preserve accepted API18e7a75, all migrations, three journeys and no-skip gate.
+Exact registered W1 message remains
+`feat(context): complete identity organization and party administration`.
+W1 IMPLEMENTED / LIVE_QUALIFICATION_PENDING; W2 remains dependency-gated.
+
+Local repair validation: workflow YAML, every native shell block and embedded Python
+parsed; native config/spec TypeScript, focused ESLint and whitespace checks PASS.
+Playwright discovery still finds exactly3 mandatory native journeys. Source review
+confirms exact-origin Spring CORS configuration, the test profile's empty override,
+and unchanged security permission endpoint paths. No local Spring/PostgreSQL/browser
+runtime result is claimed; native Origin/status assertions await exact-SHA CI.

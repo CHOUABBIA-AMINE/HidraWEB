@@ -234,6 +234,7 @@ jobs:
           java -jar "${APP_JAR}" --server.port=8080 --management.server.port=8080 \
             --springdoc.api-docs.enabled=true --springdoc.swagger-ui.enabled=false \
             --hidra.security.bootstrap.enabled=false \
+            --hidra.platform.security.cors.allowed-origins=http://127.0.0.1:5173 \
             --hidra.platform.security.jwt.token-issuer=https://foundation.synthetic.invalid \
             > "${RUNNER_TEMP}/w1-api.log" 2>&1 &
           echo "$!" > "${RUNNER_TEMP}/w1-api.pid"
@@ -277,6 +278,7 @@ jobs:
           java -jar "${APP_JAR}" --server.port=8080 --management.server.port=8080 \
             --springdoc.api-docs.enabled=true --springdoc.swagger-ui.enabled=false \
             --hidra.security.bootstrap.enabled=true \
+            --hidra.platform.security.cors.allowed-origins=http://127.0.0.1:5173 \
             --hidra.platform.security.jwt.token-issuer=https://foundation.synthetic.invalid \
             > "${RUNNER_TEMP}/w1-api.log" 2>&1 &
           echo "$!" > "${RUNNER_TEMP}/w1-api.pid"

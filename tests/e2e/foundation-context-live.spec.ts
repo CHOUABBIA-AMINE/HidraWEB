@@ -13,10 +13,13 @@ if (process.env.HIDRA_FOUNDATION_REQUIRE_NATIVE === '1' && (!web || !api || !adm
 test.use({ trace: 'off', screenshot: 'off', video: 'off' });
 test.skip(!web || !api || !administrator || !password, 'Requires configured synthetic native WEB/API and administrator credentials; not a mocked journey.');
 test.beforeAll(async ({ request }) => {
+  const origin = new URL(web!).origin;
   const authenticated = await request.post(`${api}/api/v1/identity/authentication/login`, {
+    headers: { Origin: origin },
     data: { providerType: 'LOCAL', principal: administrator, credentials: password },
   });
-  expect(authenticated.ok()).toBeTruthy();
+  expect(authenticated.status(), 'Native LOCAL login must admit the configured WEB origin').toBe(200);
+  expect(authenticated.headers()['access-control-allow-origin']).toBe(origin);
   const result = await authenticated.json();
   expect(result.authenticationType).toBe('LOCAL');
   expect(result.accessToken).toBeTruthy();
@@ -31,8 +34,25 @@ async function login(page: Page) {
   await page.goto(`${web}/administration/users`);
   await page.getByLabel(/^(Nom d’utilisateur|Username|اسم المستخدم)(?:\s*\*)?$/).fill(administrator!);
   await page.getByLabel(/^(Mot de passe|Password|كلمة المرور)(?:\s*\*)?$/).fill(password!);
+  const bootstrapPaths = new Set([
+    '/api/v1/identity/authentication/login', '/api/v1/identity/me',
+    '/api/v1/identity/me/permissions', '/api/v1/security/permissions/catalog',
+    '/api/v1/security/permissions/routes',
+  ]);
+  const statuses: string[] = [];
+  page.on('response', response => {
+    const path = new URL(response.url()).pathname;
+    if (bootstrapPaths.has(path)) statuses.push(`${path}: ${response.status()}`);
+  });
+  const exchanged = page.waitForResponse(response =>
+    new URL(response.url()).pathname === '/api/v1/identity/authentication/login' && response.request().method() === 'POST');
   await page.getByRole('button', { name: /^(Se connecter|Sign in|تسجيل الدخول)$/ }).click();
-  await expect(page.getByRole('heading', { name: /Identité & accès|Identity & Access|الهوية والوصول/ })).toBeVisible();
+  expect((await exchanged).status(), 'Browser native LOCAL login must succeed').toBe(200);
+  try {
+    await expect(page.getByRole('heading', { name: /Identité & accès|Identity & Access|الهوية والوصول/ })).toBeVisible();
+  } catch {
+    throw new Error(`Native identity screen unavailable; bootstrap statuses: ${statuses.join('; ')}`);
+  }
 }
 test('native LOCAL user creation, credential initialization, activation and real login', async ({ page, request }) => {
   const contract = await request.get(`${api}/v3/api-docs`);
