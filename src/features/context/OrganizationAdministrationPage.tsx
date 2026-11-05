@@ -1,3 +1,4 @@
+import { FoundationEmployeePanel } from '@/features/context/components/FoundationEmployeePanel';
 import { Alert, Box, Container, Tab, Tabs, Typography } from '@mui/material';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +22,7 @@ export function OrganizationAdministrationPage() {
       <Alert severity="info" sx={{ mt: 2 }}>{t('context.organization.contractNotice')}</Alert>
 
       <Box sx={{ mt: 2 }}><OrganizationCommandPanel /></Box>
+      <Box sx={{ mt: 2 }}><FoundationEmployeePanel /></Box>
       <Box sx={{ mt: 2 }}><OrganizationResponsibilityPanel /></Box>
 
       <Box sx={{ mt: 3 }}>

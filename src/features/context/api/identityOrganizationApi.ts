@@ -199,3 +199,26 @@ export function revokeOrganizationResponsibility(
     data: request,
   });
 }
+
+// HWEB-F11: transport remains generated from the accepted foundation contract.
+import type {
+  Credential, IdentityLocalCredentialState, User, Transition, Revoke, Grant,
+  OrganizationFoundationChoice, OrganizationFoundationEmployeeState,
+  OrganizationFoundationActivationRequest, OrganizationFoundationActivationEvent,
+} from '@/api/generated/identity-organization/model';
+const identityUserPath = (id: string) => `/api/v1/identity/users/${encodeURIComponent(id)}`;
+export const fetchIdentityOperationCapabilities = () => hidraHttpClient<string[]>({ method: 'GET', url: '/api/v1/identity/me/operation-capabilities' });
+export const fetchIdentityLifecycle = (id: string) => hidraHttpClient<User>({ method: 'GET', url: `${identityUserPath(id)}/lifecycle` });
+export const fetchCredentialState = (id: string) => hidraHttpClient<IdentityLocalCredentialState>({ method: 'GET', url: `${identityUserPath(id)}/local-credential/state` });
+export const setLocalCredential = (id: string, data: Credential) => hidraHttpClient<IdentityLocalCredentialState>({ method: 'PUT', url: `${identityUserPath(id)}/local-credential`, data });
+export const transitionIdentityUser = (id: string, activate: boolean, data: Transition) => hidraHttpClient<User>({ method: 'POST', url: `${identityUserPath(id)}/${activate ? 'activate' : 'deactivate'}`, data });
+export function revokeIdentityGrant(kind: 'user-role' | 'user-permission' | 'role-permission', id: string, data: Revoke) {
+  const route = { 'user-role': 'users/role-grants', 'user-permission': 'users/permission-grants', 'role-permission': 'roles/permission-grants' }[kind];
+  return hidraHttpClient<Grant>({ method: 'POST', url: `/api/v1/identity/${route}/${encodeURIComponent(id)}/revoke`, data });
+}
+export const fetchOrganizationUnitTypes = () => hidraHttpClient<OrganizationFoundationChoice[]>({ method: 'GET', url: '/api/v1/organization/reference/unit-types' });
+export const fetchOrganizationPositions = () => hidraHttpClient<OrganizationFoundationChoice[]>({ method: 'GET', url: '/api/v1/organization/reference/positions' });
+const employeePath = (id: string) => `/api/v1/organization/employees/${encodeURIComponent(id)}`;
+export const fetchEmployeeLifecycle = (id: string) => hidraHttpClient<OrganizationFoundationEmployeeState>({ method: 'GET', url: `${employeePath(id)}/lifecycle` });
+export const activateEmployee = (id: string, data: OrganizationFoundationActivationRequest) => hidraHttpClient<OrganizationFoundationEmployeeState>({ method: 'POST', url: `${employeePath(id)}/activate`, data });
+export const fetchEmployeeLifecycleHistory = (id: string) => hidraHttpClient<OrganizationFoundationActivationEvent[]>({ method: 'GET', url: `${employeePath(id)}/lifecycle-history` });

@@ -45,6 +45,8 @@ jobs:
         run: npm run api:generate:workbench
       - name: Generate HWEB-004 identity/organization OpenAPI client
         run: npm run api:generate:identity-organization
+      - name: Generate HWEB-F11 Party OpenAPI client
+        run: npm run api:generate:party
       - name: Generate HWEB-005 topology OpenAPI client
         run: npm run api:generate:topology
       - name: Generate HWEB-006 telemetry/monitoring OpenAPI client

@@ -8,12 +8,17 @@ vi.mock('@/features/context/api/identityOrganizationApi', () => ({
   createOrganizationUnit: createUnit,
   registerEmployee: vi.fn(),
   assignEmployee: vi.fn(),
+  fetchOrganizationUnitTypes: vi.fn().mockResolvedValue([]),
+  fetchOrganizationPositions: vi.fn().mockResolvedValue([]),
+  fetchOrganizationUnits: vi.fn().mockResolvedValue({ content: [] }),
+  fetchOrganizationEmployees: vi.fn().mockResolvedValue({ content: [] }),
+  fetchIdentityUsers: vi.fn().mockResolvedValue({ content: [] }),
 }));
 vi.mock('@/features/permissions/usePermissions', () => ({
   usePermissions: () => ({ can: () => true }),
 }));
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en' } }),
 }));
 
 import { OrganizationCommandPanel } from '@/features/context/components/OrganizationCommandPanel';

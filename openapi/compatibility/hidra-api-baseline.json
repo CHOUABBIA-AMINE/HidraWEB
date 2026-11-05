@@ -13,5 +13,5 @@
     "openapi/compatibility/hidra-api-c72eae39cab0b1ec1e20654386fe95ed43b134ab.part4.b64"
   ],
   "fullContractGzipSha256": "sha256:7ca5a7e9f5b67cf03b915a3278159da0e16f2f26598ed805ca92f3a8ca709e52",
-  "expectedOrvalContracts": 20
+  "expectedOrvalContracts": 21
 }

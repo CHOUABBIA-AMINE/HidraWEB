@@ -1,5 +1,5 @@
 import { Alert, Box, Button, MenuItem, Paper, TextField, Typography } from '@mui/material';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -12,6 +12,7 @@ import type {
 } from '@/api/generated/identity-organization/model';
 import {
   assignEmployee,
+  fetchOrganizationUnitTypes, fetchOrganizationPositions, fetchOrganizationUnits, fetchOrganizationEmployees, fetchIdentityUsers,
   createOrganizationUnit,
   registerEmployee,
 } from '@/features/context/api/identityOrganizationApi';
@@ -44,6 +45,17 @@ export function OrganizationCommandPanel() {
   const [assignment, setAssignment] = useState({
     employeeId: '', organizationUnitId: '', positionId: '', assignmentType: 'PRIMARY', validFrom: '', validTo: '',
   });
+
+  const { i18n } = useTranslation();
+  const [unitSearch, setUnitSearch] = useState('');
+  const [employeeSearch, setEmployeeSearch] = useState('');
+  const [userSearch, setUserSearch] = useState('');
+  const unitTypes = useQuery({ queryKey: ['hidra', 'organization-admin', 'unit-types'], queryFn: fetchOrganizationUnitTypes, enabled: permissions.can('*'), retry: false });
+  const positions = useQuery({ queryKey: ['hidra', 'organization-admin', 'positions'], queryFn: fetchOrganizationPositions, enabled: permissions.can('*'), retry: false });
+  const units = useQuery({ queryKey: ['hidra', 'organization-admin', 'unit-choices', unitSearch], queryFn: () => fetchOrganizationUnits(unitSearch, 0, 100), enabled: permissions.can(IDENTITY_ORGANIZATION_PERMISSIONS.unitsRead), retry: false });
+  const employees = useQuery({ queryKey: ['hidra', 'organization-admin', 'employee-choices', employeeSearch], queryFn: () => fetchOrganizationEmployees(employeeSearch, 0, 100), enabled: permissions.can(IDENTITY_ORGANIZATION_PERMISSIONS.employeesRead), retry: false });
+  const users = useQuery({ queryKey: ['hidra', 'identity-admin', 'active-user-choices', userSearch], queryFn: () => fetchIdentityUsers(userSearch, 0, 100), enabled: permissions.can(IDENTITY_ORGANIZATION_PERMISSIONS.usersRead), retry: false });
+  const label = (c: { nameAr?: string; nameFr?: string; nameEn?: string; code?: string }) => (i18n.language === 'ar' ? c.nameAr : i18n.language === 'fr' ? c.nameFr : c.nameEn) || c.nameFr || c.code;
 
   const unitValidFrom = parseOrganizationUnitValidFrom(unit.validFrom);
 
@@ -103,6 +115,12 @@ export function OrganizationCommandPanel() {
 
   return (
     <Box sx={{ display: 'grid', gap: 2 }}>
+      <Paper variant="outlined" sx={{ p: 2, display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+        <TextField size="small" label={`${t('context.foundation.search')}: ${t('context.foundation.unit')}`} value={unitSearch} onChange={e => setUnitSearch(e.target.value)} />
+        <TextField size="small" label={`${t('context.foundation.search')}: ${t('context.foundation.employee')}`} value={employeeSearch} onChange={e => setEmployeeSearch(e.target.value)} />
+        <TextField size="small" label={`${t('context.foundation.search')}: ${t('context.foundation.user')}`} value={userSearch} onChange={e => setUserSearch(e.target.value)} />
+      </Paper>
+      {(unitTypes.error || positions.error || units.error || employees.error || users.error) && <Alert severity="error">{t('context.foundation.loadFailed')}</Alert>}
       <Paper variant="outlined" sx={{ p: 2 }}>
         <Typography component="h2" variant="h6">{t('context.organization.createUnit')}</Typography>
         <Typography color="text.secondary" sx={{ mb: 2 }} variant="body2">{t('context.organization.hierarchyNotice')}</Typography>
@@ -112,8 +130,14 @@ export function OrganizationCommandPanel() {
           <TextField label={t('context.fields.nameFr')} onChange={(event) => setUnit({ ...unit, nameFr: event.target.value })} size="small" value={unit.nameFr} />
           <TextField label={t('context.fields.nameEn')} onChange={(event) => setUnit({ ...unit, nameEn: event.target.value })} size="small" value={unit.nameEn} />
           <TextField label={t('context.fields.nameAr')} onChange={(event) => setUnit({ ...unit, nameAr: event.target.value })} size="small" value={unit.nameAr} />
-          <TextField label={t('context.fields.unitTypeId')} onChange={(event) => setUnit({ ...unit, unitTypeId: event.target.value })} size="small" value={unit.unitTypeId} />
-          <TextField label={t('context.fields.parentUnitId')} onChange={(event) => setUnit({ ...unit, parentUnitId: event.target.value })} size="small" value={unit.parentUnitId} />
+          <TextField select label={t('context.foundation.unitType')} onChange={event => setUnit({ ...unit, unitTypeId: event.target.value })} size="small" value={unit.unitTypeId}>
+            <MenuItem value="">{t('context.foundation.choose')}</MenuItem>
+            {unitTypes.data?.map(row => <MenuItem key={row.id} value={row.id}>{label(row)}</MenuItem>)}
+          </TextField>
+          <TextField select label={t('context.foundation.parentUnit')} onChange={event => setUnit({ ...unit, parentUnitId: event.target.value })} size="small" value={unit.parentUnitId}>
+            <MenuItem value="">{t('context.foundation.choose')}</MenuItem>
+            {units.data?.content?.map(row => <MenuItem key={row.id} value={row.id}>{label(row)}</MenuItem>)}
+          </TextField>
           <TextField label={t('context.fields.status')} onChange={(event) => setUnit({ ...unit, status: event.target.value })} select size="small" value={unit.status}>
             {UNIT_STATUSES.map((value) => <MenuItem key={value} value={value}>{value}</MenuItem>)}
           </TextField>
@@ -138,7 +162,10 @@ export function OrganizationCommandPanel() {
           <TextField label={t('context.fields.employeeType')} onChange={(event) => setEmployee({ ...employee, employeeType: event.target.value })} select size="small" value={employee.employeeType}>
             {EMPLOYEE_TYPES.map((value) => <MenuItem key={value} value={value}>{value}</MenuItem>)}
           </TextField>
-          <TextField label={t('context.fields.identityUserReference')} onChange={(event) => setEmployee({ ...employee, identityUserReference: event.target.value })} size="small" value={employee.identityUserReference} />
+          <TextField select label={t('context.foundation.user')} onChange={event => setEmployee({ ...employee, identityUserReference: event.target.value })} size="small" value={employee.identityUserReference}>
+            <MenuItem value="">{t('context.foundation.choose')}</MenuItem>
+            {users.data?.content?.filter(row => row.status === 'ACTIVE')?.map(row => <MenuItem key={row.id} value={row.id}>{row.displayName || row.username}</MenuItem>)}
+          </TextField>
         </Box>
         <Button disabled={!employeeCommandAvailable || registerEmployeeMutation.isPending} onClick={() => registerEmployeeMutation.mutate()} sx={{ mt: 2 }} variant="contained">{t('context.organization.registerEmployee')}</Button>
         {registerEmployeeMutation.error ? <Alert severity="error" sx={{ mt: 2 }}>{String(registerEmployeeMutation.error)}</Alert> : null}
@@ -149,9 +176,18 @@ export function OrganizationCommandPanel() {
         <Typography component="h2" variant="h6">{t('context.organization.assignEmployee')}</Typography>
         {!employeeCommandAvailable ? <Alert severity="warning" sx={{ mb: 2 }}>{t('context.commandUnavailable')}</Alert> : null}
         <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: 'repeat(4, 1fr)' } }}>
-          <TextField label={t('context.fields.employeeId')} onChange={(event) => setAssignment({ ...assignment, employeeId: event.target.value })} size="small" value={assignment.employeeId} />
-          <TextField label={t('context.fields.organizationUnitId')} onChange={(event) => setAssignment({ ...assignment, organizationUnitId: event.target.value })} size="small" value={assignment.organizationUnitId} />
-          <TextField label={t('context.fields.positionId')} onChange={(event) => setAssignment({ ...assignment, positionId: event.target.value })} size="small" value={assignment.positionId} />
+          <TextField select label={t('context.foundation.employee')} onChange={event => setAssignment({ ...assignment, employeeId: event.target.value })} size="small" value={assignment.employeeId}>
+            <MenuItem value="">{t('context.foundation.choose')}</MenuItem>
+            {employees.data?.content?.filter(row => row.status === 'ACTIVE')?.map(row => <MenuItem key={row.id} value={row.id}>{row.displayNameLt || row.employeeNumber}</MenuItem>)}
+          </TextField>
+          <TextField select label={t('context.foundation.unit')} onChange={event => setAssignment({ ...assignment, organizationUnitId: event.target.value })} size="small" value={assignment.organizationUnitId}>
+            <MenuItem value="">{t('context.foundation.choose')}</MenuItem>
+            {units.data?.content?.map(row => <MenuItem key={row.id} value={row.id}>{label(row)}</MenuItem>)}
+          </TextField>
+          <TextField select label={t('context.foundation.position')} onChange={event => setAssignment({ ...assignment, positionId: event.target.value })} size="small" value={assignment.positionId}>
+            <MenuItem value="">{t('context.foundation.choose')}</MenuItem>
+            {positions.data?.map(row => <MenuItem key={row.id} value={row.id}>{label(row)}</MenuItem>)}
+          </TextField>
           <TextField label={t('context.fields.assignmentType')} onChange={(event) => setAssignment({ ...assignment, assignmentType: event.target.value })} select size="small" value={assignment.assignmentType}>
             {ASSIGNMENT_TYPES.map((value) => <MenuItem key={value} value={value}>{value}</MenuItem>)}
           </TextField>

@@ -1,3 +1,4 @@
+import { FoundationIdentityPanel } from '@/features/context/components/FoundationIdentityPanel';
 import { Alert, Box, Container, Tab, Tabs, Typography } from '@mui/material';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +22,7 @@ export function IdentityAdministrationPage() {
       <Alert severity="info" sx={{ mt: 2 }}>{t('context.identity.contractNotice')}</Alert>
 
       <Box sx={{ mt: 2 }}><IdentityCommandPanel /></Box>
+      <Box sx={{ mt: 2 }}><FoundationIdentityPanel /></Box>
       <Box sx={{ mt: 2 }}><IdentityAccessCommandPanel /></Box>
 
       <Box sx={{ mt: 3 }}>

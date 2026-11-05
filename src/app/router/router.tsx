@@ -101,6 +101,10 @@ export const router = createBrowserRouter([
         lazy: async () => ({ Component: (await import('@/features/context/IdentityAdministrationPage')).IdentityAdministrationPage }),
       },
       {
+        path: 'administration/parties',
+        lazy: async () => ({ Component: (await import('@/features/party/PartyAdministrationPage')).PartyAdministrationPage }),
+      },
+      {
         path: 'administration/configuration',
         lazy: async () => ({ Component: (await import('@/features/configuration')).ConfigurationAdministrationPage }),
       },

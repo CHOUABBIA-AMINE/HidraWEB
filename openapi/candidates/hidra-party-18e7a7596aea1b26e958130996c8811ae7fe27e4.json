@@ -1,0 +1,822 @@
+{
+  "components": {
+    "schemas": {
+      "AssignPartyRoleRequest": {
+        "properties": {
+          "partyId": {
+            "type": "string"
+          },
+          "qualificationRequired": {
+            "type": "boolean"
+          },
+          "roleId": {
+            "type": "string"
+          },
+          "validFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "validTo": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PartyAdministrationChoice": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "qualificationRequired": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "PartyAdministrationHistory": {
+        "properties": {
+          "actor": {
+            "type": "string"
+          },
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "details": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "newStatus": {
+            "type": "string"
+          },
+          "oldStatus": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PartyAdministrationMetadata": {
+        "properties": {
+          "expectedUpdatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "legalName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "reason": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "shortName": {
+            "type": "string"
+          },
+          "tradeName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "expectedUpdatedAt",
+          "legalName",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "PartyAdministrationPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PartyAdministrationView"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "offset": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PartyAdministrationTransition": {
+        "properties": {
+          "expectedUpdatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "expectedUpdatedAt",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "PartyAdministrationView": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "legalName": {
+            "type": "string"
+          },
+          "partyTypeId": {
+            "type": "string"
+          },
+          "primaryRoleCodeSnapshot": {
+            "type": "string"
+          },
+          "shortName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "tradeName": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PartyResponse": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "legalName": {
+            "type": "string"
+          },
+          "primaryRoleCodeSnapshot": {
+            "type": "string"
+          },
+          "shortName": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "DRAFT",
+              "ACTIVE",
+              "SUSPENDED",
+              "BLOCKED",
+              "RETIRED"
+            ],
+            "type": "string"
+          },
+          "tradeName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RegisterPartyRequest": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "legalName": {
+            "type": "string"
+          },
+          "partyTypeId": {
+            "type": "string"
+          },
+          "primaryRoleCodeSnapshot": {
+            "type": "string"
+          },
+          "shortName": {
+            "type": "string"
+          },
+          "tradeName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "externalOidcBearerJwt": {
+        "bearerFormat": "JWT",
+        "description": "Externally issued OIDC bearer JWT accepted by OIDC completion and self-bound authorization evaluation.",
+        "scheme": "bearer",
+        "type": "http"
+      },
+      "hidraBearerJwt": {
+        "bearerFormat": "JWT",
+        "description": "Hidra-issued bearer JWT used by ordinary protected HidraAPI operations.",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "description": "Hydrocarbon Intelligence for Data, Risk, and Analytics",
+    "license": {
+      "name": "MIT License"
+    },
+    "title": "HidraAPI",
+    "version": "v1"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/party/assign-role": {
+      "post": {
+        "operationId": "assignRole",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignPartyRoleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "spring-party-controller"
+        ]
+      }
+    },
+    "/api/v1/party/capabilities": {
+      "get": {
+        "operationId": "capabilities_8",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "additionalProperties": {},
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "spring-party-controller"
+        ]
+      }
+    },
+    "/api/v1/party/parties": {
+      "get": {
+        "operationId": "partyAdministrationSearch",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "typeId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "roleId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "eligibleOnly",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyAdministrationPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "party-administration-controller"
+        ]
+      },
+      "post": {
+        "operationId": "registerParty",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterPartyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "spring-party-controller"
+        ]
+      }
+    },
+    "/api/v1/party/parties/{id}": {
+      "get": {
+        "operationId": "partyAdministrationGet",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyAdministrationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "party-administration-controller"
+        ]
+      },
+      "put": {
+        "operationId": "partyAdministrationEdit",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartyAdministrationMetadata"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyAdministrationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "party-administration-controller"
+        ]
+      }
+    },
+    "/api/v1/party/parties/{id}/activate": {
+      "post": {
+        "operationId": "partyAdministrationActivate",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartyAdministrationTransition"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyAdministrationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "party-administration-controller"
+        ]
+      }
+    },
+    "/api/v1/party/parties/{id}/deactivate": {
+      "post": {
+        "operationId": "partyAdministrationDeactivate",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartyAdministrationTransition"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyAdministrationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "party-administration-controller"
+        ]
+      }
+    },
+    "/api/v1/party/parties/{id}/history": {
+      "get": {
+        "operationId": "partyAdministrationHistory",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PartyAdministrationHistory"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "party-administration-controller"
+        ]
+      }
+    },
+    "/api/v1/party/reference/party-roles": {
+      "get": {
+        "operationId": "partyAdministrationRoles",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "language",
+            "required": false,
+            "schema": {
+              "default": "en",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PartyAdministrationChoice"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "party-administration-controller"
+        ]
+      }
+    },
+    "/api/v1/party/reference/party-types": {
+      "get": {
+        "operationId": "partyAdministrationTypes",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "language",
+            "required": false,
+            "schema": {
+              "default": "en",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PartyAdministrationChoice"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "party-administration-controller"
+        ]
+      }
+    },
+    "/api/v1/party/register-party": {
+      "post": {
+        "operationId": "registerParty_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterPartyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "spring-party-controller"
+        ]
+      }
+    },
+    "/api/v1/party/roles/assignments": {
+      "post": {
+        "operationId": "assignRole_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignPartyRoleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "spring-party-controller"
+        ]
+      }
+    }
+  },
+  "x-hidra-ci-source-sha": "18e7a7596aea1b26e958130996c8811ae7fe27e4"
+}

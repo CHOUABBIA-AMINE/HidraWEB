@@ -42,6 +42,7 @@ export function IdentityCommandPanel() {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['hidra', 'workbench', 'identity'] });
+      await queryClient.invalidateQueries({ queryKey: ['hidra', 'identity-admin'] });
     },
   });
 

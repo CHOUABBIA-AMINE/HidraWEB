@@ -72,7 +72,7 @@ test('missing npm generator scripts fail closed rather than skipping contracts',
   assert.throws(() => inspectGeneratedClients(root), /Missing api:generate:demo/);
 });
 
-test('all 20 repository feature generators have compatible preflight inventory', () => {
+test('all 21 repository feature generators have compatible preflight inventory', () => {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
   const manifest = JSON.parse(readFileSync(join(root, 'openapi/compatibility/hidra-api-baseline.json'), 'utf8'));
   const scripts = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).scripts;

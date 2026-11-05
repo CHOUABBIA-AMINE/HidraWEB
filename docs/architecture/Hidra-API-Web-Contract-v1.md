@@ -561,3 +561,22 @@ and no production acceptance are authorized. **HWEB-F01 remains in
 progress pending compatible source-backed consumer pin plus complete
 permission and acceptance evidence.** See the corresponding dated ENG gap
 register delta and Ultimate Roadmap task status.
+
+
+## HWEB-F11 / W1 foundation adoption — 2026-11-05
+
+Owner Next admits the complete Identity/Organization/Party frontend foundation
+under the Ultimate Roadmap's exact W1 ledger. Backend18e7a75 Full1124/Docs911
+accepted corrected credential-state schema; governance main a9025394 Docs912 SUCCESS.
+Preserve historical F01–F10,20 prior feature sources and all prior API provenance.
+Only Identity/Organization is repinned; a dedicated Party client brings the explicit
+feature count to21. Use actual generated transport, native authorization, server
+versions and safe credential handling. UI guards are advisory; backend remains final.
+Status IN_PROGRESS; live no-mock browser/A1 and industrial/SITE gates are independent.
+
+W1 source disposition: IMPLEMENTED / CI_ACCEPTANCE_PENDING. Identity credential
+CAS/activation/deactivation and ordinary revocation, Organization catalog-backed
+choices/employee activation/history, and dedicated Party lifecycle/role/history/eligible
+selection now consume generated accepted API types. Local137 Vitest +95 Node +6
+performance cases, types/lint/build passed; browser launch and no-mock qualification
+remain pending. See owning W1 roadmap evidence; do not infer deployed acceptance.

@@ -11,8 +11,8 @@ const featureConfigs = fs.readdirSync(root)
   .filter(name => /^orval\.[a-z][a-z0-9-]*\.config\.ts$/.test(name)).sort();
 
 test('every operational client generator has a pinned OpenAPI source and generation command', () => {
-  assert.equal(featureConfigs.length, 20);
-  assert.equal(baseline.expectedOrvalContracts, 20);
+  assert.equal(featureConfigs.length, 21);
+  assert.equal(baseline.expectedOrvalContracts, 21);
   const packageJson = JSON.parse(read('package.json'));
   const seen = new Set();
   for (const config of featureConfigs) {

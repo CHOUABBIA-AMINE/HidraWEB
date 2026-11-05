@@ -1880,3 +1880,141 @@ acceptance not yet completed. No branch, PR or code comments.
 **Disposition:** **HWEB-F03 is BLOCKED** for interactive route and elevation-profile authoring pending accepted backend typed survey/profile APIs, effective grants, explicit units and CRS/vertical datum, field-precision/source provenance, versioning, concurrency and negative tests plus successful exact-SHA full OpenAPI publishing. Do not substitute map GeoJSON reads, display interpolation, local pseudo-storage or inferred heights for source-backed surveyed facts. Existing topology visualization remains preserved. This documentation-only preflight does not select F03 UI implementation, modify HidraAPI, authorize new simulation work, or unlock dependent F07/F10 completion. Other independent stages F04/F06/F08 may be assessed separately.
 
 **Scope:** append-only canonical roadmap, expected-parent guarded single-file commit directly to main, verify tree/diff, confirm Documentation CI startup and stop.
+
+
+## HWEB-F11 / W1 — owner-selected six-module foundation (2026-11-05)
+
+Owner Next selects one whole W1 delivery, including canonical frontend adoption,
+implementation and tests. Exact message: `feat(context): complete identity organization and party administration`.
+WEB baseline46676deb70fd38b906bdb370f020f609d0a16c98, parent7b30cf27fe753fdda2ab157d95424e88afe85801,
+tree19e14dea9e82b523095fc43fa31f9b6ff9bc219e, Docs39 SUCCESS; latest Code1014 is historical.
+Backend source18e7a7596aea1b26e958130996c8811ae7fe27e4 Full1124/Docs911 SUCCESS;
+acceptance-only main a90253943bbaac7bc671f0bc4d45f719229d5eb1 Docs912 SUCCESS.
+HAPI-923/924/925 prerequisites are accepted; preserve their synthetic/industrial limits.
+The corrected credential response is IdentityLocalCredentialState; never reconstruct
+transport DTOs by hand. Preserve HWEB-F01–F10 and their distinct scopes/history;
+this owner-approved foundation supplement supersedes sequencing only for W1.
+
+Whole scope: existing user/role/permission creation and grants plus safe LOCAL credential
+initialization/reset, activation/deactivation, ordinary grant revocation, operation
+capabilities; organization catalog/unit/position/employee/active-Identity choices,
+employee activation/history and existing assignment/responsibility operations; Party
+catalogs, search/detail/pagination, register/edit/activate/deactivate/role/history and
+eligible reference selection. Use generated owner types and actual backend errors,
+explicit refresh after conflicts, no optimistic success or mutation retry. Passwords
+are transient only, cleared on submission, never query/mutation-cache variables,
+storage or displayed errors. Existing supported LOCAL login remains intact.
+
+Exact MODIFY: docs/roadmap/ULTIMATE_ROADMAP.md,
+docs/architecture/Hidra-API-Web-Contract-v1.md,
+docs/roadmap/HidraAPI-Frontend-Backend-Gap-Register.md,
+package.json, orval.identity-organization.config.ts,
+openapi/compatibility/hidra-api-baseline.json,
+scripts/check-openapi-compatibility.mjs,
+scripts/verify-identity-organization-candidate.test.mjs,
+scripts/ensure-generated-clients.test.mjs,
+scripts/verify-integrated-consumer-boundaries.test.mjs,
+src/features/context/api/identityOrganizationApi.ts,
+src/features/context/IdentityAdministrationPage.tsx,
+src/features/context/OrganizationAdministrationPage.tsx,
+src/features/context/components/IdentityCommandPanel.tsx,
+src/features/context/components/OrganizationCommandPanel.tsx,
+src/features/context/components/OrganizationCommandPanel.test.tsx,
+src/features/context/i18n/contextTranslations.ts,
+src/app/router/router.tsx, src/shell/navigation/navigationRegistry.ts,
+src/shared/i18n/resources.ts, .github/workflows/ci.yml (Party generator only).
+Exact CREATE: orval.party.config.ts,
+openapi/candidates/hidra-identity-organization-18e7a7596aea1b26e958130996c8811ae7fe27e4.json,
+openapi/candidates/hidra-party-18e7a7596aea1b26e958130996c8811ae7fe27e4.json,
+src/features/context/components/FoundationIdentityPanel.tsx,
+src/features/context/components/FoundationEmployeePanel.tsx,
+src/features/party/PartyAdministrationPage.tsx,
+src/features/party/api/partyApi.ts,
+src/features/party/components/PartySelector.tsx,
+src/features/context/FoundationAdministration.test.tsx,
+scripts/verify-foundation-candidate.test.mjs,
+tests/e2e/foundation-context-live.spec.ts.
+No DELETE, generated source commits, other feature repins, dependency changes, backend
+mutation, release/deployment/P3 or W2. Existing auth/session, responsibility owner
+and all20 old generators remain; add one Party client (21 total), deliberately update
+count assertions. Full A1 live integrated acceptance remains separate.
+
+Runtime input: actual successful Full1124 aggregate artifact13416100262, ZIP SHA256
+ff57bbfe5e2328c184e14615207c6bf0d6ada4593a0e9494db472db18768064c;
+runtime member SHA256 b9703ce80de0e9592d46553af6cf7044bf803bcd1a65ff9008da05cb9d53c25a.
+Extract exact Identity/Organization and Party path subsets plus transitive schema
+closure without changing endpoint/schema/security meaning; pin SHA256s. All other
+feature inputs/proof locks remain untouched. Validate npm verify, focused component
+and browser tests using available tooling. Intercepted browser tests are mocks;
+real no-interception browser qualification requires an explicitly configured
+synthetic native backend and remains pending if unavailable. Status IN_PROGRESS,
+not VERIFIED. Publish directly main expected-head guarded, verify exact tree/parent/
+blobs/scope, observe Code/Docs CI creation/start and STOP.
+
+
+### W1 implementation and validation record — 2026-11-05
+
+IMPLEMENTED / CI_ACCEPTANCE_PENDING, not VERIFIED/COMPLETED. All work above is
+one whole W1 delivery; no W2/W3/W4/A1 implementation is included. The earlier
+credential-schema blocker was repaired/accepted in API and is not bypassed here.
+
+Identity lifecycle uses backend advisory MANAGE_USERS plus current permission
+metadata, server lifecycle/CAS generation and explicit reasons. Credential requests
+use generated Credential; responses use IdentityLocalCredentialState. Passwords
+clear before submission and never enter mutation/query caches, persisted state,
+logs or displayed error details. Rejected actions block further mutations until
+explicit refresh; no automatic mutation retry. Existing LOCAL login, role/permission
+creation and grant assignment remain. Ordinary grant revocation consumes the actual
+backend-issued grant identifier; no grant-list API or grant ownership is invented.
+Organization uses backend type/position catalogs and searchable user/unit/employee
+choices; employee activation/history uses current server revision. Existing native
+appointment/responsibility workflows remain intact. Search choice results are
+bounded to100 and users can narrow the server query; there is no local reference truth.
+Party has dedicated paginated search/detail, type/role discovery, registration with
+required country, guarded metadata and DRAFT activation / ACTIVE deactivation,
+role assignment, paginated audit history and eligible-only selection (ACTIVE filter
+plus genuine backend eligibility). SUSPENDED/BLOCKED/RETIRED are not activated by UI.
+New labels are localized in French, English and Arabic. Frontend permission checks
+remain UX only; actual owner authorization is final for every operation.
+
+Exact extracted artifact identities: Identity/Organization57 paths/61 schemas,
+SHA256050bf86810479d9cef87e3e200928f7993d342dbb51bf835d5110f15e53f94a4;
+Party11 paths/9 schemas,SHA2562538dcde09e8332749b1e3bbf1978331fade66c4a14591895ce11e132c0a1ae6.
+Independently matched every extracted path/schema/security scheme to actual Full1124
+runtime JSON; all historical input bytes and19 unrelated Orval configuration bytes
+unchanged. Twenty original generator slots retained; add Party for21. Generated
+clients remain local build outputs excluded from publication, not new DTO ownership.
+
+Actual local verification:
+- All21 source-pinned contract checks and all21 generators PASS.
+- TypeScript, ESLint (zero errors;4 preexisting unrelated refresh warnings),
+  production build and bundle budgets PASS; initial JS888.0KiB/900KiB,
+  25 lazy entries,largest lazy39.7KiB/96KiB.
+- Full Vitest52 files/137 tests PASS and Node contract/build guardrails95/95 PASS.
+  Nine new component/API cases cover denied administration with no reads, backend
+  capability denial, credential version and no secret caching, short-password guard,
+  original user/employee version forwarding, rejection/no replay/secret suppression,
+  eligible reference filtering, stale Party refresh and explicit grant/role routes.
+- Performance2 files/6 tests PASS; git diff --check and precise contract/input
+  preservation checks PASS. An earlier run concurrent with browser/build work had
+  one existing Alarm5000ms timeout; isolated full rerun137/137 PASS without changing
+  timeout, assertions or unrelated source.
+- Playwright lists67 tests/28 files. Native foundation specs cover LOCAL onboarding,
+  Party eligibility/history and employee activation/history without interception;
+ 3 specs require configured live WEB/API and native administrator credentials.
+  No live fixture exists locally, so these are pending, not passing browser proof.
+  Chromium download failed on invalid/truncated archives; system Chromium launch
+  failed before test execution at process_singleton_posix socket() Operation not
+  permitted. All64 default browser attempts therefore failed at launch, not with
+  application assertion verdicts; the3 live specs were skipped. No passing local
+  browser result is claimed. Existing hosted Code CI installs/runs Chromium normally
+  and remains mandatory. No browser failure is converted into accepted evidence.
+
+Live qualification inputs are HIDRA_FOUNDATION_WEB_URL, HIDRA_FOUNDATION_API_URL,
+HIDRA_FOUNDATION_ADMIN, HIDRA_FOUNDATION_PASSWORD, against a separately started
+same-origin service with native JWT, synthetic fixtures and mocks OFF. Passwords are
+external-only; live specs disable trace/video/screenshots. Never point this test
+at production. A1 remains the independent integrated live-backend acceptance.
+After publication require exact-source Code and Docs CI; green mocked CI does not
+close the no-mock gate, W1 independent acceptance or SITE/operational acceptance.
+Next reserved delivery after W1 acceptance: HWEB-F12/W2; do not execute it now.

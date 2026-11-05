@@ -54,7 +54,7 @@ test('existing clients and all earlier artifact proof locks remain retained', ()
     '/api/v1/organization/responsibilities',
   ]) assert.ok(current.paths[route]);
   const config = fs.readFileSync(path.join(root,'orval.identity-organization.config.ts'),'utf8');
-  assert.ok(config.includes(`./openapi/candidates/${name}`));
+  assert.ok(config.includes('openapi/candidates/hidra-identity-organization-18e7a7596aea1b26e958130996c8811ae7fe27e4.json'));
   const checker = fs.readFileSync(path.join(root,'scripts/check-openapi-compatibility.mjs'),'utf8');
   for (const lock of [
     'IDENTITY_ORGANIZATION_CURRENT_PROOF','PLANNING_CURRENT_PROOF','WORKBENCH_CURRENT_PROOF',

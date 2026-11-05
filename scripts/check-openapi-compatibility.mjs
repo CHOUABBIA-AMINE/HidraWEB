@@ -143,11 +143,10 @@ const PLANNING_CURRENT_PROOF = {
   schemas: 20,
 };
 const IDENTITY_ORGANIZATION_CURRENT_PROOF = {
-  config: 'orval.identity-organization.config.ts',
-  path: 'openapi/candidates/hidra-identity-organization-d14c44fc527ea1115ad87baafa21a3264bf6950c.json',
-  sha256: 'sha256:7158e86e61be8049972048769da2632f2a474984487644a31d7ffcdd5ce723e4',
-  paths: 35,
-  schemas: 39,
+ config: 'orval.identity-organization.config.ts',
+ path: 'openapi/candidates/hidra-identity-organization-18e7a7596aea1b26e958130996c8811ae7fe27e4.json',
+ sha256: 'sha256:050bf86810479d9cef87e3e200928f7993d342dbb51bf835d5110f15e53f94a4',
+ paths: 57, schemas: 61,
 };
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'openapi/compatibility/hidra-api-baseline.json'), 'utf8'));
@@ -441,12 +440,16 @@ for (const config of configs) {
         && !route.startsWith('/api/v1/organization/'))) {
       errors.push(`${config}: Identity/Organization contract structure differs from the verified artifact`);
     }
+  } else if (config === 'orval.party.config.ts') {
+    if (target !== 'openapi/candidates/hidra-party-18e7a7596aea1b26e958130996c8811ae7fe27e4.json' || hash(fs.readFileSync(file)) !== 'sha256:2538dcde09e8332749b1e3bbf1978331fade66c4a14591895ce11e132c0a1ae6'
+      || Object.keys(slice.paths ?? {}).length !== 11 || Object.keys(slice.components?.schemas ?? {}).length !== 9
+      || Object.keys(slice.paths ?? {}).some(route => !route.startsWith('/api/v1/party/'))) errors.push('Party differs from Full1124 runtime artifact');
   } else {
     compareSlice(config, slice);
   }
   const paths = Object.keys(slice.paths ?? {}).length;
   const schemas = Object.keys(slice.components?.schemas ?? {}).length;
-  const proof = [RISK_CURRENT_PROOF.config, TOPOLOGY_CURRENT_PROOF.config, TELEMETRY_CURRENT_PROOF.config, WORKFLOW_CURRENT_PROOF.config, INCIDENT_CURRENT_PROOF.config, CUSTODY_CURRENT_PROOF.config, LEAK_CURRENT_PROOF.config, HSE_CURRENT_PROOF.config, ASSETS_CURRENT_PROOF.config, INTEGRITY_CURRENT_PROOF.config, AUDIT_CURRENT_PROOF.config, CONFIGURATION_CURRENT_PROOF.config, DOCUMENTS_CURRENT_PROOF.config, REPORTING_CURRENT_PROOF.config, ANALYTICS_CURRENT_PROOF.config, SIMULATION_CURRENT_PROOF.config, ALARM_CURRENT_PROOF.config, WORKBENCH_CURRENT_PROOF.config, PLANNING_CURRENT_PROOF.config, IDENTITY_ORGANIZATION_CURRENT_PROOF.config].includes(config)
+  const proof = ['orval.party.config.ts', RISK_CURRENT_PROOF.config, TOPOLOGY_CURRENT_PROOF.config, TELEMETRY_CURRENT_PROOF.config, WORKFLOW_CURRENT_PROOF.config, INCIDENT_CURRENT_PROOF.config, CUSTODY_CURRENT_PROOF.config, LEAK_CURRENT_PROOF.config, HSE_CURRENT_PROOF.config, ASSETS_CURRENT_PROOF.config, INTEGRITY_CURRENT_PROOF.config, AUDIT_CURRENT_PROOF.config, CONFIGURATION_CURRENT_PROOF.config, DOCUMENTS_CURRENT_PROOF.config, REPORTING_CURRENT_PROOF.config, ANALYTICS_CURRENT_PROOF.config, SIMULATION_CURRENT_PROOF.config, ALARM_CURRENT_PROOF.config, WORKBENCH_CURRENT_PROOF.config, PLANNING_CURRENT_PROOF.config, IDENTITY_ORGANIZATION_CURRENT_PROOF.config].includes(config)
     ? 'current-artifact SHA-256' : 'historical full OpenAPI baseline';
   console.log(`[openapi:compat] ${config}: ${paths} paths, ${schemas} schemas, ${proof}, ${errors.length === before ? 'compatible' : 'FAILED'}`);
 }
@@ -456,7 +459,7 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exit(1);
 }
-console.log(`\nOpenAPI compatibility gate passed for ${configs.length} contracts: Risk and Topology from verified HidraAPI 81d46bcb8bc8821f67eafbb26cd1279f6d091457; Telemetry/Monitoring, Workflow, Incident, Custody, Leak Detection and HSE from verified HidraAPI da4ce33ead7db40776049c861027947b61b96270; Assets, Integrity, Audit, Configuration, Documents, Reporting, Analytics, Simulation and Alarm from verified HidraAPI 76b14cda4520f1eff242bd474c02ce4db317d385; Workbench from verified HidraAPI 016d972725ac9a02a46f08ec024e0a4b0f95bda6; Planning from verified HidraAPI d14c44fc527ea1115ad87baafa21a3264bf6950c; Identity/Organization from verified HidraAPI d14c44fc527ea1115ad87baafa21a3264bf6950c; all feature source pins SHA-256 verified against HidraAPI ${manifest.backendCommit}.`);
+console.log(`\nOpenAPI compatibility gate passed for ${configs.length} contracts: Risk and Topology from verified HidraAPI 81d46bcb8bc8821f67eafbb26cd1279f6d091457; Telemetry/Monitoring, Workflow, Incident, Custody, Leak Detection and HSE from verified HidraAPI da4ce33ead7db40776049c861027947b61b96270; Assets, Integrity, Audit, Configuration, Documents, Reporting, Analytics, Simulation and Alarm from verified HidraAPI 76b14cda4520f1eff242bd474c02ce4db317d385; Workbench from verified HidraAPI 016d972725ac9a02a46f08ec024e0a4b0f95bda6; Planning from verified HidraAPI d14c44fc527ea1115ad87baafa21a3264bf6950c; Identity/Organization and Party from verified HidraAPI 18e7a7596aea1b26e958130996c8811ae7fe27e4; all feature source pins SHA-256 verified against HidraAPI ${manifest.backendCommit}.`);
 
 function checkEvidence() {
   const required = ['repository', 'backendCommit', 'workflowRunId', 'artifactId', 'artifactName', 'artifactDigest', 'fullSpecSha256', 'fullContractGzipBase64Parts', 'fullContractGzipSha256', 'expectedOrvalContracts'];
