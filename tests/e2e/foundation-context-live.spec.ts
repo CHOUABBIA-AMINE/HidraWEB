@@ -92,9 +92,12 @@ test('native LOCAL user creation, credential initialization, activation and real
 
 test('native Party registration, activation, persisted history and eligible chooser', async ({ page, request }) => {
   await login(page);
-  await page.goto(`${web}/administration/parties`);
+  // Keep the transient native session alive through React Router navigation.
+  await page.getByRole('button', { name: /^(Partenaires|Parties|الجهات)$/ }).click();
+  await expect(page).toHaveURL(`${web}/administration/parties`);
+  await expect(page.getByRole('heading', { level: 1, name: /Administration des partenaires|Party administration|إدارة الجهات/ })).toBeVisible();
   const code = `W1-${Date.now()}`;
-  await page.getByLabel(/^(Code|الرمز)/).fill(code);
+  await page.getByLabel(/^(Code|الرمز)(?:\s*\*)?$/).fill(code);
   await page.getByLabel(/^(Raison sociale|Legal name|الاسم القانوني)/).fill(`Synthetic ${code}`);
   await page.getByRole('combobox', { name: /^(Type de partenaire|Party type|نوع الجهة)/ }).click();
   await page.getByRole('option').filter({ hasNotText: /Sélectionner|Select|اختر/ }).first().click();
@@ -130,7 +133,9 @@ test('native Party registration, activation, persisted history and eligible choo
 
 test('native employee registration, activation and lifecycle history', async ({ page, request }) => {
   await login(page);
-  await page.goto(`${web}/administration/organization`);
+  await page.getByRole('button', { name: /^(Organisation|Organization|التنظيم)$/ }).click();
+  await expect(page).toHaveURL(`${web}/administration/organization`);
+  await expect(page.getByRole('heading', { level: 1, name: /^(Organisation|Organization|التنظيم)$/ })).toBeVisible();
   const number = `W1-EMP-${Date.now()}`;
   await page.getByLabel(/^(Matricule|Employee number|رقم الموظف)$/).fill(number);
   await page.getByLabel(/^(Prénom latin|Latin first name|الاسم اللاتيني)$/).fill('Synthetic');

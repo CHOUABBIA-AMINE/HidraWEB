@@ -2206,3 +2206,41 @@ Playwright discovery still finds exactly3 mandatory native journeys. Source revi
 confirms exact-origin Spring CORS configuration, the test profile's empty override,
 and unchanged security permission endpoint paths. No local Spring/PostgreSQL/browser
 runtime result is claimed; native Origin/status assertions await exact-SHA CI.
+
+
+### W1 / HWEB-F11 same-task CI1020 navigation repair — owner Fail/continue, 2026-11-05
+
+Live main9e97573c58ad0a3636d9b18a719f8f531e2223b9, parent78ec58c27eb68855040cad953e70016bc2f78bb9,
+tree15c5bbcd042cce260fe50a5faad231e6d4b75732. Code1020/run42046251765 FAILED;
+regular verify job127309883520 SUCCESS; Docs45/run42046251902 SUCCESS. Native job
+127309883059 passes audited bootstrap, exact-origin login, native JWT/permissions
+and the full LOCAL user onboarding/credential/activation/real-login/403 journey.
+The Party and employee tests time out finding their first fields after page.goto.
+AuthProvider retains bearer/session state only in React memory; full document
+navigation creates an anonymous provider and RequireAuthentication returns to login.
+The sidebar already performs client-side React Router navigation.
+
+Same-task scope: MODIFY tests/e2e/foundation-context-live.spec.ts and this append-only
+roadmap; CREATE src/features/context/FoundationNativeNavigation.test.tsx. Use the
+actual localized sidebar buttons to reach Party and Organization, assert target URL
+and heading, and anchor the Party Code selector so it cannot also match Country code.
+Prove the real AuthProvider/RequireAuthentication/sidebar retain the same session
+through both routes and the actual localized form selectors resolve in all3 locales.
+Component transport fixtures are component evidence only, never native acceptance.
+Preserve transient-only credentials, native API18e7a75, PostgreSQL/bootstrap/CORS,
+three mandatory journeys, zero retries/skips, persisted lifecycle/role checks and
+all security assertions. No product auth/storage change, backend mutation, test
+weakening, timeout change, W2 or A1 selection. Exact W1 message remains
+`feat(context): complete identity organization and party administration`.
+W1 IMPLEMENTED / LIVE_QUALIFICATION_PENDING; W2 remains dependency-gated.
+
+CI1020 repair local validation:13 component cases PASS across the new3-locale
+navigation regression, existing foundation administration and organization guard.
+The regression uses the actual AuthProvider, RequireAuthentication, HidraSidebar,
+LoginPage and destination form components with fixture transport; one login and the
+same principal/bearer survive both sidebar route changes. Exact Code is required and
+distinct from Country code in every locale; employee selectors resolve unchanged.
+TypeScript project and standalone native config/spec compilation, focused ESLint,
+two pinned foundation contract checks, documentation checks and whitespace PASS.
+Native Playwright discovery retains exactly3 cases; no native browser/PostgreSQL
+rerun is claimed locally. Exact-source hosted native CI remains the acceptance gate.
