@@ -112,3 +112,142 @@ jobs:
           name: hidraweb-release-${{ github.sha }}
           path: release/hidraweb
           if-no-files-found: error
+
+  foundation-native:
+    name: W1 native API and PostgreSQL browser qualification
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: hidra_foundation_w1
+          POSTGRES_USER: hidra
+          POSTGRES_PASSWORD: hidra-w1-ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U hidra -d hidra_foundation_w1"
+          --health-interval=5s --health-timeout=5s --health-retries=12
+    env:
+      HIDRA_FOUNDATION_WEB_URL: http://127.0.0.1:5173
+      HIDRA_FOUNDATION_API_URL: http://127.0.0.1:8080
+      HIDRA_FOUNDATION_ADMIN: w1-native-admin
+      HIDRA_FOUNDATION_REQUIRE_NATIVE: '1'
+      HIDRA_TEST_DATASOURCE_URL: jdbc:postgresql://127.0.0.1:5432/hidra_foundation_w1
+      HIDRA_TEST_DATASOURCE_USERNAME: hidra
+      HIDRA_TEST_DATASOURCE_PASSWORD: hidra-w1-ci
+      HIDRA_SECURITY_AUTHENTICATION_MODE: jwt
+      HIDRA_SECURITY_BOOTSTRAP_ENABLED: 'true'
+      HIDRA_SECURITY_BOOTSTRAP_USERNAME: w1-native-admin
+      HIDRA_SECURITY_BOOTSTRAP_EMAIL_ADDRESS: w1-admin@synthetic.invalid
+      SPRING_PROFILES_ACTIVE: test
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: hidra
+      PGPASSWORD: hidra-w1-ci
+      PGDATABASE: hidra_foundation_w1
+    steps:
+      - name: Checkout WEB
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Checkout accepted immutable API source
+        uses: actions/checkout@v5
+        with:
+          repository: CHOUABBIA-AMINE/HidraAPI
+          ref: 18e7a7596aea1b26e958130996c8811ae7fe27e4
+          path: .native-api
+          persist-credentials: false
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: .native-api/pom.xml
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install WEB and generate pinned clients
+        run: |
+          npm ci --no-audit --no-fund
+          npm run prebuild
+          npx playwright install --with-deps chromium
+      - name: Generate disposable masked credential and signing material
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os, secrets
+          password = secrets.token_urlsafe(32)
+          signing = secrets.token_urlsafe(48)
+          ordinary = secrets.token_urlsafe(32)
+          print('::add-mask::' + password)
+          print('::add-mask::' + signing)
+          print('::add-mask::' + ordinary)
+          with open(os.environ['GITHUB_ENV'], 'a') as output:
+              output.write('HIDRA_FOUNDATION_PASSWORD=' + password + '\n')
+              output.write('HIDRA_FOUNDATION_USER_PASSWORD=' + ordinary + '\n')
+              output.write('HIDRA_SECURITY_BOOTSTRAP_PASSWORD=' + password + '\n')
+              output.write('HIDRA_JWT_HMAC_SECRET=' + signing + '\n')
+          PY
+      - name: Build and start pinned native API
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C .native-api rev-parse HEAD)" = 18e7a7596aea1b26e958130996c8811ae7fe27e4
+          cd .native-api
+          chmod +x mvnw
+          ./mvnw -B -q -Dmaven.test.skip=true package
+          APP_JAR="$(find target -maxdepth 1 -type f -name '*.jar' ! -name '*.original' | head -n 1)"
+          test -n "${APP_JAR}"
+          java -jar "${APP_JAR}" --server.port=8080 --management.server.port=8080 \
+            --springdoc.api-docs.enabled=true --springdoc.swagger-ui.enabled=false \
+            --hidra.platform.security.jwt.token-issuer=https://foundation.synthetic.invalid \
+            > "${RUNNER_TEMP}/w1-api.log" 2>&1 &
+          echo "$!" > "${RUNNER_TEMP}/w1-api.pid"
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:8080/actuator/health >/dev/null; then
+              exit 0
+            fi
+            if ! kill -0 "$(cat "${RUNNER_TEMP}/w1-api.pid")" 2>/dev/null; then
+              tail -n 100 "${RUNNER_TEMP}/w1-api.log"
+              exit 1
+            fi
+            sleep 2
+          done
+          tail -n 100 "${RUNNER_TEMP}/w1-api.log"
+          exit 1
+      - name: Seed synthetic catalogs in the exact disposable database
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v psql >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install --yes --no-install-recommends postgresql-client
+          fi
+          psql -v ON_ERROR_STOP=1 --file scripts/foundation-native-fixture.sql
+      - name: Run mandatory W1 browser journeys against native JWT and PostgreSQL
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PLAYWRIGHT_JSON_OUTPUT_NAME="${RUNNER_TEMP}/w1-native-results.json"
+          npm run test:e2e:foundation -- --reporter=list,json
+          python3 - <<'PYTHON'
+          import json, os
+          with open(os.environ['PLAYWRIGHT_JSON_OUTPUT_NAME']) as report:
+              stats = json.load(report)['stats']
+          assert stats['expected'] == 3, stats
+          assert stats['unexpected'] == stats['flaky'] == stats['skipped'] == 0, stats
+          print('W1 native browser qualification: 3 passed, 0 failed/flaky/skipped')
+          PYTHON
+      - name: Stop disposable native API
+        if: always()
+        shell: bash
+        run: |
+          if [ -f "${RUNNER_TEMP}/w1-api.pid" ]; then
+            kill "$(cat "${RUNNER_TEMP}/w1-api.pid")" 2>/dev/null || true
+          fi

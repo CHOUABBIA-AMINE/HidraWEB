@@ -78,6 +78,12 @@ function e2eAuthenticationMockPlugin(): Plugin | undefined {
   };
 }
 
+// Explicit opt-in for the disposable W1 native test lane only.
+const foundationNative = process.env.HIDRA_FOUNDATION_NATIVE_E2E === '1';
+if (foundationNative && process.env.HIDRA_E2E_AUTH_MOCK === '1') {
+  throw new Error('Native foundation qualification cannot use authentication mocks.');
+}
+
 export default defineConfig({
   plugins: [react(), e2eAuthenticationMockPlugin()].filter(Boolean) as Plugin[],
   build: {
@@ -87,6 +93,7 @@ export default defineConfig({
     tsconfigPaths: true,
   },
   server: {
+    proxy: foundationNative ? { '/api': { target: 'http://127.0.0.1:8080', changeOrigin: true } } : undefined,
     host: '127.0.0.1',
     port: 5173,
     strictPort: true,

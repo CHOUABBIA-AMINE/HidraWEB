@@ -2018,3 +2018,65 @@ at production. A1 remains the independent integrated live-backend acceptance.
 After publication require exact-source Code and Docs CI; green mocked CI does not
 close the no-mock gate, W1 independent acceptance or SITE/operational acceptance.
 Next reserved delivery after W1 acceptance: HWEB-F12/W2; do not execute it now.
+
+
+### W1 native browser qualification wiring — owner Next, 2026-11-05
+
+Code CI1015 (42033696163) and Docs40 (42033696158) SUCCESS at
+33b8c051a8bff7e83f9af55160dd3c41c5008ccc, parent46676deb70fd38b906bdb370f020f609d0a16c98,
+treef86a5ab5ad3fb781e0a82bcae4e1dd4121a3ce8e. Independently inspected job127266254892:
+137 unit/component cases,95 Node contracts,6 performance cases,21 generators,
+types/lint/build/packaging PASS. Browser67 cases:63 PASS,1 existing Alarm test
+passed only on retry (alarm.spec.ts:61 waiting Acquitter),3 native foundation cases
+SKIPPED for missing live configuration. Do not relabel the skips as native acceptance.
+W1 remains IMPLEMENTED / LIVE_QUALIFICATION_PENDING, W2 dependency-gated.
+
+Owner Next continues the still-unfinished whole W1 exit condition: real native
+backend A/B browser journeys. This is the qualification obligation inside W1,
+not a new substage, A1 integrated five-journey delivery or approval waiver.
+A1 still qualifies the integrated W1–W4 product later. Preserve the existing
+successful default CI, original browser tests and retry settings; do not repair an
+unrelated Alarm test here. Use a fresh local review checkout to preserve the earlier
+implementation checkout's local changes; no work is discarded by this continuation.
+
+Exact same-task scope reconciliation before mutation: MODIFY .github/workflows/ci.yml
+(add a mandatory W1 native job), vite.config.ts (explicit test-only loopback proxy),
+package.json (native test command), tests/e2e/foundation-context-live.spec.ts (fail if
+mandatory configuration absent, prove native security and Party role persistence),
+this roadmap, docs/architecture/Hidra-API-Web-Contract-v1.md,
+docs/roadmap/HidraAPI-Frontend-Backend-Gap-Register.md. CREATE
+playwright.foundation.config.ts and scripts/foundation-native-fixture.sql.
+Message remains `feat(context): complete identity organization and party administration`.
+No backend mutation, dependency or unrelated consumer repin, production feature,
+DDL/migration, auth bypass, test weakening, release/deployment or W2/P3.
+
+Native job independently checks out and builds accepted API18e7a7596aea1b26e958130996c8811ae7fe27e4
+on Java21, starts a disposable PostgreSQL16 database named hidra_foundation_w1,
+uses the existing opt-in persistent administrator bootstrap and actual LOCAL/native
+JWT authentication. Password/signing material is generated per job and masked.
+A test fixture refuses every other database name, seeds only synthetic active
+provider and Party/Organization choice catalogs, and does not manufacture user,
+credential, role grants, permissions, terminal approvals or disabled security.
+All schema comes from the pinned API's real Flyway migrations/JPA validation.
+Vite proxy activates only with the explicit native-test flag, points only to
+127.0.0.1:8080, and rejects simultaneous mock authentication. Normal product/dev
+configuration remains unchanged. The legacy frontend 'basic' selector calls the
+real LOCAL exchange and uses issued bearer authorization (verified source);
+backend authentication stays JWT, never HTTP Basic or security-disabled.
+Native Playwright runs only the3 real cases with retries0 and required inputs,
+no route interception, no traces/video/screenshots or credential-bearing artifacts.
+Current and second-user native principal/forbidden operations plus persisted Party
+role/history are checked. New exact-SHA Code/Docs results and actual no-skip native
+reports are mandatory before W1 acceptance; no live pass is claimed by source wiring.
+Publish main with expected-head guard, verify paths/parent/tree/blobs/message,
+observe CI creation/start and STOP.
+
+W1 native wiring prepublication validation: TypeScript project and standalone native
+config/spec compilation passed; ESLint passed with the same four existing refresh
+warnings. Focused foundation/organization component regression:10 tests passed;
+pinned foundation contract tests:2 passed. Workflow YAML, all native shell blocks
+and embedded Python parsed. Vite configuration loading proved native/mock rejection,
+loopback-only opt-in proxy and normal-mode absence. Playwright discovery found exactly
+3 native cases; missing mandatory inputs failed discovery as required. Native result
+report asserts3 expected,0 unexpected/flaky/skipped. These are local wiring/source
+checks, not executed native browsers or PostgreSQL proof; hosted CI remains pending.

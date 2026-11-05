@@ -580,3 +580,17 @@ choices/employee activation/history, and dedicated Party lifecycle/role/history/
 selection now consume generated accepted API types. Local137 Vitest +95 Node +6
 performance cases, types/lint/build passed; browser launch and no-mock qualification
 remain pending. See owning W1 roadmap evidence; do not infer deployed acceptance.
+
+
+### W1 mandatory native qualification — 2026-11-05
+
+Code1015/Docs40 passed at33b8c051; default browsers reported63 passed,1 existing
+Alarm retry,3 native skips. W1 remains IMPLEMENTED / LIVE_QUALIFICATION_PENDING.
+Owner Next selects its missing real backend browser criterion inside the same W1
+delivery. A new mandatory job builds pinned accepted API18e7a75, migrates a fresh
+disposable PostgreSQL16 database, provisions only the existing opt-in native LOCAL
+administrator and synthetic catalogs, and executes all3 W1 native specs with retries0,
+no mocks/interception or trace/video/screenshots. Missing native inputs fail the
+mandatory lane; ordinary regression skips remain clearly classified. No W1 acceptance,
+A1 integrated closure, production deployment or W2 implementation is asserted until
+actual source-bound native results are retrieved. See the exact roadmap scope.

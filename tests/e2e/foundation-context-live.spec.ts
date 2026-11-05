@@ -6,8 +6,27 @@ const web = process.env.HIDRA_FOUNDATION_WEB_URL;
 const api = process.env.HIDRA_FOUNDATION_API_URL;
 const administrator = process.env.HIDRA_FOUNDATION_ADMIN;
 const password = process.env.HIDRA_FOUNDATION_PASSWORD;
+const ordinaryPassword = process.env.HIDRA_FOUNDATION_USER_PASSWORD;
+if (process.env.HIDRA_FOUNDATION_REQUIRE_NATIVE === '1' && (!web || !api || !administrator || !password || !ordinaryPassword)) {
+  throw new Error('Mandatory W1 native configuration is missing; skipping is not permitted.');
+}
 test.use({ trace: 'off', screenshot: 'off', video: 'off' });
 test.skip(!web || !api || !administrator || !password, 'Requires configured synthetic native WEB/API and administrator credentials; not a mocked journey.');
+test.beforeAll(async ({ request }) => {
+  const authenticated = await request.post(`${api}/api/v1/identity/authentication/login`, {
+    data: { providerType: 'LOCAL', principal: administrator, credentials: password },
+  });
+  expect(authenticated.ok()).toBeTruthy();
+  const result = await authenticated.json();
+  expect(result.authenticationType).toBe('LOCAL');
+  expect(result.accessToken).toBeTruthy();
+  const permissions = await request.get(`${api}/api/v1/identity/me/permissions`, {
+    headers: { Authorization: `Bearer ${result.accessToken}` },
+  });
+  expect(permissions.ok()).toBeTruthy();
+  expect(await permissions.json()).toContain('*');
+});
+
 async function login(page: Page) {
   await page.goto(`${web}/administration/users`);
   await page.getByLabel(/^(Nom d’utilisateur|Username|اسم المستخدم)$/).fill(administrator!);
@@ -22,7 +41,7 @@ test('native LOCAL user creation, credential initialization, activation and real
   expect(spec.components.schemas.IdentityLocalCredentialState.properties.securityVersion.format).toBe('int64');
   await login(page);
   const name = `w1-${Date.now()}`;
-  const secret = `Synthetic-W1-${crypto.randomUUID()}`;
+  const secret = ordinaryPassword ?? `Synthetic-W1-${crypto.randomUUID()}`;
   await page.getByLabel(/^(Nom d’utilisateur|Username|اسم المستخدم)$/).fill(name);
   await page.getByLabel(/^(Adresse e-mail|Email address|البريد الإلكتروني)$/).first().fill(`${name}@synthetic.invalid`);
   await page.getByLabel(/^(Nom affiché|Display name|الاسم المعروض)$/).fill(name);
@@ -46,6 +65,9 @@ test('native LOCAL user creation, credential initialization, activation and real
   const principal = await request.get(`${api}/api/v1/identity/me`, { headers: { Authorization: `Bearer ${issued.accessToken}` } });
   expect(principal.ok()).toBeTruthy();
   expect((await principal.json()).username).toBe(name);
+  const forbidden = await request.get(`${api}/api/v1/party/parties`, { headers: { Authorization: `Bearer ${issued.accessToken}` } });
+  expect(forbidden.status()).toBe(403);
+
 });
 
 test('native Party registration, activation, persisted history and eligible chooser', async ({ page, request }) => {
@@ -62,6 +84,12 @@ test('native Party registration, activation, persisted history and eligible choo
   await page.getByLabel(/^(Motif|Reason|السبب)/).fill('Synthetic W1 Party admission');
   await page.getByRole('button', { name: /^(Activer|Activate|تفعيل)$/ }).click();
   await expect(page.getByText(new RegExp(`${code} · ACTIVE`)).first()).toBeVisible();
+  await page.getByRole('combobox', { name: /^(Rôle du partenaire|Party role|دور الجهة)/ }).last().click();
+  await page.getByRole('option').filter({ hasNotText: /Sélectionner|Select|اختر/ }).first().click();
+  const assignment = page.waitForResponse(response => response.url().endsWith('/api/v1/party/roles/assignments') && response.request().method() === 'POST');
+  await page.getByRole('button', { name: /^(Attribuer un rôle|Assign role|إسناد دور)$/ }).click();
+  expect((await assignment).ok()).toBeTruthy();
+
   const authenticated = await request.post(`${api}/api/v1/identity/authentication/login`, { data: { providerType: 'LOCAL', principal: administrator, credentials: password } });
   expect(authenticated.ok()).toBeTruthy();
   const token = (await authenticated.json()).accessToken;
@@ -71,7 +99,12 @@ test('native Party registration, activation, persisted history and eligible choo
   expect(persisted.status).toBe('ACTIVE');
   const history = await request.get(`${api}/api/v1/party/parties/${persisted.id}/history`, { headers: { Authorization: `Bearer ${token}` } });
   expect(history.ok()).toBeTruthy();
-  expect((await history.json()).some((event: { newStatus: string }) => event.newStatus === 'ACTIVE')).toBeTruthy();
+  const events = await history.json();
+  expect(events.some((event: { newStatus: string }) => event.newStatus === 'ACTIVE')).toBeTruthy();
+  expect(events.some((event: { details?: string }) => {
+    try { return String(JSON.parse(event.details ?? '{}').reason ?? '').startsWith('Assigned role '); }
+    catch { return false; }
+  })).toBeTruthy();
 });
 
 
