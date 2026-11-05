@@ -2244,3 +2244,71 @@ TypeScript project and standalone native config/spec compilation, focused ESLint
 two pinned foundation contract checks, documentation checks and whitespace PASS.
 Native Playwright discovery retains exactly3 cases; no native browser/PostgreSQL
 rerun is claimed locally. Exact-source hosted native CI remains the acceptance gate.
+
+
+
+### W1 / HWEB-F11 independent acceptance and handoff — owner Next, 2026-11-05
+
+**Disposition: VERIFIED / COMPLETED for the registered development foundation and
+synthetic native qualification scope.** This supersedes W1's earlier pending
+dispositions; it does not change historical entries or accept another delivery.
+
+Reviewed source: WEB `042844beb4beb2a53387e93fdf220aa1ba90bb72`,
+parent `9e97573c58ad0a3636d9b18a719f8f531e2223b9`,
+tree `f1f34032ff62f74413488c9c7e088fad80fa934d`.
+[Code CI #1021](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42050595244)
+and [Docs #46](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42050595127)
+are SUCCESS on that exact source. Live API main remains
+`a90253943bbaac7bc671f0bc4d45f719229d5eb1`; native qualification preserves accepted
+immutable API `18e7a7596aea1b26e958130996c8811ae7fe27e4`.
+
+Independently read both job logs and checked the source-bound workflow, native
+configuration, fixtures and assertions. Native job
+[127325333640](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42050595244/job/127325333640)
+SUCCESS: Java21 builds the pinned API, its real Flyway/JPA startup initializes fresh
+PostgreSQL16, synthetic catalogs precede the real administrator bootstrap, and the
+committed bootstrap audit event is required before browser execution. Native LOCAL
+login admits only the configured browser origin and issues JWT/effective permissions.
+No mocked authentication, intercepted API, SQL-created account/grant/audit evidence
+or disabled security substitutes for the native owner workflows.
+
+All3 mandatory native journeys PASS, with0 failed/flaky/skipped and retries0,
+in22.8 seconds. The executed JSON-statistics gate confirms the same counts:
+- LOCAL user creation, cleared credential input, current credential schema, activation,
+  actual new-user login/principal and forbidden Party administration HTTP403.
+- Party registration, activation, role assignment, backend eligible-only lookup and
+  persisted activation/role history.
+- Employee registration, activation and persisted lifecycle history with its reason.
+
+Regular verify job
+[127325333394](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42050595244/job/127325333394)
+SUCCESS:21 pinned contract checks/generators;53 Vitest files/140 tests;95 Node checks;
+6 performance cases; types/lint/build/bundle budgets and package verification.
+Default intercepted browsers report63 passed,1 existing Alarm case passed on retry,
+and3 native cases skipped in that unconfigured lane. Preserve that exact
+classification: the three real native cases passed in the separate mandatory job,
+and the Alarm retry remains an existing unrelated regression limitation
+(`tests/e2e/alarm.spec.ts:61`, waiting for Acquitter). No retry policy, assertion,
+timeout or failure classification was changed for acceptance.
+
+Acceptance records the already implemented Identity/Organization/Party foundation,
+accepted generated contracts and the registered three native journeys. It does not
+claim every administration mutation has individual live-browser coverage. A1 remains
+the separate integrated W1–W4 live-backend acceptance gate; industrial calibration,
+SITE/operational acceptance and deployment remain outside this result. Numerical
+simulation/P3 remains deferred. No API source, contract pin or production behavior
+changes in this acceptance action.
+
+Exact acceptance-only scope: APPEND this roadmap,
+`docs/architecture/Hidra-API-Web-Contract-v1.md` and
+`docs/roadmap/HidraAPI-Frontend-Backend-Gap-Register.md`; preserve all prior bytes and
+all other tree entries. Retain registered message
+`feat(context): complete identity organization and party administration`.
+Validate canonical documentation, append-only preservation, exact blobs/tree/parent
+and guarded direct-main publication. This documentation-only commit requires its
+exact-source Docs CI startup; Code CI is path-filtered and is not claimed rerun.
+Observe the applicable CI creation/start, then STOP.
+
+**Next reserved delivery: W2 / HWEB-F12**, after separate owner selection and its
+source-backed preflight/scope registration. No W2/W3/W4/A1 implementation or release
+is selected or executed by this acceptance.

@@ -594,3 +594,30 @@ no mocks/interception or trace/video/screenshots. Missing native inputs fail the
 mandatory lane; ordinary regression skips remain clearly classified. No W1 acceptance,
 A1 integrated closure, production deployment or W2 implementation is asserted until
 actual source-bound native results are retrieved. See the exact roadmap scope.
+
+
+
+### W1 / HWEB-F11 accepted native development qualification — 2026-11-05
+
+W1 is **VERIFIED / COMPLETED for its registered development foundation and synthetic
+native qualification scope**, superseding its earlier pending dispositions above.
+Reviewed WEB source `042844beb4beb2a53387e93fdf220aa1ba90bb72` passed
+[Code CI #1021](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42050595244)
+and [Docs #46](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42050595127).
+The mandatory native job built accepted API
+`18e7a7596aea1b26e958130996c8811ae7fe27e4` against fresh PostgreSQL16 and verified
+real audited administrator bootstrap, LOCAL JWT/CORS/permissions, user onboarding
+and HTTP403 denial, Party lifecycle/role/eligible lookup/history, and employee
+activation/history: **3 passed,0 failed/flaky/skipped, retries0**.
+
+Regular CI passed140 component/unit,95 Node and6 performance tests,21 contract
+generators, types/lint/build and package checks. Its intercepted browser lane retains
+63 passes,1 existing Alarm retry and3 duplicate native skips; those skips are
+separately covered by the successful mandatory native job. See the canonical
+Ultimate Roadmap's W1 acceptance entry for exact source/tree/job evidence and limits.
+
+This accepts the implemented foundation and registered native journeys, not every
+mutation's individual live coverage, integrated A1, industrial/SITE acceptance or
+deployment. Historical ENG gaps and earlier task mappings remain intact. A1 remains
+the separate integrated W1–W4 gate; W2/HWEB-F12 is next after separate selection.
+No backend change, new capability or numerical simulation/P3 is authorized here.
