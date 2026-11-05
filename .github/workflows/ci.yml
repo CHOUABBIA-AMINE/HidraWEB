@@ -166,6 +166,33 @@ jobs:
           java-version: '21'
           cache: maven
           cache-dependency-path: .native-api/pom.xml
+      - name: Restore pinned Maven wrapper distribution
+        id: foundation-maven-wrapper
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.m2/wrapper/dists
+          key: ${{ runner.os }}-w1-maven-wrapper-${{ hashFiles('.native-api/.mvn/wrapper/maven-wrapper.properties') }}
+      - name: Bootstrap pinned Maven wrapper with bounded download retries
+        working-directory: .native-api
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x mvnw
+          for attempt in 1 2 3; do
+            if ./mvnw -B --version; then exit 0; fi
+            if [ "${attempt}" -eq 3 ]; then
+              echo "Pinned Maven wrapper bootstrap failed after 3 attempts"
+              exit 1
+            fi
+            sleep "$((attempt * 5))"
+          done
+          exit 1
+      - name: Save completed pinned Maven wrapper distribution
+        if: steps.foundation-maven-wrapper.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.m2/wrapper/dists
+          key: ${{ steps.foundation-maven-wrapper.outputs.cache-primary-key }}
       - name: Set up Node.js
         uses: actions/setup-node@v5
         with:

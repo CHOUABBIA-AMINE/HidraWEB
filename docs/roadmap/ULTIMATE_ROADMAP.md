@@ -2140,3 +2140,33 @@ password inputs resolve using the corrected native regex; Arabic form submission
 still calls the selected real gateway interface. Native config/spec TypeScript
 compilation, focused ESLint and whitespace checks PASS. These are component/source
 checks; no replacement hosted native-browser or PostgreSQL pass is claimed locally.
+
+
+### W1 / HWEB-F11 same-task CI1018 infrastructure repair — owner Fail, 2026-11-05
+
+Live main13af27a8653a2cff992106b84842ce0786be0fe7, parent35d8242e11280b5442c15ba2635bfce2ed41d43f,
+tree568f112dbb272154f3d0b8682579553c59b117a6. Code1018/run42042268342 FAILED,
+verify job127295853774 SUCCESS; Docs43/run42042268499 SUCCESS. Native job127295854318
+failed within1 second before API compilation: Maven wrapper wget could not fetch
+https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.11/apache-maven-3.9.11-bin.zip.
+No new application, bootstrap or browser verdict exists on this SHA; prior selector
+repair remains awaiting native execution. HTTP cause/status was not logged, so this
+is a verified wrapper-download failure, not a proven Maven repository outage.
+
+Scope before mutation: MODIFY .github/workflows/ci.yml and this append-only roadmap.
+Restore the wrapper distribution cache using OS and the immutable accepted API's
+wrapper-properties digest. Bootstrap that existing pinned wrapper with --version,
+maximum3 attempts and bounded5/10-second backoff; terminal failure stays nonzero.
+Save its completed distribution cache immediately after successful bootstrap so later
+browser failure does not discard a successfully downloaded toolchain. Do not retry
+compilation or tests, substitute Maven versions/hosts, edit API source/wrapper,
+relax security/assertions, skip native journeys or change the W1 acceptance gate.
+Exact registered message remains `feat(context): complete identity organization and party administration`.
+W1 IMPLEMENTED / LIVE_QUALIFICATION_PENDING; W2 remains dependency-gated.
+
+Local validation: workflow YAML, native shell blocks and embedded Python parsed;
+executed the exact bootstrap shell with isolated tool stubs for first-attempt success,
+two failures then third-attempt success, and terminal failure after exactly3 attempts.
+All3 cases PASS, with --version-only invocation verified and no real local toolchain
+provisioning. Whitespace checks PASS. Hosted wrapper fetch/build/native browser
+validation remains pending; no new application or PostgreSQL pass is claimed.
