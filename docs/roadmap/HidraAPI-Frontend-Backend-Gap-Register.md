@@ -788,3 +788,23 @@ main publication against a6887c0f8705129b21bd9ca4c9c859930ff7dcbd. Observe exact
 Docs creation/start, then STOP; Code is path-filtered and not claimed rerun.
 Next necessary selection is the bounded backend handoff contract proposal, then
 resume HWEB-F14/W4. A1, SITE, numerical/P3, release and deployment remain unexecuted.
+
+## HWEB-F14 / W4 — handoff dependency resolved; native browser evidence pending
+
+Backend handoff prerequisite accepted at5817406923e53761577ac41bbc3f318b517c3977,
+Full1140/Docs930 SUCCESS, acceptance428a6f00a5813294b067daeb0df5f5bdaff72658.
+The previous no-preapproval-target-handoff blocker is historical. W4 now consumes
+source-stamped generated target addressing and process/reviewer choices; no local
+digest/locator, hardcoded target catalog IDs, actor impersonation or counterfeit
+approval is substituted. Exact source and closed-contract digests,20-file scope
+and validation are recorded in the canonical roadmap's resumed whole W4 entry.
+
+Status: IMPLEMENTED / NATIVE_BROWSER_QUALIFICATION_PENDING. Local58 Vitest files/
+156 tests,98 Node checks,6 performance cases, lint/types/contracts/build pass;
+ordinary browser launch is unavailable locally due to the missing pinned browser.
+Nine native cases are authored/enumerated, not locally executed: seven W1-W3
+regressions before explicit disposable credential/reference setup, then two W4
+review/denial journeys against the accepted immutable API and real PostgreSQL.
+Only successful exact-SHA hosted evidence plus independent acceptance can close
+W4. A1/HWEB-F15 integrated acceptance, SITE/operational, P3, release and deployment
+remain unexecuted. Preserve all original ENG mappings and prior gap history.

@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { compareContractSlice } from './audit-openapi-drift.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const artifactName = 'hidra-workflow-da4ce33ead7db40776049c861027947b61b96270.json';
+const artifactName = 'hidra-workflow-5817406923e53761577ac41bbc3f318b517c3977.json';
 const artifactPath = path.join(root, 'openapi/candidates', artifactName);
 const legacyPath = path.join(root, 'openapi/hidra-workflow-63f3f60974ce57eb8cd5e42910397615195624fb.json');
 const artifact = fs.readFileSync(artifactPath);
@@ -16,10 +16,10 @@ const legacy = JSON.parse(fs.readFileSync(legacyPath, 'utf8'));
 
 test('Workflow source exactly matches the verified backend OpenAPI artifact slice', () => {
   assert.equal(crypto.createHash('sha256').update(artifact).digest('hex'),
-    'becdd0505299b437d743fe71ffabb56bca26211435ce43dc2669ac8095f975f5');
+    '44bd9f9f21b6a3f757a44ec5fc36ddf2228fb8047244bc38d65f6e00ee6ca28e');
   assert.equal(current.openapi, '3.1.0');
-  assert.equal(Object.keys(current.paths).length, 12);
-  assert.equal(Object.keys(current.components.schemas).length, 13);
+  assert.equal(Object.keys(current.paths).length, 14);
+  assert.equal(Object.keys(current.components.schemas).length, 17);
   assert.equal(current.servers, undefined);
   assert.ok(Object.keys(current.paths).every((name) => name.startsWith('/api/v1/workflow/')));
 });
@@ -67,4 +67,14 @@ test('active Workflow Orval pin requires source digest and retains historical co
   for (const token of ['RISK_CURRENT_PROOF', 'TOPOLOGY_CURRENT_PROOF', 'TELEMETRY_CURRENT_PROOF', 'compareSlice(config, slice);']) {
     assert.ok(checker.includes(token));
   }
+});
+
+test('W4 discovery/target addressing are source-stamped and expose no browser encoding authority', () => {
+  assert.equal(current['x-hidra-ci-source-sha'], '5817406923e53761577ac41bbc3f318b517c3977');
+  const handoff = current.paths['/api/v1/workflow/definitions/installed-characteristic-link-target'].get;
+  assert.equal(handoff.operationId, 'readInstalledCharacteristicLinkWorkflowTarget');
+  assert.deepEqual(handoff.parameters.map(p => p.name).sort(), ['companyPartyId', 'installedUnitId', 'linkId', 'revisionId']);
+  assert.ok(current.components.schemas.Definition.properties.assignmentChoices);
+  assert.ok(current.components.schemas.TargetHandoff.properties.targetLocator);
+  assert.equal(current.paths['/api/v1/workflow/definitions'].get.parameters.length, 5);
 });

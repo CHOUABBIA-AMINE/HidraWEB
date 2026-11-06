@@ -33,6 +33,7 @@ import {
   fetchTimeline,
   workflowQueryKeys,
 } from '@/features/workflow/api/workflowApi';
+import { WorkflowStartPanel } from './components/WorkflowStartPanel';
 import { WORKFLOW_PERMISSIONS } from '@/features/workflow/api/workflowPermissions';
 
 const INBOX_SIZE = 50;
@@ -74,7 +75,7 @@ export function WorkflowTasksPage() {
   const permissions = usePermissions();
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
-  const [selectedTaskId, setSelectedTaskId] = useState('');
+  const [selectedTaskId, setSelectedTaskId] = useState(searchParams.get('taskId') ?? '');
   const [selectedTransitionId, setSelectedTransitionId] = useState('');
   const [reasonId, setReasonId] = useState('');
   const [commentText, setCommentText] = useState('');
@@ -160,6 +161,8 @@ export function WorkflowTasksPage() {
           </Paper>
         ) : null}
 
+        {permissions.can(WORKFLOW_PERMISSIONS.instancesCreate) && permissions.can(WORKFLOW_PERMISSIONS.tasksCreate) && canInstances ? <WorkflowStartPanel onTaskCreated={id => { closeTask(); setSelectedTaskId(id); void tasksQuery.refetch(); }} /> : null}
+
         {canTasks ? (
           <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', lg: selectedTaskId ? 'minmax(0, 1fr) minmax(360px, 0.8fr)' : '1fr' } }}>
             <Paper variant="outlined" sx={{ p: 2 }}>
@@ -171,7 +174,7 @@ export function WorkflowTasksPage() {
                 <Button onClick={() => void tasksQuery.refetch()}>{t('workflow.refresh')}</Button>
               </Box>
               {tasks.length ? (
-                <TableContainer sx={{ mt: 1 }}><Table size="small"><TableHead><TableRow><TableCell>{t('workflow.task')}</TableCell><TableCell>{t('workflow.status')}</TableCell><TableCell>{t('workflow.priority')}</TableCell><TableCell>{t('workflow.due')}</TableCell><TableCell>{t('workflow.assignee')}</TableCell><TableCell /></TableRow></TableHead><TableBody>{tasks.map((task, index) => <TaskSummary key={task.id ?? `task-${index}`} task={task} onOpen={() => { setSelectedTaskId(task.id ?? ''); setSuccessMessage(''); }} />)}</TableBody></Table></TableContainer>
+                <TableContainer sx={{ mt: 1 }}><Table size="small"><TableHead><TableRow><TableCell>{t('workflow.task')}</TableCell><TableCell>{t('workflow.status')}</TableCell><TableCell>{t('workflow.priority')}</TableCell><TableCell>{t('workflow.due')}</TableCell><TableCell>{t('workflow.assignee')}</TableCell><TableCell /></TableRow></TableHead><TableBody>{tasks.map((task, index) => <TaskSummary key={task.id ?? `task-${index}`} task={task} onOpen={() => { closeTask(); setSelectedTaskId(task.id ?? ''); }} />)}</TableBody></Table></TableContainer>
               ) : !tasksQuery.isLoading && !tasksQuery.error ? <Alert severity="info" sx={{ mt: 2 }}>{t('workflow.empty')}</Alert> : null}
             </Paper>
 
@@ -183,6 +186,7 @@ export function WorkflowTasksPage() {
                     <Button disabled={transitionMutation.isPending} onClick={closeTask} size="small">{t('workflow.close')}</Button>
                   </Box>
                   {taskQuery.data ? <Stack spacing={0.5}><Typography>{t('workflow.status')}: {taskQuery.data.status ?? '—'}</Typography><Typography>{t('workflow.step')}: {taskQuery.data.stepId ?? '—'}</Typography><Typography>{t('workflow.sla')}: {taskQuery.data.slaStatus ?? '—'}</Typography><Typography>{t('workflow.due')}: {taskQuery.data.dueAt ?? '—'}</Typography></Stack> : null}
+                  <Button disabled={transitionMutation.isPending} onClick={async () => { const refreshed = await Promise.all([taskQuery.refetch(), actionsQuery.refetch()]); if (refreshed.every(r => r.status === 'success')) { setSelectedTransitionId(''); transitionMutation.reset(); } }}>{t('workflow.refresh')}</Button>
                   <Divider />
                   <Box>
                     <Typography component="h3" variant="subtitle1">{t('workflow.availableActions')}</Typography>
@@ -200,14 +204,14 @@ export function WorkflowTasksPage() {
                                 {action.commentRequired ? <Chip label="comment" size="small" variant="outlined" /> : null}
                               </Stack>
                               {action.requiredPermissionCode ? <Typography color="text.secondary" variant="caption">{action.requiredPermissionCode}</Typography> : null}
-                              {permitted ? <Button disabled={transitionMutation.isPending} onClick={() => { setSelectedTransitionId(action.transitionId ?? ''); setReasonId(''); setCommentText(''); setDecisionNote(''); transitionMutation.reset(); }} size="small" variant={selected ? 'contained' : 'outlined'}>{action.decision ?? t('workflow.action')}</Button> : null}
+                              {permitted ? <Button disabled={transitionMutation.isPending} onClick={() => { setSelectedTransitionId(action.transitionId ?? ''); setReasonId(''); setCommentText(''); setDecisionNote(''); }} size="small" variant={selected ? 'contained' : 'outlined'}>{action.decision ?? t('workflow.action')}</Button> : null}
                               {selected ? (
                                 <Stack spacing={1}>
                                   {action.reasonRequired ? <TextField label="reasonId" onChange={(event) => setReasonId(event.target.value)} required size="small" value={reasonId} /> : null}
                                   {action.commentRequired ? <TextField label="comment" multiline onChange={(event) => setCommentText(event.target.value)} required rows={2} size="small" value={commentText} /> : null}
                                   <TextField label={t('workflow.note')} multiline onChange={(event) => setDecisionNote(event.target.value)} rows={2} size="small" value={decisionNote} />
                                   <Button
-                                    disabled={transitionMutation.isPending || !taskQuery.data?.updatedAt || (action.reasonRequired === true && !reasonId.trim()) || (action.commentRequired === true && !commentText.trim())}
+                                    disabled={transitionMutation.isPending || transitionMutation.isError || taskQuery.isFetching || actionsQuery.isFetching || Boolean(taskQuery.error) || Boolean(actionsQuery.error) || !taskQuery.data?.updatedAt || (action.reasonRequired === true && !reasonId.trim()) || (action.commentRequired === true && !commentText.trim())}
                                     onClick={() => transitionMutation.mutate(action)}
                                     variant="contained"
                                   >{transitionMutation.isPending ? '…' : `${t('workflow.action')}: ${action.decision ?? ''}`}</Button>

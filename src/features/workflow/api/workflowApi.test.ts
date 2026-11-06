@@ -87,3 +87,17 @@ describe('workflow API adapter', () => {
     });
   });
 });
+
+it('reads exact owner addressing and starts through runtime-generated commands without digest synthesis', async () => {
+  const { readWorkflowTarget, discoverWorkflowDefinitions, startWorkflowInstance, createWorkflowTask } = await import('./workflowApi');
+  httpClient.mockReset(); httpClient.mockResolvedValue({});
+  const address = { companyPartyId: 'c', installedUnitId: 'u', linkId: 'l', revisionId: 2 };
+  await readWorkflowTarget(address);
+  expect(httpClient).toHaveBeenLastCalledWith({ url: '/api/v1/workflow/definitions/installed-characteristic-link-target', method: 'GET', params: address, signal: undefined });
+  await discoverWorkflowDefinitions({ targetModule: 'topology', targetTypeId: 't', workflowPurposeId: 'p', targetId: 'server-digest', targetLocator: 'server-locator' });
+  const command = { definitionId: 'd', definitionVersion: 1, startedByActorId: 'current-user' };
+  await startWorkflowInstance(command);
+  expect(httpClient).toHaveBeenLastCalledWith({ url: '/api/v1/workflow/instances', method: 'POST', data: command, headers: { 'Content-Type': 'application/json' }, signal: undefined });
+  await createWorkflowTask({ instanceId: 'i', stepId: 's', assignedActorId: 'reviewer' });
+  expect(httpClient).toHaveBeenLastCalledWith(expect.objectContaining({ url: '/api/v1/workflow/tasks', method: 'POST', data: { instanceId: 'i', stepId: 's', assignedActorId: 'reviewer' } }));
+});

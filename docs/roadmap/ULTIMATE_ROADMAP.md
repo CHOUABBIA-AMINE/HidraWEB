@@ -2789,3 +2789,115 @@ main publication against a6887c0f8705129b21bd9ca4c9c859930ff7dcbd. Observe exact
 Docs creation/start, then STOP; Code is path-filtered and not claimed rerun.
 Next necessary selection is the bounded backend handoff contract proposal, then
 resume HWEB-F14/W4. A1, SITE, numerical/P3, release and deployment remain unexecuted.
+
+## HWEB-F14 / W4 — resumed whole configured Workflow delivery (2026-11-06)
+
+Owner Next resumes the same whole W4 after the backend prerequisite acceptance.
+WEB source99318555d9e74da4e7b429d5d311a12b9a85706a, tree2f4cfb06c764f32c811b29bf5857316e30883038,
+Docs55 SUCCESS; accepted W3 Code1026 remains the runtime baseline. Root AGENTS.md
+absent. API implementation5817406923e53761577ac41bbc3f318b517c3977 Full1140/Docs930
+SUCCESS, acceptance428a6f00a5813294b067daeb0df5f5bdaff72658 Docs931 SUCCESS.
+Authenticated aggregate13544860761 ZIP34e13d4962ff3f258afa9e2c61ee0c909fe72b25a2400c76465dc0676981df66
+contains genuine runtime JSON062864129140cf85bc16982e7a856fb6aef0dc3a9af650cab635c2f9b0222493.
+Closed Workflow slice14 paths/17 schemas, SHA25644bd9f9f21b6a3f757a44ec5fc36ddf2228fb8047244bc38d65f6e00ee6ca28e.
+The prior handoff BLOCKED entry is historical; its backend dependency is resolved.
+
+Exact registered message: `feat(workflow): integrate configured foundation task journeys`.
+CREATE openapi/candidates/hidra-workflow-5817406923e53761577ac41bbc3f318b517c3977.json;
+src/features/workflow/components/WorkflowStartPanel.tsx and WorkflowStartPanel.test.tsx;
+tests/e2e/foundation-workflow-live.spec.ts; scripts/foundation-workflow-fixture.sql;
+scripts/prepare-foundation-workflow.mjs. MODIFY WorkflowTasksPage.tsx,
+api/workflowApi.ts, api/workflowApi.test.ts, api/workflowPermissions.ts (relative to
+src/features/workflow); src/shared/i18n/resources.ts; orval.workflow.config.ts;
+scripts/check-openapi-compatibility.mjs; scripts/verify-workflow-candidate.test.mjs;
+playwright.foundation.config.ts; .github/workflows/ci.yml; APPEND this roadmap,
+docs/architecture/Hidra-API-Web-Contract-v1.md and
+docs/roadmap/HidraAPI-Frontend-Backend-Gap-Register.md. No DELETE/generated output.
+
+Use generated server handoff/definition/start/task transport; no browser digest,
+locator encoding, catalog seed IDs or actor impersonation. Exact revision addressing
+is explicitly supplied by the operator/deep link; supported process/reviewer choices
+come only from owner discovery. Server actor is current authenticated principal,
+not an editable field. Separate explicit start and task assignment preserve a
+recoverable persisted instance when assignment fails; no automatic mutation retry.
+Existing task/action/timeline UI keeps permitted=true and required reason/comment
+and exact version handling; stale actions require explicit refresh before resubmit.
+
+Extend the native lane with the immutable accepted API implementation pin above;
+preserve all seven W1/W2/W3 cases, deadlines, retries0 and separated principals.
+Disposable W4 fixture grants exact source/publication/Workflow lock privileges and
+explicit synthetic process/catalog/reference policy only. Setup uses genuine owner
+APIs for users/Party/unit/manufacturer revision/link; synthetic manufacturer
+qualification/source authorization and process/assignment configuration are
+schema-owner reference fixtures, not fabricated approval/history. Temporarily
+admit manufacturer publishing only during setup and revoke before consumer reads.
+Real browser starts and reviewer APPROVE/REJECT, persisted reload/history, stale
+version/replay denial and unrelated actor non-disclosure must run in hosted CI;
+no intercepted business API/native passing claim. Local components/contracts/build
+checks and hosted native acceptance stay distinct. No API modifications, P3,
+A1 integrated acceptance, SITE, release or deployment. After guarded direct-main
+publication observe exact-SHA Code/Docs queue/start and STOP; W4 pending independent
+native acceptance. Next reserved task HWEB-F15/A1 only after W4 acceptance.
+
+W4 same-delivery scope reconciliation: also MODIFY
+src/features/workflow/WorkflowTasksPage.test.tsx to exercise an actual component409,
+blocked resubmission, successful explicit task/action refresh and server-version
+resubmission. This is a regression inside the same whole W4 scope, not another
+stage. Native execution remains seven preserved W1-W3 cases, then explicit W4
+capability setup and two W4 cases; both reports must contain zero failures/skips.
+
+## HWEB-F14 / W4 — whole source delivery and validation handoff (2026-11-06)
+
+W4 is IMPLEMENTED / NATIVE_BROWSER_QUALIFICATION_PENDING. New transport is generated
+from the accepted source-stamped Workflow slice, preserving all historical pins.
+The start panel accepts exact link revision addressing, obtains owner handoff and
+supported process/independent reviewer choices, uses the current principal for the
+backend actor-match field, and never computes a digest/locator or accepts editable
+actor identity. Explicit start then assignment preserves instanceId in the route;
+reload resumes server state instead of repeating start, and known taskId suppresses
+repeat assignment. Command errors block resubmission until deliberate review;
+there are no automatic mutation retries. Existing backend-permitted decisions,
+required reason/comment and immutable task timestamp are retained. The selected-task
+refresh must successfully reload both task and available actions before a failed
+transition can be resubmitted. Component regression proves409 blocking and the new
+server timestamp. Workspace requests serialize against native NOWAIT fences without
+retries or relaxed owner authority; French/English/Arabic start labels are present.
+
+Native lane pins implementation5817406923e53761577ac41bbc3f318b517c3977. Seven
+W1-W3 cases remain mandatory and unchanged. Only after their successful report does
+the disposable W4 fixture configure explicit synthetic reference/process policy;
+real owner APIs create users, active Parties, unit, manufacturer source revision
+and draft link. Manufacturer qualification/source authorization are clearly seeded
+reference policy, not a manufacturer approval or industrial evidence. Temporary
+source and unit write capabilities are revoked before protected consumer reads,
+matching the backend's mutually exclusive credential checks. Workflow instance,
+task and human decision/history are written only by the real APIs. Two additional
+mandatory W4 browser cases exercise discovered process start, independent reviewer
+APPROVE/REJECT, exact stale409, reload/durable timeline, retained physical DRAFT
+state, missing-authority handoff404/empty body, forbidden detail/history/count/write
+and absence of an unauthorized browser start form. Both7-case and2-case reports
+must have0 failed/flaky/skipped, with native retries0 and original40-minute job and
+90-second test budgets unchanged. These are authored native qualification cases,
+not claimed locally passed runtime evidence.
+
+Local validation PASS: npm ci and all generated client preparation;21 pinned
+OpenAPI compatibility contracts; TypeScript; lint0 errors/6 existing fast-refresh
+warnings;58 Vitest files/156 tests (two workers),98 Node contract checks,6 performance
+cases, production build and unchanged bundle limits (initial JS899.0/900KiB,
+25 lazy routes, largest lazy39.7/96KiB, largest JS995.4/1050KiB). Nine native cases
+are enumerated. Workflow YAML, every bash run block, exact accepted API pin, ordered
+7+2 mandatory counts, script syntax, canonical Docs and whitespace pass.
+Ordinary workflow Playwright launch was attempted with retries0: both cases failed
+before execution because the pinned Chromium headless-shell executable is absent
+locally. No live API/PostgreSQL/browser qualification is claimed on this host.
+Hosted Code CI owns ordinary regression and complete native qualification; skipped
+native tests in an ordinary run never satisfy the mandatory native lane.
+
+Exact publication:6 CREATE /14 MODIFY /0 DELETE,20 registered paths. Generated
+clients, build output, credentials and local reports are excluded. Three governance
+documents are append-only; original task/ENG history is preserved. Backend source,
+release/tag, numerical/P3, SITE and A1 integrated acceptance are unchanged. Publish
+the registered whole W4 message against expected WEB main99318555d9e74da4e7b429d5d311a12b9a85706a,
+verify parent/tree/blobs and exact scope, observe new-SHA Code/Docs queue/start,
+then STOP. Next is W4 independent native acceptance after successful CI, repairing
+responsible failures first; HWEB-F15/A1 remains separately dependency-gated.

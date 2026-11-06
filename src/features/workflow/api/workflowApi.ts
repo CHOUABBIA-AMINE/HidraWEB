@@ -1,3 +1,5 @@
+import * as generatedWorkflow from '@/api/generated/workflow/workflow';
+import type { AxiosRequestConfig } from 'axios';
 import { hidraHttpClient } from '@/api/client/hidraHttpClient';
 import type {
   AvailableActionView,
@@ -15,6 +17,20 @@ export interface TaskInboxParams {
   size?: number;
 }
 
+// Native owner reads share NOWAIT Identity fences. Serialize this workspace's
+// requests without retrying any read or command; the server still owns admission.
+let workflowTail: Promise<void> = Promise.resolve();
+function serialized<A extends unknown[], R>(call: (...args: A) => Promise<R>) {
+  return (...args: A): Promise<R> => {
+    const result = workflowTail.then(() => call(...args));
+    workflowTail = result.then(() => undefined, () => undefined);
+    return result;
+  };
+}
+function workflowRequest<T>(config: AxiosRequestConfig): Promise<T> {
+  return serialized((value: AxiosRequestConfig) => hidraHttpClient<T>(value))(config);
+}
+
 function compactParams(params: TaskInboxParams): Record<string, unknown> {
   return Object.fromEntries(Object.entries(params).filter(([, value]) => value !== undefined && value !== ''));
 }
@@ -28,23 +44,23 @@ export const workflowQueryKeys = {
 };
 
 export function fetchTasks(params: TaskInboxParams): Promise<PageTaskView> {
-  return hidraHttpClient<PageTaskView>({ method: 'GET', url: '/api/v1/workflow/tasks', params: compactParams(params) });
+  return workflowRequest<PageTaskView>({ method: 'GET', url: '/api/v1/workflow/tasks', params: compactParams(params) });
 }
 
 export function fetchTask(id: string): Promise<TaskView> {
-  return hidraHttpClient<TaskView>({ method: 'GET', url: `/api/v1/workflow/tasks/${encodeURIComponent(id)}` });
+  return workflowRequest<TaskView>({ method: 'GET', url: `/api/v1/workflow/tasks/${encodeURIComponent(id)}` });
 }
 
 export function fetchAvailableActions(id: string): Promise<AvailableActionView[]> {
-  return hidraHttpClient<AvailableActionView[]>({ method: 'GET', url: `/api/v1/workflow/tasks/${encodeURIComponent(id)}/available-actions` });
+  return workflowRequest<AvailableActionView[]>({ method: 'GET', url: `/api/v1/workflow/tasks/${encodeURIComponent(id)}/available-actions` });
 }
 
 export function fetchInstance(id: string): Promise<InstanceView> {
-  return hidraHttpClient<InstanceView>({ method: 'GET', url: `/api/v1/workflow/instances/${encodeURIComponent(id)}` });
+  return workflowRequest<InstanceView>({ method: 'GET', url: `/api/v1/workflow/instances/${encodeURIComponent(id)}` });
 }
 
 export function fetchTimeline(id: string): Promise<TimelineEntry[]> {
-  return hidraHttpClient<TimelineEntry[]>({ method: 'GET', url: `/api/v1/workflow/instances/${encodeURIComponent(id)}/timeline` });
+  return workflowRequest<TimelineEntry[]>({ method: 'GET', url: `/api/v1/workflow/instances/${encodeURIComponent(id)}/timeline` });
 }
 
 export function executeWorkflowTransition(
@@ -52,9 +68,15 @@ export function executeWorkflowTransition(
   transitionId: string,
   request: ExecuteWorkflowTransitionRequest,
 ): Promise<WorkflowTransitionExecutionResponse> {
-  return hidraHttpClient<WorkflowTransitionExecutionResponse>({
+  return workflowRequest<WorkflowTransitionExecutionResponse>({
     method: 'POST',
     url: `/api/v1/workflow/tasks/${encodeURIComponent(taskId)}/transitions/${encodeURIComponent(transitionId)}/execute`,
     data: request,
   });
 }
+
+// All new transport types, routes and bodies come from the accepted runtime.
+export const readWorkflowTarget = serialized(generatedWorkflow.readInstalledCharacteristicLinkWorkflowTarget);
+export const discoverWorkflowDefinitions = serialized(generatedWorkflow.definitions1);
+export const startWorkflowInstance = serialized(generatedWorkflow.startWorkflowInstance);
+export const createWorkflowTask = serialized(generatedWorkflow.createWorkflowTask);

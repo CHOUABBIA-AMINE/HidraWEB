@@ -114,7 +114,7 @@ jobs:
           if-no-files-found: error
 
   foundation-native:
-    name: W1, W2 and W3 native API and PostgreSQL browser qualification
+    name: W1, W2, W3 and W4 native API and PostgreSQL browser qualification
     runs-on: ubuntu-latest
     timeout-minutes: 40
     services:
@@ -156,7 +156,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           repository: CHOUABBIA-AMINE/HidraAPI
-          ref: f1fdc206c916a5266f609810c045c6b5688bfd49
+          ref: 5817406923e53761577ac41bbc3f318b517c3977
           path: .native-api
           persist-credentials: false
       - name: Set up Java 21
@@ -225,7 +225,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git -C .native-api rev-parse HEAD)" = f1fdc206c916a5266f609810c045c6b5688bfd49
+          test "$(git -C .native-api rev-parse HEAD)" = 5817406923e53761577ac41bbc3f318b517c3977
           cd .native-api
           chmod +x mvnw
           ./mvnw -B -q -Dmaven.test.skip=true package
@@ -317,7 +317,7 @@ jobs:
         run: |
           set -euo pipefail
           export PLAYWRIGHT_JSON_OUTPUT_NAME="${RUNNER_TEMP}/w1-native-results.json"
-          npm run test:e2e:foundation -- --reporter=list,json
+          npm run test:e2e:foundation -- --grep-invert 'W4 native' --reporter=list,json
           python3 - <<'PYTHON'
           import json, os
           with open(os.environ['PLAYWRIGHT_JSON_OUTPUT_NAME']) as report:
@@ -325,6 +325,24 @@ jobs:
           assert stats['expected'] == 7, stats
           assert stats['unexpected'] == stats['flaky'] == stats['skipped'] == 0, stats
           print('W1/W2/W3 native browser qualification: 7 passed, 0 failed/flaky/skipped')
+          PYTHON
+      - name: Prepare explicit synthetic W4 source and process configuration
+        run: |
+          psql -v ON_ERROR_STOP=1 --file scripts/foundation-workflow-fixture.sql
+          node scripts/prepare-foundation-workflow.mjs
+      - name: Run mandatory W4 native review and denial browser journeys
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PLAYWRIGHT_JSON_OUTPUT_NAME="${RUNNER_TEMP}/w4-native-results.json"
+          npm run test:e2e:foundation -- --grep 'W4 native' --reporter=list,json
+          python3 - <<'PYTHON'
+          import json, os
+          with open(os.environ['PLAYWRIGHT_JSON_OUTPUT_NAME']) as report:
+              stats = json.load(report)['stats']
+          assert stats['expected'] == 2, stats
+          assert stats['unexpected'] == stats['flaky'] == stats['skipped'] == 0, stats
+          print('W4 native browser qualification: 2 passed, 0 failed/flaky/skipped; seven W1-W3 preserved')
           PYTHON
       - name: Stop disposable native API
         if: always()

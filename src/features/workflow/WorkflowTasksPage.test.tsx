@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
+import { HidraApiError } from '@/api/errors/HidraApiError';
 import { hidraHttpClient } from '@/api/client/hidraHttpClient';
 import { App } from '@/app/App';
 import { AppProviders } from '@/app/providers/AppProviders';
@@ -12,7 +13,7 @@ const fixtures = vi.hoisted(() => {
   ];
   const permissions = ['workflow:tasks:read', 'workflow:instances:read'];
   const task = { id: 'task-1', instanceId: 'instance-1', stepId: 'review', status: 'OPEN', taskLabel: 'Validate pressure deviation', priorityId: 'HIGH', dueAt: '2026-09-12T08:00:00Z', assignedActorDisplayName: 'Operator A', slaStatus: 'NORMAL', updatedAt: '2026-09-11T10:30:00Z' };
-  return { routes, permissions, task };
+  return { routes, permissions, task, rejectNextTransition: true };
 });
 
 vi.mock('@/api/client/hidraHttpClient', () => ({
@@ -29,6 +30,7 @@ vi.mock('@/api/client/hidraHttpClient', () => ({
     ];
     if (config.url === '/api/v1/workflow/instances/instance-1') return { id: 'instance-1', status: 'STARTED', currentStepId: 'review', targetId: 'DEV-1', targetLabel: 'Pressure deviation DEV-1' };
     if (config.url === '/api/v1/workflow/instances/instance-1/timeline') return [{ id: 'tl-1', instanceId: 'instance-1', taskId: 'task-1', actionType: 'ASSIGN', actorDisplayName: 'Supervisor', sequence: 1, occurredAt: '2026-09-11T10:00:00Z' }];
+    if (config.method === 'POST' && config.url === '/api/v1/workflow/tasks/task-1/transitions/tr-1/execute' && fixtures.rejectNextTransition) { fixtures.rejectNextTransition = false; fixtures.task.updatedAt = '2026-09-11T10:30:01Z'; throw new HidraApiError('Changed', { status: 409 }); }
     if (config.method === 'POST' && config.url === '/api/v1/workflow/tasks/task-1/transitions/tr-1/execute') return { actionId: 'act-1', taskId: 'task-1', taskStatus: 'APPROVED', instanceId: 'instance-1', instanceStatus: 'COMPLETED', transitionId: 'tr-1', decision: 'APPROVE', currentStepId: 'approved', executedAt: '2026-09-11T10:31:00Z' };
     throw new Error(`Unexpected request ${config.method ?? 'GET'} ${config.url}`);
   }),
@@ -59,11 +61,21 @@ describe('HWEB-007 workflow task workspace', () => {
     fireEvent.change(screen.getByLabelText('comment *'), { target: { value: 'Validated against operating evidence.' } });
     fireEvent.click(screen.getByRole('button', { name: 'Action: APPROVE' }));
 
+    expect(await screen.findByText('The task changed. Refresh the task and available actions before retrying.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Action: APPROVE' })).toBeDisabled();
+    expect(vi.mocked(hidraHttpClient).mock.calls.filter(([config]) => config.method === 'POST')).toHaveLength(1);
+    // Inbox refresh is distinct from the explicit selected-task/action refresh.
+    fireEvent.click(screen.getAllByRole('button', { name: 'Actualiser' }).at(-1)!);
+    await waitFor(() => expect(screen.queryByText('The task changed. Refresh the task and available actions before retrying.')).not.toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: 'APPROVE' }));
+    fireEvent.change(screen.getByLabelText('comment *'), { target: { value: 'Validated against operating evidence.' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Action: APPROVE' }));
+
     await waitFor(() => expect(vi.mocked(hidraHttpClient)).toHaveBeenCalledWith(expect.objectContaining({
       method: 'POST',
       url: '/api/v1/workflow/tasks/task-1/transitions/tr-1/execute',
       data: {
-        expectedTaskUpdatedAt: '2026-09-11T10:30:00Z',
+        expectedTaskUpdatedAt: '2026-09-11T10:30:01Z',
         reasonId: undefined,
         commentText: 'Validated against operating evidence.',
         decisionNote: undefined,

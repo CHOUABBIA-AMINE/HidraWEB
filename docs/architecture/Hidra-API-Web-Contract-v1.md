@@ -875,3 +875,31 @@ main publication against a6887c0f8705129b21bd9ca4c9c859930ff7dcbd. Observe exact
 Docs creation/start, then STOP; Code is path-filtered and not claimed rerun.
 Next necessary selection is the bounded backend handoff contract proposal, then
 resume HWEB-F14/W4. A1, SITE, numerical/P3, release and deployment remain unexecuted.
+
+## HWEB-F14 / W4 — accepted backend handoff consumption, frontend qualification pending
+
+The earlier W4 owner-target handoff blocker is resolved by accepted API
+5817406923e53761577ac41bbc3f318b517c3977 (Full1140/Docs930 SUCCESS;
+acceptance428a6f00a5813294b067daeb0df5f5bdaff72658, Docs931 SUCCESS).
+The authenticated runtime SHA256062864129140cf85bc16982e7a856fb6aef0dc3a9af650cab635c2f9b0222493
+supplies the closed Workflow slice14 paths/17 schemas,
+SHA25644bd9f9f21b6a3f757a44ec5fc36ddf2228fb8047244bc38d65f6e00ee6ca28e.
+GET definitions/installed-characteristic-link-target is an authorized exact link
+revision read; its digest/locator/catalog IDs are server-owned metadata, never
+approval or a reusable authority token. Generic definition discovery, start and
+independent task assignment consume these generated contracts. The actor-match
+request uses the current authenticated principal; no editable actor or browser
+canonicalization is introduced. Start/assignment recovery uses persisted instance
+and task route context; transition conflicts require successful fresh task/action
+reads. Physical characteristic links remain DRAFT after Workflow decisions until
+separate protected approval publication. Only configured supported processes and
+current backend-permitted actions are available; no general designer is implied.
+
+The whole W4 candidate includes local component/contract/build validation and an
+extended immutable-API native lane (seven W1-W3 cases then two W4 cases). Reference
+manufacturer qualification/source authorization and process configuration are
+explicit synthetic schema-owner fixtures; business revisions and actual Workflow
+instances/tasks/actions use owner APIs. Native/browser qualification and independent
+W4 acceptance are pending hosted exact-SHA CI. A1 integrated software acceptance,
+SITE, numerical/P3 and deployment/release remain separate. Previous ENG identifiers,
+legacy pins, accepted W1-W3 evidence and historical blockers remain unchanged.
