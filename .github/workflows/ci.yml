@@ -116,7 +116,7 @@ jobs:
   foundation-native:
     name: W1, W2 and W3 native API and PostgreSQL browser qualification
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 40
     services:
       postgres:
         image: postgres:16

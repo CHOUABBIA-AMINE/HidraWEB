@@ -2641,3 +2641,34 @@ observe new-SHA Code/Docs creation or startup, then STOP. Hosted qualification a
 independent acceptance remain gates; green unit tests do not prove deployment.
 W4/HWEB-F14 remains next after W3 acceptance and separate selection. A1 integrated
 acceptance, industrial/SITE, numerical/P3, release and deployment remain unexecuted.
+
+
+## HWEB-F13 / W3 — CI1025 job-budget repair (2026-11-06)
+
+Owner Next refresh: main c667fd8bc3d325c16c3d444be8ca2f5003dccd13,
+parent1cf9d87e21ada106bd3a5bdb7e82b11ab0b35f77,
+tree39a9f9c9856c6326e03a1c5117f6af04e2d844c5.
+Docs52/run42267088253 SUCCESS; Code1025/run42267089410 CANCELLED.
+Verify job128061707752 SUCCESS. Native job128061707229 ran from18:02:40Z
+to18:22:49Z. Its WEB/client/browser installation step consumed17m21s.
+Pinned API build/schema, audited bootstrap and fixture preparation all succeeded.
+All seven native W1/W2/W3 tests passed in49.4s; the mandatory report asserted
+7 passed/0 failed/flaky/skipped at18:22:44.401Z. GitHub then cancelled the job
+at the20-minute wall-clock limit. These passing test observations do not turn
+a cancelled workflow into a successful acceptance result.
+
+Same-parent bounded repair; exact message
+`fix(ci): allow native qualification setup sufficient job time`.
+Exact MODIFY: .github/workflows/ci.yml and APPEND this roadmap. No CREATE/DELETE.
+Increase only foundation-native timeout-minutes20 to40. Preserve verify's15-minute
+budget, seven-test assertion, native retries0, per-test90-second timeout, immutable
+API pin, application deadlines, credentials, fixtures and every business/security
+assertion. No release, deployment, new feature or W4 selection.
+
+Validation: YAML parse, bash syntax for all run blocks, exact one-scalar workflow
+delta, append-only roadmap preservation, exact two-path diff and whitespace checks
+PASS. No redundant app suite is needed for this execution-budget-only change.
+Publish guarded against c667fd8bc3d325c16c3d444be8ca2f5003dccd13, verify exact
+parent/tree/blobs/message, observe exact-SHA Code/Docs creation/start, then STOP.
+W3 remains NATIVE_BROWSER_QUALIFICATION_PENDING until a completed successful
+workflow and independent acceptance. W4/HWEB-F14 remains reserved after acceptance.
