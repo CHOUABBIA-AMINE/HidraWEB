@@ -57,11 +57,22 @@ test('map reads remain published and the current source is additive', () => {
 
 test('topology Orval input is activated without replacing historic source evidence', () => {
   const config = fs.readFileSync(path.join(root, 'orval.topology.config.ts'), 'utf8');
-  assert.ok(config.includes('./openapi/candidates/hidra-topology-81d46bcb8bc8821f67eafbb26cd1279f6d091457.json'));
+  assert.ok(config.includes('./openapi/candidates/hidra-topology-f1fdc206c916a5266f609810c045c6b5688bfd49.json'));
   assert.ok(!config.includes('hidra-topology-63f3f60974ce57eb8cd5e42910397615195624fb.json'));
   const gate = fs.readFileSync(path.join(root, 'scripts/check-openapi-compatibility.mjs'), 'utf8');
   assert.ok(gate.includes('TOPOLOGY_CURRENT_PROOF'));
   assert.ok(gate.includes('source-backed Topology contract digest mismatch'));
   assert.ok(gate.includes('RISK_CURRENT_PROOF'));
   assert.ok(gate.includes('compareSlice(config, slice);'));
+});
+
+// Historical proof above remains immutable; W2 consumes a genuine expanded runtime slice.
+test('W2 runtime contract retains historical operations and closes all component references', () => {
+  const bytes = fs.readFileSync(path.join(root, 'openapi/candidates/hidra-topology-f1fdc206c916a5266f609810c045c6b5688bfd49.json'));
+  assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'), '76cb0959b88b9812ca2d62bc88fa2f89f9427263ff210dc82ac5365e2393c2f1');
+  const current = JSON.parse(bytes);
+  for (const route of Object.keys(candidate.paths)) assert.ok(current.paths[route]);
+  for (const match of bytes.toString().matchAll(/"\$ref": "#\/components\/schemas\/([^"]+)"/g)) assert.ok(current.components.schemas[match[1]]);
+  assert.ok(current.paths['/api/v1/topology/foundation/facilities'].post);
+  assert.ok(current.paths['/api/v1/topology/engineering-networks/{draftId}/authored-topology'].put);
 });

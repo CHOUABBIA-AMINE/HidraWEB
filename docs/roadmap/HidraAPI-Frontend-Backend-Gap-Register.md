@@ -534,3 +534,41 @@ mutation's individual live coverage, integrated A1, industrial/SITE acceptance o
 deployment. Historical ENG gaps and earlier task mappings remain intact. A1 remains
 the separate integrated W1–W4 gate; W2/HWEB-F12 is next after separate selection.
 No backend change, new capability or numerical simulation/P3 is authorized here.
+
+
+## HWEB-F12 / W2 persisted topology foundation — 2026-11-06 source submission
+
+Backend implementation f1fdc206c916a5266f609810c045c6b5688bfd49 was independently
+accepted at db712ab35ff3051c489e74327090d2fc7ef47b33 (Full1137/Docs926 and
+acceptance Docs927 SUCCESS). Full runtime artifact SHA256
+da4326497b4c65f9dcbeb286b64c1c9840a6fc73b91c3543c48633f682fb3fba
+supplies the closed Topology slice:58 paths/113 schemas; slice SHA256
+76cb0959b88b9812ca2d62bc88fa2f89f9427263ff210dc82ac5365e2393c2f1.
+Orval now consumes this verified runtime slice; all20 other generators/pins and
+historical Topology evidence remain. Handwritten feature code imports generated
+transport/types only, through a module queue that serializes protected NOWAIT
+transactions without retries. Native authority remains exclusively server-owned.
+
+W2 SOURCE IMPLEMENTED / NATIVE_BROWSER_QUALIFICATION_PENDING: /network offers an
+explicit editor alongside the existing map reader, including backend company,
+system/type/station choices; setup/activation; physical position, UNKNOWN-evidence
+unit and installation; typed graph nodes/ports/branches and Pipeline/optional Segment
+references; exact expected revisions, persisted schematic, historical reads and
+shareable company/system/draft URLs; separate station-graph author/publication and
+installed-configuration save/history. Physical identity does not become an Assets
+maintenance aggregate. Geometry remains NOT_SUPPLIED; the SVG is explicitly a
+nongeographic persisted schematic. No local durable graph store or raw JSON editor.
+The station template is explicitly synthetic serial incidence requiring operator
+review, not a numerical/hydraulic or engineering qualification.
+
+Current native integration test source adds2 scenarios to the3 mandatory W1 cases,
+against the pinned accepted API/fresh PostgreSQL16 with distinct ordinary, installed,
+setup and configuration principals. Security/catalog fixtures create no promised
+Topology business rows. API-created synthetic Party setup is permitted; all new
+system/station/position/unit/installation/graph/configuration writes use owner APIs.
+The main browser case requires persisted reload/history and exact stale409 with
+unchanged graph version; the second uses actual LOCAL ordinary-user credentials
+and requires403 before setup disclosure/write. These browser cases are authored
+and enumerated, not claimed executed locally. CI requires5 passed/0 failed/flaky/
+skipped/retries; full W1 preservation remains mandatory after the API pin change.
+Broader ENG-001–012 editors, W3/W4, A1, SITE, P3 and deployment remain independent.

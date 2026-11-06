@@ -28,6 +28,7 @@ import {
   toHidraMapFeatureCollection,
   topologyFeatureLabel,
 } from '@/features/topology/model/topologyPresentation';
+import { NetworkAuthoringPanel } from './components/NetworkAuthoringPanel';
 import { useContextDrawer } from '@/shell/context/useContextDrawer';
 
 const MAP_PAGE_SIZE = 1000;
@@ -50,6 +51,7 @@ export function NetworkTopologyPage() {
   const [committedSearch, setCommittedSearch] = useState(linkedQuery);
   const [selectedFeatureId, setSelectedFeatureId] = useState<string>();
 
+  const [authoring, setAuthoring] = useState(searchParams.has('draft') || searchParams.get('mode') === 'author');
   const canRead = permissions.can(TOPOLOGY_PERMISSIONS.read);
   const canSearch = permissions.can(TOPOLOGY_PERMISSIONS.search);
 
@@ -133,8 +135,11 @@ export function NetworkTopologyPage() {
     setCommittedSearch('');
   };
 
+  const editorToggle = <Button onClick={() => setAuthoring(!authoring)}>{t(authoring ? 'topology.editor.map' : 'topology.editor.open')}</Button>;
+  if (authoring) return <Container maxWidth="xl" sx={{py:3}}>{editorToggle}<NetworkAuthoringPanel /></Container>;
+
   if (!canRead) {
-    return <Container maxWidth="xl" sx={{ py: 4 }}><Alert severity="warning">{t('topology.capabilityUnavailable')}</Alert></Container>;
+    return <Container maxWidth="xl" sx={{ py: 4 }}>{editorToggle}<Alert severity="warning">{t('topology.capabilityUnavailable')}</Alert></Container>;
   }
 
   if (layersQuery.isLoading) {
@@ -149,18 +154,18 @@ export function NetworkTopologyPage() {
   if (layersQuery.error) {
     const error = normalizeHidraApiError(layersQuery.error);
     return (
-      <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Container maxWidth="xl" sx={{ py: 4 }}>{editorToggle}
         <Alert severity="error">{t(error.status === 403 ? 'topology.errorForbidden' : 'topology.errorGeneric')}</Alert>
       </Container>
     );
   }
 
   if (layers.length === 0) {
-    return <Container maxWidth="xl" sx={{ py: 4 }}><Alert severity="info">{t('topology.emptyLayers')}</Alert></Container>;
+    return <Container maxWidth="xl" sx={{ py: 4 }}>{editorToggle}<Alert severity="info">{t('topology.emptyLayers')}</Alert></Container>;
   }
 
   return (
-    <Container maxWidth={false} sx={{ py: 3 }}>
+    <Container maxWidth={false} sx={{ py: 3 }}>{editorToggle}
       <Stack direction={{ xs: 'column', md: 'row' }} sx={{ gap: 2, justifyContent: 'space-between' }}>
         <Box>
           <Typography color="text.secondary" variant="overline">HWEB-005</Typography>

@@ -114,7 +114,7 @@ jobs:
           if-no-files-found: error
 
   foundation-native:
-    name: W1 native API and PostgreSQL browser qualification
+    name: W1 and W2 native API and PostgreSQL browser qualification
     runs-on: ubuntu-latest
     timeout-minutes: 20
     services:
@@ -156,7 +156,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           repository: CHOUABBIA-AMINE/HidraAPI
-          ref: 18e7a7596aea1b26e958130996c8811ae7fe27e4
+          ref: f1fdc206c916a5266f609810c045c6b5688bfd49
           path: .native-api
           persist-credentials: false
       - name: Set up Java 21
@@ -225,7 +225,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git -C .native-api rev-parse HEAD)" = 18e7a7596aea1b26e958130996c8811ae7fe27e4
+          test "$(git -C .native-api rev-parse HEAD)" = f1fdc206c916a5266f609810c045c6b5688bfd49
           cd .native-api
           chmod +x mvnw
           ./mvnw -B -q -Dmaven.test.skip=true package
@@ -259,6 +259,7 @@ jobs:
             sudo apt-get install --yes --no-install-recommends postgresql-client
           fi
           psql -v ON_ERROR_STOP=1 --file scripts/foundation-native-fixture.sql
+          psql -v ON_ERROR_STOP=1 --file scripts/foundation-topology-fixture.sql
       - name: Restart native API with real audited administrator bootstrap
         shell: bash
         run: |
@@ -278,6 +279,17 @@ jobs:
           java -jar "${APP_JAR}" --server.port=8080 --management.server.port=8080 \
             --springdoc.api-docs.enabled=true --springdoc.swagger-ui.enabled=false \
             --hidra.security.bootstrap.enabled=true \
+            --spring.datasource.username=w2_app --spring.datasource.password=hidra-w1-ci \
+            --spring.flyway.user=hidra --spring.flyway.password=hidra-w1-ci \
+            --hidra.platform.persistence.publication.enabled=true \
+            --hidra.platform.persistence.publication.username=w2_installed \
+            --hidra.platform.persistence.publication.password=hidra-w1-ci \
+            --hidra.platform.persistence.topology-setup.enabled=true \
+            --hidra.platform.persistence.topology-setup.username=w2_setup \
+            --hidra.platform.persistence.topology-setup.password=hidra-w1-ci \
+            --hidra.platform.persistence.station-configuration.enabled=true \
+            --hidra.platform.persistence.station-configuration.username=w2_configuration \
+            --hidra.platform.persistence.station-configuration.password=hidra-w1-ci \
             --hidra.platform.security.cors.allowed-origins=http://127.0.0.1:5173 \
             --hidra.platform.security.jwt.token-issuer=https://foundation.synthetic.invalid \
             > "${RUNNER_TEMP}/w1-api.log" 2>&1 &
@@ -296,7 +308,9 @@ jobs:
           done
           tail -n 100 "${RUNNER_TEMP}/w1-api.log"
           exit 1
-      - name: Run mandatory W1 browser journeys against native JWT and PostgreSQL
+      - name: Prepare synthetic current W2 permissions
+        run: node scripts/prepare-foundation-topology.mjs
+      - name: Run mandatory W1 and W2 browser journeys against native JWT and PostgreSQL
         shell: bash
         run: |
           set -euo pipefail
@@ -306,9 +320,9 @@ jobs:
           import json, os
           with open(os.environ['PLAYWRIGHT_JSON_OUTPUT_NAME']) as report:
               stats = json.load(report)['stats']
-          assert stats['expected'] == 3, stats
+          assert stats['expected'] == 5, stats
           assert stats['unexpected'] == stats['flaky'] == stats['skipped'] == 0, stats
-          print('W1 native browser qualification: 3 passed, 0 failed/flaky/skipped')
+          print('W1/W2 native browser qualification: 5 passed, 0 failed/flaky/skipped')
           PYTHON
       - name: Stop disposable native API
         if: always()

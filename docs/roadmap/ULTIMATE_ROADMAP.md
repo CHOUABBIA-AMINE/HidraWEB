@@ -2312,3 +2312,80 @@ Observe the applicable CI creation/start, then STOP.
 **Next reserved delivery: W2 / HWEB-F12**, after separate owner selection and its
 source-backed preflight/scope registration. No W2/W3/W4/A1 implementation or release
 is selected or executed by this acceptance.
+
+
+## HWEB-F12 / W2 — owner Next, whole persisted foundation editor (2026-11-06)
+
+One complete registered delivery; exact message
+`feat(topology): implement persisted foundation network editor`. Refresh baseline
+WEB1a48331b5e569381dc035920e6e62de4eee1c66f (parent042844be, treeb8b90854),
+Docs42052400231 SUCCESS; W1 source042844be Code1021/Docs46 accepted above. API
+implementationf1fdc206c916a5266f609810c045c6b5688bfd49 Full1137/Docs926 SUCCESS,
+independent acceptance db712ab35ff3051c489e74327090d2fc7ef47b33 Docs927 SUCCESS.
+Current API source/runtime evidence supersedes earlier W2 discovery/setup blockers.
+No separate preflight publication or task subdivision.
+
+Exact CREATE scope: openapi/candidates/hidra-topology-f1fdc206c916a5266f609810c045c6b5688bfd49.json;
+src/features/topology/components/NetworkAuthoringPanel.tsx, PipelineEditor.tsx,
+InstalledUnitPanel.tsx, StationConfigurationPanel.tsx, FoundationControls.tsx;
+src/features/topology/model/foundationGraph.ts and foundationGraph.test.ts;
+src/features/topology/api/foundationTopologyApi.ts;
+src/features/topology/components/NetworkAuthoringPanel.test.tsx;
+tests/e2e/foundation-topology-live.spec.ts; scripts/foundation-topology-fixture.sql;
+scripts/prepare-foundation-topology.mjs.
+Exact MODIFY: src/features/topology/NetworkTopologyPage.tsx,
+api/topologyPermissions.ts, i18n/topologyTranslations.ts; orval.topology.config.ts;
+scripts/check-openapi-compatibility.mjs and verify-topology-candidate.test.mjs;
+playwright.foundation.config.ts; .github/workflows/ci.yml; this roadmap;
+docs/architecture/Hidra-API-Web-Contract-v1.md and
+docs/roadmap/HidraAPI-Frontend-Backend-Gap-Register.md.
+Paths below NetworkTopologyPage are relative to src/features/topology unless stated.
+No DELETE; generated Orval output stays untracked.
+
+Deliverable: backend company/system/catalog choice paging, real system/station setup
+and activation, physical unit/position/installation, typed graph nodes/ports/branches,
+canonical Pipeline/Segment associations, persisted revision/history reload, station
+graph publication and installed configuration. Reuse existing map reader; expose
+geometry as absent unless supplied by owner. Forms are unsaved until backend success.
+No browser pseudo-persistence, handwritten transport DTO, inferred privilege or
+automatic mutation retry. Native grants and separate restricted database principals
+are synthetic fixture/security setup only; all promised business writes use APIs.
+Acceptance requires local types/lint/unit/build/contracts and source-pinned native
+browser journey/denial/stale-write checks in CI. Existing W1 cases remain mandatory.
+CI-first publication records honest limitations and startup, then STOP; no W3/W4/A1,
+P3, release or deployment. Status IMPLEMENTATION_IN_PROGRESS until hosted evidence.
+
+W2 same-delivery review adds exact CREATE
+`src/features/topology/api/foundationTopologyApi.test.ts`: protected owner calls
+share one frontend request queue because each backend transaction locks the same
+Identity ledger with NOWAIT. This prevents self-contention across simultaneously
+mounted panels; it never retries failed commands or changes database lock policy.
+The regression must prove serialization, rejection propagation and subsequent
+independent request execution. No separate stage or commit is introduced.
+
+### W2 whole source submission and available validation — 2026-11-06
+
+The exact registered delivery now contains14 CREATE /11 MODIFY /0 DELETE paths.
+Generated Orval output under src/api/generated stays outside the commit. No API
+repository, migration, original task payload, prior accepted contract or unrelated
+feature is changed. Whole editor source and native fixture/tests above are delivered
+in the same registered task/message; no later delivery is executed.
+
+Local npm ci/prebuild, all21 source-pinned OpenAPI checks, TypeScript, lint
+(0 errors;6 fast-refresh warnings including4 existing),56 Vitest files/146 tests,
+96 Node contract checks,6 performance cases and production build/bundle checks PASS.
+Initial static JavaScript896.1KiB/900KiB;25 lazy entries; largest lazy route39.7KiB/
+96KiB; largest chunk995.4KiB/1050KiB. No performance limit was increased. Focused
+Topology queue/graph/scope/failed-write regressions pass; the queue preserves actual
+refusals and never retries. Playwright native configuration enumerates all5 mandatory
+W1/W2 tests with retries0. This host lacks a running native API/PostgreSQL pair;
+local enumeration/component tests are not native browser/PostgreSQL proof.
+
+CI-first candidate IMPLEMENTED / NATIVE_BROWSER_QUALIFICATION_PENDING, not accepted.
+Publish to existing main with expected head1a48331b5e569381dc035920e6e62de4eee1c66f,
+exact message `feat(topology): implement persisted foundation network editor`;
+verify exact tree,parent,blobs and25-file scope, observe new-SHA Code/Docs startup,
+then STOP. Next selection must repair any failed W2 gate first or independently
+accept W2 after actual evidence. W3/HWEB-F13 remains the next reserved implementation
+after W2 acceptance, not selected now. A1/browser-integrated milestone, live OT,
+industrial/SITE acceptance, numerical/P3, release and deployment remain unexecuted.
