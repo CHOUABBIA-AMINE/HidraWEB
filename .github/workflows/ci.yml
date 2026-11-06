@@ -280,6 +280,7 @@ jobs:
             --springdoc.api-docs.enabled=true --springdoc.swagger-ui.enabled=false \
             --hidra.security.bootstrap.enabled=true \
             --spring.datasource.username=w2_app --spring.datasource.password=hidra-w1-ci \
+            --spring.flyway.url="${HIDRA_TEST_DATASOURCE_URL}" \
             --spring.flyway.user=hidra --spring.flyway.password=hidra-w1-ci \
             --hidra.platform.persistence.publication.enabled=true \
             --hidra.platform.persistence.publication.username=w2_installed \

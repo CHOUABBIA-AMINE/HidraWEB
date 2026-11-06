@@ -2389,3 +2389,45 @@ then STOP. Next selection must repair any failed W2 gate first or independently
 accept W2 after actual evidence. W3/HWEB-F13 remains the next reserved implementation
 after W2 acceptance, not selected now. A1/browser-integrated milestone, live OT,
 industrial/SITE acceptance, numerical/P3, release and deployment remain unexecuted.
+
+
+## HWEB-F12 / W2 — CI1022 native startup repair (2026-11-06)
+
+Owner reported failure of Code CI1022, run42223227158, on WEB
+`ec63822ec1b086755d57f9e666805a94b2d320a2` (parent
+`1a48331b5e569381dc035920e6e62de4eee1c66f`, tree
+`ae6bde9b6ad350ad1396f0fff74546c3f81dab3a`). Docs48/run42223227043
+succeeded. Code's verify job succeeded, including contracts, lint, types,
+unit/component/performance checks, build, artifact verification and full ordinary
+Playwright regression. Native job127910144118 failed at API restart, before
+permission preparation or any of the five mandatory native W1/W2 journeys.
+
+Observed cause: Flyway was given separate owner credentials without an explicit
+migration URL. Spring Boot attempted URL discovery from the protected routing
+DataSource and threw UnsupportedDataSourcePropertyException: Unable to find
+suitable method for url. The first schema initialization already succeeded; this
+is a restart configuration failure, not a timeout or a browser-test failure.
+Pinned API f1fdc206c916a5266f609810c045c6b5688bfd49 uses wrapped routing
+DataSources; its separate-principal PostgreSQL fixtures explicitly supply
+spring.flyway.url alongside migration credentials.
+
+Registered repair under the same HWEB-F12/W2 parent; exact message
+`fix(ci): supply explicit Flyway URL for native foundation restart`.
+Exact MODIFY scope: `.github/workflows/ci.yml` and APPEND this roadmap only.
+Provide spring.flyway.url from the existing HIDRA_TEST_DATASOURCE_URL on restart.
+Keep the ordinary w2_app login, migration owner, three independent protected
+principals, fixture privileges, immutable API pin, health/audit startup gate and
+all five mandatory native journeys unchanged. No CREATE/DELETE, backend changes,
+new contract, relaxed acceptance, retries, timeout or performance-limit change.
+
+Validation: workflow YAML parsing, bash syntax for every run block, exact restart
+URL/credential/pin/five-test assertions, canonical documentation checks, append-only
+roadmap preservation and exact two-path diff pass locally. No native API/PostgreSQL
+runtime is available on this host; these checks do not establish runtime startup
+or browser/PostgreSQL qualification. Existing successful exact-source verify/Docs
+evidence above applies to CI1022, not to a new commit. After guarded direct-main
+publication, verify exact parent/tree/blobs and observe new-SHA Code/Docs creation
+or startup, then STOP. W2 remains NATIVE_BROWSER_QUALIFICATION_PENDING until actual
+hosted evidence and independent acceptance; repair any failed gate first.
+Next reserved implementation remains W3/HWEB-F13 after W2 acceptance and separate
+selection; A1, SITE, numerical/P3, release and deployment remain unexecuted.
