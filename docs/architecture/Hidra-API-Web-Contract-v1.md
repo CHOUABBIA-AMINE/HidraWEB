@@ -659,3 +659,46 @@ and requires403 before setup disclosure/write. These browser cases are authored
 and enumerated, not claimed executed locally. CI requires5 passed/0 failed/flaky/
 skipped/retries; full W1 preservation remains mandatory after the API pin change.
 Broader ENG-001–012 editors, W3/W4, A1, SITE, P3 and deployment remain independent.
+
+
+## HWEB-F12 / W2 — independent native browser acceptance (2026-11-06)
+
+Owner Next selects this acceptance stage only. Verified implementation/repair SHA
+`e09edd393e3b6253e9ecc32172377bc52f2d1b38`, parent
+`419fff00a1bfb3b36fd67661373e2a282ca2d8ea`, tree
+`228bdc4cf7fa9e7ebd93010cb2c9d92fd2ba65e6` remains live main at preflight.
+Code1024 [run42246674965](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42246674965)
+and Docs50 [run42246674846](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42246674846)
+are completed SUCCESS on that exact SHA. Native job127990590404 executed all five
+mandatory W1/W2 browser cases:5 passed in48.3 seconds,0 failed/flaky/skipped;
+the mandatory report assertion succeeded. The separate verify job127990591052
+also succeeded, including the full ordinary Playwright regression suite.
+
+Transition: HWEB-F12/W2 ACCEPTED for the registered software/native-browser scope;
+NATIVE_BROWSER_QUALIFICATION_PENDING is resolved by this exact-source hosted
+evidence. This includes persisted system/station/installation/configuration and
+Pipeline graph browser reload/history, stale-write409 with unchanged persisted
+version, ordinary LOCAL actor catalog/write403 and preservation of the three W1
+journeys. The native lane uses API f1fdc206c916a5266f609810c045c6b5688bfd49,
+fresh PostgreSQL16, genuine JWT and separate restricted database principals.
+No mocks, retry, deadline relaxation or alternative acceptance replaces that lane.
+
+This acceptance covers the registered journeys and does not establish exhaustive
+live coverage of every mutation, integrated W1-W4/A1 acceptance, industrial
+calibration, SITE/operational acceptance, numerical/P3 readiness or deployment.
+Historical ENG gaps and task mappings remain preserved. No backend/API pin,
+application behavior, fixture, workflow or security rule changes in this stage.
+
+Registered exact message: `docs(topology): accept W2 native browser qualification`.
+Exact acceptance-only scope: APPEND docs/roadmap/ULTIMATE_ROADMAP.md,
+docs/architecture/Hidra-API-Web-Contract-v1.md and
+docs/roadmap/HidraAPI-Frontend-Backend-Gap-Register.md. Preserve every prior byte
+and every other tree entry. Validate canonical documentation, append-only
+preservation and exact parent/tree/blobs. Guard direct-main publication against
+expected head e09edd393e3b6253e9ecc32172377bc52f2d1b38. This documentation-only
+commit requires its own Docs CI startup; Code CI is path-filtered and is not
+claimed rerun. Observe applicable CI creation/start, then STOP.
+
+Next reserved implementation: W3/HWEB-F13, requiring separate owner selection
+and source-backed scope registration. W3/W4/A1, numerical/P3, release and
+deployment are not selected or executed by this acceptance.
