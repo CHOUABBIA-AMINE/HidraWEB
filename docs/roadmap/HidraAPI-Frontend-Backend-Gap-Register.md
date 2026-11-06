@@ -671,3 +671,52 @@ observe new-SHA Code/Docs creation or startup, then STOP. Hosted qualification a
 independent acceptance remain gates; green unit tests do not prove deployment.
 W4/HWEB-F14 remains next after W3 acceptance and separate selection. A1 integrated
 acceptance, industrial/SITE, numerical/P3, release and deployment remain unexecuted.
+
+
+## HWEB-F13 / W3 — independent native browser acceptance (2026-11-06)
+
+Owner Next selects acceptance of the registered whole W3 delivery only.
+Verified live WEB main3601f491bb3661a50b650961888f71c87bcd17dd,
+parentc667fd8bc3d325c16c3d444be8ca2f5003dccd13,
+treebd0101e4bc6883e8a6951846be5bb657984bb735.
+[Code1026/run42271560936](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42271560936)
+and [Docs53/run42271560727](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42271560727)
+completed SUCCESS on this exact SHA. Verify job128077136755 succeeded.
+Native job128077137217 succeeded and its actual log reports7 passed in57.3s;
+the mandatory report assertion confirms0 failed/flaky/skipped, with retries0.
+The earlier cancelled Code1025 remains historical and is not relabelled successful.
+
+Transition: HWEB-F13/W3 ACCEPTED for registered typed Configuration software and
+native browser scope. NATIVE_BROWSER_QUALIFICATION_PENDING is resolved by this
+hosted execution. The two W3 cases prove real Configuration activation, typed
+NUMBER default/canonical override, exclusive-end fallback, BOOLEAN flag state,
+exact stale409 preserving state, browser reload and ordinary LOCAL actor403
+before protected catalog/detail/effective/flag disclosure or definition write.
+The three W1 and two W2 journeys also passed, preserving their accepted scope.
+Runtime uses immutable API f1fdc206c916a5266f609810c045c6b5688bfd49, genuine JWT,
+fresh PostgreSQL16 and the registered synthetic catalog/credential fixtures.
+No business API interception or mutation retry substitutes for native execution.
+
+This accepts only the admitted STRING/NUMBER/BOOLEAN, PUBLIC/INTERNAL, unscoped
+and no-approval Configuration contract and BOOLEAN flags. It does not accept
+unsupported strategies/types, confidential-value authoring, exhaustive mutation
+coverage, enterprise commissioning, integrated A1, industrial calibration,
+SITE/operational acceptance, numerical/P3, release or deployment. Current backend
+administrator-only semantics remain authoritative. Historical task/ENG mappings
+and prior evidence remain preserved. No application, API pin, test, fixture,
+workflow, database migration or security change is made by this acceptance.
+
+Registered exact acceptance message:
+`docs(configuration): accept W3 native browser qualification`.
+Exact MODIFY scope: APPEND docs/roadmap/ULTIMATE_ROADMAP.md,
+docs/architecture/Hidra-API-Web-Contract-v1.md and
+docs/roadmap/HidraAPI-Frontend-Backend-Gap-Register.md only. No CREATE/DELETE.
+Validate canonical Docs, append-only preservation, exact three-path scope,
+parent/tree/blobs/message; publish directly to main with expected head
+3601f491bb3661a50b650961888f71c87bcd17dd. This documentation-only commit requires
+its own Docs CI startup; Code CI is path-filtered and is not claimed rerun.
+Observe applicable CI creation/start, then STOP.
+
+Next reserved implementation: W4/HWEB-F14 configured Workflow journeys, after
+separate owner selection and source-backed registration. W4, A1, P3, release and
+deployment are not selected or executed by this acceptance.
