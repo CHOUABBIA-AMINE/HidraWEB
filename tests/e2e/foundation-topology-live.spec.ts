@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 const web=process.env.HIDRA_FOUNDATION_WEB_URL;
 const api=process.env.HIDRA_FOUNDATION_API_URL;
 const admin=process.env.HIDRA_FOUNDATION_ADMIN;
@@ -19,13 +19,18 @@ async function pick(page:Page,label:string,name:RegExp){
 }
 function response(page:Page,path:string,method:string){return page.waitForResponse(r=>new URL(r.url()).pathname.endsWith(path)&&r.request().method()===method);}
 
+async function createActiveCompany(request:APIRequestContext,headers:Record<string,string>,code:string){
+ const created=await request.post(`${api}/api/v1/party/parties`,{headers,data:{code,legalName:`Synthetic ${code}`,partyTypeId:'w1-synthetic-party-type',countryCode:'DZ'}});expect(created.status()).toBe(200);const party=await created.json();
+ const before=await request.get(`${api}/api/v1/party/parties/${party.id}`,{headers});expect(before.status()).toBe(200);
+ const active=await request.post(`${api}/api/v1/party/parties/${party.id}/activate`,{headers,data:{expectedUpdatedAt:(await before.json()).updatedAt,reason:'Synthetic W2 company'}});expect(active.status()).toBe(200);
+ return party.id as string;
+}
+
 test('native persisted system, station, installation, station configuration and Pipeline graph survive browser reload',async({page,request})=>{
  const auth=await request.post(`${api}/api/v1/identity/authentication/login`,{data:{providerType:'LOCAL',principal:admin,credentials:password}});expect(auth.status()).toBe(200);const token=(await auth.json()).accessToken;
  const headers={Authorization:`Bearer ${token}`};const code=`W2-${Date.now()}`;
  // Party setup uses genuine owner APIs; no SQL business object is admitted.
- const created=await request.post(`${api}/api/v1/party/parties`,{headers,data:{code,legalName:`Synthetic ${code}`,partyTypeId:'w1-synthetic-party-type',countryCode:'DZ'}});expect(created.status()).toBe(200);const party=await created.json();
- const before=await request.get(`${api}/api/v1/party/parties/${party.id}`,{headers});expect(before.status()).toBe(200);
- const active=await request.post(`${api}/api/v1/party/parties/${party.id}/activate`,{headers,data:{expectedUpdatedAt:(await before.json()).updatedAt,reason:'Synthetic W2 company'}});expect(active.status()).toBe(200);
+ await createActiveCompany(request,headers,code);
  await login(page);await pick(page,'Référence de partenaire éligible',new RegExp(code));
  await page.getByLabel('Code and name',{exact:true}).fill(code);await page.getByLabel('Reason and evidence reference',{exact:true}).fill('synthetic:W2 operator');
  await page.getByRole('button',{name:'System types',exact:true}).click();await pick(page,'System type',/W2_GAS/);
@@ -41,7 +46,7 @@ test('native persisted system, station, installation, station configuration and 
  const stationGraph=page.waitForResponse(r=>new URL(r.url()).pathname.includes('/station-graph/revisions/')&&r.request().method()==='PUT');await page.getByRole('button',{name:'Save station graph revision',exact:true}).click();expect((await stationGraph).status()).toBe(200);
  const publication=response(page,`/facilities/${facility}/station-graph/publications`,'POST');await page.getByRole('button',{name:'Publish station graph',exact:true}).click();expect((await publication).status()).toBe(200);
  const config=response(page,`/facilities/${facility}/installed-configuration`,'PUT');await page.getByRole('button',{name:'Save installed configuration',exact:true}).click();expect((await config).status()).toBe(200);await expect(page.getByText('Installed configuration epoch: 1',{exact:true})).toBeVisible();
- const draft=response(page,'/engineering-networks','POST');await page.getByRole('button',{name:'Create network draft',exact:true}).click();expect((await draft).status()).toBe(200);
+ const draft=response(page,'/engineering-networks','POST');await page.getByRole('button',{name:'Create network draft',exact:true}).click();expect((await draft).status()).toBe(201);
  await page.getByLabel('Pipeline code and name',{exact:true}).fill(`${code}-PIPE`);await pick(page,'Pipeline type',/W2_PIPE/);
  await page.getByRole('button',{name:'Add junction node',exact:true}).click();await pick(page,'Station for new node (empty for junction)',new RegExp(code));await page.getByRole('button',{name:'Add station node',exact:true}).click();
  await pick(page,'From port',/OUTLET/);await page.getByRole('combobox',{name:'To port',exact:true}).click();await page.getByRole('option',{name:/INLET/}).last().click();await page.getByRole('button',{name:'Add branch',exact:true}).click();
@@ -65,7 +70,10 @@ test('native ordinary user cannot disclose setup catalogs or mutate foundation b
  const credential=await request.put(`${api}/api/v1/identity/users/${user.id}/local-credential`,{headers,data:{expectedSecurityVersion:(await credentialState.json()).securityVersion,password:ordinaryPassword,reason:'Synthetic W2 denied actor'}});expect(credential.status()).toBe(200);
  const current=await request.get(`${api}/api/v1/identity/users/${user.id}/lifecycle`,{headers});expect(current.status()).toBe(200);
  const activated=await request.post(`${api}/api/v1/identity/users/${user.id}/activate`,{headers,data:{expectedUpdatedAt:(await current.json()).updatedAt,reason:'Synthetic W2 denied actor'}});expect(activated.status()).toBe(200);
+ const company=await createActiveCompany(request,headers,`W2-DENIED-${Date.now()}`);
+ const control=await request.get(`${api}/api/v1/topology/foundation/choices/SYSTEM_TYPES?companyPartyId=${company}`,{headers});expect(control.status()).toBe(200);
  const ordinary=await request.post(`${api}/api/v1/identity/authentication/login`,{data:{providerType:'LOCAL',principal:name,credentials:ordinaryPassword}});expect(ordinary.status()).toBe(200);const deniedHeaders={Authorization:`Bearer ${(await ordinary.json()).accessToken}`};
- const choices=await request.get(`${api}/api/v1/topology/foundation/choices/SYSTEM_TYPES?companyPartyId=unknown`,{headers:deniedHeaders});expect(choices.status()).toBe(403);expect(await choices.text()).not.toContain('W2_GAS');
- const write=await request.post(`${api}/api/v1/topology/foundation/pipeline-systems`,{headers:deniedHeaders,data:{companyPartyId:'unknown',id:crypto.randomUUID(),requestId:crypto.randomUUID(),code:name,name,systemTypeId:'w2-gas',reason:'Synthetic refused write'}});expect(write.status()).toBe(403);
+ const choices=await request.get(`${api}/api/v1/topology/foundation/choices/SYSTEM_TYPES?companyPartyId=${company}`,{headers:deniedHeaders});expect(choices.status()).toBe(403);expect(await choices.text()).not.toContain('W2_GAS');
+ const write=await request.post(`${api}/api/v1/topology/foundation/pipeline-systems`,{headers:deniedHeaders,data:{companyPartyId:company,id:crypto.randomUUID(),requestId:crypto.randomUUID(),code:name,name,systemTypeId:'w2-gas',reason:'Synthetic refused write'}});expect(write.status()).toBe(403);
+ const after=await request.get(`${api}/api/v1/topology/foundation/choices/SYSTEMS?companyPartyId=${company}`,{headers});expect(after.status()).toBe(200);expect((await after.json()).items).toEqual([]);
 });

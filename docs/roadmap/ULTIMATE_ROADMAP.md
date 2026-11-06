@@ -2431,3 +2431,73 @@ or startup, then STOP. W2 remains NATIVE_BROWSER_QUALIFICATION_PENDING until act
 hosted evidence and independent acceptance; repair any failed gate first.
 Next reserved implementation remains W3/HWEB-F13 after W2 acceptance and separate
 selection; A1, SITE, numerical/P3, release and deployment remain unexecuted.
+
+
+## HWEB-F12 / W2 — CI1023 lifecycle and native assertion repair (2026-11-06)
+
+Owner reported Code1023/run42235711844 failure on
+`419fff00a1bfb3b36fd67661373e2a282ca2d8ea` (parent ec63822e,
+tree3c1570d8df5ef99547bc7ae08d83a4cea0bf34a4). Docs49 succeeded;
+Code verify and all three native W1 cases succeeded. The Flyway repair is proven
+through restricted-principal startup and the committed bootstrap audit event.
+W2 failed at disabled station graph preparation and an unknown-company denial
+request returning503 instead of403.
+
+Registered repair under existing HWEB-F12/W2; exact message
+`fix(topology): gate station readers on active lifecycle and repair native assertions`.
+Exact MODIFY scope: src/features/topology/components/NetworkAuthoringPanel.tsx,
+src/features/topology/components/NetworkAuthoringPanel.test.tsx,
+tests/e2e/foundation-topology-live.spec.ts and APPEND this roadmap. No CREATE/DELETE.
+Mount station installation/configuration readers only after server-returned ACTIVE
+facility status. Test the PLANNED-to-ACTIVE transition and rejected activation.
+For native denial, create/activate a real company through Party APIs, prove the
+administrator control request succeeds, then require exact403 and no disclosed
+catalog/write result for the unprivileged LOCAL actor. New engineering drafts
+must return201 (200 is replay-only), as implemented by the pinned backend.
+Preserve five mandatory native tests, no retries, immutable API pin, Flyway URL,
+restricted credentials, fixture privileges, exact stale409 and persisted/history
+checks. No backend, contract, timeout, performance-budget or acceptance weakening.
+
+Local native diagnosis on fresh PostgreSQL16.15 and compiled pinned API
+f1fdc206c916a5266f609810c045c6b5688bfd49 confirms the PLANNED station returns403
+for installation and configuration readers; after activation they return200
+(initial absent configuration404). Existing UI mounted them before activation and
+retained their errors. Station graph author/publication, configuration save/read/
+history succeed with unchanged fixture privileges. New engineering draft creation
+returns201. These HTTP checks are not browser or industrial acceptance. Chromium
+cannot launch locally because this host disallows its Unix socket; retain hosted
+browser qualification as a separate gate. Further validation and publication
+evidence follows below; W2 remains NATIVE_BROWSER_QUALIFICATION_PENDING.
+
+
+### W2 CI1023 repair validation and publication handoff
+
+The bounded four-path candidate passes TypeScript, lint (0 errors,6 existing
+fast-refresh warnings),21 pinned OpenAPI compatibility checks,56 Vitest files/
+148 tests (including PLANNED/activation/refusal regressions),96 Node contract
+checks, production build and unchanged bundle budgets. Vitest was run with two
+workers after the initial parallel API/build/unit run caused two unrelated5-second
+unit timeouts and a native503 under host contention; no test timeout, application
+deadline or mutation retry was changed. The final native run was isolated from
+compilation/unit load and passed without command retries on a fresh PostgreSQL16.15
+schema with the same restricted principals and compiled immutable API pin.
+
+Native HTTP evidence: system/station creation and activation, physical position/
+unit/installation, published station graph, installed-configuration save/current/
+history, new engineering draft201, Pipeline/graph save, current and version2
+history reads, stale write409 with unchanged persisted graph, and real LOCAL actor
+catalog/write denial403 against an active company. All promised business objects
+were created through owner APIs. These are native HTTP/PostgreSQL checks and
+component regressions, not the hosted browser journey or a deployment/SITE claim.
+Playwright enumerates exactly5 mandatory tests with retries0; local browser launch
+remains blocked by the host Unix-socket restriction. Canonical Docs validation,
+append-only historical preservation, exact four-file diff and whitespace checks
+pass. Generated clients, native tools, diagnostic scripts and runtime files remain
+outside the publication. The API repository is unchanged.
+
+Publish this repair directly to existing main with expected head
+419fff00a1bfb3b36fd67661373e2a282ca2d8ea and the registered message above; verify
+parent/tree/blobs, observe exact-SHA Code/Docs creation or startup, then STOP.
+W2 remains IMPLEMENTED / NATIVE_BROWSER_QUALIFICATION_PENDING; independent
+acceptance follows successful hosted evidence. Next reserved implementation is
+W3/HWEB-F13 only after W2 acceptance and separate selection. No A1, P3 or deployment.

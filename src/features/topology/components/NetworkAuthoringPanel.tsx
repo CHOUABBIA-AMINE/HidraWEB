@@ -55,7 +55,7 @@ function CompanyEditor({ company }: { company: string }) {
       <Button disabled={!can('topology:engineering-draft:create') || !system || !code.trim() || Boolean(draftId) || command.isPending || command.isError} onClick={() => command.mutate(async () => { const r = await api.createEngineeringNetworkDraft({ companyPartyId: company, pipelineSystemId: system, creationRequestId: crypto.randomUUID(), title: code, evidenceReference: reason }); if (r.draftId) saveLink(r.draftId); return r; })}>{t('topology.editor.createDraft')}</Button>
     </Stack>
     <CommandState pending={command.isPending} error={command.error} reset={() => { command.reset(); void choices.refetch(); }} />
-    {facility && <InstalledUnitPanel key={`${company}:${facility}`} company={company} facility={facility} reason={reason} system={system} draftId={draftId} />}
+    {facility && [...facilities, ...available].find(x => x.id === facility)?.status === 'ACTIVE' && <InstalledUnitPanel key={`${company}:${facility}`} company={company} facility={facility} reason={reason} system={system} draftId={draftId} />}
     {draftId && system && <PipelineEditor key={`${company}:${system}:${draftId}`} company={company} system={system} draftId={draftId} />}
   </Stack>;
 }
