@@ -720,3 +720,71 @@ Observe applicable CI creation/start, then STOP.
 Next reserved implementation: W4/HWEB-F14 configured Workflow journeys, after
 separate owner selection and source-backed registration. W4, A1, P3, release and
 deployment are not selected or executed by this acceptance.
+
+
+## HWEB-F14 / W4 — selected delivery blocked by owner-target handoff (2026-11-06)
+
+Owner Next selects the reserved whole W4 delivery, not W4 implementation approval
+for invented contracts. WEB maina6887c0f8705129b21bd9ca4c9c859930ff7dcbd,
+parent3601f491bb3661a50b650961888f71c87bcd17dd,
+treed7c038140e6bd149c0016f06fcb8d3d34d24934a; Docs54/run42289453575 SUCCESS.
+API maindb712ab35ff3051c489e74327090d2fc7ef47b33 retains implementation
+f1fdc206c916a5266f609810c045c6b5688bfd49. The authenticated runtime artifact
+(full JSON SHA256 da4326497b4c65f9dcbeb286b64c1c9840a6fc73b91c3543c48633f682fb3fba)
+and exact source were inspected. Root WEB AGENTS.md remains absent.
+
+Verified contract gap: GET /api/v1/workflow/definitions requires all five of
+ targetModule, targetTypeId, workflowPurposeId, targetId and targetLocator.
+WorkflowDefinitionDiscoveryController/Responses publish only a target-specific
+supported process, independent reviewer choices and transition metadata. They do
+not bootstrap the target coordinates or publish a general reference catalog.
+The admitted B6 process is installed-characteristic-link approval. Topology's
+InstalledCharacteristicLinkResponses.Link publishes immutable link/source fields
+but no pre-approval Workflow target digest, canonical locator or target/purpose
+catalog IDs. ApprovalDecision publishes targetSha256 and WorkflowEvidence only
+AFTER approval, so it cannot supply the initial Workflow-start handoff.
+No workflow-target/approval-target discovery route exists in the verified runtime.
+
+InstalledCharacteristicLinkApprovalTargetDigester owns versioned length-prefixed
+UTF-8 canonicalization and microsecond timestamp encoding in Domain. The native
+TopologyInstalledCharacteristicLinkWorkflowTargetLookup independently checks that
+digest and its canonical locator against the protected immutable owner revision.
+Browser duplication or a test-generated locator/digest would silently make this
+owner invariant part of the frontend contract. The public REST schema currently
+contains neither a published pre-approval handoff nor a versioned browser encoding
+contract. A mocked source probe is not a native browser round trip.
+
+This is a dependency conflict with the complete W4 browser-start requirement,
+not a reversal of accepted B6 software. TASKS_HPS-015 B6 acceptance explicitly
+states that WorkflowFoundationProcessPostgresIntegrationTest uses a mocked owner
+target probe and is not physical Topology acceptance. Existing native Topology
+read/Workflow suites retain their separate valid scopes. W1/W2/W3 acceptance and
+existing task inbox/actions remain unchanged. W4 is BLOCKED at initial target
+handoff; no partial feature or counterfeit successful native case is published.
+
+Bounded backend proposal (NOT an existing endpoint and NOT implemented here):
+add an owner-authorized pre-approval Workflow handoff read for an exact installed
+characteristic link revision, reusing the protected native owner read. Return
+server-derived targetModule, targetTypeId, workflowPurposeId, targetId/digest,
+targetLocator, exact link revision and digest-format version. Resolve admitted
+active catalog IDs on the server; no hardcoded migration IDs in the browser.
+Treat this response as metadata, never an authorization token: Workflow must
+still revalidate the target, current starter/reviewer authority, independence,
+CAS and target provenance. Preserve denial before existence disclosure and omit
+manufacturer payloads. No schema rewrite, numerical solver or general designer.
+Acceptance requires exact source/OpenAPI/CI proof, foreign/revoked actor denial,
+pre-approval target round trip and a real configured independent-reviewer
+APPROVE/REJECT flow with stale/replay checks. Then resume the same whole W4 task
+using generated transport and native browser qualification. No new task ID is
+adopted and no API modification is selected by this WEB documentation disposition.
+
+This blocked disposition's exact message is
+`docs(workflow): record W4 owner-target handoff blocker`.
+Exact MODIFY scope: APPEND docs/roadmap/ULTIMATE_ROADMAP.md,
+docs/architecture/Hidra-API-Web-Contract-v1.md and
+docs/roadmap/HidraAPI-Frontend-Backend-Gap-Register.md only. No CREATE/DELETE.
+Canonical Docs, append-only, exact tree/parent/blobs/message checks precede guarded
+main publication against a6887c0f8705129b21bd9ca4c9c859930ff7dcbd. Observe exact-SHA
+Docs creation/start, then STOP; Code is path-filtered and not claimed rerun.
+Next necessary selection is the bounded backend handoff contract proposal, then
+resume HWEB-F14/W4. A1, SITE, numerical/P3, release and deployment remain unexecuted.
