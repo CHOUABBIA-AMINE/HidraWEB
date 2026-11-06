@@ -1,0 +1,1232 @@
+{
+  "components": {
+    "schemas": {
+      "ConfigurationDefinitionResponse": {
+        "properties": {
+          "displayNameFr": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "namespaceId": {
+            "type": "string"
+          },
+          "requiresApproval": {
+            "type": "boolean"
+          },
+          "scoped": {
+            "type": "boolean"
+          },
+          "sensitivity": {
+            "enum": [
+              "PUBLIC",
+              "INTERNAL",
+              "RESTRICTED",
+              "SECRET_REFERENCE_ONLY"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "DRAFT",
+              "ACTIVE",
+              "DEPRECATED",
+              "RETIRED"
+            ],
+            "type": "string"
+          },
+          "valueType": {
+            "enum": [
+              "STRING",
+              "NUMBER",
+              "BOOLEAN",
+              "DATE",
+              "DURATION",
+              "JSON",
+              "REFERENCE",
+              "LIST"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ConfigurationValueResponse": {
+        "properties": {
+          "definitionId": {
+            "type": "string"
+          },
+          "definitionVersionId": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effectiveTo": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "DRAFT",
+              "ACTIVE",
+              "SUPERSEDED",
+              "EXPIRED",
+              "REVOKED"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CreateConfigurationDefinitionRequest": {
+        "properties": {
+          "defaultValue": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayNameAr": {
+            "type": "string"
+          },
+          "displayNameEn": {
+            "type": "string"
+          },
+          "displayNameFr": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "namespaceId": {
+            "type": "string"
+          },
+          "requiresApproval": {
+            "type": "boolean"
+          },
+          "scoped": {
+            "type": "boolean"
+          },
+          "sensitivity": {
+            "enum": [
+              "PUBLIC",
+              "INTERNAL",
+              "RESTRICTED",
+              "SECRET_REFERENCE_ONLY"
+            ],
+            "type": "string"
+          },
+          "valueType": {
+            "enum": [
+              "STRING",
+              "NUMBER",
+              "BOOLEAN",
+              "DATE",
+              "DURATION",
+              "JSON",
+              "REFERENCE",
+              "LIST"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CreateFeatureFlagRequest": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "defaultEnabled": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "evaluationStrategy": {
+            "enum": [
+              "BOOLEAN",
+              "PERCENTAGE",
+              "RULE_BASED",
+              "ALLOW_LIST",
+              "DENY_LIST"
+            ],
+            "type": "string"
+          },
+          "nameAr": {
+            "type": "string"
+          },
+          "nameEn": {
+            "type": "string"
+          },
+          "nameFr": {
+            "type": "string"
+          },
+          "owningModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FeatureFlagResponse": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "defaultEnabled": {
+            "type": "boolean"
+          },
+          "evaluationStrategy": {
+            "enum": [
+              "BOOLEAN",
+              "PERCENTAGE",
+              "RULE_BASED",
+              "ALLOW_LIST",
+              "DENY_LIST"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "nameFr": {
+            "type": "string"
+          },
+          "owningModule": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "DRAFT",
+              "ACTIVE",
+              "PAUSED",
+              "RETIRED"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FoundationConfigurationActivationRequest": {
+        "properties": {
+          "expectedUpdatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "expectedUpdatedAt"
+        ],
+        "type": "object"
+      },
+      "FoundationConfigurationChoiceResponse": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FoundationConfigurationDefinitionResponse": {
+        "properties": {
+          "activeVersionId": {
+            "type": "string"
+          },
+          "defaultValue": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "namespaceId": {
+            "type": "string"
+          },
+          "redacted": {
+            "type": "boolean"
+          },
+          "sensitivity": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "valueType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FoundationConfigurationEffectiveResponse": {
+        "properties": {
+          "definitionId": {
+            "type": "string"
+          },
+          "definitionVersionId": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "instant": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "provenance": {
+            "type": "string"
+          },
+          "redacted": {
+            "type": "boolean"
+          },
+          "sourceValueId": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FoundationConfigurationFlagResponse": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "defaultEnabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "strategy": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FoundationConfigurationFlagStateRequest": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "environment": {
+            "maxLength": 40,
+            "minLength": 0,
+            "type": "string"
+          },
+          "expectedUpdatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "enabled",
+          "environment",
+          "expectedUpdatedAt"
+        ],
+        "type": "object"
+      },
+      "FoundationConfigurationFlagStateResponse": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "flagId": {
+            "type": "string"
+          },
+          "provenance": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FoundationConfigurationValueResponse": {
+        "properties": {
+          "actorId": {
+            "type": "string"
+          },
+          "definitionId": {
+            "type": "string"
+          },
+          "definitionVersionId": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effectiveTo": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "rawValue": {
+            "type": "string"
+          },
+          "redacted": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "SetConfigurationValueRequest": {
+        "properties": {
+          "createdByActorId": {
+            "type": "string"
+          },
+          "definitionId": {
+            "type": "string"
+          },
+          "definitionVersionId": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effectiveTo": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "jsonValue": {
+            "type": "string"
+          },
+          "rawValue": {
+            "type": "string"
+          },
+          "secretReference": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "externalOidcBearerJwt": {
+        "bearerFormat": "JWT",
+        "description": "Externally issued OIDC bearer JWT accepted by OIDC completion and self-bound authorization evaluation.",
+        "scheme": "bearer",
+        "type": "http"
+      },
+      "hidraBearerJwt": {
+        "bearerFormat": "JWT",
+        "description": "Hidra-issued bearer JWT used by ordinary protected HidraAPI operations.",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "description": "Hydrocarbon Intelligence for Data, Risk, and Analytics",
+    "license": {
+      "name": "MIT License"
+    },
+    "title": "HidraAPI",
+    "version": "v1"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/configuration/capabilities": {
+      "get": {
+        "operationId": "capabilities_21",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "additionalProperties": {},
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "spring-configuration-controller"
+        ]
+      }
+    },
+    "/api/v1/configuration/create-configuration-definition": {
+      "post": {
+        "operationId": "createConfigurationDefinition_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConfigurationDefinitionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationDefinitionResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "spring-configuration-controller"
+        ]
+      }
+    },
+    "/api/v1/configuration/create-feature-flag": {
+      "post": {
+        "operationId": "createFeatureFlag",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFeatureFlagRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureFlagResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "spring-configuration-controller"
+        ]
+      }
+    },
+    "/api/v1/configuration/definitions": {
+      "get": {
+        "operationId": "definitions",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "namespaceId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FoundationConfigurationDefinitionResponse"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "configuration-administration-controller"
+        ]
+      },
+      "post": {
+        "operationId": "createConfigurationDefinition",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConfigurationDefinitionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationDefinitionResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "spring-configuration-controller"
+        ]
+      }
+    },
+    "/api/v1/configuration/definitions/{id}": {
+      "get": {
+        "operationId": "definition",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoundationConfigurationDefinitionResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "configuration-administration-controller"
+        ]
+      }
+    },
+    "/api/v1/configuration/definitions/{id}/activate": {
+      "post": {
+        "operationId": "activateDefinition",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FoundationConfigurationActivationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoundationConfigurationDefinitionResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "configuration-administration-controller"
+        ]
+      }
+    },
+    "/api/v1/configuration/effective": {
+      "get": {
+        "operationId": "effective",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "definitionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "environment",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "instant",
+            "required": true,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoundationConfigurationEffectiveResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "configuration-administration-controller"
+        ]
+      }
+    },
+    "/api/v1/configuration/feature-flags": {
+      "get": {
+        "operationId": "flags",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FoundationConfigurationFlagResponse"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "configuration-administration-controller"
+        ]
+      },
+      "post": {
+        "operationId": "createFeatureFlag_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFeatureFlagRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureFlagResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "spring-configuration-controller"
+        ]
+      }
+    },
+    "/api/v1/configuration/feature-flags/{id}/activate": {
+      "post": {
+        "operationId": "activateFlag",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FoundationConfigurationActivationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoundationConfigurationFlagResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "configuration-administration-controller"
+        ]
+      }
+    },
+    "/api/v1/configuration/feature-flags/{id}/state": {
+      "get": {
+        "operationId": "flagState",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "environment",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoundationConfigurationFlagStateResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "configuration-administration-controller"
+        ]
+      },
+      "put": {
+        "operationId": "setFlagState",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FoundationConfigurationFlagStateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoundationConfigurationFlagStateResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "configuration-administration-controller"
+        ]
+      }
+    },
+    "/api/v1/configuration/namespaces": {
+      "get": {
+        "operationId": "namespaces",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FoundationConfigurationChoiceResponse"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "configuration-administration-controller"
+        ]
+      }
+    },
+    "/api/v1/configuration/set-configuration-value": {
+      "post": {
+        "operationId": "setConfigurationValue",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetConfigurationValueRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationValueResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "spring-configuration-controller"
+        ]
+      }
+    },
+    "/api/v1/configuration/values": {
+      "get": {
+        "operationId": "values",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "definitionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "environment",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FoundationConfigurationValueResponse"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "configuration-administration-controller"
+        ]
+      },
+      "post": {
+        "operationId": "setConfigurationValue_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetConfigurationValueRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationValueResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "hidraBearerJwt": []
+          }
+        ],
+        "tags": [
+          "spring-configuration-controller"
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "description": "Authenticated task inbox, workflow history, and available transition metadata.",
+      "name": "Workflow Queries"
+    },
+    {
+      "description": "Canonical operational scopes and effective-dated organization responsibilities.",
+      "name": "Organization Responsibilities"
+    },
+    {
+      "description": "Owner-authorized supported active process bindings.",
+      "name": "Workflow Definition Discovery"
+    },
+    {
+      "description": "Authoritative planning revision approval integration with workflow.",
+      "name": "Planning Approval"
+    },
+    {
+      "description": "Verified realtime transports, event envelope metadata, and recovery semantics.",
+      "name": "Realtime"
+    },
+    {
+      "description": "Authoritative execution of backend-defined task transitions.",
+      "name": "Workflow Transitions"
+    },
+    {
+      "description": "Repository-side OIDC/JWT browser integration contract.",
+      "name": "Security OIDC"
+    },
+    {
+      "description": "Role, permission, and authorization-grant administration commands.",
+      "name": "Identity Administration"
+    },
+    {
+      "description": "Authenticated principal, user, role, and permission queries.",
+      "name": "Identity Administration"
+    }
+  ],
+  "x-hidra-ci-source-sha": "f1fdc206c916a5266f609810c045c6b5688bfd49"
+}

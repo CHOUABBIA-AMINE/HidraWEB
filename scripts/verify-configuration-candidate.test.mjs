@@ -69,7 +69,7 @@ test('Configuration source lock preserves earlier verified and historical checks
   assert.ok(!delta.some((item) =>
     ['path_removed', 'method_removed', 'field_removed', 'response_removed'].includes(item.kind)));
   const orval = fs.readFileSync(path.join(root, 'orval.configuration.config.ts'), 'utf8');
-  assert.ok(orval.includes(`./openapi/candidates/${name}`));
+  assert.ok(orval.includes('hidra-configuration-f1fdc206c916a5266f609810c045c6b5688bfd49.json'));
   const checker = fs.readFileSync(path.join(root, 'scripts/check-openapi-compatibility.mjs'), 'utf8');
   for (const lock of [
     'CONFIGURATION_CURRENT_PROOF', 'source-backed Configuration contract digest mismatch',
@@ -80,4 +80,14 @@ test('Configuration source lock preserves earlier verified and historical checks
   ]) {
     assert.ok(checker.includes(lock));
   }
+});
+
+test('W3 runtime Configuration slice is source-stamped, closed and retains original commands',()=>{
+ const p=JSON.parse(fs.readFileSync(path.join(root,'openapi/candidates/hidra-configuration-f1fdc206c916a5266f609810c045c6b5688bfd49.json'),'utf8'));
+ assert.equal(p['x-hidra-ci-source-sha'],'f1fdc206c916a5266f609810c045c6b5688bfd49');
+ assert.equal(Object.keys(p.paths).length,13);
+ for(const route of Object.keys(current.paths))for(const method of Object.keys(current.paths[route]))assert.ok(p.paths[route][method]);
+ for(const match of JSON.stringify(p).matchAll(/"\$ref":"#\/components\/schemas\/([^"]+)"/g))assert.ok(p.components.schemas[match[1]]);
+ assert.ok(p.paths['/api/v1/configuration/effective'].get);
+ assert.ok(p.paths['/api/v1/configuration/feature-flags/{id}/state'].put);
 });

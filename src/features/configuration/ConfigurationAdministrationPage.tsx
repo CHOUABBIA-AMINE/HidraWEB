@@ -1,259 +1,84 @@
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Container,
-  FormControlLabel,
-  Paper,
-  Stack,
-  Switch,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Alert, Button, Checkbox, Container, FormControlLabel, MenuItem, Paper, Stack, TextField, Typography } from '@mui/material';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
-import type { FormEvent } from 'react';
-
-import type {
-  CreateConfigurationDefinitionRequest,
-  CreateFeatureFlagRequest,
-  SetConfigurationValueRequest,
-} from '@/api/generated/configuration/model';
-import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
+import { useState } from 'react';
 import { usePermissions } from '@/features/permissions/usePermissions';
-import {
-  fetchWorkbenchRecords,
-  fetchWorkbenchResources,
-  workbenchQueryKeys,
-} from '@/features/workbench/api/workbenchApi';
+import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
+import * as api from './api/configurationApi';
 
-import {
-  createConfigurationDefinition,
-  createFeatureFlag,
-  setConfigurationValue,
-} from './api/configurationApi';
-
-const MODULE = 'configuration';
-const PAGE_SIZE = 25;
-const WORKBENCH_LIST_ROUTE = '/api/v1/workbench/{module}/{resource}';
-const DEFINITION_ROUTE = '/api/v1/configuration/definitions';
-const FLAG_ROUTE = '/api/v1/configuration/feature-flags';
-const VALUE_ROUTE = '/api/v1/configuration/values';
-
-function permissionForRoute(
-  routes: ReturnType<typeof usePermissions>['routes'],
-  route: string,
-  method: 'GET' | 'POST',
-): string | undefined {
-  return routes.find((descriptor) => descriptor.route === route && descriptor.methods.includes(method))?.permission;
+function Choice({label,value,onChange,items}:{label:string;value:string;onChange:(v:string)=>void;items:{id?:string;label?:string}[]}) {
+ return <TextField select label={label} value={value} onChange={e=>onChange(e.target.value)}><MenuItem value="">Choose</MenuItem>{items.map(x=><MenuItem key={x.id} value={x.id}>{x.label??x.id}</MenuItem>)}</TextField>;
 }
-
-function errorMessage(error: unknown, fallback: string): string {
-  const normalized = normalizeHidraApiError(error);
-  if (normalized.status === 403) return 'HidraAPI refused this configuration operation.';
-  return normalized.message || fallback;
+function Field({label,value,set}:{label:string;value:string;set:(v:string)=>void}) {return <TextField label={label} value={value} onChange={e=>set(e.target.value)}/>;}
+function Failure({error}:{error:unknown}) {if(!error)return null;const e=normalizeHidraApiError(error);return <Alert severity="error">{e.status===403?'HidraAPI refused this configuration operation.':e.status===409?'Configuration changed. Reload and review before submitting again.':'Configuration operation failed.'}</Alert>;}
+export function ConfigurationAdministrationPage(){
+ const permissions=usePermissions();
+ // B5 is deliberately administrator-only, including counts and choice discovery.
+ if(permissions.status!=='ready'||!permissions.can('*'))return <Alert severity="info">Current Configuration administrator authority required.</Alert>;
+ return <ConfigurationEditor/>;
 }
+function ConfigurationEditor(){
+ const cache=useQueryClient();
+ const [namespace,setNamespace]=useState(''),[selected,setSelected]=useState(''),[flag,setFlag]=useState('');
+ const [nsOffset,setNsOffset]=useState(0),[defOffset,setDefOffset]=useState(0),[flagOffset,setFlagOffset]=useState(0),[valueOffset,setValueOffset]=useState(0);
+ const [key,setKey]=useState(''),[name,setName]=useState(''),[type,setType]=useState('STRING'),[sensitivity,setSensitivity]=useState('INTERNAL'),[defaultValue,setDefault]=useState('');
+ const [environment,setEnvironment]=useState('TEST'),[instant,setInstant]=useState(new Date().toISOString()),[from,setFrom]=useState(new Date().toISOString()),[until,setUntil]=useState(''),[raw,setRaw]=useState(''),[confirmed,setConfirmed]=useState(false);
+ const [flagCode,setFlagCode]=useState(''),[flagName,setFlagName]=useState(''),[defaultEnabled,setDefaultEnabled]=useState(false),[enabled,setEnabled]=useState(false);
+ const scope=['hidra','configuration'];
+ const namespaces=useQuery({queryKey:[...scope,'namespaces',nsOffset],queryFn:()=>api.namespaces({limit:25,offset:nsOffset}),retry:false});
+ const definitions=useQuery({queryKey:[...scope,'definitions',namespace,defOffset],queryFn:()=>api.definitions({namespaceId:namespace,limit:25,offset:defOffset}),enabled:!!namespace,retry:false});
+ const detail=useQuery({queryKey:[...scope,'definition',selected],queryFn:()=>api.definition(selected),enabled:!!selected,retry:false});
+ const flags=useQuery({queryKey:[...scope,'flags',flagOffset],queryFn:()=>api.flags({limit:25,offset:flagOffset}),retry:false});
+ const selectedFlag=flags.data?.find(x=>x.id===flag);
+ const environmentValid=/^[A-Za-z0-9][A-Za-z0-9_.-]{0,39}$/.test(environment);
+ const effective=useQuery({queryKey:[...scope,'effective',selected,environment,instant],queryFn:()=>api.effective({definitionId:selected,environment,instant}),enabled:!!selected&&detail.data?.status==='ACTIVE'&&environmentValid&&Number.isFinite(Date.parse(instant)),retry:false});
+ const history=useQuery({queryKey:[...scope,'values',selected,environment,valueOffset],queryFn:()=>api.values({definitionId:selected,environment,limit:25,offset:valueOffset}),enabled:!!selected&&environmentValid,retry:false});
+ const state=useQuery({queryKey:[...scope,'flag-state',flag,environment],queryFn:()=>api.flagState(flag,{environment}),enabled:!!flag&&selectedFlag?.status==='ACTIVE'&&environmentValid,retry:false});
+ const command=useMutation({mutationFn:(fn:()=>Promise<unknown>)=>fn(),retry:false,onSuccess:async()=>{setRaw('');setConfirmed(false);await cache.invalidateQueries({queryKey:scope});}});
+ const blocked=command.isPending||command.isError;
+ const current=detail.data;
 
-function redactConfigurationEvidence(attributes: Record<string, unknown>): Record<string, unknown> {
-  return Object.fromEntries(Object.entries(attributes).map(([key, value]) => {
-    if (['rawValue', 'jsonValue', 'secretReference'].includes(key)) {
-      return [key, value == null || value === '' ? value : '[redacted in HidraWEB]'];
-    }
-    return [key, value];
-  }));
-}
-
-function EvidenceList({ title, items }: { title: string; items: Array<{ id?: unknown; attributes: Record<string, unknown> }> }) {
-  return (
-    <Paper variant="outlined" sx={{ p: 2 }}>
-      <Stack spacing={1}>
-        <Typography component="h2" variant="h6">{title}</Typography>
-        {items.length === 0 ? <Typography color="text.secondary">No records returned.</Typography> : null}
-        {items.map((item, index) => (
-          <Box component="pre" key={String(item.id ?? index)} sx={{ m: 0, p: 1, overflowX: 'auto', bgcolor: 'action.hover', whiteSpace: 'pre-wrap' }}>
-            {JSON.stringify({ id: item.id, ...redactConfigurationEvidence(item.attributes) }, null, 2)}
-          </Box>
-        ))}
-      </Stack>
-    </Paper>
-  );
-}
-
-export function ConfigurationAdministrationPage() {
-  const permissions = usePermissions();
-  const queryClient = useQueryClient();
-
-  const [definitionForm, setDefinitionForm] = useState<CreateConfigurationDefinitionRequest>({
-    namespaceId: '', key: '', displayNameFr: '', displayNameAr: '', displayNameEn: '',
-    valueType: 'STRING', sensitivity: 'INTERNAL', scoped: false, requiresApproval: false,
-    defaultValue: '', description: '',
-  });
-  const [flagForm, setFlagForm] = useState<CreateFeatureFlagRequest>({
-    code: '', nameFr: '', nameAr: '', nameEn: '', owningModule: '', evaluationStrategy: 'BOOLEAN',
-    defaultEnabled: false, description: '',
-  });
-  const [valueForm, setValueForm] = useState<SetConfigurationValueRequest>({
-    definitionId: '', definitionVersionId: '', environment: '', rawValue: '', jsonValue: '',
-    secretReference: '', effectiveFrom: '', effectiveTo: '', createdByActorId: '',
-  });
-  const [valueSubmissionConfirmed, setValueSubmissionConfirmed] = useState(false);
-
-  const listPermission = permissionForRoute(permissions.routes, WORKBENCH_LIST_ROUTE, 'GET');
-  const definitionPermission = permissionForRoute(permissions.routes, DEFINITION_ROUTE, 'POST');
-  const flagPermission = permissionForRoute(permissions.routes, FLAG_ROUTE, 'POST');
-  const valuePermission = permissionForRoute(permissions.routes, VALUE_ROUTE, 'POST');
-
-  const canRead = Boolean(listPermission && permissions.can(listPermission));
-  const canCreateDefinition = Boolean(definitionPermission && permissions.can(definitionPermission));
-  const canCreateFlag = Boolean(flagPermission && permissions.can(flagPermission));
-  const canSetValue = Boolean(valuePermission && permissions.can(valuePermission));
-
-  const resourcesQuery = useQuery({
-    queryKey: workbenchQueryKeys.resources(MODULE),
-    queryFn: () => fetchWorkbenchResources(MODULE),
-    enabled: canRead,
-  });
-
-  const resources = useMemo(() => ({
-    definitions: resourcesQuery.data?.find((item) => item.javaType.endsWith('ConfigurationDefinitionJpaEntity')),
-    flags: resourcesQuery.data?.find((item) => item.javaType.endsWith('FeatureFlagJpaEntity')),
-    values: resourcesQuery.data?.find((item) => item.javaType.endsWith('ConfigurationValueJpaEntity')),
-  }), [resourcesQuery.data]);
-
-  const definitionsQuery = useQuery({
-    queryKey: workbenchQueryKeys.list(MODULE, resources.definitions?.resource ?? '', 0, PAGE_SIZE, ''),
-    queryFn: () => fetchWorkbenchRecords({ module: MODULE, resource: resources.definitions?.resource ?? '', page: 0, size: PAGE_SIZE, query: '' }),
-    enabled: canRead && Boolean(resources.definitions),
-  });
-  const flagsQuery = useQuery({
-    queryKey: workbenchQueryKeys.list(MODULE, resources.flags?.resource ?? '', 0, PAGE_SIZE, ''),
-    queryFn: () => fetchWorkbenchRecords({ module: MODULE, resource: resources.flags?.resource ?? '', page: 0, size: PAGE_SIZE, query: '' }),
-    enabled: canRead && Boolean(resources.flags),
-  });
-  const valuesQuery = useQuery({
-    queryKey: workbenchQueryKeys.list(MODULE, resources.values?.resource ?? '', 0, PAGE_SIZE, ''),
-    queryFn: () => fetchWorkbenchRecords({ module: MODULE, resource: resources.values?.resource ?? '', page: 0, size: PAGE_SIZE, query: '' }),
-    enabled: canRead && Boolean(resources.values),
-  });
-
-  const refreshEvidence = () => queryClient.invalidateQueries({ queryKey: workbenchQueryKeys.resources(MODULE) });
-  const definitionMutation = useMutation({ mutationFn: createConfigurationDefinition, onSuccess: refreshEvidence });
-  const flagMutation = useMutation({ mutationFn: createFeatureFlag, onSuccess: refreshEvidence });
-  const valueMutation = useMutation({
-    mutationFn: setConfigurationValue,
-    onSuccess: async () => {
-      setValueSubmissionConfirmed(false);
-      await refreshEvidence();
-    },
-  });
-
-  function submitDefinition(event: FormEvent) { event.preventDefault(); if (canCreateDefinition) definitionMutation.mutate(definitionForm); }
-  function submitFlag(event: FormEvent) { event.preventDefault(); if (canCreateFlag) flagMutation.mutate(flagForm); }
-  function submitValue(event: FormEvent) {
-    event.preventDefault();
-    if (canSetValue && valueSubmissionConfirmed) valueMutation.mutate(valueForm);
-  }
-
-  if (permissions.status !== 'ready') {
-    return <Container maxWidth="xl"><Alert severity="info">Loading configuration permissions…</Alert></Container>;
-  }
-
-  return (
-    <Container maxWidth="xl" sx={{ py: 3 }}>
-      <Stack spacing={3}>
-        <Box>
-          <Typography component="h1" variant="h4">Configuration administration</Typography>
-          <Typography color="text.secondary">HWEB-014-02 exposes only backend-published configuration operations with exact route permissions.</Typography>
-        </Box>
-
-        <Alert severity="info">
-          HidraAPI publishes create-definition, create-feature-flag, and set-configuration-value operations. It does not publish toggle, update, delete, promotion, rollback, activate/deactivate, or inheritance actions; those controls are intentionally absent. Configuration evidence shown here redacts value-bearing raw/json/secret-reference fields to avoid accidental exposure in the administration UI.
-        </Alert>
-
-        {!listPermission ? <Alert severity="warning">Configuration workbench route-permission metadata is unavailable. Read evidence is denied by default.</Alert> : null}
-        {listPermission && !canRead ? <Alert severity="warning">Your current HidraAPI grants do not allow configuration evidence reads.</Alert> : null}
-        {canRead && resourcesQuery.isPending ? <CircularProgress size={24} /> : null}
-        {resourcesQuery.isError ? <Alert severity="error">{errorMessage(resourcesQuery.error, 'Configuration resources could not be loaded.')}</Alert> : null}
-
-        {canRead && resourcesQuery.data ? (
-          <Stack spacing={2}>
-            {!resources.definitions ? <Alert severity="warning">No ConfigurationDefinitionJpaEntity runtime resource is published.</Alert> : null}
-            {!resources.flags ? <Alert severity="warning">No FeatureFlagJpaEntity runtime resource is published.</Alert> : null}
-            {!resources.values ? <Alert severity="warning">No ConfigurationValueJpaEntity runtime resource is published.</Alert> : null}
-            {resources.definitions && definitionsQuery.data ? <EvidenceList title="Configuration definitions" items={definitionsQuery.data.items} /> : null}
-            {resources.flags && flagsQuery.data ? <EvidenceList title="Feature flags" items={flagsQuery.data.items} /> : null}
-            {resources.values && valuesQuery.data ? <EvidenceList title="Configuration values" items={valuesQuery.data.items} /> : null}
-            {definitionsQuery.isError || flagsQuery.isError || valuesQuery.isError ? <Alert severity="error">A configuration evidence read failed.</Alert> : null}
-          </Stack>
-        ) : null}
-
-        <Paper variant="outlined" sx={{ p: 2 }}>
-          <Stack component="form" spacing={2} onSubmit={submitDefinition}>
-            <Typography component="h2" variant="h6">Create configuration definition</Typography>
-            {!definitionPermission ? <Alert severity="warning">Definition-create route permission metadata is unavailable.</Alert> : null}
-            {definitionPermission && !canCreateDefinition ? <Alert severity="warning">Your current grants do not allow configuration definition creation.</Alert> : null}
-            <TextField label="Namespace ID" value={definitionForm.namespaceId ?? ''} onChange={(e) => setDefinitionForm((v) => ({ ...v, namespaceId: e.target.value }))} />
-            <TextField label="Key" value={definitionForm.key ?? ''} onChange={(e) => setDefinitionForm((v) => ({ ...v, key: e.target.value }))} />
-            <TextField label="French display name" value={definitionForm.displayNameFr ?? ''} onChange={(e) => setDefinitionForm((v) => ({ ...v, displayNameFr: e.target.value }))} />
-            <TextField label="Arabic display name" value={definitionForm.displayNameAr ?? ''} onChange={(e) => setDefinitionForm((v) => ({ ...v, displayNameAr: e.target.value }))} />
-            <TextField label="English display name" value={definitionForm.displayNameEn ?? ''} onChange={(e) => setDefinitionForm((v) => ({ ...v, displayNameEn: e.target.value }))} />
-            <TextField label="Value type" value={definitionForm.valueType ?? ''} onChange={(e) => setDefinitionForm((v) => ({ ...v, valueType: e.target.value as CreateConfigurationDefinitionRequest['valueType'] }))} helperText="STRING, NUMBER, BOOLEAN, DATE, DURATION, JSON, REFERENCE, LIST" />
-            <TextField label="Sensitivity" value={definitionForm.sensitivity ?? ''} onChange={(e) => setDefinitionForm((v) => ({ ...v, sensitivity: e.target.value as CreateConfigurationDefinitionRequest['sensitivity'] }))} helperText="PUBLIC, INTERNAL, RESTRICTED, SECRET_REFERENCE_ONLY" />
-            <FormControlLabel control={<Switch checked={definitionForm.scoped ?? false} onChange={(e) => setDefinitionForm((v) => ({ ...v, scoped: e.target.checked }))} />} label="Scoped" />
-            <FormControlLabel control={<Switch checked={definitionForm.requiresApproval ?? false} onChange={(e) => setDefinitionForm((v) => ({ ...v, requiresApproval: e.target.checked }))} />} label="Requires approval" />
-            <TextField label="Default value" value={definitionForm.defaultValue ?? ''} onChange={(e) => setDefinitionForm((v) => ({ ...v, defaultValue: e.target.value }))} />
-            <TextField label="Description" value={definitionForm.description ?? ''} onChange={(e) => setDefinitionForm((v) => ({ ...v, description: e.target.value }))} />
-            <Button type="submit" variant="contained" disabled={!canCreateDefinition || definitionMutation.isPending}>Create definition</Button>
-            {definitionMutation.isError ? <Alert severity="error">{errorMessage(definitionMutation.error, 'Definition creation failed.')}</Alert> : null}
-            {definitionMutation.data ? <Alert severity="success">Definition {definitionMutation.data.id ?? '—'} recorded with status {definitionMutation.data.status ?? '—'}.</Alert> : null}
-          </Stack>
-        </Paper>
-
-        <Paper variant="outlined" sx={{ p: 2 }}>
-          <Stack component="form" spacing={2} onSubmit={submitFlag}>
-            <Typography component="h2" variant="h6">Create feature flag</Typography>
-            {!flagPermission ? <Alert severity="warning">Feature-flag create route permission metadata is unavailable.</Alert> : null}
-            {flagPermission && !canCreateFlag ? <Alert severity="warning">Your current grants do not allow feature-flag creation.</Alert> : null}
-            <TextField label="Flag code" value={flagForm.code ?? ''} onChange={(e) => setFlagForm((v) => ({ ...v, code: e.target.value }))} />
-            <TextField label="French flag name" value={flagForm.nameFr ?? ''} onChange={(e) => setFlagForm((v) => ({ ...v, nameFr: e.target.value }))} />
-            <TextField label="Arabic flag name" value={flagForm.nameAr ?? ''} onChange={(e) => setFlagForm((v) => ({ ...v, nameAr: e.target.value }))} />
-            <TextField label="English flag name" value={flagForm.nameEn ?? ''} onChange={(e) => setFlagForm((v) => ({ ...v, nameEn: e.target.value }))} />
-            <TextField label="Owning module" value={flagForm.owningModule ?? ''} onChange={(e) => setFlagForm((v) => ({ ...v, owningModule: e.target.value }))} />
-            <TextField label="Evaluation strategy" value={flagForm.evaluationStrategy ?? ''} onChange={(e) => setFlagForm((v) => ({ ...v, evaluationStrategy: e.target.value as CreateFeatureFlagRequest['evaluationStrategy'] }))} helperText="BOOLEAN, PERCENTAGE, RULE_BASED, ALLOW_LIST, DENY_LIST" />
-            <FormControlLabel control={<Switch checked={flagForm.defaultEnabled ?? false} onChange={(e) => setFlagForm((v) => ({ ...v, defaultEnabled: e.target.checked }))} />} label="Default enabled" />
-            <TextField label="Flag description" value={flagForm.description ?? ''} onChange={(e) => setFlagForm((v) => ({ ...v, description: e.target.value }))} />
-            <Button type="submit" variant="contained" disabled={!canCreateFlag || flagMutation.isPending}>Create feature flag</Button>
-            {flagMutation.isError ? <Alert severity="error">{errorMessage(flagMutation.error, 'Feature-flag creation failed.')}</Alert> : null}
-            {flagMutation.data ? <Alert severity="success">Feature flag {flagMutation.data.id ?? '—'} recorded with status {flagMutation.data.status ?? '—'}.</Alert> : null}
-          </Stack>
-        </Paper>
-
-        <Paper variant="outlined" sx={{ p: 2 }}>
-          <Stack component="form" spacing={2} onSubmit={submitValue}>
-            <Typography component="h2" variant="h6">Set configuration value</Typography>
-            {!valuePermission ? <Alert severity="warning">Set-value route permission metadata is unavailable.</Alert> : null}
-            {valuePermission && !canSetValue ? <Alert severity="warning">Your current grants do not allow configuration value creation.</Alert> : null}
-            <TextField label="Definition ID" value={valueForm.definitionId ?? ''} onChange={(e) => setValueForm((v) => ({ ...v, definitionId: e.target.value }))} />
-            <TextField label="Definition version ID" value={valueForm.definitionVersionId ?? ''} onChange={(e) => setValueForm((v) => ({ ...v, definitionVersionId: e.target.value }))} />
-            <TextField label="Environment" value={valueForm.environment ?? ''} onChange={(e) => setValueForm((v) => ({ ...v, environment: e.target.value }))} />
-            <TextField label="Raw value" value={valueForm.rawValue ?? ''} onChange={(e) => setValueForm((v) => ({ ...v, rawValue: e.target.value }))} helperText="Use only when the selected backend definition expects a raw value." />
-            <TextField label="JSON value" value={valueForm.jsonValue ?? ''} onChange={(e) => setValueForm((v) => ({ ...v, jsonValue: e.target.value }))} helperText="HidraWEB does not interpret or validate domain JSON semantics." />
-            <TextField label="Secret reference" type="password" value={valueForm.secretReference ?? ''} onChange={(e) => setValueForm((v) => ({ ...v, secretReference: e.target.value }))} helperText="Enter an opaque backend-managed secret reference only; do not paste secret material." />
-            <TextField label="Effective from" type="datetime-local" value={valueForm.effectiveFrom ?? ''} onChange={(e) => setValueForm((v) => ({ ...v, effectiveFrom: e.target.value }))} slotProps={{ inputLabel: { shrink: true } }} />
-            <TextField label="Effective to" type="datetime-local" value={valueForm.effectiveTo ?? ''} onChange={(e) => setValueForm((v) => ({ ...v, effectiveTo: e.target.value }))} slotProps={{ inputLabel: { shrink: true } }} />
-            <TextField label="Created by actor ID" value={valueForm.createdByActorId ?? ''} onChange={(e) => setValueForm((v) => ({ ...v, createdByActorId: e.target.value }))} />
-            <FormControlLabel
-              control={<Switch checked={valueSubmissionConfirmed} onChange={(e) => setValueSubmissionConfirmed(e.target.checked)} />}
-              label="Confirm configuration value submission"
-            />
-            <Typography variant="body2" color="text.secondary">Confirmation is a frontend safety safeguard only; HidraAPI permissions and validation remain authoritative.</Typography>
-            <Button type="submit" variant="contained" disabled={!canSetValue || !valueSubmissionConfirmed || valueMutation.isPending}>Set configuration value</Button>
-            {valueMutation.isError ? <Alert severity="error">{errorMessage(valueMutation.error, 'Configuration value creation failed.')}</Alert> : null}
-            {valueMutation.data ? <Alert severity="success">Configuration value {valueMutation.data.id ?? '—'} recorded with status {valueMutation.data.status ?? '—'}.</Alert> : null}
-          </Stack>
-        </Paper>
-      </Stack>
-    </Container>
-  );
+ const supported=!!current&&!current.redacted&&['PUBLIC','INTERNAL'].includes(current.sensitivity??'')&&['STRING','BOOLEAN','NUMBER'].includes(current.valueType??'');
+ const refresh=()=>{command.reset();void cache.invalidateQueries({queryKey:scope});};
+ const pager=(offset:number,set:(v:number)=>void,count:number)=><Stack direction="row"><Button disabled={!offset} onClick={()=>set(Math.max(0,offset-25))}>Previous page</Button><Button disabled={count<25} onClick={()=>set(offset+25)}>Next page</Button></Stack>;
+ const valueControl=(label:string,value:string,set:(v:string)=>void,valueType:string)=>valueType==='BOOLEAN'?<Choice label={label} value={value} onChange={set} items={['true','false'].map(id=>({id,label:id}))}/>:<Field label={label} value={value} set={set}/>;
+ return <Container maxWidth="lg"><Stack spacing={3} sx={{py:3}}>
+  <Typography variant="h4" component="h1">Configuration administration</Typography>
+  <Alert severity="info">Typed foundation configuration: STRING, NUMBER and BOOLEAN; PUBLIC or INTERNAL; unscoped and without approvals. Only BOOLEAN feature flags are supported. Secrets and confidential values must not be entered.</Alert>
+  <Failure error={command.error}/><Button onClick={refresh} disabled={command.isPending}>Reload and review</Button>
+  <Paper variant="outlined" sx={{p:2}}><Stack spacing={2}>
+   <Typography variant="h6">Definitions</Typography><Failure error={namespaces.error??definitions.error??detail.error}/>
+   <Choice label="Namespace" value={namespace} onChange={v=>{setNamespace(v);setSelected('');setDefOffset(0);setValueOffset(0);}} items={namespaces.data?.map(x=>({id:x.id,label:x.label??x.code}))??[]}/>{pager(nsOffset,setNsOffset,namespaces.data?.length??0)}
+   <Field label="Key" value={key} set={setKey}/><Field label="Display name" value={name} set={setName}/>
+   <Choice label="Value type" value={type} onChange={v=>{setType(v);setDefault('');}} items={['STRING','NUMBER','BOOLEAN'].map(id=>({id,label:id}))}/>
+   <Choice label="Sensitivity" value={sensitivity} onChange={setSensitivity} items={['PUBLIC','INTERNAL'].map(id=>({id,label:id}))}/>
+   {valueControl('Default value',defaultValue,setDefault,type)}
+   <Button disabled={blocked||!namespace||!key.trim()||!name.trim()||namespaces.isFetching||!!namespaces.error} onClick={()=>command.mutate(async()=>{const r=await api.createConfigurationDefinition({namespaceId:namespace,key,displayNameFr:name,valueType:type as 'STRING'|'NUMBER'|'BOOLEAN',sensitivity:sensitivity as 'PUBLIC'|'INTERNAL',scoped:false,requiresApproval:false,...(defaultValue?{defaultValue}:{})});setSelected(r.id??'');return r;})}>Create definition</Button>
+   <Choice label="Definition" value={selected} onChange={v=>{setSelected(v);setRaw('');setConfirmed(false);setValueOffset(0);}} items={[...(definitions.data??[]).map(x=>({id:x.id,label:x.key})),...((selected&&!definitions.data?.some(x=>x.id===selected))?[{id:selected,label:'New definition'}]:[])]}/>{pager(defOffset,setDefOffset,definitions.data?.length??0)}
+   {current&&<Typography role="status">Definition status: {current.status} · {current.valueType} · {current.sensitivity}</Typography>}
+   {current?.redacted&&<Alert severity="info">Confidential definition: metadata only.</Alert>}
+   <Button disabled={blocked||!supported||current?.status!=='DRAFT'||!current?.updatedAt||detail.isFetching||!!detail.error} onClick={()=>command.mutate(()=>api.activateDefinition(selected,{expectedUpdatedAt:current!.updatedAt!}))}>Activate definition</Button>
+  </Stack></Paper>
+  <Paper variant="outlined" sx={{p:2}}><Stack spacing={2}>
+   <Typography variant="h6">Environment values</Typography><Field label="Environment" value={environment} set={v=>{setEnvironment(v);setValueOffset(0);setConfirmed(false);}}/>
+   <Field label="Effective instant" value={instant} set={setInstant}/><Failure error={effective.error??history.error}/>
+   {effective.data&&<Typography role="status">Effective value: {effective.data.redacted?'[redacted]':effective.data.value??'No value'} · Provenance: {effective.data.provenance} · Version: {effective.data.definitionVersionId}</Typography>}
+   <Field label="Effective from" value={from} set={setFrom}/><Field label="Effective until (exclusive, optional)" value={until} set={setUntil}/>
+   {valueControl('Override value',raw,setRaw,current?.valueType??'STRING')}
+   <FormControlLabel control={<Checkbox checked={confirmed} onChange={e=>setConfirmed(e.target.checked)}/>} label="I confirm this contains no confidential or secret material"/>
+   <Button disabled={blocked||!supported||current?.status!=='ACTIVE'||!current.activeVersionId||!environmentValid||!raw||!confirmed||!Number.isFinite(Date.parse(from))||(!!until&&(!Number.isFinite(Date.parse(until))||Date.parse(until)<=Date.parse(from)))||detail.isFetching||!!detail.error} onClick={()=>command.mutate(()=>api.setConfigurationValue({definitionId:selected,definitionVersionId:current!.activeVersionId,environment,rawValue:raw,effectiveFrom:from,...(until?{effectiveTo:until}:{})}))}>Set configuration value</Button>
+   <Typography variant="h6">Configuration values</Typography>{history.data?.map(v=><Typography key={v.id}>{v.environment} · {v.effectiveFrom} → {v.effectiveTo??'open'} · {v.redacted?'[redacted]':v.rawValue} · Actor: {v.actorId}</Typography>)}{pager(valueOffset,setValueOffset,history.data?.length??0)}
+  </Stack></Paper>
+  <Paper variant="outlined" sx={{p:2}}><Stack spacing={2}>
+   <Typography variant="h6">Feature flags</Typography><Failure error={flags.error??state.error}/>
+   <Field label="Flag code" value={flagCode} set={setFlagCode}/><Field label="Flag name" value={flagName} set={setFlagName}/>
+   <FormControlLabel control={<Checkbox checked={defaultEnabled} onChange={e=>setDefaultEnabled(e.target.checked)}/>} label="Default enabled"/>
+   <Button disabled={blocked||!flagCode.trim()||!flagName.trim()} onClick={()=>command.mutate(async()=>{const r=await api.createFeatureFlag({code:flagCode,nameFr:flagName,owningModule:'configuration',evaluationStrategy:'BOOLEAN',defaultEnabled});setFlag(r.id??'');return r;})}>Create feature flag</Button>
+   <Choice label="Feature flag" value={flag} onChange={setFlag} items={[...(flags.data??[]).map(x=>({id:x.id,label:x.code})),...((flag&&!flags.data?.some(x=>x.id===flag))?[{id:flag,label:'New feature flag (locate in pages to activate)'}]:[])]}/>{pager(flagOffset,setFlagOffset,flags.data?.length??0)}
+   {selectedFlag&&<Typography role="status">Flag status: {selectedFlag.status}</Typography>}
+   <Button disabled={blocked||selectedFlag?.status!=='DRAFT'||selectedFlag.strategy!=='BOOLEAN'||!selectedFlag.updatedAt||flags.isFetching||!!flags.error} onClick={()=>command.mutate(()=>api.activateFlag(flag,{expectedUpdatedAt:selectedFlag!.updatedAt!}))}>Activate feature flag</Button>
+   {state.data&&<Typography role="status">Flag enabled: {String(state.data.enabled)} · Provenance: {state.data.provenance}</Typography>}
+   <FormControlLabel control={<Checkbox checked={enabled} onChange={e=>setEnabled(e.target.checked)}/>} label="Environment flag enabled"/>
+   <Button disabled={blocked||selectedFlag?.status!=='ACTIVE'||selectedFlag.strategy!=='BOOLEAN'||!state.data?.updatedAt||!environmentValid||state.isFetching||!!state.error} onClick={()=>command.mutate(()=>api.setFlagState(flag,{environment,enabled,expectedUpdatedAt:state.data!.updatedAt!}))}>Save flag state</Button>
+  </Stack></Paper>
+ </Stack></Container>;
 }

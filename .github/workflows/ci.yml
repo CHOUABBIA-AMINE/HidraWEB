@@ -114,7 +114,7 @@ jobs:
           if-no-files-found: error
 
   foundation-native:
-    name: W1 and W2 native API and PostgreSQL browser qualification
+    name: W1, W2 and W3 native API and PostgreSQL browser qualification
     runs-on: ubuntu-latest
     timeout-minutes: 20
     services:
@@ -260,6 +260,7 @@ jobs:
           fi
           psql -v ON_ERROR_STOP=1 --file scripts/foundation-native-fixture.sql
           psql -v ON_ERROR_STOP=1 --file scripts/foundation-topology-fixture.sql
+          psql -v ON_ERROR_STOP=1 --file scripts/foundation-configuration-fixture.sql
       - name: Restart native API with real audited administrator bootstrap
         shell: bash
         run: |
@@ -311,7 +312,7 @@ jobs:
           exit 1
       - name: Prepare synthetic current W2 permissions
         run: node scripts/prepare-foundation-topology.mjs
-      - name: Run mandatory W1 and W2 browser journeys against native JWT and PostgreSQL
+      - name: Run mandatory W1, W2 and W3 browser journeys against native JWT and PostgreSQL
         shell: bash
         run: |
           set -euo pipefail
@@ -321,9 +322,9 @@ jobs:
           import json, os
           with open(os.environ['PLAYWRIGHT_JSON_OUTPUT_NAME']) as report:
               stats = json.load(report)['stats']
-          assert stats['expected'] == 5, stats
+          assert stats['expected'] == 7, stats
           assert stats['unexpected'] == stats['flaky'] == stats['skipped'] == 0, stats
-          print('W1/W2 native browser qualification: 5 passed, 0 failed/flaky/skipped')
+          print('W1/W2/W3 native browser qualification: 7 passed, 0 failed/flaky/skipped')
           PYTHON
       - name: Stop disposable native API
         if: always()

@@ -50,16 +50,22 @@ describe('administration contract guardrails', () => {
       data: exportRequest,
     });
     expect(httpClient).toHaveBeenNthCalledWith(2, {
+      headers: { 'Content-Type': 'application/json' },
+      signal: undefined,
       method: 'POST',
       url: '/api/v1/configuration/definitions',
       data: definition,
     });
     expect(httpClient).toHaveBeenNthCalledWith(3, {
+      headers: { 'Content-Type': 'application/json' },
+      signal: undefined,
       method: 'POST',
       url: '/api/v1/configuration/feature-flags',
       data: flag,
     });
     expect(httpClient).toHaveBeenNthCalledWith(4, {
+      headers: { 'Content-Type': 'application/json' },
+      signal: undefined,
       method: 'POST',
       url: '/api/v1/configuration/values',
       data: value,

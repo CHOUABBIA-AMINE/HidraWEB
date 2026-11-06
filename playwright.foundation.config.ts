@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests/e2e',
-  testMatch: ['foundation-context-live.spec.ts', 'foundation-topology-live.spec.ts'],
+  testMatch: ['foundation-context-live.spec.ts', 'foundation-topology-live.spec.ts', 'foundation-configuration-live.spec.ts'],
   fullyParallel: false,
   forbidOnly: true,
   retries: 0,

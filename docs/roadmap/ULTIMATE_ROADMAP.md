@@ -2544,3 +2544,100 @@ claimed rerun. Observe applicable CI creation/start, then STOP.
 Next reserved implementation: W3/HWEB-F13, requiring separate owner selection
 and source-backed scope registration. W3/W4/A1, numerical/P3, release and
 deployment are not selected or executed by this acceptance.
+
+
+## HWEB-F13 / W3 — selected whole typed Configuration delivery (2026-11-06)
+
+Owner Next selects W3 after W2 acceptance and Docs51 SUCCESS on
+1cf9d87e21ada106bd3a5bdb7e82b11ab0b35f77 (tree6bb07611beb9f42c842672f4261f866b34790ef6).
+B5/HAPI-927 is accepted; current API db712ab35ff3051c489e74327090d2fc7ef47b33
+retains implementation f1fdc206c916a5266f609810c045c6b5688bfd49, whose Full1137
+run42211688855 succeeds. Runtime artifact13499236734 ZIP SHA256
+b86e00f3a4ce83474ea3af1dc297b6ebaabfb6ab27ccc25ebcec426478f4a928 is authenticated.
+Closed Configuration slice: 13 paths/14 schemas, SHA256 6df15b4570903b52ba0008ac66c746812a7a58f786613d8158de3cc1c3165d1d.
+Exact message: `feat(configuration): integrate typed foundation administration`.
+
+Exact CREATE: openapi/candidates/hidra-configuration-f1fdc206c916a5266f609810c045c6b5688bfd49.json; src/features/configuration/ConfigurationAdministrationPage.test.tsx;
+tests/e2e/foundation-configuration-live.spec.ts; scripts/foundation-configuration-fixture.sql.
+Exact MODIFY: src/features/configuration/ConfigurationAdministrationPage.tsx;
+api/configurationApi.ts (relative to that feature); orval.configuration.config.ts;
+scripts/check-openapi-compatibility.mjs; scripts/verify-configuration-candidate.test.mjs;
+tests/e2e/configuration-administration.spec.ts; playwright.foundation.config.ts;
+.github/workflows/ci.yml; this roadmap; docs/architecture/Hidra-API-Web-Contract-v1.md;
+docs/roadmap/HidraAPI-Frontend-Backend-Gap-Register.md. No DELETE.
+
+Reuse route/security shell; owner namespace/definition/flag choices and typed
+STRING/NUMBER/BOOLEAN, PUBLIC/INTERNAL unscoped definitions; exact activation
+version, environment half-open overrides, effective default/override provenance,
+server-derived actor, BOOLEAN flag lifecycle/state and stale conflict review.
+Restricted metadata remains redacted by backend; no secret payload inspector,
+actor impersonation, raw IDs for supported choices, local durable config or
+unsupported approval/scoping/type/strategy promise. Read/write authority is checked
+before owner requests. Preserve existing W1/W2 native cases, add W3 positive and
+denied native cases against pinned real API/fresh PostgreSQL. No business API mocks
+in native lane, mutation retries, fixture business values, API changes or W4/A1/P3.
+Local build/contracts/tests and hosted native qualification are independent gates.
+Publish guarded against the above WEB head, observe exact-SHA Code/Docs startup,
+then STOP. W3 stays pending hosted qualification; W4/HWEB-F14 is next after W3 acceptance.
+
+W3 same-delivery scope reconciliation also MODIFY
+`src/features/administration/AdministrationContract.test.ts`: preserve exact canonical
+POST/body expectations while asserting the generated client's JSON header and
+optional abort signal. This replaces the old handwritten-transport call shape;
+no production route or test assertion is weakened.
+
+
+## HWEB-F13 / W3 — whole typed Configuration source delivery (2026-11-06)
+
+W3 is IMPLEMENTED / NATIVE_BROWSER_QUALIFICATION_PENDING. Reuses the existing
+ConfigurationAdministrationPage route, security shell and native W1/W2 lane.
+Consumes only generated transport from the authenticated runtime Configuration
+slice of API f1fdc206c916a5266f609810c045c6b5688bfd49. Full runtime JSON SHA256
+ da4326497b4c65f9dcbeb286b64c1c9840a6fc73b91c3543c48633f682fb3fba;
+closed slice13 paths/14 schemas SHA256
+6df15b4570903b52ba0008ac66c746812a7a58f786613d8158de3cc1c3165d1d.
+All20 other active contract pins and historical Configuration artifacts remain.
+
+Current administrator authority is required before any protected read, choices
+or counts. Owner namespace/definition/flag paging replaces raw ID entry; exact
+server activation timestamps and active version IDs are passed unchanged.
+Supported STRING/NUMBER/BOOLEAN, PUBLIC/INTERNAL unscoped definitions without
+approval support default/effective reads and explicit half-open environment
+overrides. Actor identity comes from the backend, never browser input. BOOLEAN
+flag creation/activation, environment state/default provenance and stale-version
+conflict review are supported. Failed commands are never retried and require
+explicit review/reset. Confidential metadata is rendered as metadata; no raw JSON
+payload inspector, secret reference input, local durable truth or physics exists.
+The former legacy DURATION/approval/scoped/actor-ID forms and their mocked
+transport assertions are replaced by admitted typed controls and matching tests,
+not claimed supported by B5. Backend redaction, not UI hiding, is authoritative.
+
+Native CI preserves the three W1 and two W2 journeys and requires all seven
+W1/W2/W3 cases passed with0 failed/flaky/skipped and retries0. W3 positive source
+covers NUMBER lifecycle, canonical default, override and exclusive-end fallback,
+BOOLEAN flag lifecycle/state, exact stale409 preserving enabled state and browser
+reload. The denied case uses genuine LOCAL credentials and requires403 before
+catalog/missing-detail/effective/flag disclosure or definition write. The only
+new SQL fixture provisions a synthetic namespace and ordinary Configuration DML
+privileges in the exact disposable database; business definitions/values/flags
+are written through owner APIs. No new backend or production migration is needed.
+
+Local validation PASS: npm ci/generation;21 pinned OpenAPI checks; TypeScript;
+lint0 errors/6 existing fast-refresh warnings;57 Vitest files/151 tests with two
+workers;97 Node contract tests;6 performance cases; production build and unchanged
+bundle budgets (initial JS896.4KiB/900KiB;25 lazy entries; largest lazy route39.7KiB/
+96KiB; largest JS chunk995.4KiB/1050KiB). Seven native tests enumerate successfully.
+An outdated shared handwritten-transport assertion was repaired to retain exact
+routes/body and additionally assert generated JSON header/abort signal; final
+full suite passes. Native API/PostgreSQL/browser journeys are authored for CI,
+not claimed executed on this host. Ordinary browser regressions likewise require
+hosted execution. Canonical documentation, shell syntax and append-only checks
+are required before guarded publication. Generated clients remain untracked.
+
+Exact source publication is4 CREATE /12 MODIFY /0 DELETE paths under the registered
+W3 message `feat(configuration): integrate typed foundation administration`.
+Expected WEB head1cf9d87e21ada106bd3a5bdb7e82b11ab0b35f77. Verify parent/tree/blobs,
+observe new-SHA Code/Docs creation or startup, then STOP. Hosted qualification and
+independent acceptance remain gates; green unit tests do not prove deployment.
+W4/HWEB-F14 remains next after W3 acceptance and separate selection. A1 integrated
+acceptance, industrial/SITE, numerical/P3, release and deployment remain unexecuted.
