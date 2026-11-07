@@ -24,7 +24,7 @@ function dateTimeInput(minutesAgo: number) {
 }
 
 test('A1 native Organization and Party persist and the same eligible Party reaches Topology', async ({ page, request }) => {
-  const prefix = `A1-${crypto.randomUUID().slice(0, 8)}`;
+  const prefix = `A1-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
   const parentCode = prefix + '-PARENT';
   const childCode = prefix + '-CHILD';
   const employeeNumber = prefix + '-EMP';
