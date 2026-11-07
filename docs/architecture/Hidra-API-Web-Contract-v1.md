@@ -922,3 +922,15 @@ authority for target access, assignment and transition admission. The unrelated
 actor's handoff returned an empty 404 and the tested Workflow calls returned
 403. The physical link stayed DRAFT after each completed review. Physical
 approval publication and HWEB-F15/A1 are separate acceptance scopes.
+
+## HWEB-F15 / A1 — Organization responsibility approval prerequisite (2026-11-07)
+
+A1 Journey B is BLOCKED. The accepted HidraAPI runtime
+`5817406923e53761577ac41bbc3f318b517c3977` exposes Organization responsibility
+assign/read/revoke. Assign and revoke consume a matching completed
+`organization/RESPONSIBILITY_CHANGE` approval. Workflow start requires an owner
+resolver for the target family, and this runtime has no resolver for that
+Organization target. The W4 Workflow handoff is for an installed-characteristic
+link revision. A1 requires an approved Organization producer contract or an
+explicit owner revision of the acceptance scope. The full evidence and guarded
+publication scope are recorded in the canonical roadmap.

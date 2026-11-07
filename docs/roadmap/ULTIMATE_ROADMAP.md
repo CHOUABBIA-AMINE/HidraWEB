@@ -3013,3 +3013,62 @@ Publish directly to main with expected head
 the acceptance commit. Code CI is path-filtered. Stop after exact-SHA Docs CI
 queues or starts. The next registered stage is HWEB-F15/A1 integrated software
 acceptance, subject to separate owner selection.
+
+## HWEB-F15 / A1 — integrated acceptance blocked on Organization approval (2026-11-07)
+
+Owner Next selects the whole A1 delivery under the adopted foundation supplement.
+The registered message for that delivery is
+`test(foundation): verify six-module live backend browser journeys`. A1 requires
+the five A–E journeys against one pinned API and fresh PostgreSQL, with real
+browser and owner API operations. Journey B includes the Organization hierarchy
+and scoped appointment path, a supported responsibility assignment and revocation,
+and Party creation, activation and reference discovery.
+[Adopted foundation supplement](https://github.com/CHOUABBIA-AMINE/HidraAPI/blob/428a6f00a5813294b067daeb0df5f5bdaff72658/doc/roadmap/FOUNDATION_PRODUCTION_ROADMAP.md)
+
+WEB main `6807c8e720ccaedf1831330b0b3d401b113f6d84`, parent
+`6b2230d81832d4d09bdda0410c896dba3ba239fe`, tree
+`c1a7080bf4414d3a23ca60bb303bbb61bca42995`, passed Docs #59. The parent
+passed Code #1029 with all nine native W1–W4 browser cases. API main
+`428a6f00a5813294b067daeb0df5f5bdaff72658` passed Docs #931 and differs
+from the accepted runtime pin `5817406923e53761577ac41bbc3f318b517c3977`
+only in documentation. That runtime passed Full CI #1140 and Docs #930.
+[WEB Docs #59](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42376409386)
+[WEB Code #1029](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42363484721)
+[API Full #1140](https://github.com/CHOUABBIA-AMINE/HidraAPI/actions/runs/42299943400)
+[API Docs #931](https://github.com/CHOUABBIA-AMINE/HidraAPI/actions/runs/42304417409)
+
+**BLOCKED in Journey B.** The runtime OpenAPI from Full #1140, stamped with the
+runtime SHA and SHA-256
+`062864129140cf85bc16982e7a856fb6aef0dc3a9af650cab635c2f9b0222493`,
+publishes responsibility assignment, lookup and revocation. Both mutation
+operations consume a completed `organization/RESPONSIBILITY_CHANGE` approval
+with a matching operation reference and final APPROVE decision.
+`WorkflowApplicationService.startWorkflowInstance` calls
+`WorkflowExecutionOwnership.requireTarget`, which requires exactly one
+registered resolver for the target family. The pinned runtime has no
+Organization responsibility-change resolver. The responsibility approval
+adapter's unit test supplies Workflow query responses through a mock. This
+evidence qualifies the consumer contract but leaves the required approval
+producer unproven. The W4 Topology approval belongs to a different target
+family. The accepted WEB Organization client also has an appointment assignment
+operation but lacks browser consumers for the published appointment end and
+transfer commands.
+[Workflow target admission](https://github.com/CHOUABBIA-AMINE/HidraAPI/blob/5817406923e53761577ac41bbc3f318b517c3977/src/main/java/dz/sh/hidra/modules/workflow/application/service/WorkflowExecutionOwnership.java)
+[Responsibility approval consumer](https://github.com/CHOUABBIA-AMINE/HidraAPI/blob/5817406923e53761577ac41bbc3f318b517c3977/src/main/java/dz/sh/hidra/modules/workflow/application/service/OrganizationResponsibilityWorkflowContractAdapter.java)
+
+The whole A1 delivery remains blocked. W1–W4 retain their accepted scopes.
+The owner must decide whether to register a bounded prerequisite that admits
+an Organization-owned, operation-bound Workflow target and exposes a supported
+approval path, or explicitly revise the A1 acceptance criterion. A prerequisite
+would require genuine assignment and revocation approvals and exact-SHA
+HTTP/PostgreSQL/CI evidence. Native browser acceptance must use owner APIs for
+the actual business states and decisions.
+
+Record this blocked disposition within A1 with
+`docs(foundation): record A1 organization approval blocker`. Append only to
+this roadmap, `docs/architecture/Hidra-API-Web-Contract-v1.md` and
+`docs/roadmap/HidraAPI-Frontend-Backend-Gap-Register.md`. Canonical Docs,
+append-only scope and exact parent, tree, blobs and message verification precede
+guarded publication to existing main at expected
+`6807c8e720ccaedf1831330b0b3d401b113f6d84`. Documentation Validation applies.
+Code CI is path-filtered. Stop after exact-SHA Docs CI queues or starts.

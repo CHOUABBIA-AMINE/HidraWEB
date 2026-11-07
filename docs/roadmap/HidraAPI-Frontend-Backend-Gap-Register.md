@@ -824,3 +824,15 @@ retained DRAFT state and unrelated actor denial. The earlier pending and failed
 entries record the state at their respective commits. HWEB-F15/A1 integrated
 acceptance, protected physical approval publication and SITE acceptance remain
 separate gates.
+
+## HWEB-F15 / A1 — blocked integrated acceptance (2026-11-07)
+
+**BLOCKED in Journey B.** The accepted runtime exposes responsibility assignment
+and revocation with a completed, matching Organization approval prerequisite.
+The pinned Workflow runtime lacks an owner resolver for
+`organization/RESPONSIBILITY_CHANGE`, so the required approval cannot be created
+through the published Workflow start path. Appointment end and transfer are
+published by HidraAPI and lack HidraWEB browser consumers. This disposition
+preserves W1–W4 acceptance and keeps the five-journey A1 gate open. The next
+dependency is an owner decision on the Organization approval path and the
+resulting integrated acceptance scope.
