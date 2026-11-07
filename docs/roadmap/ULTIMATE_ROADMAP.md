@@ -2928,3 +2928,46 @@ expected WEB main 8ba7b908a27bc87ac54189ac6fedfa9a02f86e3d. Verify the
 exact parent, tree and two modified blobs. Stop after verifying exact-SHA
 Code and Docs CI queue or start. W4 remains pending independent native
 acceptance. HWEB-F15/A1 remains gated on W4 acceptance.
+
+## HWEB-F14 / W4 — Code #1028 native fixture repair (2026-11-07)
+
+Code #1028 failed on WEB main 222d48b199aeed91d57d73fcb44ccbf1a8f8d35c,
+parent 8ba7b908a27bc87ac54189ac6fedfa9a02f86e3d and tree
+becd57c3df358c61d5cec85c3053d25df6b9bbf4. Standard verification, Docs #57
+and all seven W1–W3 native browser cases passed. W4 passed the manufacturer role
+SQL and stopped at installed-unit registration with HTTP 503. Neither W4 browser
+case ran in #1028.
+
+PostgreSQL 16.15 reproduces the guard rejection with the old fixture grants.
+The unit registration guard requires the Party eligibility registry to remain
+read-only for the publication role. W4 now registers the unit with the W2
+credential, switches to the manufacturer publication grants and revokes source
+writes before draft-link creation. Exact Party relation privileges support the
+backend's lock checks in the disposable W4 database.
+
+Local browser diagnosis also found that HidraWEB sign-in requires
+`security:permissions:read` for permission metadata. Both synthetic W4 users
+receive that read permission. The unrelated actor receives no Workflow or
+Topology grant and opens the actual protected target in the browser denial case.
+Owner APIs still create the unit, source revision, draft link and Workflow records.
+
+Registered repair message `fix(workflow): isolate native qualification fixture privileges`.
+Modify only `.github/workflows/ci.yml`, `scripts/foundation-workflow-fixture.sql`,
+`scripts/prepare-foundation-workflow.mjs`, `tests/e2e/foundation-workflow-live.spec.ts`
+and append this roadmap. Preserve the immutable API pin, the seven W1–W3 and
+two W4 native cases, zero retries, the test budgets and the existing exact HTTP
+acceptance assertions.
+
+Final local validation passed with the unmodified pinned API
+5817406923e53761577ac41bbc3f318b517c3977, a fresh PostgreSQL 16.15 database migrated
+by Flyway, and pinned Chromium. Seven W1–W3 cases passed, W4 setup completed through
+process discovery, and both W4 cases passed with zero retries or skips. The W4
+cases exercised APPROVE and REJECT, persisted timeline after reload, stale replay
+409, retained DRAFT state and unrelated actor denial. An earlier isolated run
+without the preceding W1–W3 cases returned a unit registration 503 locally. The
+final run followed the required CI sequence and completed on the first attempt.
+
+Verify the exact parent, tree and five modified blobs, then publish to existing
+main guarded by 222d48b199aeed91d57d73fcb44ccbf1a8f8d35c. Stop after observing
+exact-SHA Code and Docs CI queue or start. W4 still requires hosted native
+qualification and independent acceptance. HWEB-F15/A1 follows W4 acceptance.

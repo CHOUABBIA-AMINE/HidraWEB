@@ -1,16 +1,18 @@
--- Synthetic W4 security/reference setup, invoked only AFTER the seven W1-W3 cases.
+-- Synthetic W4 security setup, after the seven W1-W3 cases and W4 unit registration.
 \set ON_ERROR_STOP on
 BEGIN;
 DO $$
 DECLARE t text; item record;
 BEGIN
  IF current_database()<>'hidra_foundation_w1' THEN RAISE EXCEPTION 'Exact disposable database required'; END IF;
+ REVOKE INSERT,UPDATE,DELETE ON public.hidra_topology_installed_unit FROM w2_installed;
  FOREACH t IN ARRAY ARRAY['hidra_workflow_instance','hidra_workflow_task'] LOOP
   EXECUTE format('GRANT INSERT,UPDATE ON public.%I TO w2_app',t);
  END LOOP;
  GRANT INSERT ON public.hidra_workflow_action,public.hidra_workflow_state_history TO w2_app;
  REVOKE SELECT ON public.hidra_topology_installed_characteristic_revision FROM w2_app;
- FOREACH t IN ARRAY ARRAY['hidra_workflow_action','hidra_workflow_definition','hidra_workflow_definition_target_binding','hidra_workflow_instance','hidra_workflow_state_history','hidra_workflow_step','hidra_workflow_task','hidra_workflow_transition','hidra_workflow_type_catalog','hidra_party_eligibility_generation','hidra_party_manufacturer_source_authorization'] LOOP
+ -- The native Party and Workflow evidence participants take final relation fences.
+ FOREACH t IN ARRAY ARRAY['hidra_workflow_action','hidra_workflow_definition','hidra_workflow_definition_target_binding','hidra_workflow_instance','hidra_workflow_state_history','hidra_workflow_step','hidra_workflow_task','hidra_workflow_transition','hidra_workflow_type_catalog','hidra_party_party','hidra_party_eligibility_generation','hidra_party_role','hidra_party_role_assignment','hidra_party_manufacturer_profile','hidra_party_manufacturer_source_authorization'] LOOP
   EXECUTE format('GRANT UPDATE ON public.%I TO w2_installed',t);
  END LOOP;
  GRANT INSERT ON public.hidra_topology_installed_characteristic_revision,public.hidra_topology_installed_characteristic_request,public.hidra_topology_installed_characteristic_approval,public.hidra_topology_installed_characteristic_approval_request TO w2_installed;

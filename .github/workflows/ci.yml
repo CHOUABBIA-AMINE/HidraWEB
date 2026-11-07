@@ -327,9 +327,7 @@ jobs:
           print('W1/W2/W3 native browser qualification: 7 passed, 0 failed/flaky/skipped')
           PYTHON
       - name: Prepare explicit synthetic W4 source and process configuration
-        run: |
-          psql -v ON_ERROR_STOP=1 --file scripts/foundation-workflow-fixture.sql
-          node scripts/prepare-foundation-workflow.mjs
+        run: node scripts/prepare-foundation-workflow.mjs
       - name: Run mandatory W4 native review and denial browser journeys
         shell: bash
         run: |
