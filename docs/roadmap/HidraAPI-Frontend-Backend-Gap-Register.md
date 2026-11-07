@@ -845,3 +845,26 @@ the integrated qualification dependency. Those capability gaps remain in
 their owning scopes. The A1 candidate exercises one initial appointment and the
 same eligible Party in the Topology system write. A1 is pending all native
 A–E results and exact-SHA evidence review.
+
+
+## HWEB-F15 / A1 — accepted native six-module foundation evidence (2026-11-07)
+
+Status: **VERIFIED for the owner-revised A1 synthetic native browser scope**.
+The earlier Organization responsibility approval prerequisite remains a
+preserved historical BLOCKED observation under the superseded Journey B
+criterion; it is **not** an implemented producer or a verified responsibility
+assignment/revocation path. Initial appointment and its current owner read,
+Organization unit/employee hierarchy/lifecycle, Party activation/role/history,
+protected denial and Party-to-Topology reference reuse meet the revised gate.
+
+Exact WEB `c6a44faa80a74871dc31c5c1e4ada2d1c05863ac`, immutable API
+`5817406923e53761577ac41bbc3f318b517c3977`,
+[Code CI #1033](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42410743798) SUCCESS and
+[A1 evidence artifact ID 13589920776](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42410743798/artifacts/13589920776) are the acceptance pins.
+Native A1 1/1, W1–W3 7/7 and W4 2/2 passed with zero unexpected, flaky or skipped;
+201 Flyway migrations succeeded and the retained runtime OpenAPI SHA256 is
+`48bfd92267aaba516ae948bde71bb461868ae059afbd9a4ad5630eb39d07a189`.
+Historical contract-pinning and engineering gaps keep their original statuses
+and dated evidence. Appointment transfer/end, Workflow-approved responsibility
+change, unified deployment-role concurrency, industrial/SITE acceptance,
+release/deployment, live OT/SCADA and numerical/P3 remain outside this record.

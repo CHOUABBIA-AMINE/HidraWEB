@@ -947,3 +947,28 @@ LOCAL actor checks protected reads against those existing records. The
 identifies the exact evidence to review. This gate uses the initial appointment
 contract. The historical responsibility, end and transfer gaps remain tracked
 separately.
+
+
+## HWEB-F15 / A1 — revised integrated foundation browser contract accepted (2026-11-07)
+
+The owner-approved A1 Journey B revision at HidraAPI
+`1e5e18f7f13d10f21e1cdf95cb0568dfe49cc383` is the acceptance authority.
+The prior responsibility-change approval-producer blocker remains an accurate
+historical limitation, not a requirement silently bypassed. Initial Organization
+appointment, parent/child hierarchy, employee activation/history, Party lifecycle,
+role/history, authorized and denied reads, eligible Party reference, and reuse of
+that same Party in a persisted Topology write are now **VERIFIED for the accepted
+A1 native software journey only**. No new REST endpoint or frontend-owned business
+truth was introduced.
+
+HidraWEB `c6a44faa80a74871dc31c5c1e4ada2d1c05863ac` passed [Code CI #1033](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42410743798) with
+10/10 native browser tests against immutable HidraAPI
+`5817406923e53761577ac41bbc3f318b517c3977`, native JWT, fresh PostgreSQL
+and synthetic fixtures. [A1 artifact](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42410743798/artifacts/13589920776) contains exact source pins,
+201 successful Flyway migration entries, runtime OpenAPI checksum and all three
+Playwright reports with zero unexpected/flaky/skipped. Historical W1–W4
+software acceptance is preserved. Appointment transfer/end and Workflow-approved
+Organization responsibility assign/revoke remain outside A1 and are not marked
+VERIFIED. The fixture's sequential privilege modes do not validate a unified
+concurrent deployment. This status does not establish SITE, real OT, calibration,
+production release/deployment or numerical/P3 capabilities.

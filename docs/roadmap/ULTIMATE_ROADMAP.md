@@ -3080,3 +3080,64 @@ blocker for this gate. The candidate covers native Journeys A–E against API
 `5817406923e53761577ac41bbc3f318b517c3977` and fresh PostgreSQL. Integrated
 acceptance remains pending the exact-SHA results and evidence review.
 [Qualification procedure](../deployment/Six-Module-Foundation-Acceptance.md)
+
+
+## HWEB-F15 / A1 — independent integrated native qualification accepted (2026-11-07)
+
+Owner Next selects the acceptance checkpoint for the implemented HWEB-F15/A1
+six-module foundation, under the owner-approved Journey B revision in HidraAPI
+`1e5e18f7f13d10f21e1cdf95cb0568dfe49cc383`. This is a documentation-only
+acceptance of the registered synthetic software journey, not a new implementation.
+
+HidraWEB main candidate `c6a44faa80a74871dc31c5c1e4ada2d1c05863ac`, parent
+`980da172d4f6f307deab1a69a79f052aedb0acc5`, tree `edf629c06e37f6e03433706c41f7bb54f1475bc0`, passed
+[HidraWEB Code CI #1033](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42410743798), run `42410743798`, attempt 1,
+completed SUCCESS on that exact WEB SHA. Both the ordinary verify job
+`128518121778` and native PostgreSQL/browser job `128518121956` succeeded.
+The immutable runtime backend is HidraAPI
+`5817406923e53761577ac41bbc3f318b517c3977` (Full CI #1140 succeeded);
+the later backend roadmap amendment is documentation-only. A1's native job
+uses genuine LOCAL JWT and fresh PostgreSQL 16 with synthetic policy/privilege
+fixtures, not mocked business routes or production plant data.
+
+[Exact-SHA A1 qualification artifact](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42410743798/artifacts/13589920776) ID `13589920776`
+was downloaded and inspected: artifact ZIP SHA256
+`0bbf1d256569ab456353452c369de3b38c711f033bc8e3925be23d223e7eee2e`;
+`sources.txt` records both SHAs, run/attempt 1 and synthetic database;
+all 201 Flyway migration entries are success; runtime OpenAPI has 345 paths,
+SHA256 `48bfd92267aaba516ae948bde71bb461868ae059afbd9a4ad5630eb39d07a189`
+matching the retained checksum. All three Playwright JSON reports have
+unexpected/flaky/skipped = 0: A1 integrated Journey B→C 1/1, preserved
+W1–W3 7/7, preserved W4 2/2; total **10/10 native cases passed**.
+The A1 browser case creates parent/child Organization units, activates and
+reads back the employee, creates the exact initial appointment, creates and
+activates a Party, records its role/history, checks protected reads with a
+separate denied LOCAL actor, and reuses the same Party ID in a persisted
+Topology system write/read. The preserved W1–W4 cases exercise Identity,
+Topology, Configuration and Workflow, including independent decisions,
+unauthorized reads, conflict/replay and reload evidence within their bounded
+accepted scopes.
+
+**Disposition: HWEB-F15/A1 ACCEPTED for the adopted revised six-module
+synthetic software/native-browser foundation.** The earlier Organization
+responsibility approval blocker remains historical and is not claimed
+implemented: appointment transfer/end and Workflow-approved responsibility
+assignment/revocation are explicitly outside revised Journey B. The fixture
+switches a Party row-lock grant between appointment and Topology phases;
+concurrent operation under one deployment-role layout was not qualified.
+This is not production deployment, SITE/industrial calibration, full security
+certification, live OT/SCADA, numerical simulation/P3 or release acceptance.
+
+Registered acceptance-record message:
+`docs(foundation): accept A1 six-module native qualification`.
+Exact scope: append only this roadmap,
+`docs/architecture/Hidra-API-Web-Contract-v1.md` and
+`docs/roadmap/HidraAPI-Frontend-Backend-Gap-Register.md`; no other files,
+source changes, tests, fixtures, contracts or GitHub Actions changes.
+Validate canonical Docs and preserved append-only history; publish guarded
+directly to main from expected head `c6a44faa80a74871dc31c5c1e4ada2d1c05863ac`, verify commit
+parent/tree/blobs, observe new-SHA Documentation Validation creation/start,
+then STOP. Code CI is paths-filtered for a documentation-only change.
+The adopted 12-delivery six-module foundation has no subsequent registered
+implementation delivery after A1; engineering production/SITE/release and
+previously excluded Organization responsibilities require separate authority.
