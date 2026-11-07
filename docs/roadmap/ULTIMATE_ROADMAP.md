@@ -2971,3 +2971,45 @@ Verify the exact parent, tree and five modified blobs, then publish to existing
 main guarded by 222d48b199aeed91d57d73fcb44ccbf1a8f8d35c. Stop after observing
 exact-SHA Code and Docs CI queue or start. W4 still requires hosted native
 qualification and independent acceptance. HWEB-F15/A1 follows W4 acceptance.
+
+## HWEB-F14 / W4 — independent native acceptance (2026-11-07)
+
+Owner Next selects acceptance of the registered W4 delivery. **HWEB-F14/W4
+is ACCEPTED for the configured installed-characteristic link review software
+and native browser scope.**
+
+Verified WEB main `6b2230d81832d4d09bdda0410c896dba3ba239fe`, parent
+`222d48b199aeed91d57d73fcb44ccbf1a8f8d35c`, and tree
+`26a4053479565ce491146068373e61e54b2b2455`.
+[Code CI #1029](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42363484721)
+and [Docs #58](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42363484734)
+completed successfully on that exact SHA. Verify job 128376526700 passed, including
+21 OpenAPI compatibility checks, 156 component tests and six performance cases.
+[Native job 128376526789](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42363484721/job/128376526789)
+confirmed seven W1–W3 cases and two W4 cases passed, with zero failures, flaky
+results or skips and retries set to zero. It used the accepted HidraAPI pin
+`5817406923e53761577ac41bbc3f318b517c3977`, native JWT, PostgreSQL 16.15 and
+the disposable synthetic fixtures.
+
+The W4 evidence covers server-owned target handoff, process discovery, explicit
+start and independent reviewer assignment. Separate APPROVE and REJECT executions
+persisted in the timeline after reload. Each stale replay returned 409, each
+Workflow instance completed, and the physical link stayed DRAFT. The unrelated
+LOCAL actor received a 404 with an empty handoff response, and 403 on the tested
+inbox, detail, available action, timeline and start calls. The same actor could
+sign in and open the exact target route with no handoff or start controls.
+
+This closes the W4 native browser qualification gate. Protected publication of
+the physical link, general process design, integrated A1 software acceptance,
+industrial and SITE acceptance, numerical/P3, release and deployment remain
+separate gates.
+
+Registered acceptance message `docs(workflow): accept W4 native browser qualification`.
+Append only to this roadmap, `docs/architecture/Hidra-API-Web-Contract-v1.md`
+and `docs/roadmap/HidraAPI-Frontend-Backend-Gap-Register.md`. Validate canonical
+Docs, append-only preservation, exact scope, parent, tree, blobs and message.
+Publish directly to main with expected head
+`6b2230d81832d4d09bdda0410c896dba3ba239fe`. Documentation Validation applies to
+the acceptance commit. Code CI is path-filtered. Stop after exact-SHA Docs CI
+queues or starts. The next registered stage is HWEB-F15/A1 integrated software
+acceptance, subject to separate owner selection.

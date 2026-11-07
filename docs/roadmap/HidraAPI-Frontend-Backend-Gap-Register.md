@@ -808,3 +808,19 @@ review/denial journeys against the accepted immutable API and real PostgreSQL.
 Only successful exact-SHA hosted evidence plus independent acceptance can close
 W4. A1/HWEB-F15 integrated acceptance, SITE/operational, P3, release and deployment
 remain unexecuted. Preserve all original ENG mappings and prior gap history.
+
+## HWEB-F14 / W4 — native qualification gate closed (2026-11-07)
+
+**ACCEPTED** for configured installed-characteristic link review software and
+native browser qualification. The prior handoff blocker was resolved by accepted
+HidraAPI `5817406923e53761577ac41bbc3f318b517c3977`. Exact WEB SHA
+`6b2230d81832d4d09bdda0410c896dba3ba239fe` passed
+[Code CI #1029](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42363484721)
+and [Docs #58](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42363484734).
+The native job confirmed all seven W1–W3 and two W4 cases passed with zero
+failures, flaky results or skips. The evidence covers authorized process start,
+independent APPROVE and REJECT, persisted timeline, stale replay rejection,
+retained DRAFT state and unrelated actor denial. The earlier pending and failed
+entries record the state at their respective commits. HWEB-F15/A1 integrated
+acceptance, protected physical approval publication and SITE acceptance remain
+separate gates.

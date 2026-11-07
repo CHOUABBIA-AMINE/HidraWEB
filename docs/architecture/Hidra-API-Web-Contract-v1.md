@@ -903,3 +903,22 @@ instances/tasks/actions use owner APIs. Native/browser qualification and indepen
 W4 acceptance are pending hosted exact-SHA CI. A1 integrated software acceptance,
 SITE, numerical/P3 and deployment/release remain separate. Previous ENG identifiers,
 legacy pins, accepted W1-W3 evidence and historical blockers remain unchanged.
+
+## HWEB-F14 / W4 — configured link review accepted (2026-11-07)
+
+W4 is ACCEPTED for the configured installed-characteristic link review scope.
+HidraWEB `6b2230d81832d4d09bdda0410c896dba3ba239fe` passed
+[Code CI #1029](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42363484721)
+and [Docs #58](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42363484734).
+The hosted native job ran seven W1–W3 cases and two W4 cases against accepted
+HidraAPI `5817406923e53761577ac41bbc3f318b517c3977`, native JWT and fresh
+PostgreSQL 16.15 with synthetic policy fixtures.
+
+The accepted generated contract covers exact-revision handoff, discovery of the
+configured review and independent reviewer, explicit start and assignment,
+server-permitted APPROVE and REJECT, persisted reload and stale replay 409.
+The browser consumes server-issued target metadata. The backend remains the
+authority for target access, assignment and transition admission. The unrelated
+actor's handoff returned an empty 404 and the tested Workflow calls returned
+403. The physical link stayed DRAFT after each completed review. Physical
+approval publication and HWEB-F15/A1 are separate acceptance scopes.
