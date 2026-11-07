@@ -114,7 +114,7 @@ jobs:
           if-no-files-found: error
 
   foundation-native:
-    name: W1, W2, W3 and W4 native API and PostgreSQL browser qualification
+    name: A1 six-module native API and PostgreSQL browser qualification
     runs-on: ubuntu-latest
     timeout-minutes: 40
     services:
@@ -208,16 +208,19 @@ jobs:
         shell: bash
         run: |
           python3 - <<'PY'
-          import os, secrets
+          import base64, os, secrets
           password = secrets.token_urlsafe(32)
           signing = secrets.token_urlsafe(48)
           ordinary = secrets.token_urlsafe(32)
+          proof = base64.b64encode(secrets.token_bytes(32)).decode('ascii')
+          print('::add-mask::' + proof)
           print('::add-mask::' + password)
           print('::add-mask::' + signing)
           print('::add-mask::' + ordinary)
           with open(os.environ['GITHUB_ENV'], 'a') as output:
               output.write('HIDRA_FOUNDATION_PASSWORD=' + password + '\n')
               output.write('HIDRA_FOUNDATION_USER_PASSWORD=' + ordinary + '\n')
+              output.write('HIDRA_IDENTITY_ORGANIZATIONCOMMITPROOF_SIGNINGKEYBASE64=' + proof + '\n')
               output.write('HIDRA_SECURITY_BOOTSTRAP_PASSWORD=' + password + '\n')
               output.write('HIDRA_JWT_HMAC_SECRET=' + signing + '\n')
           PY
@@ -261,6 +264,52 @@ jobs:
           psql -v ON_ERROR_STOP=1 --file scripts/foundation-native-fixture.sql
           psql -v ON_ERROR_STOP=1 --file scripts/foundation-topology-fixture.sql
           psql -v ON_ERROR_STOP=1 --file scripts/foundation-configuration-fixture.sql
+      - name: Configure separated native appointment roles and purpose-specific key
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(psql -XAtqc 'SELECT current_database()')" = hidra_foundation_w1
+          psql -X -v ON_ERROR_STOP=1 <<'SQL'
+          BEGIN;
+          CREATE ROLE a1_appointment_config LOGIN NOSUPERUSER NOBYPASSRLS NOCREATEROLE NOCREATEDB NOREPLICATION PASSWORD 'hidra-w1-ci';
+          CREATE ROLE a1_proof_admin LOGIN NOSUPERUSER NOBYPASSRLS NOCREATEROLE NOCREATEDB NOREPLICATION PASSWORD 'hidra-w1-ci';
+          GRANT USAGE ON SCHEMA public TO a1_appointment_config, a1_proof_admin;
+          GRANT EXECUTE ON FUNCTION public.hidra_org_activate_appointment_binding(text,text,text,bigint),
+            public.hidra_org_activate_appointment_policy(text,text,bigint,jsonb),
+            public.hidra_party_require_organization_configuration_reference(text) TO a1_appointment_config;
+          GRANT EXECUTE ON FUNCTION public.hidra_identity_org_commit_admin(bigint,text,uuid,name,bytea) TO a1_proof_admin;
+          DO $$
+          DECLARE relation text;
+          BEGIN
+            FOR relation IN SELECT tablename FROM pg_tables WHERE schemaname='public'
+              AND (tablename LIKE 'hidra_org_appointment_%' OR tablename='hidra_org_employee_assignment') LOOP
+              EXECUTE format('REVOKE INSERT,UPDATE,DELETE ON public.%I FROM w2_app', relation);
+            END LOOP;
+          END $$;
+          REVOKE ALL ON public.hidra_identity_org_commit_key_event,public.hidra_identity_org_commit_key_head,
+            public.hidra_identity_org_commit_proof_use FROM w2_app,w2_installed,w2_setup,w2_configuration;
+          GRANT UPDATE ON public.hidra_org_employee,public.hidra_org_unit,public.hidra_org_position,
+            public.hidra_org_appointment_binding_head,public.hidra_org_appointment_policy_head,
+            public.hidra_org_appointment_lock_key,public.hidra_org_employee_assignment TO w2_installed;
+          GRANT INSERT ON public.hidra_org_appointment_lock_key,public.hidra_org_employee_assignment,
+            public.hidra_org_appointment_event TO w2_installed;
+          GRANT EXECUTE ON FUNCTION public.hidra_org_appointment_exact_id(text),
+            public.hidra_identity_org_commit_key_context(boolean),
+            public.hidra_org_appointment_final_guard(uuid,uuid,uuid,text,text,text,text,timestamptz,timestamptz,integer,bigint,bytea,bytea,timestamptz),
+            public.hidra_org_appointment_read_guard(jsonb,timestamptz,timestamptz,integer,bigint,timestamptz) TO w2_installed;
+          COMMIT;
+          SQL
+          revision="$(PGUSER=a1_proof_admin psql -XAt -v ON_ERROR_STOP=1 <<SQL
+          SELECT public.hidra_identity_org_commit_admin(0,'a1-synthetic-key',gen_random_uuid(),'w2_installed',
+            decode('${HIDRA_IDENTITY_ORGANIZATIONCOMMITPROOF_SIGNINGKEYBASE64}','base64'));
+          SQL
+          )"
+          test "${revision}" = 1
+          {
+            echo 'HIDRA_IDENTITY_ORGANIZATIONCOMMITPROOF_ENABLED=true'
+            echo 'HIDRA_IDENTITY_ORGANIZATIONCOMMITPROOF_KEYID=a1-synthetic-key'
+            echo "HIDRA_IDENTITY_ORGANIZATIONCOMMITPROOF_KEYREVISION=${revision}"
+          } >> "${GITHUB_ENV}"
       - name: Restart native API with real audited administrator bootstrap
         shell: bash
         run: |
@@ -312,12 +361,25 @@ jobs:
           exit 1
       - name: Prepare synthetic current W2 permissions
         run: node scripts/prepare-foundation-topology.mjs
+      - name: Run mandatory A1 Journey B and verify its handoff to Journey C
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PLAYWRIGHT_JSON_OUTPUT_NAME="${RUNNER_TEMP}/a1-native-results.json"
+          npm run test:e2e:foundation -- --grep 'A1 native' --reporter=list,json
+          python3 - <<'PYTHON'
+          import json, os
+          with open(os.environ['PLAYWRIGHT_JSON_OUTPUT_NAME']) as report:
+              stats = json.load(report)['stats']
+          assert stats['expected'] == 1, stats
+          assert stats['unexpected'] == stats['flaky'] == stats['skipped'] == 0, stats
+          PYTHON
       - name: Run mandatory W1, W2 and W3 browser journeys against native JWT and PostgreSQL
         shell: bash
         run: |
           set -euo pipefail
           export PLAYWRIGHT_JSON_OUTPUT_NAME="${RUNNER_TEMP}/w1-native-results.json"
-          npm run test:e2e:foundation -- --grep-invert 'W4 native' --reporter=list,json
+          npm run test:e2e:foundation -- --grep-invert 'A1 native|W4 native' --reporter=list,json
           python3 - <<'PYTHON'
           import json, os
           with open(os.environ['PLAYWRIGHT_JSON_OUTPUT_NAME']) as report:
@@ -342,6 +404,32 @@ jobs:
           assert stats['unexpected'] == stats['flaky'] == stats['skipped'] == 0, stats
           print('W4 native browser qualification: 2 passed, 0 failed/flaky/skipped; seven W1-W3 preserved')
           PYTHON
+      - name: Record exact-source qualification evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="${RUNNER_TEMP}/a1-evidence"
+          mkdir -p "${evidence}"
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          {
+            printf 'WEB_SHA=%s\n' "${GITHUB_SHA}"
+            printf 'API_SHA=%s\n' "$(git -C .native-api rev-parse HEAD)"
+            printf 'GITHUB_RUN_ID=%s\n' "${GITHUB_RUN_ID}"
+            printf 'GITHUB_RUN_ATTEMPT=%s\n' "${GITHUB_RUN_ATTEMPT}"
+            printf 'JWT_ISSUER=https://foundation.synthetic.invalid\n'
+            printf 'DATABASE=hidra_foundation_w1\n'
+            printf 'TEST_DATA=synthetic\n'
+          } > "${evidence}/sources.txt"
+          curl --fail --silent --show-error http://127.0.0.1:8080/v3/api-docs > "${evidence}/runtime-openapi.json"
+          (cd "${evidence}" && sha256sum runtime-openapi.json > runtime-openapi.sha256)
+          psql -X -v ON_ERROR_STOP=1 --csv -c 'SELECT installed_rank,version,script,checksum,success FROM public.flyway_schema_history ORDER BY installed_rank' > "${evidence}/migrations.csv"
+          cp "${RUNNER_TEMP}"/{a1,w1,w4}-native-results.json "${evidence}/"
+      - name: Upload A1 development qualification evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: hidraweb-foundation-a1-${{ github.sha }}
+          path: ${{ runner.temp }}/a1-evidence
+          if-no-files-found: error
       - name: Stop disposable native API
         if: always()
         shell: bash

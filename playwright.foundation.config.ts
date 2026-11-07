@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests/e2e',
-  testMatch: ['foundation-context-live.spec.ts', 'foundation-topology-live.spec.ts', 'foundation-configuration-live.spec.ts', 'foundation-workflow-live.spec.ts'],
+  testMatch: ['foundation-context-live.spec.ts', 'foundation-topology-live.spec.ts', 'foundation-configuration-live.spec.ts', 'foundation-workflow-live.spec.ts', 'foundation-integrated-live.spec.ts'],
   fullyParallel: false,
   forbidOnly: true,
   retries: 0,
@@ -12,6 +12,7 @@ export default defineConfig({
   outputDir: 'test-results/foundation-native',
   use: {
     baseURL: 'http://127.0.0.1:5173',
+    timezoneId: 'UTC',
     trace: 'off', screenshot: 'off', video: 'off',
   },
   projects: [{ name: 'chromium-native', use: { ...devices['Desktop Chrome'] } }],

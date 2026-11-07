@@ -3072,3 +3072,11 @@ append-only scope and exact parent, tree, blobs and message verification precede
 guarded publication to existing main at expected
 `6807c8e720ccaedf1831330b0b3d401b113f6d84`. Documentation Validation applies.
 Code CI is path-filtered. Stop after exact-SHA Docs CI queues or starts.
+
+## HWEB-F15 / A1 — revised native qualification candidate (2026-11-07)
+
+The owner-approved Journey B revision at API main `1e5e18f7` supersedes the
+blocker for this gate. The candidate covers native Journeys A–E against API
+`5817406923e53761577ac41bbc3f318b517c3977` and fresh PostgreSQL. Integrated
+acceptance remains pending the exact-SHA results and evidence review.
+[Qualification procedure](../deployment/Six-Module-Foundation-Acceptance.md)

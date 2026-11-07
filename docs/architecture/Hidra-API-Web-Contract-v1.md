@@ -934,3 +934,16 @@ Organization target. The W4 Workflow handoff is for an installed-characteristic
 link revision. A1 requires an approved Organization producer contract or an
 explicit owner revision of the acceptance scope. The full evidence and guarded
 publication scope are recorded in the canonical roadmap.
+
+## HWEB-F15 / A1 — revised Journey B contract (2026-11-07)
+
+HidraWEB's Organization unit, employee and assignment forms drive the native
+hierarchy and initial appointment. The Organization owner API confirms the
+relationship, employee lifecycle and exact current appointment. The native
+Party lifecycle, role and eligible lookup produce the same identifier the
+Topology company chooser sends to the system write. A separate authenticated
+LOCAL actor checks protected reads against those existing records. The
+[qualification procedure](../deployment/Six-Module-Foundation-Acceptance.md)
+identifies the exact evidence to review. This gate uses the initial appointment
+contract. The historical responsibility, end and transfer gaps remain tracked
+separately.

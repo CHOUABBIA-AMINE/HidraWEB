@@ -836,3 +836,12 @@ published by HidraAPI and lack HidraWEB browser consumers. This disposition
 preserves W1–W4 acceptance and keeps the five-journey A1 gate open. The next
 dependency is an owner decision on the Organization approval path and the
 resulting integrated acceptance scope.
+
+## HWEB-F15 / A1 — reconcile the Journey B blocker (2026-11-07)
+
+The [owner-approved API revision](https://github.com/CHOUABBIA-AMINE/HidraAPI/blob/1e5e18f7f13d10f21e1cdf95cb0568dfe49cc383/doc/roadmap/FOUNDATION_PRODUCTION_ROADMAP.md#owner-approved-a1-journey-b-acceptance-revision--2026-11-07)
+removes the responsibility approval producer and appointment end/transfer from
+the integrated qualification dependency. Those capability gaps remain in
+their owning scopes. The A1 candidate exercises one initial appointment and the
+same eligible Party in the Topology system write. A1 is pending all native
+A–E results and exact-SHA evidence review.
