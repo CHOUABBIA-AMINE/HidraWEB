@@ -29,8 +29,16 @@ const source=id(),unit=id(),link=id(),definition=id(),first=id(),last=id(),appro
 // Reference policy has no supported manufacturer qualification authoring in W4.
 // Seed it explicitly as synthetic reference data, never claim a qualified OEM result.
 sql(`
-INSERT INTO public.hidra_party_role(id,code,qualification_required_by_default,status,created_at,updated_at) VALUES('w4-manufacturer-role','MANUFACTURER',true,'ACTIVE',now(),now()) ON CONFLICT(code) DO NOTHING;
-INSERT INTO public.hidra_party_role_assignment(id,party_id,role_id,valid_from,status,qualification_required,created_at,updated_at) SELECT ${quote(id())},${quote(manufacturer)},id,now()-interval '1 hour','ACTIVE',true,now(),now() FROM public.hidra_party_role WHERE code='MANUFACTURER';
+INSERT INTO public.hidra_party_role(id,code,qualification_required_by_default,status,created_at,updated_at)
+SELECT 'w4-manufacturer-role','MANUFACTURER',true,'ACTIVE',now(),now()
+WHERE NOT EXISTS (SELECT 1 FROM public.hidra_party_role WHERE code='MANUFACTURER');
+
+-- The scalar lookup requires exactly one active role. The required role_id
+-- rejects a missing active role, and PostgreSQL rejects multiple active matches.
+INSERT INTO public.hidra_party_role_assignment(id,party_id,role_id,valid_from,status,qualification_required,created_at,updated_at)
+VALUES (${quote(id())},${quote(manufacturer)},
+  (SELECT id FROM public.hidra_party_role WHERE code='MANUFACTURER' AND status='ACTIVE'),
+  now()-interval '1 hour','ACTIVE',true,now(),now());
 INSERT INTO public.hidra_party_manufacturer_profile(id,party_id,capability_type,qualification_status,created_at,updated_at) VALUES(${quote(id())},${quote(manufacturer)},'EQUIPMENT','QUALIFIED',now(),now());
 INSERT INTO public.hidra_party_manufacturer_source_authorization(authorization_id,company_party_id,manufacturer_party_id,manufacturer_model_reference,authorization_status,valid_from,generation,created_at,updated_at) VALUES(${quote(id())},${quote(company)},${quote(manufacturer)},'synthetic-model','ACTIVE',now()-interval '1 hour',1,now(),now());
 `);

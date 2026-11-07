@@ -2901,3 +2901,30 @@ the registered whole W4 message against expected WEB main99318555d9e74da4e7b429d
 verify parent/tree/blobs and exact scope, observe new-SHA Code/Docs queue/start,
 then STOP. Next is W4 independent native acceptance after successful CI, repairing
 responsible failures first; HWEB-F15/A1 remains separately dependency-gated.
+
+## HWEB-F14 / W4 — Code #1027 fixture repair (2026-11-07)
+
+Code #1027 failed on WEB main 8ba7b908a27bc87ac54189ac6fedfa9a02f86e3d,
+parent 99318555d9e74da4e7b429d5d311a12b9a85706a and tree
+3f930ab5a82973a9778b086a991e30d6b9b3032e. Standard verification, all
+seven W1–W3 native cases and Docs #56 passed. The W4 preparation step
+failed before either W4 browser case ran. Its manufacturer role insert used
+`ON CONFLICT (code)`, but the pinned Party schema has no unique constraint
+on that column.
+
+The repair modifies only `scripts/prepare-foundation-workflow.mjs` and appends
+this evidence. The disposable fixture seeds the synthetic manufacturer role
+when the code is absent and requires exactly one active match for assignment.
+
+Disposable PostgreSQL 16.15 applied all 201 migrations from pinned API
+5817406923e53761577ac41bbc3f318b517c3977. All 22 emitted W4 SQL blocks
+executed with both an absent role and an existing active role. Duplicate
+active and inactive-only roles were rejected. The local harness supplied
+synthetic API identifiers and responses. Both W4 browser cases still require
+hosted qualification.
+
+Publish `fix(workflow): resolve manufacturer role in native qualification` against
+expected WEB main 8ba7b908a27bc87ac54189ac6fedfa9a02f86e3d. Verify the
+exact parent, tree and two modified blobs. Stop after verifying exact-SHA
+Code and Docs CI queue or start. W4 remains pending independent native
+acceptance. HWEB-F15/A1 remains gated on W4 acceptance.
