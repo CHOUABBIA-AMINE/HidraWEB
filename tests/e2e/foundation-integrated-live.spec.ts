@@ -42,7 +42,14 @@ test('A1 native Organization and Party persist and the same eligible Party reach
   async function assertDenied(path: string, values: string[]) {
     const response = await request.get(api! + path, { headers: denied });
     expect(response.status(), `Unauthorized GET ${path}`).toBe(403);
-    const body = await response.text();
+    const problem = await response.json();
+    expect(problem.status).toBe(403);
+    const requestedPath = new URL(api! + path).pathname;
+    // Problem Details may echo the submitted path, including its known ID.
+    for (const key of ['instance', 'path']) {
+      if (problem[key] === requestedPath) delete problem[key];
+    }
+    const body = JSON.stringify(problem);
     for (const value of [...values, '"totalElements"', '"totalCount"', '"items"', '"content"']) {
       expect(body).not.toContain(value);
     }
