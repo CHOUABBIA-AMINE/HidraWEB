@@ -173,11 +173,20 @@ test('A1 native Organization and Party persist and the same eligible Party reach
   await page.getByLabel('Reason and evidence reference', { exact: true }).fill('synthetic:A1 Party handoff');
   await page.getByRole('button', { name: 'System types', exact: true }).click();
   await choose(page, page, 'System type', /W2_GAS/);
+  // The editor refreshes the catalog after creation. Let that protected read
+  // release its NOWAIT locks before the independent persistence check.
+  const refreshedTypes = page.waitForResponse(response => {
+    const url = new URL(response.url());
+    return response.request().method() === 'GET'
+      && url.pathname === topology + '/choices/SYSTEM_TYPES'
+      && url.searchParams.get('companyPartyId') === partyId;
+  });
   const system = browserMutation(page, topology + '/pipeline-systems');
   await page.getByRole('button', { name: 'Create system', exact: true }).click();
   const created = await system;
   expect(created.request().postDataJSON().companyPartyId).toBe(partyId);
   const systemId = (await created.json()).items[0].id;
+  expect((await refreshedTypes).status(), 'Browser refresh after system creation').toBe(200);
   expect((await read(topology + '/choices/SYSTEMS?companyPartyId=' + partyId)).items).toContainEqual(
     expect.objectContaining({ id: systemId, code: prefix }),
   );
