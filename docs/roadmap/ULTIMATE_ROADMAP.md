@@ -3141,3 +3141,25 @@ then STOP. Code CI is paths-filtered for a documentation-only change.
 The adopted 12-delivery six-module foundation has no subsequent registered
 implementation delivery after A1; engineering production/SITE/release and
 previously excluded Organization responsibilities require separate authority.
+
+## 2026-11-08 — HWEB-F16 GZ2 alarm acknowledgement preflight registration
+
+**Status:** REGISTERED. Execution requires a separate owner `Next` after the registration commit's exact-SHA Documentation Validation succeeds.
+
+The owner selected documentation registration for the production-first GZ2 slice. [HidraWEB production-first delivery roadmap](HidraWEB-Production-First-Roadmap.md) records the supporting proposal and its source baseline. WF-01–WF-28 are planning aliases. This checkpoint registers one stage, HWEB-F16, under the existing HWEB-F sequence. Earlier foundation acceptance and historical track records continue to apply. Stage ownership is HidraWEB with Alarm and security reviewers in HidraAPI.
+
+The registration baseline is HidraWEB `7fef9c042052bc2a326b15a103e5ee3d35df1db4` with [Code CI #1034](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42463226504), and HidraAPI `70490d28e1a290a14578c2fc6320d242b4a76ec3` with [Full CI #1145](https://github.com/CHOUABBIA-AMINE/HidraAPI/actions/runs/42485536476) and [Docs #937](https://github.com/CHOUABBIA-AMINE/HidraAPI/actions/runs/42485536750). These are observations on the inspected commits. Refresh both heads, governing records and applicable CI before preflight execution. Qualify the API runtime pin, runtime OpenAPI artifact and its compatibility with the WEB contract. Formal HAPI-929 acceptance and WEB refresh consumption remain outside this registration.
+
+**HWEB-F16 execution scope.** Assess whether the existing Alarm Console can safely support one human acknowledgement of an existing GZ2 alarm and durable readback. Review the signed-in principal, authorized asset context, alarm list and counts, detail, acknowledgement, and readback. Validate exact endpoint contracts, authorization enforcement before existence or count disclosure, trusted actor/time, persisted state, and actual handling of duplicate or stale actions. Use approved synthetic fixtures and a disposable fresh migrated PostgreSQL environment. Retain the versions, test commands or reproducible procedure, fixture roles and outcomes without secrets or live data.
+
+| Required evidence | Acceptance |
+|---|---|
+| Contract and context | Exact WEB/API SHAs and CI, runtime OpenAPI digest, route and payload mapping, selected authentication assumption, authoritative GZ2 asset association and approved API pin or documented blocker. |
+| Permitted operator | Within-scope actor sees the correct list, count and detail. Acknowledgement persists and a fresh detail read shows the exact alarm, persisted state, actor and time. |
+| Scope isolation | Same-company out-of-scope and cross-company actors with equivalent route grants cannot observe protected list entries, counts or existence, fetch detail, or acknowledge via a direct request. Record actual response semantics and verify durable state is unaffected by denied mutations. |
+| Completion decision | Append source and synthetic evidence to the gap register. Record ADMIT only when every required proof passes. Otherwise record HOLD with the specific failed or unavailable proof and the smallest API prerequisite or policy decision. No runtime proof may be inferred from a green docs run. |
+
+**Registered preflight message:** `docs(alarm): record GZ2 acknowledgement preflight`.  
+**Tracked preflight allowlist:** append findings to `docs/roadmap/HidraAPI-Frontend-Backend-Gap-Register.md` and append disposition here. Disposable probe fixtures and outputs are temporary. Any repository test, runtime, OpenAPI, migration, workflow or feature change requires separately registered scope.
+
+**Registration publication record.** The selected registration message is `docs(roadmap): register GZ2 alarm acknowledgement preflight`. Its tracked allowlist is an append to this roadmap and the addition of `docs/roadmap/HidraWEB-Production-First-Roadmap.md`. Verify exact parent, tree, blobs and two paths, publish to existing `main` against `7fef9c042052bc2a326b15a103e5ee3d35df1db4`, then observe Documentation Validation creation or start and stop. This checkpoint grants no release, deployment or staging authority.
