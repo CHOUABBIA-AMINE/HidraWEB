@@ -3210,3 +3210,26 @@ The exact blocker is server-side **Alarm company/asset resource isolation**: the
 **Execution control:** The original registered HWEB-F16 documentation-preflight message `docs(alarm): record GZ2 acknowledgement preflight` is historical. No standalone source implementation is approved or claimed by the mistaken registration. Before source publication, select and authorize the **whole HWEB-F16** scope and exact message/file allowlist; any security-safe failure repair stays under HWEB-F16. Publish directly to existing `main` with expected-head guard, verify the exact tree and relevant Code/Docs CI queue/start, then STOP without advancing another task. If any dependency remains unavailable, retain HOLD; **never split HWEB-F16** to bypass its acceptance gate.
 
 **This correction only:** `docs(roadmap): keep HWEB-F16 indivisible`, two governance documents, no API/WEB source, tests, runtime OpenAPI or release files modified. Its documentation CI cannot be counted as HWEB-F16 implementation acceptance.
+
+## HWEB-F17 — HyFlo Login branding registration (2026-11-09)
+
+**Status:** REGISTERED / NOT SELECTED FOR IMPLEMENTATION. The owner confirmed this as one standalone HidraWEB task. Registration is documentation only. Source execution requires successful exact-SHA Documentation Validation for this registration and a subsequent owner `Next` selecting this task.
+
+**Product and technical names.** HyFlo is the official user-facing product name. Hidra, HidraWEB and HidraAPI remain the technical names. This task applies HyFlo branding to the existing `/login` and browser metadata. It uses the SONATRACH color direction and the owner-supplied `images.zip`. The agreed scope is independent of the HWEB-F16 Alarm workflow, whose recorded HOLD remains unchanged.
+
+**One deliverable.** Use the supplied HyFlo logo in the existing Login layout, apply the SONATRACH color treatment, align user-facing Login copy in English, French and Arabic, and show the HyFlo name and favicon in browser metadata. Preserve the actual HidraAPI sign-in path, enabled provider choices, credential submission and error handling, authenticated redirect, session and permissions behavior. Refresh-token work is deferred until the owner confirms completion of the HidraAPI implementation and separately selects the WEB integration. This task also excludes the synthetic preview, operator landing, application shell and repository/API renaming.
+
+**Implementation commit message:** `feat(auth): apply HyFlo branding to login`.
+
+| Change | Exact implementation path | Purpose |
+|---|---|---|
+| MODIFY | `src/app/pages/LoginPage.tsx` | Existing Login visual branding and responsive presentation. |
+| MODIFY | `src/shared/i18n/resources.ts` | User-facing Login copy in existing locales. Preserve technical provider identifiers. |
+| MODIFY | `index.html` | HyFlo browser title, description and favicon reference. |
+| ADD | `public/brand/hyflo-full.png` | Byte-preserved `images/HyFlo_Full.png` from the supplied archive. |
+| ADD | `public/favicon.ico` | Byte-preserved `images/favicon.ico` from the supplied archive. |
+| MODIFY | `src/app/pages/LoginPage.test.tsx` | Branding assertions and regression coverage in the existing Login test suite. |
+
+**Acceptance.** Verify the supplied assets, title and favicon in the built application. Review desktop and narrow layouts, keyboard focus, contrast, English/French copy and Arabic right-to-left presentation. Run the existing Login suite, frontend lint, typecheck and build. With an approved development HidraAPI and synthetic user, verify successful sign-in through the existing browser flow, protected landing with an authorized session, and usable feedback for invalid credentials. Exercise enabled provider dispatch through the existing test coverage and record which providers were runtime-tested. The owner reviews the branded page. Mocked provider tests do not establish live identity-provider behavior.
+
+**Registration evidence and publication.** Base is HidraWEB `befb1d71235b050a58da809c1b3f7c67e917303a` with [Documentation Validation #68](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42596930048) successful. The sole tracked registration change is an append to this roadmap. Use `docs(roadmap): register HyFlo Login branding`, verify the exact parent, tree and blob, publish to existing `main` with an expected-head guard, and stop after observing exact-SHA Documentation Validation creation or start. This checkpoint does not authorize release or deployment.
