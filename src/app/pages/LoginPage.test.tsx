@@ -6,11 +6,6 @@ const authentication = vi.hoisted(() => ({
   authenticateCredentials: vi.fn(),
   beginOidcSignIn: vi.fn(),
 }));
-const language = vi.hoisted(() => ({
-  language: 'en',
-  resolvedLanguage: 'en',
-  changeLanguage: vi.fn(),
-}));
 vi.mock('@/app/auth/useAuth', () => ({
   useAuth: () => ({
     mode: 'multi',
@@ -21,55 +16,31 @@ vi.mock('@/app/auth/useAuth', () => ({
     ...authentication,
   }),
 }));
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    i18n: language,
-    t: (key: string, options?: { defaultValue?: string }) => (
-      language.language === 'ar' ? ({
-        'auth.multi.title': 'تسجيل الدخول إلى هيدرا',
-        'auth.multi.provider': 'طريقة المصادقة',
-        'auth.basic.username': 'اسم المستخدم',
-        'auth.basic.password': 'كلمة المرور',
-        'auth.basic.submit': 'تسجيل الدخول',
-        'auth.login.providers.local': 'حساب هيدرا المحلي',
-        'auth.login.providers.ldap': 'دليل LDAP',
-        'auth.login.providers.activeDirectory': 'الدليل النشط (Active Directory)',
-      } as Record<string, string>)[key] : undefined
-    ) ?? ({
-      'auth.multi.title': 'Sign in to Hidra',
-      'auth.multi.description': 'Choose an authentication method',
-      'auth.multi.provider': 'Authentication method',
-      'auth.multi.or': 'or',
-      'auth.basic.username': 'Username',
-      'auth.basic.password': 'Password',
-      'auth.basic.submit': 'Sign in',
-      'auth.login.providers.local': 'Hidra Local',
-      'auth.login.providers.ldap': 'LDAP',
-      'auth.login.providers.activeDirectory': 'Active Directory',
-      'auth.login.showPassword': 'Show entered characters',
-      'auth.login.hidePassword': 'Hide entered characters',
-      'auth.login.brandTitle': 'Operational intelligence for hydrocarbon transportation.',
-      'auth.login.brandDescription': 'One workspace for Hidra.',
-      'auth.login.brandFooter': 'Transportation · Operations · Engineering',
-      'auth.login.eyebrow': 'SECURE ACCESS',
-      'auth.login.providerHint': 'Choose your account',
-      'auth.login.environment': 'Environment: dev',
-      'auth.login.accessNotice': 'Authorized users only',
-    } as Record<string, string>)[key] ?? options?.defaultValue ?? key,
-  }),
-}));
-
 import { LoginPage } from '@/app/pages/LoginPage';
+import { i18n } from '@/shared/i18n/i18n';
 
 describe('HidraWEB multi-provider login selection', () => {
-  beforeEach(() => {
-    language.language = 'en';
-    language.resolvedLanguage = 'en';
+  beforeEach(async () => {
+    await i18n.changeLanguage('en');
     authentication.authenticateCredentials.mockReset().mockResolvedValue(undefined);
     authentication.beginOidcSignIn.mockReset().mockResolvedValue(undefined);
-    language.changeLanguage.mockReset().mockResolvedValue(undefined);
   });
   afterEach(() => cleanup());
+
+  it.each([
+    ['en', 'Sign in to HyFlo', 'ltr'],
+    ['fr', 'Connexion à HyFlo', 'ltr'],
+    ['ar', 'تسجيل الدخول إلى HyFlo', 'rtl'],
+  ])('shows the supplied HyFlo logo and localized %s branding', async (locale, title, direction) => {
+    await i18n.changeLanguage(locale);
+    render(<MemoryRouter initialEntries={['/login']}><LoginPage /></MemoryRouter>);
+
+    const logo = screen.getByRole('img', { name: 'HyFlo' });
+    expect(logo).toHaveAttribute('src', `${import.meta.env.BASE_URL}brand/hyflo-full.png`);
+    expect(logo.closest('[dir]')).toHaveAttribute('dir', direction);
+    expect(screen.getByRole('heading', { name: title })).toBeInTheDocument();
+    expect(screen.getByText('SONATRACH')).toBeInTheDocument();
+  });
 
   it('dispatches only the explicitly selected directory provider and clears old passwords', async () => {
     render(<MemoryRouter initialEntries={['/login']}><LoginPage /></MemoryRouter>);
@@ -87,8 +58,7 @@ describe('HidraWEB multi-provider login selection', () => {
   });
 
   it('renders Arabic labels from the right and keeps localized provider selection bound to backend codes', async () => {
-    language.language = 'ar';
-    language.resolvedLanguage = 'ar';
+    await i18n.changeLanguage('ar');
     render(<MemoryRouter initialEntries={['/login']}><LoginPage /></MemoryRouter>);
     const selector = screen.getByRole('combobox', { name: 'طريقة المصادقة' });
     expect(selector.closest('[dir="rtl"]')).toBeInTheDocument();
@@ -118,10 +88,10 @@ describe('HidraWEB multi-provider login selection', () => {
     expect(password).toHaveAttribute('type', 'password');
   });
 
-  it('offers language selection without triggering an authentication request', () => {
+  it('offers language selection without triggering an authentication request', async () => {
     render(<MemoryRouter initialEntries={['/login']}><LoginPage /></MemoryRouter>);
     fireEvent.click(screen.getByRole('button', { name: 'Français' }));
-    expect(language.changeLanguage).toHaveBeenCalledWith('fr');
+    expect(await screen.findByRole('heading', { name: 'Connexion à HyFlo' })).toBeInTheDocument();
     expect(authentication.authenticateCredentials).not.toHaveBeenCalled();
     expect(authentication.beginOidcSignIn).not.toHaveBeenCalled();
   });

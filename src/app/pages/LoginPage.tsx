@@ -158,6 +158,7 @@ export function LoginPage() {
         }}
       >
         <Box
+          dir={isArabic ? 'rtl' : 'ltr'}
           sx={{
             minWidth: 0,
             position: 'relative',
@@ -186,35 +187,26 @@ export function LoginPage() {
               pointerEvents: 'none',
             }}
           />
-          <Box sx={{ position: 'relative', zIndex: 1 }}>
-            <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-              <Box
-                aria-hidden="true"
-                sx={{
-                  width: 41,
-                  height: 41,
-                  borderRadius: 1.5,
-                  bgcolor: colors.orange,
-                  color: colors.black,
-                  display: 'grid',
-                  placeItems: 'center',
-                  fontSize: 21,
-                  fontWeight: 900,
-                  letterSpacing: '-0.08em',
-                }}
-              >
-                H
-              </Box>
-              <Box>
-                <Typography sx={{ fontWeight: 850, fontSize: 18, lineHeight: 1.15, letterSpacing: '0.1em' }}>
-                  HIDRA
-                </Typography>
-                <Typography sx={{ fontSize: 10, color: alpha('#fff', 0.7), letterSpacing: '0.17em', mt: 0.4 }}>
-                  SONATRACH
-                </Typography>
-              </Box>
-            </Stack>
-          </Box>
+          <Stack spacing={1.25} sx={{ alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
+            <Box
+              component="img"
+              src={`${import.meta.env.BASE_URL}brand/hyflo-full.png`}
+              alt="HyFlo"
+              width={1536}
+              height={1024}
+              sx={{
+                display: 'block',
+                width: { xs: 144, sm: 168, md: 208 },
+                maxWidth: '100%',
+                height: 'auto',
+                bgcolor: colors.warmWhite,
+                borderRadius: 2,
+              }}
+            />
+            <Typography sx={{ fontSize: 11, fontWeight: 700, color: alpha('#fff', 0.8), letterSpacing: '0.17em' }}>
+              SONATRACH
+            </Typography>
+          </Stack>
 
           <Box sx={{ position: 'relative', zIndex: 1, display: { xs: 'none', md: 'block' } }}>
             <Box sx={{ width: 48, height: 4, borderRadius: 2, bgcolor: colors.orange, mb: 3 }} />
@@ -247,6 +239,10 @@ export function LoginPage() {
             pb: { xs: 4, sm: 5 },
             display: 'flex',
             flexDirection: 'column',
+            '& .MuiButtonBase-root:focus-visible': {
+              outline: `2px solid ${colors.black}`,
+              outlineOffset: 2,
+            },
           }}
         >
           <Stack direction="row" spacing={0.5} sx={{ justifyContent: 'flex-end', mb: { xs: 3, md: 5 } }}>
@@ -406,7 +402,7 @@ export function LoginPage() {
                     fontWeight: 800,
                     borderRadius: 2,
                     textTransform: 'none',
-                    '&:hover': { bgcolor: colors.orangeHover, color: '#fff' },
+                    '&:hover': { bgcolor: colors.orangeHover },
                     '&.Mui-disabled': { bgcolor: '#F0EEE9', color: colors.muted },
                   }}
                 >
@@ -452,7 +448,7 @@ export function LoginPage() {
             <Typography sx={{ color: colors.muted, fontSize: 12 }}>
               {t('auth.login.environment', { environment: runtimeConfig.environment })}
             </Typography>
-            <Typography sx={{ color: '#888', fontSize: 11, mt: 1 }}>
+            <Typography sx={{ color: colors.muted, fontSize: 11, mt: 1 }}>
               {t('auth.login.accessNotice')}
             </Typography>
           </Box>
