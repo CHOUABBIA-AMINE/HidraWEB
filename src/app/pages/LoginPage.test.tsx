@@ -28,18 +28,23 @@ describe('HidraWEB multi-provider login selection', () => {
   afterEach(() => cleanup());
 
   it.each([
-    ['en', 'Sign in to HyFlo', 'ltr'],
-    ['fr', 'Connexion à HyFlo', 'ltr'],
-    ['ar', 'تسجيل الدخول إلى HyFlo', 'rtl'],
-  ])('shows the supplied HyFlo logo and localized %s branding', async (locale, title, direction) => {
+    ['en', 'SECURE ACCESS', 'ltr', 'Sign in to HyFlo', 'Choose an authentication method enabled for this environment.', 'Environment: dev'],
+    ['fr', 'ACCÈS SÉCURISÉ', 'ltr', 'Connexion à HyFlo', 'Choisissez une méthode de connexion autorisée pour cet environnement.', 'Environnement : dev'],
+    ['ar', 'دخول آمن', 'rtl', 'تسجيل الدخول إلى HyFlo', 'اختر طريقة مصادقة مسموحة في هذه البيئة.', 'البيئة: dev'],
+  ])('shows only the HyFlo logo in the branding panel and removes extra %s login copy', async (
+    locale, title, direction, formerTitle, formerDescription, formerEnvironment,
+  ) => {
     await i18n.changeLanguage(locale);
     render(<MemoryRouter initialEntries={['/login']}><LoginPage /></MemoryRouter>);
 
     const logo = screen.getByRole('img', { name: 'HyFlo' });
-    expect(logo).toHaveAttribute('src', `${import.meta.env.BASE_URL}brand/hyflo-full.png`);
+    expect(logo).toHaveAttribute('src', `${import.meta.env.BASE_URL}brand/hyflo.png`);
     expect(logo.closest('[dir]')).toHaveAttribute('dir', direction);
-    expect(screen.getByRole('heading', { name: title })).toBeInTheDocument();
-    expect(screen.getByText('SONATRACH')).toBeInTheDocument();
+    expect(logo.parentElement).toHaveTextContent(/^$/);
+    expect(screen.getByRole('heading', { name: title, level: 1 })).toBeInTheDocument();
+    for (const text of [formerTitle, formerDescription, formerEnvironment, 'SONATRACH']) {
+      expect(screen.queryByText(text)).not.toBeInTheDocument();
+    }
   });
 
   it('dispatches only the explicitly selected directory provider and clears old passwords', async () => {
@@ -91,7 +96,7 @@ describe('HidraWEB multi-provider login selection', () => {
   it('offers language selection without triggering an authentication request', async () => {
     render(<MemoryRouter initialEntries={['/login']}><LoginPage /></MemoryRouter>);
     fireEvent.click(screen.getByRole('button', { name: 'Français' }));
-    expect(await screen.findByRole('heading', { name: 'Connexion à HyFlo' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'ACCÈS SÉCURISÉ' })).toBeInTheDocument();
     expect(authentication.authenticateCredentials).not.toHaveBeenCalled();
     expect(authentication.beginOidcSignIn).not.toHaveBeenCalled();
   });

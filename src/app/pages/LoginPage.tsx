@@ -22,7 +22,7 @@ import { useTranslation } from 'react-i18next';
 import { Navigate, useLocation } from 'react-router';
 
 import { useAuth } from '@/app/auth/useAuth';
-import { runtimeConfig, type HidraCredentialProvider } from '@/app/bootstrap/runtimeConfig';
+import type { HidraCredentialProvider } from '@/app/bootstrap/runtimeConfig';
 
 interface LoginLocationState {
   from?: string;
@@ -32,7 +32,6 @@ const colors = {
   orange: '#FF8500',
   orangeHover: '#DE7100',
   black: '#171717',
-  charcoal: '#252525',
   muted: '#646464',
   warmWhite: '#FAF9F7',
   border: '#E7E3DE',
@@ -161,72 +160,26 @@ export function LoginPage() {
           dir={isArabic ? 'rtl' : 'ltr'}
           sx={{
             minWidth: 0,
-            position: 'relative',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            overflow: 'hidden',
-            bgcolor: colors.black,
-            color: '#fff',
+            display: 'grid',
+            placeItems: 'center',
+            background: `radial-gradient(ellipse at top left, ${alpha(colors.orange, 0.12)}, transparent 72%), ${colors.warmWhite}`,
             p: { xs: 3, sm: 4.5, md: 5 },
-            minHeight: { xs: 165, md: 570 },
-            gap: 3,
+            minHeight: { xs: 144, md: 570 },
           }}
         >
           <Box
-            aria-hidden="true"
+            component="img"
+            src={`${import.meta.env.BASE_URL}brand/hyflo.png`}
+            alt="HyFlo"
+            width={760}
+            height={320}
             sx={{
-              position: 'absolute',
-              width: 420,
-              height: 420,
-              borderRadius: '50%',
-              border: `1px solid ${alpha(colors.orange, 0.32)}`,
-              top: -178,
-              right: -218,
-              boxShadow: `0 0 0 65px ${alpha(colors.orange, 0.045)}, 0 0 0 133px ${alpha('#fff', 0.025)}`,
-              pointerEvents: 'none',
+              display: 'block',
+              width: { xs: 200, sm: 240, md: 320 },
+              maxWidth: '100%',
+              height: 'auto',
             }}
           />
-          <Stack spacing={1.25} sx={{ alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
-            <Box
-              component="img"
-              src={`${import.meta.env.BASE_URL}brand/hyflo-full.png`}
-              alt="HyFlo"
-              width={1536}
-              height={1024}
-              sx={{
-                display: 'block',
-                width: { xs: 144, sm: 168, md: 208 },
-                maxWidth: '100%',
-                height: 'auto',
-                bgcolor: colors.warmWhite,
-                borderRadius: 2,
-              }}
-            />
-            <Typography sx={{ fontSize: 11, fontWeight: 700, color: alpha('#fff', 0.8), letterSpacing: '0.17em' }}>
-              SONATRACH
-            </Typography>
-          </Stack>
-
-          <Box sx={{ position: 'relative', zIndex: 1, display: { xs: 'none', md: 'block' } }}>
-            <Box sx={{ width: 48, height: 4, borderRadius: 2, bgcolor: colors.orange, mb: 3 }} />
-            <Typography
-              component="h2"
-              sx={{ fontSize: { md: 36, lg: 41 }, fontWeight: 760, lineHeight: 1.2, letterSpacing: '-0.035em' }}
-            >
-              {t('auth.login.brandTitle')}
-            </Typography>
-            <Typography sx={{ mt: 2, lineHeight: 1.8, color: alpha('#fff', 0.73), maxWidth: 350 }}>
-              {t('auth.login.brandDescription')}
-            </Typography>
-          </Box>
-
-          <Stack direction="row" spacing={1} sx={{ alignItems: 'center', position: 'relative', zIndex: 1 }}>
-            <Box sx={{ width: 7, height: 7, borderRadius: '50%', bgcolor: colors.orange }} />
-            <Typography sx={{ color: alpha('#fff', 0.77), fontSize: 12, letterSpacing: '0.02em' }}>
-              {t('auth.login.brandFooter')}
-            </Typography>
-          </Stack>
         </Box>
 
         <Box
@@ -270,31 +223,32 @@ export function LoginPage() {
 
           <Box sx={{ width: '100%', maxWidth: 410, mx: 'auto', my: 'auto' }}>
             <Typography
+              component={auth.mode === 'multi' ? 'h1' : 'span'}
               variant="overline"
               sx={{ color: '#A95400', fontWeight: 800, letterSpacing: '0.11em' }}
             >
               {t('auth.login.eyebrow')}
             </Typography>
-            <Typography
-              component="h1"
-              sx={{
-                color: colors.black,
-                mt: 0.75,
-                fontWeight: 780,
-                fontSize: { xs: 29, sm: 34 },
-                lineHeight: 1.2,
-                letterSpacing: '-0.035em',
-              }}
-            >
-              {auth.mode === 'multi' ? t('auth.multi.title')
-                : auth.mode === 'jwt' ? t('auth.jwt.title')
-                  : providerLabel(auth.credentialProvider)}
-            </Typography>
-            <Typography sx={{ color: colors.muted, mt: 1.4, lineHeight: 1.7, fontSize: 14 }}>
-              {auth.mode === 'multi' ? t('auth.multi.description')
-                : auth.mode === 'jwt' ? t('auth.login.oidcDescription')
-                  : t('auth.login.credentialDescription')}
-            </Typography>
+            {auth.mode !== 'multi' ? (
+              <>
+                <Typography
+                  component="h1"
+                  sx={{
+                    color: colors.black,
+                    mt: 0.75,
+                    fontWeight: 780,
+                    fontSize: { xs: 29, sm: 34 },
+                    lineHeight: 1.2,
+                    letterSpacing: '-0.035em',
+                  }}
+                >
+                  {auth.mode === 'jwt' ? t('auth.jwt.title') : providerLabel(auth.credentialProvider)}
+                </Typography>
+                <Typography sx={{ color: colors.muted, mt: 1.4, lineHeight: 1.7, fontSize: 14 }}>
+                  {auth.mode === 'jwt' ? t('auth.login.oidcDescription') : t('auth.login.credentialDescription')}
+                </Typography>
+              </>
+            ) : null}
             {auth.mode === 'basic' ? (
               <Typography sx={{ color: colors.muted, fontSize: 12, mt: 1.5 }}>
                 {auth.credentialProvider}
@@ -444,14 +398,9 @@ export function LoginPage() {
             ) : null}
           </Box>
 
-          <Box sx={{ mt: { xs: 4, md: 6 }, textAlign: 'center' }}>
-            <Typography sx={{ color: colors.muted, fontSize: 12 }}>
-              {t('auth.login.environment', { environment: runtimeConfig.environment })}
-            </Typography>
-            <Typography sx={{ color: colors.muted, fontSize: 11, mt: 1 }}>
-              {t('auth.login.accessNotice')}
-            </Typography>
-          </Box>
+          <Typography sx={{ color: colors.muted, fontSize: 11, mt: { xs: 4, md: 6 }, textAlign: 'center' }}>
+            {t('auth.login.accessNotice')}
+          </Typography>
         </Box>
       </Paper>
     </Box>
