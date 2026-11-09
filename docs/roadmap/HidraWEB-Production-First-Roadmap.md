@@ -367,3 +367,75 @@ The adopted A1 sequence has no registered implementation successor. Preserve can
 - **Proposed follow-on.** After F16 acceptance, bring one operator-scoped station investigation forward for separate registration. Its prerequisites include a server-authorized network projection and discovery, owner-backed alarm and telemetry relationships, and versioned technical evidence. Qualification should prove the same station and time context from the map or a linked alarm and after reload, with isolation for out-of-scope actors. Any modeled-versus-observed overlay follows a separately qualified numerical runtime and authorized scope.
 
 This decision is the product interpretation of the proposed operator-focused overview and asset-first work described above. Planning aliases in this document do not register executable tasks.
+
+
+## 14. Prepared delivery queue from HWEB-F17 (2026-11-09)
+
+This queue translates the adopted network workspace target and the [Login, Network and Digital Twin delivery proposal](https://chatgpt.com/library?file_id=libfile_9bfa4dd6e8bc8191965e26ea9213b501&account_id=personal) into standalone delivery candidates. The canonical F17 registration governs branding and takes precedence over the earlier combined branding and renewal proposal. HWEB-F18 through HWEB-F23 are proposed identifiers and sequencing, **PROPOSED / NOT SELECTED**. Each candidate requires its own canonical registration, exact SHA and file allowlist, and explicit implementation selection. Each is one indivisible task with one acceptance decision.
+
+**Baseline.** WEB `1cb3444f383294c0cd7082d646a2bc95803bcae2` (parent `befb1d71235b050a58da809c1b3f7c67e917303a`, tree `98794ae21fa64400c75538c447313a8533809268`) passed [Documentation Validation #69](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42620413303). [Code CI #1034](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42463226504) is earlier source evidence. HidraAPI `75b81071a063d3c7deffcc52fbb832e513f65929` contains the latest inspected HAPI-929 refresh throttling change. [API Docs #954](https://github.com/CHOUABBIA-AMINE/HidraAPI/actions/runs/42627895299) passed and [API CI #1160](https://github.com/CHOUABBIA-AMINE/HidraAPI/actions/runs/42627895165) passed. The [API task ledger](https://github.com/CHOUABBIA-AMINE/HidraAPI/blob/75b81071a063d3c7deffcc52fbb832e513f65929/doc/roadmap/TASKS_HPS-001.md#hapi-929) retains PARTIAL / IN_PROGRESS and records remaining lifecycle qualification. Recheck live evidence at each selection.
+
+| Task | Standalone outcome | Entry gate | Intended implementation message |
+|---|---|---|---|
+| **HWEB-F17** | HyFlo branding on the actual Login and browser metadata | Exact-SHA registration CI passed. Owner `Next` selects implementation. | `feat(auth): apply HyFlo branding to login` (registered) |
+| **HWEB-F18** | Secure LOCAL session renewal and logout | F17 acceptance, owner-confirmed whole HAPI-929 acceptance, accepted runtime contract and browser credential policy. Separate owner selection. | `feat(auth): integrate rotating LOCAL sessions` |
+| **HWEB-F19** | Isolated network workspace client preview | F17 acceptance, approved preview isolation, fixtures and roles. Session renewal is an independent lane. | `feat(preview): demonstrate the network workspace` |
+| **HWEB-F20** | Isolated station investigation and follow-up preview | Client acceptance of the F19 interaction and agreed Alarm, technical, telemetry and follow-up ownership. | `feat(preview): demonstrate station investigation` |
+| **HWEB-F21** | Isolated digital-twin decision preview | Client acceptance of the F20 interaction and explicit approval for synthetic model output. Numerical P3 stays deferred. | `feat(preview): demonstrate digital twin decisions` |
+| **HWEB-F22** | Qualify one operator-scoped native station investigation | F16 ADMIT, accepted owner contracts and native fixtures, and F20 feedback disposition. F21 preview can proceed independently. | `feat(network): qualify scoped station investigation` |
+| **HWEB-F23** | Route qualified operators to the existing `/network` workspace | F22 native acceptance, approved operator entry rule and separately selected routing change. | `feat(navigation): open network for qualified operators` |
+
+### HWEB-F17 — HyFlo Login branding
+
+**Scope.** Follow the [canonical six-path allowlist](ULTIMATE_ROADMAP.md#hweb-f17--hyflo-login-branding-registration-2026-11-09). Modify `src/app/pages/LoginPage.tsx`, `src/app/pages/LoginPage.test.tsx`, `src/shared/i18n/resources.ts` and `index.html`. Add `public/brand/hyflo-full.png` and `public/favicon.ico`. The inspected source still displays `HidraWeb` in the browser title and already contains SONATRACH-oriented orange and neutral color tokens in the Login page. Reuse the existing provider dispatch and sign-in flow.
+
+| Supplied archive entry | Target | Bytes | SHA-256 |
+|---|---|---:|---|
+| `images/HyFlo_Full.png` | `public/brand/hyflo-full.png` | 2231744 | `3b21fd7d6dc7dbaef5fb69ec928a6d64407919ad09aabab72bb3f943c448de51` |
+| `images/favicon.ico` | `public/favicon.ico` | 13038 | `bd42abbfccf7bd227e82c4fb2666555437a293011d44cfcac0e575854e81d119` |
+
+The owner-supplied [images.zip](https://chatgpt.com/library?file_id=libfile_e05ae574fc0c8191bb1500a739640fd8&account_id=personal) passed ZIP integrity checks and has SHA-256 `e33e7af8935e1b5b999e3e16d81985572847ecfd1178bc85672a58121b8082c3`. Verify both output assets byte for byte.
+
+**Acceptance.** Run the focused Login Vitest suite, lint, typecheck and build on Node 24. Inspect built title, metadata and favicon, keyboard focus, contrast, narrow and desktop layouts, and English, French and Arabic RTL copy. In a browser against approved development HidraAPI, sign in with a synthetic user, prove a protected destination with effective permissions and exercise invalid credentials. Record provider coverage and obtain owner visual acceptance. Existing mocked provider dispatch tests are regression evidence only.
+
+### HWEB-F18 — LOCAL session renewal and logout
+
+**Scope candidate.** Use the exact accepted Identity contract for the existing login plus `POST /api/v1/identity/authentication/refresh` and `POST /api/v1/identity/authentication/logout`. The inspected API controller has these mappings, including source-visible refresh throttling (429) and logout (204). Before admission, inspect the published runtime OpenAPI and accepted status/error semantics, agree the volatile credential policy and record the exact compatibility digest. Candidate paths include `src/app/auth/AuthProvider.tsx`, `src/app/auth/authContext.ts`, `src/app/auth/authenticationGateway.ts`, `src/api/client/hidraAxios.ts`, `orval.identity-organization.config.ts`, its candidate source and proof checks, and focused auth, transport and native browser coverage. Preserve other pins and provider flows.
+
+**Acceptance.** On fresh synthetic PostgreSQL and genuine browser/HTTP, qualify LOCAL only, one renewal for parallel eligible reads, atomic credential replacement, current identity and permissions before resuming safe reads once, old bearer rejection, expiry/resume, 429 and denied authorization, missing/rejected or ambiguous renewal, and confirmed logout. An uncertain renewal must never resubmit consumed proof automatically. Protect against a late refresh restoring a signed-out session, clear protected cache, and distinguish confirmed family revocation from an unconfirmed remote logout. Verify no automatic mutation replay and no credentials in persistent browser storage, logs, traces or URLs. Record exact API and WEB revisions and redacted runtime evidence.
+
+### HWEB-F19 — Network workspace client preview
+
+**Scope candidate.** Add an isolated preview entry and fixtures under a proposed `preview/network/` directory. Use the existing network workspace, map abstraction and accessible list as interaction references. Carry one scope, system, canonical asset and time window across the map, tree, technical revisions, telemetry and Alarm panel. Keep synthetic provenance, quality, stale/unavailable states and fixture reset visible. The preview has no credentials, live API writes or product route registration. Verify isolation from the application bundle.
+
+**Acceptance.** A client operator can select the same station and time from map, tree and alarm, switch to a second synthetic system and distinguish empty, stale and unavailable data. Scope change clears incompatible selections and evidence. Read-only, same-company out-of-scope and cross-company fixture roles exercise disclosure-safe states. Demonstrate a keyboard path and narrow view, and record the client walkthrough and build identity.
+
+### HWEB-F20 — Station investigation and follow-up preview
+
+**Scope candidate.** Extend the isolated preview entry with the selected station investigation, bound observations, technical evidence revision, alarm history and separate follow-up. Use deterministic scenario transitions and fixture readback. Keep product Alarm and Workflow transport outside the preview.
+
+**Acceptance.** The client can review the condition, distinguish acknowledgement, follow-up and resolution, and reopen the resulting history with the original evidence. Exercise degraded evidence, permission denial and stale action. Denied or stale fixture actions leave history unchanged. Label simulated actor, timestamp and readback, and record client acceptance and unresolved native dependencies.
+
+### HWEB-F21 — Digital-twin decision preview
+
+**Scope candidate.** Extend the same isolated preview with gas-first scenario setup, a versioned input manifest, explicit units, precomputed synthetic observed/model comparisons, provenance, recommendation, independent human decision and outcome review. Preserve Hidra's own steady/transient engine direction and engine-neutral versioned inputs. Engine execution and physical qualification remain deferred.
+
+**Acceptance.** Client operator, engineer and reviewer can trace observation to input revision, simulated run, alternative, proposal, decision and follow-up. Prove a missing or incompatible input blocks a result, stale or unauthorized decisions preserve state, and an unavailable outcome remains unresolved. Distinguish fixture observation from fixture model output. Record decision actor, time, rationale and source links in the fixture history.
+
+### HWEB-F22 — Native station investigation
+
+**Scope candidate.** Reuse `src/features/topology/NetworkTopologyPage.tsx`, the existing Alarm Console and owner-backed technical and observation adapters. Place cross-feature composition in a proposed `src/processes/station-investigation/` directory and admit only the exact OpenAPI slices and test fixtures needed. Keep existing authoring, Alarm semantics and default landing behavior under their own authority. Before selection, obtain server-scoped network and station discovery, authoritative point and alarm links, approved technical revision evidence, and owner-confirmed asset type and scope. Record absent contracts in the existing gap register.
+
+**Acceptance.** Starting from the map and from a linked alarm, a genuine synthetic operator reaches the same authorized station, evidence revision and time window, then reloads and reauthorizes. Verify provenance, unit and freshness, allowed partial panel failure, direct links, a scope change and revoked access. Same-route-grant out-of-scope principals cannot infer protected existence, counts or history. Any admitted action uses its current owner transition and durable readback. Use exact WEB/API SHAs, OpenAPI digests, genuine browser/HTTP and disposable migrated PostgreSQL. Retain HOLD for missing authority or bindings.
+
+### HWEB-F23 — Operator landing
+
+**Scope candidate.** Adjust default authorized operator entry in `src/app/router/router.tsx`, `src/app/pages/LoginPage.tsx` and `src/app/pages/OidcCallbackPage.tsx` only where the selected baseline requires it. Reuse the authenticated shell and effective permission bootstrap. Include focused route and browser regressions in the eventual allowlist. The entry rule must use accepted server-provided permissions and qualified context.
+
+**Acceptance.** A qualified operator lands on `/network` after sign-in with the supported scope. Safe authorized return paths retain precedence, unauthorized links are handled safely, and users without a qualifying assignment reach the approved fallback. Confirm direct links, reload, revoked access, a second authorized system, and continued access to permitted support diagnostics. Exercise the genuine browser journey and review the behavior with the owner.
+
+### Common handoff and remaining portfolio
+
+- Each task's implementation handoff records exact parent/tree, source scope, contract and fixture inputs, commit message, validation and one disposition. For each delivered interface, record its entry, permissions, operations, events, error states, owner data provenance and client review separately from engineering and SITE acceptance.
+- Publish each separately selected stage to existing `main` with an expected-head guard, observe applicable exact-SHA CI creation or start and stop. Keep historical aliases and reconciliation records. The next registered source task is HWEB-F17. HWEB-F16 stays indivisible and on HOLD under its existing gate.
+- The remainder of D05–D08 in section 4 stays in the existing portfolio. Admit engineering/integrity/maintenance, planning/custody, governance and intelligence flows only after their owning contracts and representative operator workflows are qualified. D09 in section 10 still governs staging/UAT, artifact and recovery evidence, and the separate promotion decision. Preserve the existing performance budgets and measure the qualified workflow before tuning.
