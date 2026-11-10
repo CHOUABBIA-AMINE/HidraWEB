@@ -3284,3 +3284,34 @@ The accepted Login uses the supplied transparent HyFlo wordmark, the HyFlo title
 **Accepted behavior.** The LOCAL tab keeps credentials in memory and requires sign-in after reload or from a new tab. Eligible parallel reads share one rotation. HidraWEB verifies current identity and effective permissions before releasing reads. The native checks prove old-bearer rejection, replacement-bearer access, recovery after expiry, throttle handling, fail-closed handling of an ambiguous refresh, read and mutation denial without replay, family logout and rejection of a replacement bearer when its refresh response arrives after sign-out. Focused client tests cover at most one eligible read replay, no automatic mutation replay and unconfirmed remote logout. Provider regressions passed within Code CI. Live external-provider, multi-node, production and SITE qualification remain separate.
 
 **Publication and handoff.** Append this acceptance record to the canonical roadmap with `docs(auth): accept F18 LOCAL session qualification`. The next candidate is HWEB-F19, the isolated network workspace client preview. F19 requires separate canonical registration and selection under its preview isolation, fixture and role gates.
+
+## HWEB-F19 — isolated network workspace preview registration (2026-11-10)
+
+**Status:** REGISTERED. The owner’s `Next` selects this documentation stage. Implementation requires exact-SHA Documentation Validation to pass on the registration and a subsequent owner `Next` selecting the preview scope below.
+
+**Basis.** F17 branding is accepted. F18 software acceptance is recorded at HidraWEB `db6e20098cd5427d867ac6c6a1a683a4778e1373` (parent `6e0e79349a3bb04ff07230368a2fe9b69ad0a9d0`, tree `979b9b4ffbc2b88db0429c615b9f3fd05e0ef909`), with [Documentation Validation #73](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42783588099) passed. F19 is the independent synthetic client-preview lane in the [adopted product target and prepared delivery queue](HidraWEB-Production-First-Roadmap.md#14-prepared-delivery-queue-from-hweb-f17-2026-11-09). Use the existing [Network & Topology interaction](../../src/features/topology/NetworkTopologyPage.tsx) and [information architecture](../architecture/HidraWeb-Information-Architecture.md) as design references.
+
+**One deliverable.** Open a standalone HyFlo client preview directly at a read-only network workspace. Show a map with layer visibility controls and an accessible asset tree. A single preview state owns the company and organization scope, pipeline system, canonical fixture asset ID and UTC time window. Map, tree and alarm links converge on that state. The technical revision, telemetry and Alarm panels consume the same scope and time window and display fixture provenance, explicit units where relevant, and observed-at timestamps. Use a visibly labeled local schematic with fictional geometry. Represent GZ2 as the gas reference in a synthetic scenario and include a second fictional gas system. Supply a versioned fixture and an explicit reset to its deterministic starting state.
+
+**Fixture roles and disclosure.** Include a scoped demo operator, a scoped read-only observer, a same-company actor outside the selected asset grant and an actor in a different fictional company. Both in-scope roles can read permitted evidence. Demo role changes model view filtering only. Scope or role changes clear incompatible selections and evidence before the new view renders. Use the same non-disclosing state for absent and inaccessible targets when the actor lacks authority. Authorized actors can distinguish empty, stale and unavailable evidence. Fixture IDs and permissions have no runtime meaning in HidraAPI, and the bundled fixture data is public to anyone with the preview files.
+
+**Isolation.** Keep a standalone Vite root and output under `preview/network/`. Reuse the repository's installed Node 24, React, TypeScript, Vite and Playwright tooling. Keep all preview state in memory. The preview uses no credentials, auth session, product routes, API clients, HidraAPI requests, remote map tiles or third-party network services. Default product entry, product release packaging, native qualification and Alarm/Workflow behavior remain under their existing gates. F16 stays HOLD for native Alarm acknowledgement. F19 covers read-only navigation and context, with client review separate from implementation CI.
+
+**Implementation commit message** — `feat(preview): demonstrate the network workspace`.
+
+| Change | Exact implementation path | Purpose |
+|---|---|---|
+| ADD | `preview/network/index.html` | Standalone preview entry. |
+| ADD | `preview/network/vite.config.ts` | Isolated Vite root, local preview server and preview output. |
+| ADD | `preview/network/tsconfig.json` | Strict preview typecheck. |
+| ADD | `preview/network/main.tsx` | Workspace, schematic, accessible tree and shared context. |
+| ADD | `preview/network/fixtures.ts` | Versioned synthetic evidence and fixture role projections. |
+| ADD | `preview/network/styles.css` | Preview layout, responsive behavior and visible keyboard focus. |
+| ADD | `preview/network/playwright.config.ts` | Chromium checks against the built preview. |
+| ADD | `preview/network/network.spec.ts` | Browser context, disclosure, accessibility and isolation checks. |
+| ADD | `preview/network/README.md` | Local build commands, fixture and role walkthrough, and client-review evidence template. |
+| ADD | `.github/workflows/preview-network.yml` | Separate exact-SHA build and browser verification triggered by preview changes. |
+
+**Acceptance.** Check preview lint and typecheck, build it separately and verify the default product build and release manifest exclude its entry, fixtures and assets. In Chromium, select the same station and time via the map, tree and linked alarm, change the time and system, confirm incompatible evidence clears, and reset the fixture. Exercise authorized empty, stale and unavailable states, both in-scope roles, same-company and cross-company disclosure denial, keyboard-only navigation and a narrow viewport. Verify the built preview makes no product API or off-origin requests and writes no credentials or durable browser state. Record exact WEB SHA, fixture version, build identity and test results. Client walkthrough acceptance records the reviewed build and feedback before any F20 selection.
+
+**Registration publication.** Append only this canonical roadmap with `docs(roadmap): register F19 network workspace preview`. Publish directly to existing `main` with the expected-head guard against `db6e20098cd5427d867ac6c6a1a683a4778e1373`. Verify the exact commit, parent, tree and changed blob, then stop after observing exact-SHA Documentation Validation creation or start.
