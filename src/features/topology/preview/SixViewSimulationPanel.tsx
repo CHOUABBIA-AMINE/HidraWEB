@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { sixViewCopy } from './sixViewCopy';
-import { sixViewFixtureVersion, sixViewModel, type SixViewContext, type SixViewModel } from './sixViewFixture';
+import { sixViewFixtureVersion, sixViewModel, type SixViewContext } from './sixViewFixture';
 import { previewCopy, type PreviewLanguage } from './previewCopy';
 
 const tabs = ['geography', 'hydraulics', 'schematic', 'telemetry', 'integrity', 'station'] as const;
