@@ -95,3 +95,18 @@ integration require accepted HidraAPI contracts.
 F21 uses `digital-twin-decision-v1` with `network-fixture-v2` observations.
 The pressure outputs are authored comparison fixtures. The preview performs
 no engine execution and records decisions solely within the walkthrough.
+
+## F21 expanded walkthrough — six simulated interfaces
+
+The six-interface addition extends the single F21 task. It is not a suffixed new implementation task. Synthetic fixture version: six-interface-preview-v1.
+
+1. Open the signed-in synthetic network preview and inspect the six tabs below the original map/evidence: Geographic / Spatial, Hydraulic & Elevation, Logical Schematic / P&ID, Telemetry & Analytics, Asset Integrity, 2D Station.
+2. Geographic: toggle fictitious HCA/water layers, inspect the coordinates caveat and select West Intake or Atlas. These coordinates are station proxies, not exact anomaly GPS.
+3. Hydraulic: inspect authored chainage/elevation and illustrative flow with available fixture pressure; explicitly verify there is no actual steady/transient solver, mass balance or slack-line assessment.
+4. P&ID: inspect the grayscale scheme and orange demo alarm. Try station selection; no valve/SCADA command is offered.
+5. Telemetry: view Atlas morning pressure sample order, then afternoon stale exclusion. Select West Intake and overlay the other time window by click or drag/drop; the comparison must use a shared pressure scale. Individual sample timestamps and high-frequency live readings are not supplied.
+6. Integrity: inspect fictional L485 steel, wall-thickness and weld records, and missing qualified ILI. Station: inspect local SVG inlet, equipment train, bypass and outlet for the selected station and revision.
+7. Switch to Orion and an unselected station. Exercise otherScope and otherCompany: the entire six-view panel must disappear. Change English, French and Arabic RTL; use arrow/home/end keys, test a 360px viewport and Reset preview.
+8. Reopen the original station investigation and F21 independent decision walkthrough; original synthetic comparison and history must still work. Verify no new business HTTP requests, no OT actuation and no persistent local browser data.
+
+F21 requires explicit owner walkthrough acceptance after the source/CI evidence; F16 HOLD and F22 prerequisites remain unchanged.

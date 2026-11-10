@@ -530,3 +530,65 @@ test('digital-twin preview supports narrow keyboard entry and localized RTL copy
   await chooseLanguage(page, 'EN');
   await expect(page.getByRole('region', { name: 'Digital-twin decision preview' })).toContainText('REV-A03');
 });
+
+
+test('F21 six synthetic interfaces present six scoped and keyboard-selectable views', async ({ page }) => {
+  await openPreview(page);
+  const six = page.getByRole('region', { name: 'Six-view digital twin simulation' });
+  await expect(six).toContainText('six-interface-preview-v1');
+  await expect(six.getByRole('tab')).toHaveCount(6);
+  const names = [
+    '1. Geographic / Spatial', '2. Hydraulic & Elevation', '3. Logical Schematic / P&ID',
+    '4. Telemetry & Analytics', '5. Asset Integrity', '6. 2D Station',
+  ];
+  for (const name of names) {
+    await six.getByRole('tab', { name, exact: true }).click();
+    await expect(six.getByRole('tabpanel')).toBeVisible();
+    await expect(six.getByRole('tabpanel').getByRole('img')).toBeVisible();
+  }
+  await six.getByRole('tab', { name: names[0] }).focus();
+  await page.keyboard.press('End');
+  await expect(six.getByRole('tab', { name: names[5] })).toHaveAttribute('aria-selected', 'true');
+  await six.getByRole('tab', { name: names[0] }).click();
+  await six.getByRole('checkbox', { name: 'Demo HCA polygon' }).check();
+  await six.getByRole('checkbox', { name: 'Demo water crossing' }).check();
+  await expect(six.getByRole('checkbox', { name: 'Demo HCA polygon' })).toBeChecked();
+  await expect(six).toContainText('exact anomaly GPS unknown');
+});
+
+test('F21 six-view telemetry excludes stale readings and supports historical comparison', async ({ page }) => {
+  await openPreview(page);
+  const six = page.getByRole('region', { name: 'Six-view digital twin simulation' });
+  await six.getByRole('tab', { name: '4. Telemetry & Analytics' }).click();
+  await expect(six).toContainText('65.8');
+  await expect(six.getByRole('button', { name: /Overlay historical samples/ })).toBeDisabled();
+  await workspace(page).tree.getByRole('button', { name: /West Intake/ }).click();
+  await expect(six.getByRole('button', { name: /Overlay historical samples/ })).toBeEnabled();
+  await six.getByRole('button', { name: /Overlay historical samples/ }).click();
+  await expect(six).toContainText('Other fixture window: 65.2');
+  await workspace(page).tree.getByRole('button', { name: /Atlas Compression/ }).click();
+  await workspace(page).window.selectOption('afternoon');
+  await expect(six.getByRole('status')).toContainText('Stale evidence');
+  await expect(six.getByRole('img')).toHaveCount(0);
+});
+
+test('F21 six views protect demo scope, localize and expose no control commands', async ({ page }) => {
+  await openPreview(page);
+  const six = page.getByRole('region', { name: 'Six-view digital twin simulation' });
+  await six.getByRole('tab', { name: '3. Logical Schematic / P&ID' }).click();
+  await expect(six).toContainText('No valve actuation or SCADA/PLC commands');
+  for (const role of ['otherScope', 'otherCompany']) {
+    await workspace(page).role.selectOption(role);
+    await expect(six).toHaveCount(0);
+    await expect(page.getByText('DEMO-W-1')).toHaveCount(0);
+  }
+  await workspace(page).role.selectOption('operator');
+  await expect(six.getByRole('tab')).toHaveCount(6);
+  await chooseLanguage(page, 'AR');
+  await expect(page.getByRole('region', { name: 'محاكاة التوأم الرقمي بست واجهات' })).toBeVisible();
+  await chooseLanguage(page, 'FR');
+  await expect(page.getByRole('region', { name: 'Simulation du jumeau numérique en six vues' })).toBeVisible();
+  await page.getByRole('button', { name: 'Réinitialiser l’aperçu' }).click();
+  await expect(page.getByRole('region', { name: 'Simulation du jumeau numérique en six vues' })
+    .getByRole('tab', { name: /Géographie/ })).toHaveAttribute('aria-selected', 'true');
+});

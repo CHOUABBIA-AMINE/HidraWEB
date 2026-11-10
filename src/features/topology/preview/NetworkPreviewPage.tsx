@@ -15,6 +15,8 @@ import {
 } from './fixtures';
 import basemapUrl from './north-africa.geojson?url';
 import { formatTime, investigationCopy, previewCopy, windowLabel, type PreviewLanguage } from './previewCopy';
+import { SixViewSimulationPanel } from './SixViewSimulationPanel';
+import { sixViewFixtureVersion } from './sixViewFixture';
 import { StationInvestigationPanel } from './StationInvestigationPanel';
 import { initialInvestigation, investigationVersion, investigationView, updateInvestigation, type InvestigationContext } from './stationInvestigation';
 import './styles.css';
@@ -39,6 +41,7 @@ export function NetworkPreviewPage() {
   const [decisionOpen, setDecisionOpen] = useState(false);
   const [decisionActor, setDecisionActor] = useState<DecisionActor>('operator');
   const [decisionInput, setDecisionInput] = useState<InputSelection>('matched');
+  const [sixViewReset, setSixViewReset] = useState(0);
   const decisionTrigger = useRef<HTMLButtonElement>(null);
   const systems = useMemo(() => accessibleSystems(context.role), [context.role]);
   const system = systems.find(({ id }) => id === context.systemId);
@@ -83,6 +86,7 @@ export function NetworkPreviewPage() {
     setDecisionOpen(false);
     setDecisionActor('operator');
     setDecisionInput('matched');
+    setSixViewReset((value) => value + 1);
   };
 
   return (
@@ -204,6 +208,11 @@ export function NetworkPreviewPage() {
         </section>
       </div>}
 
+      {system && (
+        <SixViewSimulationPanel key={context.role + ':' + context.systemId + ':' + sixViewReset}
+          context={context} language={language} onSelect={selectAsset} />
+      )}
+
       {openInvestigationView && (
         <StationInvestigationPanel view={openInvestigationView} context={context} language={language}
           onCommand={(command) => setInvestigation((previous) => updateInvestigation(previous, context, command))}
@@ -234,7 +243,7 @@ export function NetworkPreviewPage() {
 
       <footer>
         <span>{copy.syntheticDisclosure}</span>
-        <span>{copy.fixture} <code dir="ltr">{fixtureVersion} / {investigationVersion} / {decisionFixtureVersion}</code></span>
+        <span>{copy.fixture} <code dir="ltr">{fixtureVersion} / {investigationVersion} / {decisionFixtureVersion} / {sixViewFixtureVersion}</code></span>
       </footer>
     </section>
   );

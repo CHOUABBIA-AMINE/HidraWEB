@@ -162,3 +162,33 @@
 :where(.network-fixture-workspace) .digital-twin-table td { border-block-end: 1px solid var(--line); padding: .45rem; text-align: start; overflow-wrap: anywhere; }
 :where(.network-fixture-workspace) .digital-twin-table thead { background: #edf2f5; }
 :where(.network-fixture-workspace) .digital-twin-tradeoff { font-size: .78rem; color: var(--muted); }
+
+
+/* F21 whole-task extension: all six industrial interfaces are synthetic. */
+:where(.network-fixture-workspace) .six-view-workspace { margin-block-start: 1rem; min-width: 0; overflow: hidden; }
+:where(.network-fixture-workspace) .six-view-workspace .panel-heading { display: grid; gap: .3rem; }
+:where(.network-fixture-workspace) .six-view-tabs { display: flex; flex-wrap: wrap; gap: .4rem; margin-block: .75rem; }
+:where(.network-fixture-workspace) .six-view-tabs button { min-width: 0; flex: 1 1 10rem; padding: .6rem .45rem; border: 1px solid #a6b5bd; border-radius: .3rem; background: #e6ecee; font-size: .82rem; text-align: center; }
+:where(.network-fixture-workspace) .six-view-tabs button[aria-selected="true"] { border-color: #344c5b; background: #fff; font-weight: 700; box-shadow: inset 0 -3px 0 #546a79; }
+:where(.network-fixture-workspace) .six-view-content { min-width: 0; border: 1px solid var(--line); border-radius: .35rem; padding: .8rem; background: #fff; }
+:where(.network-fixture-workspace) .six-view-inner { display: grid; gap: .75rem; min-width: 0; }
+:where(.network-fixture-workspace) .six-view-inner h3 { font-size: 1rem; }
+:where(.network-fixture-workspace) .six-view-inner p,
+:where(.network-fixture-workspace) .six-view-source { color: var(--muted); font-size: .78rem; overflow-wrap: anywhere; }
+:where(.network-fixture-workspace) .six-view-figure { width: 100%; height: auto; max-height: 24rem; display: block; direction: ltr; background: #edf1f2; border-radius: .28rem; }
+:where(.network-fixture-workspace) .six-view-options { display: flex; flex-wrap: wrap; gap: .5rem 1rem; border: 1px solid var(--line); padding: .5rem; }
+:where(.network-fixture-workspace) .six-view-options legend { font-size: .8rem; font-weight: 700; }
+:where(.network-fixture-workspace) .six-view-options label { font-size: .82rem; }
+:where(.network-fixture-workspace) .six-view-actions { display: flex; flex-wrap: wrap; gap: .4rem; }
+:where(.network-fixture-workspace) .six-view-actions button { min-width: 0; max-width: 100%; overflow-wrap: anywhere; white-space: normal; }
+:where(.network-fixture-workspace) .six-view-actions [aria-pressed="true"] { box-shadow: inset 0 0 0 2px #546a79; }
+:where(.network-fixture-workspace) .six-view-warning { border-inline-start: 3px solid #b67a4b; padding-inline-start: .5rem; }
+:where(.network-fixture-workspace) .six-view-alarm-key { border: 2px solid #b36e39; padding: .1rem .3rem; }
+:where(.network-fixture-workspace) .six-view-table-scroll { width: 100%; overflow-x: auto; }
+:where(.network-fixture-workspace) .six-view-table-scroll table { min-width: 26rem; }
+:where(.network-fixture-workspace) .six-view-drop { min-width: 0; display: grid; gap: .5rem; padding: .4rem; border: 1px dashed #a3b4be; }
+:where(.network-fixture-workspace) .six-view-source { margin-block-start: .55rem; }
+@container (max-width: 470px) {
+  :where(.network-fixture-workspace) .six-view-content { padding: .45rem; }
+  :where(.network-fixture-workspace) .six-view-tabs button { flex-basis: 100%; }
+}
