@@ -1,0 +1,71 @@
+name: HidraWEB Network Preview CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'preview/network/**'
+      - '.github/workflows/preview-network.yml'
+      - 'package-lock.json'
+      - 'package.json'
+      - '.nvmrc'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'preview/network/**'
+      - '.github/workflows/preview-network.yml'
+      - 'package-lock.json'
+      - 'package.json'
+      - '.nvmrc'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-preview:
+    name: F19 standalone network preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Lint, typecheck and build the preview
+        run: |
+          npx --no-install eslint 'preview/network/*.{ts,tsx}'
+          npx --no-install tsc -p preview/network/tsconfig.json
+          npx --no-install vite build --config preview/network/vite.config.ts
+      - name: Install Chromium
+        run: npx --no-install playwright install --with-deps chromium
+      - name: Verify the built preview in Chromium
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: ${{ runner.temp }}/f19-network-preview.json
+        run: npx --no-install playwright test --config preview/network/playwright.config.ts --reporter=list,json
+      - name: Record fixture, source and build evidence
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: ${{ runner.temp }}/f19-network-preview.json
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          fixture="$(node --input-type=module -e 'import { fixtureVersion } from "./preview/network/fixtures.ts"; console.log(fixtureVersion)')"
+          build="$(find preview/network/node_modules/.cache/network-preview -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | cut -d' ' -f1)"
+          stats="$(node --input-type=module <<'JS'
+          import { readFileSync } from 'node:fs';
+          const { stats } = JSON.parse(readFileSync(process.env.PLAYWRIGHT_JSON_OUTPUT_NAME, 'utf8'));
+          if (stats.expected !== 5 || stats.unexpected || stats.flaky || stats.skipped) {
+            throw new Error('Incomplete F19 browser qualification');
+          }
+          console.log(stats.expected + ' passed, 0 failed, 0 flaky, 0 skipped');
+          JS
+          )"
+          printf 'WEB SHA %s\nFixture %s\nBuild SHA-256 %s\nChromium %s\n' "$GITHUB_SHA" "$fixture" "$build" "$stats" | tee -a "$GITHUB_STEP_SUMMARY"
