@@ -82,7 +82,7 @@ export function SixViewSimulationPanel({ context, language, onSelect }: Props) {
             <path d="M 0 42 Q 260 88 470 37 T 800 91" stroke="#c4d2da" strokeWidth="26" fill="none" />
             {showHca && <polygon points="265,65 530,45 618,200 380,238" fill="#d7b6a0" stroke="#8d4825" strokeDasharray="8 5" strokeWidth="3" opacity=".7" />}
             {showWater && <path d="M 425 0 Q 345 105 498 280" fill="none" stroke="#658e9d" strokeWidth="15" opacity=".7" />}
-            <polyline points={model.system.stations.map((s, i) => drawX(i, model.system.stations.length) + ',' + (177 - i % 2 * 55)).join(' ')}
+            <polyline points={model.system.stations.map((_, i) => drawX(i, model.system.stations.length) + ',' + (177 - i % 2 * 55)).join(' ')}
               fill="none" stroke="#586b75" strokeWidth="8" strokeLinecap="round" />
             {model.system.stations.map((s, i) => <g key={s.id}>
               <circle cx={drawX(i, model.system.stations.length)} cy={177 - i % 2 * 55} r={model.station?.id === s.id ? 16 : 11}
