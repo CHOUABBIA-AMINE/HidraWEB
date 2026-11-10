@@ -3369,3 +3369,32 @@ The owner accepted F19 at `861c3d3940efbdad3a0a346d30b284774b31a3e2` (parent `78
 **Acceptance.** In Chromium, start from the map and from the linked alarm and verify the same station, time and evidence. Acknowledge and add a separate follow-up, then reopen the timeline and check the original evidence, actor and time. Exercise fixture resolution, stale review, degraded evidence, the observer and both out-of-scope roles. Verify that rejected actions leave the timeline unchanged, reset restores the fixture, language and narrow keyboard paths work, and demo interactions make no business API calls. Run focused tests, lint, typecheck, production build and Code CI. Record exact SHA and fixture version. Client walkthrough acceptance precedes any F21 selection.
 
 **Registration publication.** Append only this canonical roadmap with `docs(roadmap): accept F19 and register F20 station investigation`. Use guarded direct-main publication with expected head `861c3d3940efbdad3a0a346d30b284774b31a3e2`, verify exact parent, tree and blob, and stop after observing exact-SHA Documentation Validation creation or start.
+
+## HWEB-F20 — owner acceptance of station investigation (2026-11-10)
+
+The owner accepted the integrated F20 preview at `c7746c64deac3bc53eb2a467bb3a079271819de3` (parent `69c5111e70a4542411600fb5d7b3234dc1810ce1`, tree `2d7a46fc50edffb2ae54349a4947e79c28ecb825`). [Code CI #1043](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42801499456) and [Documentation Validation #79](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42801499535) passed on that SHA. Acceptance covers the integrated investigation, its versioned synthetic evidence and simulated acknowledgement, follow-up and resolution. Additional operational parameters still require completed and accepted HidraAPI contracts.
+
+## HWEB-F21 — digital-twin decision preview registration (2026-11-10)
+
+**Status.** Registered for the synthetic preview scope. The owner's acceptance covers the F20 walkthrough and the proposed F21 use of clearly labeled, precomputed synthetic model outputs reviewed in the handoff. Implementation requires successful exact-SHA Documentation Validation on this registration and a subsequent owner selection.
+
+**One deliverable.** Extend the signed-in `/network?view=preview` workspace with a gas-first decision walkthrough for the GZ2 reference fixture. Start from the existing station investigation and carry its company and organization scope, system, station, UTC window and evidence revision into an engine-neutral, versioned input manifest. Reuse the existing synthetic pressure observation and its units and provenance. Show the manifest, fixture run identity and precomputed baseline and alternative pressure outputs separately from the fixture observation. Label the modeled trade-off and its limitations. Keep the link from original evidence through comparison, proposal, reviewer decision and follow-up.
+
+**Decision and authority.** Use distinct demo operator, engineer and independent reviewer actors within the authorized fixture. Let the engineer propose an alternative from an eligible comparison and let the reviewer record an explicit approve, reject or return decision with a rationale. Retain the actor, simulated UTC time and original source references in the in-memory history. Keep an unavailable follow-up outcome unresolved. Gate the view through the existing topology read permission and fixture disclosure rules. A stale proposal, incompatible or missing input, or unauthorized action leaves decisions and history unchanged. Record approvals solely within the walkthrough. Engine execution, P3 numerical work, live integrations, additional operational parameters and OT actuation remain deferred. Preserve the future Hidra engine direction and the independent F22 native qualification gates.
+
+**Implementation commit** — `feat(preview): demonstrate digital twin decisions`.
+
+| Change | Exact implementation path | Purpose |
+|---|---|---|
+| MODIFY | `src/features/topology/preview/NetworkPreviewPage.tsx` | Mount the decision walkthrough in the existing authorized station context. |
+| ADD | `src/features/topology/preview/DigitalTwinDecisionPanel.tsx` | Render the manifest, observation and modeled comparison, proposal, decision and outcome review. |
+| ADD | `src/features/topology/preview/digitalTwinDecision.ts` | Define the versioned synthetic scenario, precomputed outputs, provenance and guarded demo transitions. |
+| ADD | `src/features/topology/preview/digitalTwinDecision.test.ts` | Verify provenance, missing inputs, role separation, stale decisions and unresolved outcomes. |
+| ADD | `src/features/topology/preview/digitalTwinCopy.ts` | Provide French, English and Arabic walkthrough copy. |
+| MODIFY | `src/features/topology/preview/styles.css` | Keep the comparison and decision history accessible in the preview layout. |
+| MODIFY | `tests/e2e/network.spec.ts` | Verify the browser walkthrough, role and context guards and transport isolation. |
+| MODIFY | `docs/roadmap/HWEB-F19-Network-Preview.md` | Document how to review the integrated F21 walkthrough. |
+
+**Acceptance.** In Chromium, trace the fixture observation and input revision into the precomputed comparison and proposal. Record and reopen the independent human decision with its original evidence, actor, time and rationale. Exercise the missing and incompatible input paths, stale and unauthorized decisions, both out-of-scope fixture roles, and the unresolved outcome state. Check keyboard access, narrow layout, French, English and Arabic RTL, reset behavior and absence of business API calls during the walkthrough. Run focused tests, lint, typecheck, production build and Code CI. Record exact SHA and fixture version. Client walkthrough acceptance follows implementation.
+
+**Registration publication.** Append only this canonical roadmap with `docs(roadmap): accept F20 and register F21 decision preview`. Use guarded direct-main publication with expected head `c7746c64deac3bc53eb2a467bb3a079271819de3`, verify exact parent, tree and blob, and stop after observing exact-SHA Documentation Validation creation or start.
