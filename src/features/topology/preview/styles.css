@@ -42,7 +42,7 @@
 :where(.network-fixture-workspace) .control-bar label > span, :where(.network-fixture-workspace) .scope > span { color: var(--muted); font-size: .71rem; font-weight: 700; }
 :where(.network-fixture-workspace) select { width: 100%; min-height: 2.25rem; border: 1px solid #9aafb9; border-radius: .3rem; padding: .25rem .45rem; background: #f8fafb; color: #192c3b; font-size: .84rem; }
 :where(.network-fixture-workspace) select:disabled { cursor: default; color: var(--muted); border-color: var(--line); }
-:where(.network-fixture-workspace) .scope { padding-left: .9rem; border-left: 1px solid var(--line); }
+:where(.network-fixture-workspace) .scope { padding-inline-start: .9rem; border-inline-start: 1px solid var(--line); }
 :where(.network-fixture-workspace) .scope strong { font-size: .87rem; }
 :where(.network-fixture-workspace) .scope small { color: var(--muted); font-size: .74rem; }
 
@@ -53,9 +53,9 @@
 :where(.network-fixture-workspace) .tree, :where(.network-fixture-workspace) .tree ul { list-style: none; margin: 0; padding: 0; }
 :where(.network-fixture-workspace) .tree { padding: .75rem .7rem; }
 :where(.network-fixture-workspace) .tree-root { display: block; padding: .25rem .2rem .5rem; font-size: .79rem; font-weight: 700; }
-:where(.network-fixture-workspace) .tree-root > span { color: var(--teal); margin-right: .24rem; }
-:where(.network-fixture-workspace) .tree ul { margin-left: .45rem; padding-left: .4rem; border-left: 1px solid var(--line); }
-:where(.network-fixture-workspace) .tree button, :where(.network-fixture-workspace) .alarm-links button { display: flex; align-items: start; gap: .48rem; width: 100%; padding: .48rem .4rem; border: 1px solid transparent; border-radius: .35rem; background: transparent; text-align: left; }
+:where(.network-fixture-workspace) .tree-root > span { color: var(--teal); margin-inline-end: .24rem; }
+:where(.network-fixture-workspace) .tree ul { margin-inline-start: .45rem; padding-inline-start: .4rem; border-inline-start: 1px solid var(--line); }
+:where(.network-fixture-workspace) .tree button, :where(.network-fixture-workspace) .alarm-links button { display: flex; align-items: start; gap: .48rem; width: 100%; padding: .48rem .4rem; border: 1px solid transparent; border-radius: .35rem; background: transparent; text-align: start; }
 :where(.network-fixture-workspace) .tree button:hover, :where(.network-fixture-workspace) .alarm-links button:hover { background: #f0f5f6; }
 :where(.network-fixture-workspace) .tree button[aria-pressed="true"] { border-color: #a4ccc6; background: #e6f4f0; }
 :where(.network-fixture-workspace) .tree button strong, :where(.network-fixture-workspace) .alarm-links strong { display: block; font-size: .78rem; }
@@ -72,31 +72,18 @@
 :where(.network-fixture-workspace) .layers legend { padding: 0 .15rem; color: var(--muted); font-size: .71rem; font-weight: 700; }
 :where(.network-fixture-workspace) .layers label { display: flex; align-items: center; gap: .25rem; font-size: .79rem; }
 :where(.network-fixture-workspace) .layers input { margin: 0; accent-color: var(--teal); }
-:where(.network-fixture-workspace) .schematic {
-  position: relative;
-  min-height: 23rem;
-  height: clamp(23rem, 30vw, 31rem);
-  overflow: hidden;
-  margin: 0 .75rem;
+:where(.network-fixture-workspace) .geographic-map { overflow: hidden; margin: 0 .75rem; border-radius: .35rem; }
+:where(.network-fixture-workspace) .geographic-station {
+  padding: .22rem .4rem;
+  border: 2px solid white;
   border-radius: .35rem;
-  background-color: #152d39;
-  background-image: linear-gradient(#2a414d 1px, transparent 1px), linear-gradient(90deg, #2a414d 1px, transparent 1px);
-  background-size: 2rem 2rem;
+  background: #174f77;
+  color: white;
+  font-size: .69rem;
+  font-weight: 700;
+  white-space: nowrap;
 }
-:where(.network-fixture-workspace) .diagram { position: absolute; inset: 0; width: 100%; height: 100%; }
-:where(.network-fixture-workspace) .contour, :where(.network-fixture-workspace) .corridor { fill: none; vector-effect: non-scaling-stroke; }
-:where(.network-fixture-workspace) .contour { stroke: #405866; stroke-width: 1px; }
-:where(.network-fixture-workspace) .corridor { stroke: #59debf; stroke-width: 3px; stroke-linejoin: round; }
-:where(.network-fixture-workspace) .schematic-key, :where(.network-fixture-workspace) .schematic-label { position: absolute; z-index: 1; color: #c9dde4; font-size: .69rem; font-weight: 650; letter-spacing: .12em; pointer-events: none; }
-:where(.network-fixture-workspace) .schematic-key { top: .8rem; right: .8rem; display: grid; justify-items: center; }
-:where(.network-fixture-workspace) .schematic-key span:last-child { font-size: 1.1rem; }
-:where(.network-fixture-workspace) .schematic-label { bottom: .8rem; left: .8rem; }
-:where(.network-fixture-workspace) .station-marker { position: absolute; top: var(--y); left: var(--x); transform: translate(-50%, -50%); display: grid; place-items: center; padding: 0; width: 2.5rem; height: 2.5rem; border: 0; border-radius: 50%; background: transparent; color: white; }
-:where(.network-fixture-workspace) .station-marker:focus-visible { outline-color: #ffd39a; }
-:where(.network-fixture-workspace) .marker-pin { width: .87rem; height: .87rem; border-radius: 50%; border: 2px solid #142936; outline: 2px solid #8ce3cd; background: #c1f8e6; }
-:where(.network-fixture-workspace) .station-marker:hover .marker-pin, :where(.network-fixture-workspace) .station-marker[aria-pressed="true"] .marker-pin { outline: 2px solid #ffbd92; background: #ff9e67; }
-:where(.network-fixture-workspace) .marker-name { position: absolute; top: 2.2rem; width: max-content; max-width: 6.4rem; padding: .2rem .38rem; border-radius: .22rem; background: #112530; color: white; font-size: .69rem; line-height: 1.16; }
-:where(.network-fixture-workspace) .station-marker[aria-pressed="true"] .marker-name { background: #683217; color: #fff0e6; }
+:where(.network-fixture-workspace) .geographic-station[aria-pressed="true"] { background: #903b0f; }
 :where(.network-fixture-workspace) .map-caption { display: flex; justify-content: space-between; gap: .4rem; padding: .65rem .8rem .8rem; color: var(--muted); font-size: .7rem; }
 :where(.network-fixture-workspace) .map-caption i { display: inline-block; margin: 0 .24rem .15rem 0; width: .85rem; height: .15rem; background: var(--teal); }
 
@@ -129,16 +116,13 @@
   :where(.network-fixture-workspace) .page-heading { flex-wrap: wrap; align-items: start; gap: .65rem; }
   :where(.network-fixture-workspace) .control-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; padding: .65rem; }
   :where(.network-fixture-workspace) .workspace-grid, :where(.network-fixture-workspace) .cards { grid-template-columns: minmax(0, 1fr); }
-  :where(.network-fixture-workspace) .scope { padding-left: .45rem; }
-  :where(.network-fixture-workspace) .schematic { min-height: 16rem; height: 16rem; }
+  :where(.network-fixture-workspace) .scope { padding-inline-start: .45rem; }
 }
 @media (forced-colors: active) {
-  :where(.network-fixture-workspace) .corridor, :where(.network-fixture-workspace) .trend polyline { stroke: CanvasText; }
-  :where(.network-fixture-workspace) .marker-pin { forced-color-adjust: none; }
+  :where(.network-fixture-workspace) .trend polyline { stroke: CanvasText; }
 }
 
 @container (max-width: 25rem) {
   :where(.network-fixture-workspace) .control-bar { grid-template-columns: minmax(0, 1fr); }
   :where(.network-fixture-workspace) .layers, :where(.network-fixture-workspace) .map-caption { flex-wrap: wrap; }
-  :where(.network-fixture-workspace) .marker-name { display: none; }
 }

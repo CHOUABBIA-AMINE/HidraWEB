@@ -14,9 +14,22 @@ read permission govern entry to the view.
    in the existing application shell.
 4. Use **Return to operational map** to return to the existing topology reader.
 
-The switch follows the selected app language. The synthetic workspace and
-fixture labels are in English. The ordinary HidraWEB build and deployment
-include this view.
+The switch, workspace, evidence labels and map controls follow the selected app
+language in French, English or Arabic. Arabic uses right-to-left layout.
+Changing language preserves the selected fixture context. The ordinary HidraWEB
+build includes this view and its basemap.
+
+## Geographic basemap
+
+The regional basemap uses public-domain Natural Earth 1:50m Admin 0 countries
+from version 5.1.2. The [upstream GeoJSON](https://github.com/nvkelso/natural-earth-vector/blob/v5.1.2/geojson/ne_50m_admin_0_countries.geojson)
+was simplified at 0.0125 degrees, clipped to longitude −5° to 13° and latitude
+29° to 40°, rounded to four decimal places and stripped of feature attributes.
+The repository serves the resulting land and border geometry locally.
+See the [Natural Earth terms of use](https://www.naturalearthdata.com/about/terms-of-use/).
+
+The gas corridors, station coordinates and measurements are synthetic.
+The regional map is intended for the demonstration walkthrough.
 
 ## Client walkthrough
 

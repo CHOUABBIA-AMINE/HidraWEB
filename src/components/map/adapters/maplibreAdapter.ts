@@ -1,8 +1,12 @@
-import { Map, NavigationControl, type GeoJSONSource, type MapLayerMouseEvent } from 'maplibre-gl';
+import { Map as MapLibreMap, Marker, NavigationControl, setWorkerUrl, type GeoJSONSource, type MapLayerMouseEvent } from 'maplibre-gl';
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 import { getFeatureCollectionBounds } from '@/components/map/mapBounds';
-import type { HidraMapAdapter, HidraMapFeatureCollection, HidraMapSelection } from '@/components/map/mapTypes';
+import type { HidraGeographicBasemap, HidraMapAdapter, HidraMapFeatureCollection, HidraMapSelection } from '@/components/map/mapTypes';
+
+// Let Vite emit the worker and its imports at a same-origin URL.
+setWorkerUrl(workerUrl);
 
 const SOURCE_ID = 'hidra-topology-source';
 const POINT_LAYER_ID = 'hidra-topology-points';
@@ -16,20 +20,26 @@ function asGeoJson(data: HidraMapFeatureCollection): Parameters<GeoJSONSource['s
 export function createMapLibreAdapter(
   container: HTMLElement,
   onFeatureSelect: (selection: HidraMapSelection) => void,
+  basemap?: HidraGeographicBasemap,
 ): HidraMapAdapter {
-  const map = new Map({
+  const map = new MapLibreMap({
     container,
-    center: [0, 0],
-    zoom: 1,
+    center: basemap?.center ?? [0, 0],
+    zoom: basemap ? 5.5 : 1,
+    ...(basemap ? { maxBounds: basemap.bounds, locale: basemap.locale, attributionControl: false } : {}),
     style: {
       version: 8,
-      sources: {},
+      sources: basemap ? { 'hidra-geography': { type: 'geojson', data: basemap.url } } : {},
       layers: [
         {
           id: 'hidra-background',
           type: 'background',
-          paint: { 'background-color': '#f4f6f8' },
+          paint: { 'background-color': basemap ? '#c8e0eb' : '#f4f6f8' },
         },
+        ...(basemap ? [
+          { id: 'hidra-land', type: 'fill' as const, source: 'hidra-geography', paint: { 'fill-color': '#f1efe5' } },
+          { id: 'hidra-borders', type: 'line' as const, source: 'hidra-geography', paint: { 'line-color': '#84989d', 'line-width': 1 } },
+        ] : []),
       ],
     },
   });
@@ -40,8 +50,44 @@ export function createMapLibreAdapter(
   let selectedFeatureId: string | undefined;
   let appliedSelectedFeatureId: string | undefined;
   let fittedInitialData = false;
+  const markers = new Map<string, { marker: Marker; button: HTMLButtonElement }>();
+
+  const updateMarkers = (data: HidraMapFeatureCollection) => {
+    if (!basemap) return;
+    const next = new Set<string>();
+    for (const { id, geometry, properties } of data.features) {
+      if (geometry.type !== 'Point' || !properties.markerLabel) continue;
+      next.add(id);
+      let entry = markers.get(id);
+      const isNew = !entry;
+      if (!entry) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'geographic-station';
+        button.addEventListener('click', (event) => {
+          event.stopPropagation();
+          onFeatureSelect({ featureId: id, layerId: properties.layer });
+        });
+        const marker = new Marker({ element: button, anchor: 'center' });
+        entry = { button, marker };
+        markers.set(id, entry);
+      }
+      entry.button.textContent = properties.label;
+      entry.button.setAttribute('aria-label', properties.markerLabel);
+      entry.marker.setLngLat(geometry.coordinates as [number, number]);
+      if (isNew) entry.marker.addTo(map);
+    }
+    for (const [id, { marker }] of markers) {
+      if (next.has(id)) continue;
+      marker.remove();
+      markers.delete(id);
+    }
+  };
 
   const applySelection = () => {
+    for (const [id, { button }] of markers) {
+      button.setAttribute('aria-pressed', String(id === selectedFeatureId));
+    }
     if (!map.isStyleLoaded()) return;
     if (appliedSelectedFeatureId && appliedSelectedFeatureId !== selectedFeatureId) {
       map.setFeatureState({ source: SOURCE_ID, id: appliedSelectedFeatureId }, { selected: false });
@@ -70,6 +116,7 @@ export function createMapLibreAdapter(
     if (!source) return;
     source.setData(asGeoJson(data));
     fitInitialData(data);
+    updateMarkers(data);
     applySelection();
   };
 
@@ -84,7 +131,7 @@ export function createMapLibreAdapter(
         'line-width': ['case', ['boolean', ['feature-state', 'selected'], false], 5, 3],
       },
     });
-    map.addLayer({
+    if (!basemap) map.addLayer({
       id: POINT_LAYER_ID,
       source: SOURCE_ID,
       type: 'circle',
@@ -103,9 +150,12 @@ export function createMapLibreAdapter(
       onFeatureSelect({ featureId: String(feature.id), layerId: layer });
     };
 
-    map.on('click', LINE_LAYER_ID, handleClick);
-    map.on('click', POINT_LAYER_ID, handleClick);
+    if (!basemap) {
+      map.on('click', LINE_LAYER_ID, handleClick);
+      map.on('click', POINT_LAYER_ID, handleClick);
+    }
     fitInitialData(pendingData);
+    updateMarkers(pendingData);
     applySelection();
   });
 
@@ -115,6 +165,9 @@ export function createMapLibreAdapter(
       selectedFeatureId = featureId;
       applySelection();
     },
-    destroy: () => map.remove(),
+    destroy: () => {
+      for (const { marker } of markers.values()) marker.remove();
+      map.remove();
+    },
   };
 }

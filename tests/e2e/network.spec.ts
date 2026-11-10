@@ -67,14 +67,20 @@ test('HWEB-005 loads topology, searches, and inspects while preserving the netwo
   await expect(page.getByText('Résultats de recherche · 1')).toBeVisible();
 });
 
-async function openPreview(page: Page) {
+async function chooseLanguage(page: Page, language: 'EN' | 'FR' | 'AR') {
+  await page.getByRole('combobox', { name: /^(Language|Langue|اللغة)$/ }).click();
+  await page.getByRole('option', { name: language, exact: true }).click();
+}
+
+async function openPreview(page: Page, language: 'EN' | 'FR' = 'EN') {
   await mockBackend(page);
   await signIn(page);
   await page.getByRole('button', { name: 'Réseau' }).click();
   await page.getByRole('link', { name: 'Ouvrir l’aperçu synthétique' }).click();
   await expect(page).toHaveURL(/\/network\?view=preview$/);
-  await expect(page.getByRole('heading', { name: 'Synthetic network preview' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Réseau' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Aperçu synthétique du réseau' })).toBeVisible();
+  if (language === 'EN') await chooseLanguage(page, 'EN');
+  await expect(page.getByRole('button', { name: language === 'EN' ? 'Network' : 'Réseau' })).toBeVisible();
 }
 
 function workspace(page: Page) {
@@ -82,7 +88,7 @@ function workspace(page: Page) {
     role: page.getByLabel('Demo role'),
     system: page.getByLabel('Pipeline system'),
     window: page.getByLabel('Time window', { exact: false }),
-    map: page.getByRole('group', { name: 'Station map' }),
+    map: page.getByRole('region', { name: 'Station map' }),
     tree: page.getByRole('region', { name: 'Asset tree' }),
     telemetry: page.getByRole('region', { name: 'Telemetry' }),
     technical: page.getByRole('region', { name: 'Technical revision' }),
@@ -122,14 +128,15 @@ test('map, tree and linked alarm open the same fixture asset and UTC window', as
   await expect(mapAtlas).toHaveCount(0);
   await expect(treeAtlas).toBeVisible();
   await page.getByRole('checkbox', { name: 'Pipelines' }).uncheck();
-  await expect(view.map.locator('.corridor')).toHaveCount(0);
+  await expect(page.getByRole('checkbox', { name: 'Pipelines' })).not.toBeChecked();
+  await expect(view.map.locator('canvas')).toBeVisible();
   await page.getByRole('button', { name: 'Reset preview' }).click();
   await expectAtlas();
-  await expect(view.map.locator('.corridor')).toBeVisible();
+  await expect(page.getByRole('checkbox', { name: 'Pipelines' })).toBeChecked();
 
-  await page.getByRole('link', { name: 'Revenir à la carte opérationnelle' }).click();
+  await page.getByRole('link', { name: 'Return to operational map' }).click();
   await expect(page).toHaveURL(/\/network$/);
-  await expect(page.getByRole('heading', { name: 'Réseau & topologie' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Network & topology' })).toBeVisible();
   await expect(page.getByText('FAC-1')).toBeVisible();
   await expect(view.telemetry).toHaveCount(0);
 });
@@ -196,8 +203,8 @@ test('both authorized roles can read and denied scopes disclose no protected fix
 test('narrow workspace supports keyboard selection with visible focus', async ({ page }) => {
   await openPreview(page);
   await page.setViewportSize({ width: 360, height: 740 });
-  await page.getByRole('button', { name: 'Réduire la navigation' }).click();
-  await page.getByRole('link', { name: 'Revenir à la carte opérationnelle' }).focus();
+  await page.getByRole('button', { name: 'Collapse navigation' }).click();
+  await page.getByRole('link', { name: 'Return to operational map' }).focus();
 
   const target = workspace(page).tree.getByRole('button', { name: /West Intake/ });
   for (let step = 0; step < 10 && !(await target.evaluate((element) => element === document.activeElement)); step += 1) {
@@ -216,7 +223,7 @@ test('preview deep link requires authentication and topology map permission', as
   await signInFrom(page, '/network?view=preview');
   await expect(page).toHaveURL(/\/network\?view=preview$/);
   await expect(page.getByRole('alert')).toContainText('La capacité de lecture topology');
-  await expect(page.getByRole('heading', { name: 'Synthetic network preview' })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Aperçu synthétique du réseau' })).toHaveCount(0);
   await expect(page.getByRole('link', { name: 'Ouvrir l’aperçu synthétique' })).toHaveCount(0);
 });
 
@@ -227,7 +234,18 @@ test('preview fixture interactions use no operational data or persistent browser
     const { origin, pathname } = new URL(request.url());
     requests.push({ origin, pathname, method: request.method() });
   });
+  const basemapResponse = page.waitForResponse((response) => {
+    const url = new URL(response.url());
+    return url.pathname.endsWith('/north-africa.geojson') && !url.search;
+  });
   await signInFrom(page, '/network?view=preview');
+  await expect(page.getByRole('heading', { name: 'Aperçu synthétique du réseau' })).toBeVisible();
+  const basemap = await basemapResponse;
+  expect(basemap.ok()).toBe(true);
+  const geography = await basemap.json();
+  expect(geography.type).toBe('FeatureCollection');
+  expect(geography.features.length).toBeGreaterThan(1);
+  await chooseLanguage(page, 'EN');
   await expect(page.getByRole('heading', { name: 'Synthetic network preview' })).toBeVisible();
   const sessionStorageBefore = await page.evaluate(() => [localStorage.length, sessionStorage.length]);
   const cookiesBefore = await context.cookies();
@@ -254,4 +272,25 @@ test('preview fixture interactions use no operational data or persistent browser
   }
   expect(await context.cookies()).toEqual(cookiesBefore);
   expect(await page.evaluate(() => [localStorage.length, sessionStorage.length])).toEqual(sessionStorageBefore);
+});
+
+test('the preview follows French, Arabic and English without resetting the selected station', async ({ page }) => {
+  await openPreview(page, 'FR');
+  await expect(page.getByRole('region', { name: 'Télémétrie' })).toContainText('64,1 bar(g)');
+  const map = page.getByRole('region', { name: 'Carte des stations' });
+  await expect(map.getByRole('button', { name: 'Agrandir la carte' })).toBeVisible();
+  await map.getByRole('button', { name: 'Sélectionner Entrée Ouest sur la carte' }).click();
+  await expect(page.getByRole('heading', { name: 'Entrée Ouest' })).toBeVisible();
+
+  await chooseLanguage(page, 'AR');
+  const arabicPreview = page.getByRole('region', { name: 'معاينة الشبكة الاصطناعية' });
+  await expect(arabicPreview).toHaveAttribute('dir', 'rtl');
+  await expect(arabicPreview.getByRole('heading', { name: 'المدخل الغربي' })).toBeVisible();
+  await expect(arabicPreview.getByRole('button', { name: 'تكبير الخريطة' })).toBeVisible();
+  await expect(arabicPreview.getByRole('button', { name: 'اختر المدخل الغربي على الخريطة' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(arabicPreview.getByRole('region', { name: 'إنذار', exact: true })).toContainText('لا توجد سجلات في هذه الفترة.');
+
+  await chooseLanguage(page, 'EN');
+  await expect(page.getByRole('heading', { name: 'West Intake' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Synthetic network preview' })).toHaveAttribute('dir', 'ltr');
 });

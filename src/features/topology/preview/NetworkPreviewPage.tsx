@@ -1,9 +1,15 @@
-import { useState, type CSSProperties, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { HidraMap } from '@/components/map/HidraMap';
+import type { HidraGeographicBasemap, HidraMapFeatureCollection } from '@/components/map/mapTypes';
 
 import {
-  accessibleSystems, fixtureDate, fixtureVersion, roles, windows,
+  accessibleSystems, fixtureDate, fixtureVersion, observedAt, roles, windows,
   type Evidence, type GasSystem, type RoleId, type Station, type SystemId, type WindowId,
 } from './fixtures';
+import basemapUrl from './north-africa.geojson?url';
+import { previewCopy } from './previewCopy';
 import './styles.css';
 
 type Context = {
@@ -17,16 +23,29 @@ const initialContext: Context = {
   role: 'operator', systemId: 'gz2', assetId: 'demo-gz2-atlas', windowId: 'morning',
 };
 const initialLayers = { pipelines: true, stations: true };
-const rolesList = Object.entries(roles);
-const noScope = 'No workspace is available in this demo scope.';
+type PreviewLanguage = keyof typeof previewCopy;
+const rolesList = Object.keys(roles) as RoleId[];
+
+function formatTime(iso: string, language: PreviewLanguage) {
+  return new Intl.DateTimeFormat(language, {
+    timeZone: 'UTC', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).format(new Date(iso));
+}
+
+function windowLabel(windowId: WindowId, language: PreviewLanguage) {
+  return windows[windowId].map((time) => formatTime(observedAt(time), language)).join('–') + ' UTC';
+}
 
 export function NetworkPreviewPage() {
+  const { i18n } = useTranslation();
+  const language = i18n.resolvedLanguage === 'ar' || i18n.resolvedLanguage === 'fr' ? i18n.resolvedLanguage : 'en';
+  const copy = previewCopy[language];
+  const date = new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(fixtureDate));
   const [context, setContext] = useState(initialContext);
   const [layers, setLayers] = useState(initialLayers);
-  const systems = accessibleSystems(context.role);
+  const systems = useMemo(() => accessibleSystems(context.role), [context.role]);
   const system = systems.find(({ id }) => id === context.systemId);
   const station = system?.stations.find(({ id }) => id === context.assetId);
-  const time = windows[context.windowId];
   const alarmLinks = system?.stations.flatMap((asset) => {
     const alarm = asset.evidence[context.windowId].alarm;
     return 'value' in alarm ? [{ asset, alarm: alarm.value }] : [];
@@ -38,7 +57,7 @@ export function NetworkPreviewPage() {
   });
   const selectAsset = (id: string) => setContext((previous) => {
     const target = accessibleSystems(previous.role).find(({ id }) => id === previous.systemId);
-    return { ...previous, assetId: target?.stations.some((asset) => asset.id === id) ? id : null };
+    return target?.stations.some((asset) => asset.id === id) ? { ...previous, assetId: id } : previous;
   });
   const reset = () => {
     setContext(initialContext);
@@ -46,78 +65,78 @@ export function NetworkPreviewPage() {
   };
 
   return (
-    <section className="network-fixture-workspace" lang="en" dir="ltr" aria-labelledby="network-fixture-title">
+    <section className="network-fixture-workspace" lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'} aria-labelledby="network-fixture-title">
       <div className="page-heading">
         <div>
-          <p className="eyebrow">Synthetic data · Read only</p>
-          <h1 id="network-fixture-title">Synthetic network preview</h1>
-          <p className="subheading">Explore a fictional gas corridor and its station evidence.</p>
+          <p className="eyebrow">{copy.badge}</p>
+          <h1 id="network-fixture-title">{copy.heading}</h1>
+          <p className="subheading">{copy.intro}</p>
         </div>
-        <button className="secondary-button" onClick={reset}>Reset preview</button>
+        <button className="secondary-button" onClick={reset}>{copy.reset}</button>
       </div>
 
-      <section className="control-bar" aria-label="Workspace context">
+      <section className="control-bar" aria-label={copy.workspace}>
         <label>
-          <span>Demo role</span>
+          <span>{copy.role}</span>
           <select value={context.role} onChange={(event) => selectRole(event.target.value as RoleId)}>
-            {rolesList.map(([id, role]) => <option value={id} key={id}>{role.label}</option>)}
+            {rolesList.map((id) => <option value={id} key={id}>{copy.roles[id]}</option>)}
           </select>
         </label>
         <label>
-          <span>Pipeline system</span>
+          <span>{copy.system}</span>
           <select disabled={!system} value={system?.id ?? ''} onChange={(event) => {
             const systemId = event.target.value as SystemId;
             if (systems.some(({ id }) => id === systemId)) setContext({ ...context, systemId, assetId: null });
           }}>
-            {!system && <option value="">No system available</option>}
-            {systems.map(({ id, name }) => <option value={id} key={id}>{name}</option>)}
+            {!system && <option value="">{copy.noSystem}</option>}
+            {systems.map(({ id }) => <option value={id} key={id}>{copy.systems[id]}</option>)}
           </select>
         </label>
         <label>
-          <span>Time window · {fixtureDate}</span>
+          <span>{copy.time} · {date}</span>
           <select disabled={!system} value={context.windowId} onChange={(event) => {
             const windowId = event.target.value as WindowId;
             setContext({ ...context, windowId });
           }}>
-            {Object.entries(windows).map(([id, window]) => <option value={id} key={id}>{window.label}</option>)}
+            {(Object.keys(windows) as WindowId[]).map((id) => <option value={id} key={id}>{windowLabel(id, language)}</option>)}
           </select>
         </label>
         <div className="scope" aria-live="polite">
-          <span>Company and organization</span>
-          <strong>{system ? system.organization : 'Scope unavailable'}</strong>
-          {system && <small>{system.company}</small>}
+          <span>{copy.scope}</span>
+          <strong>{system ? copy.organizations[system.organization] : copy.noScope}</strong>
+          {system && <small>{copy.company}</small>}
         </div>
       </section>
 
-      {!system ? <section className="panel restricted" aria-label="Scope status">
-        <h2>Workspace unavailable</h2>
-        <p role="status">{noScope}</p>
+      {!system ? <section className="panel restricted" aria-label={copy.scopeStatus}>
+        <h2>{copy.deniedTitle}</h2>
+        <p role="status">{copy.denied}</p>
       </section> : <div className="workspace-grid">
         <section className="panel asset-panel" aria-labelledby="assets-heading">
           <div className="panel-heading">
-            <p className="eyebrow">Topology</p>
-            <h2 id="assets-heading">Asset tree</h2>
+            <p className="eyebrow">{copy.topology}</p>
+            <h2 id="assets-heading">{copy.assetTree}</h2>
           </div>
           <ul className="tree">
             <li>
-              <span className="tree-root"><span aria-hidden="true">◆</span> {system.name}</span>
-              <ul aria-label="Stations">
+              <span className="tree-root"><span aria-hidden="true">◆</span> {copy.systems[system.id]}</span>
+              <ul aria-label={copy.stationsLabel}>
                 {system.stations.map((asset) => (
                   <li key={asset.id}><button aria-pressed={station?.id === asset.id} onClick={() => selectAsset(asset.id)}>
                     <span className="tree-dot" aria-hidden="true" />
-                    <span><strong>{asset.name}</strong><small>{asset.kind}</small></span>
+                    <span><strong>{copy.stations[asset.id]}</strong><small>{copy.kinds[asset.kind]}</small></span>
                   </button></li>
                 ))}
               </ul>
             </li>
           </ul>
           <div className="alarm-links" aria-labelledby="linked-alarms">
-            <h3 id="linked-alarms">Linked alarms</h3>
-            {alarmLinks.length === 0 ? <p className="muted">No linked alarm records in this window.</p> :
+            <h3 id="linked-alarms">{copy.linkedAlarms}</h3>
+            {alarmLinks.length === 0 ? <p className="muted">{copy.noLinkedAlarms}</p> :
               alarmLinks.map(({ asset, alarm }) => (
                 <button key={alarm.id} onClick={() => selectAsset(asset.id)}>
                   <span className="alarm-dot" aria-hidden="true" />
-                  <span><strong>{alarm.title}</strong><small>{asset.name} · {alarm.id}</small></span>
+                  <span><strong>{copy.lowDischarge}</strong><small>{copy.stations[asset.id]} · <bdi>{alarm.id}</bdi></small></span>
                 </button>
               ))}
           </div>
@@ -125,105 +144,122 @@ export function NetworkPreviewPage() {
 
         <section className="panel map-panel" aria-labelledby="map-heading">
           <div className="panel-heading map-heading">
-            <div><p className="eyebrow">Network schematic</p><h2 id="map-heading">{system.name}</h2></div>
-            <span className="read-only">Read only</span>
+            <div><p className="eyebrow">{copy.geographicMap}</p><h2 id="map-heading">{copy.systems[system.id]}</h2></div>
+            <span className="read-only">{copy.readOnly}</span>
           </div>
           <fieldset className="layers">
-            <legend>Map layers</legend>
-            <label><input type="checkbox" checked={layers.pipelines} onChange={(event) => setLayers({ ...layers, pipelines: event.target.checked })} /> Pipelines</label>
-            <label><input type="checkbox" checked={layers.stations} onChange={(event) => setLayers({ ...layers, stations: event.target.checked })} /> Stations</label>
+            <legend>{copy.layers}</legend>
+            <label><input type="checkbox" checked={layers.pipelines} onChange={(event) => setLayers({ ...layers, pipelines: event.target.checked })} /> {copy.pipelines}</label>
+            <label><input type="checkbox" checked={layers.stations} onChange={(event) => setLayers({ ...layers, stations: event.target.checked })} /> {copy.stationsLabel}</label>
           </fieldset>
-          <Schematic system={system} selected={station} layers={layers} onSelect={selectAsset} />
-          <div className="map-caption"><span><i aria-hidden="true" /> Gas corridor</span><span>Fictional geometry · diagram only</span></div>
+          <GeographicMap key={system.id + language} system={system} selected={station} layers={layers} language={language} onSelect={selectAsset} />
+          <div className="map-caption"><span><i aria-hidden="true" /> {copy.corridor}</span><span>{copy.fictionalOverlay}</span></div>
         </section>
 
         <section className="panel evidence-panel" aria-labelledby="evidence-heading">
           <div className="panel-heading">
-            <p className="eyebrow">Station evidence</p>
-            <h2 id="evidence-heading">{station?.name ?? 'Select a station'}</h2>
+            <p className="eyebrow">{copy.stationEvidence}</p>
+            <h2 id="evidence-heading">{station ? copy.stations[station.id] : copy.chooseStation}</h2>
             <p className="selection" aria-live="polite">
-              {station ? <><span>{station.id}</span><span>{time.label}</span></> : 'Use the map, asset tree or linked alarms.'}
+              {station ? <><bdi>{station.id}</bdi><bdi>{windowLabel(context.windowId, language)}</bdi></> : copy.useMapOrTree}
             </p>
           </div>
-          {station && <EvidenceCards station={station} windowId={context.windowId} />}
+          {station && <EvidenceCards station={station} windowId={context.windowId} language={language} />}
         </section>
       </div>}
 
       <footer>
-        <span>All assets, measurements and access scenarios are synthetic.</span>
-        <span>Fixture <code>{fixtureVersion}</code></span>
+        <span>{copy.syntheticDisclosure}</span>
+        <span>{copy.fixture} <code dir="ltr">{fixtureVersion}</code></span>
       </footer>
     </section>
   );
 }
 
-function Schematic({ system, selected, layers, onSelect }: {
+function GeographicMap({ system, selected, layers, language, onSelect }: {
   system: GasSystem;
   selected: Station | undefined;
   layers: typeof initialLayers;
+  language: PreviewLanguage;
   onSelect: (id: string) => void;
 }) {
-  const points = system.stations.map(({ point }) => point.join(',')).join(' ');
-  return <div className="schematic" role="group" aria-label="Station map">
-    <div className="schematic-key" aria-hidden="true"><span>N</span><span>↑</span></div>
-    <span className="schematic-label" aria-hidden="true">{system.code} / GAS</span>
-    <svg className="diagram" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-      <path className="contour" d="M-5 25 Q20 6 40 17 T76 21 T105 4 M-7 35 Q20 12 40 25 T77 29 T107 12 M-10 46 Q20 20 41 32 T78 36 T108 21 M-7 85 Q22 67 40 80 T76 83 T110 65 M-6 95 Q22 75 40 88 T76 91 T110 76" />
-      {layers.pipelines && <polyline className="corridor" points={points} />}
-    </svg>
-    {layers.stations && system.stations.map((asset) => {
-      const [x, y] = asset.point;
-      return <button
-        key={asset.id}
-        className="station-marker"
-        style={{ '--x': x + '%', '--y': y + '%' } as CSSProperties}
-        aria-label={'Select ' + asset.name + ' on map'}
-        aria-pressed={selected?.id === asset.id}
-        onClick={() => onSelect(asset.id)}
-      ><span className="marker-pin" aria-hidden="true" /><span className="marker-name">{asset.name}</span></button>;
-    })}
+  const copy = previewCopy[language];
+  const basemap = useMemo<HidraGeographicBasemap>(() => ({
+    url: basemapUrl,
+    bounds: [[-5, 29], [13, 40]],
+    center: [3, 35.5],
+    locale: copy.locale,
+    errorLabel: copy.mapUnavailable,
+  }), [copy]);
+  const data = useMemo<HidraMapFeatureCollection>(() => ({
+    type: 'FeatureCollection',
+    features: [
+      ...(layers.pipelines && system.stations.length > 1 ? [{
+        type: 'Feature' as const, id: system.id + '-corridor',
+        geometry: { type: 'LineString' as const, coordinates: system.stations.map(({ coordinates }) => [...coordinates]) },
+        properties: { layer: 'pipeline' },
+      }] : []),
+      ...layers.stations ? system.stations.map(({ id, coordinates }) => ({
+        type: 'Feature' as const, id,
+        geometry: { type: 'Point' as const, coordinates: [...coordinates] },
+        properties: { layer: 'station', label: copy.stations[id], markerLabel: copy.selectOnMap(copy.stations[id]) },
+      })) : [],
+    ],
+  }), [copy, layers, system]);
+
+  return <div className="geographic-map">
+    <HidraMap
+      data={data}
+      selectedFeatureId={selected?.id}
+      ariaLabel={copy.stationMap}
+      minHeight={360}
+      basemap={basemap}
+      onFeatureSelect={({ featureId, layerId }) => { if (layerId === 'station') onSelect(featureId); }}
+    />
   </div>;
 }
 
-function EvidenceCards({ station, windowId }: { station: Station; windowId: WindowId }) {
+function EvidenceCards({ station, windowId, language }: { station: Station; windowId: WindowId; language: PreviewLanguage }) {
   const { technical, pressure, alarm } = station.evidence[windowId];
+  const copy = previewCopy[language];
+  const number = new Intl.NumberFormat(language, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   return <div className="cards">
-    <EvidenceCard title="Technical revision" evidence={technical}>
-      {(value) => <><strong>{value.revision}</strong><p>{value.description}</p></>}
+    <EvidenceCard title={copy.technical} evidence={technical} language={language}>
+      {(value) => <><strong><bdi>{value.revision}</bdi></strong><p>{copy.descriptions[value.description]}</p></>}
     </EvidenceCard>
-    <EvidenceCard title="Telemetry" evidence={pressure}>
+    <EvidenceCard title={copy.telemetry} evidence={pressure} language={language}>
       {(value) => <>
-        <p>Station outlet pressure</p>
+        <p>{copy.pressure}</p>
         <div className="measurement">
-          <strong>{value.samples.at(-1)?.toFixed(1)} <small>bar(g)</small></strong>
-          <PressureTrend samples={value.samples} />
+          <strong><bdi>{number.format(value.samples.at(-1)!)} <small>bar(g)</small></bdi></strong>
+          <PressureTrend samples={value.samples} label={copy.samples + ' · ' + value.samples.map((sample) => number.format(sample)).join(' · ')} />
         </div>
       </>}
     </EvidenceCard>
-    <EvidenceCard title="Alarm" evidence={alarm}>
-      {(value) => <><strong>{value.title}</strong><p>{value.id}</p></>}
+    <EvidenceCard title={copy.alarm} evidence={alarm} language={language}>
+      {(value) => <><strong>{copy.lowDischarge}</strong><p><bdi>{value.id}</bdi></p></>}
     </EvidenceCard>
   </div>;
 }
 
-function EvidenceCard<T>({ title, evidence, children }: {
-  title: string; evidence: Evidence<T>; children: (value: T) => ReactNode;
+function EvidenceCard<T>({ title, evidence, children, language }: {
+  title: string; evidence: Evidence<T>; children: (value: T) => ReactNode; language: PreviewLanguage;
 }) {
-  const labels = { available: 'Available', stale: 'Stale', empty: 'Empty', unavailable: 'Unavailable' };
+  const copy = previewCopy[language];
   return <section className="evidence-card" aria-label={title}>
-    <div className="card-heading"><h3>{title}</h3><span className={'status ' + evidence.state}>{labels[evidence.state]}</span></div>
+    <div className="card-heading"><h3>{title}</h3><span className={'status ' + evidence.state}>{copy.states[evidence.state]}</span></div>
     {'value' in evidence ? <>
       {children(evidence.value)}
-      <p className="provenance">Fixture evidence · <time dateTime={evidence.observedAt}>{evidence.observedAt.slice(11, 16)} UTC</time></p>
-    </> : <p>{evidence.state === 'empty' ? 'No records in this window.' : 'Evidence source unavailable.'}</p>}
+      <p className="provenance">{copy.source} · <time dateTime={evidence.observedAt}><bdi>{formatTime(evidence.observedAt, language)} UTC</bdi></time></p>
+    </> : <p>{evidence.state === 'empty' ? copy.empty : copy.unavailable}</p>}
   </section>;
 }
 
-function PressureTrend({ samples }: { samples: readonly number[] }) {
+function PressureTrend({ samples, label }: { samples: readonly number[]; label: string }) {
   const min = Math.min(...samples);
   const spread = Math.max(...samples) - min || 1;
   const points = samples.map((value, index) => [3 + 68 * index / Math.max(1, samples.length - 1), 22 - 18 * (value - min) / spread].join(',')).join(' ');
-  return <svg className="trend" width="74" height="26" viewBox="0 0 74 26" role="img" aria-label={'Pressure samples in bar gauge: ' + samples.map((value) => value.toFixed(1)).join(', ')}>
+  return <svg className="trend" width="74" height="26" viewBox="0 0 74 26" role="img" aria-label={label}>
     <polyline points={points} />
   </svg>;
 }

@@ -1,16 +1,18 @@
 import { Alert, Box } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 
-import type { HidraMapAdapter, HidraMapFeatureCollection, HidraMapSelection } from '@/components/map/mapTypes';
+import type { HidraGeographicBasemap, HidraMapAdapter, HidraMapFeatureCollection, HidraMapSelection } from '@/components/map/mapTypes';
 
 export interface HidraMapProps {
   data: HidraMapFeatureCollection;
   selectedFeatureId?: string;
   ariaLabel: string;
+  basemap?: HidraGeographicBasemap;
+  minHeight?: number;
   onFeatureSelect: (selection: HidraMapSelection) => void;
 }
 
-export function HidraMap({ data, selectedFeatureId, ariaLabel, onFeatureSelect }: HidraMapProps) {
+export function HidraMap({ data, selectedFeatureId, ariaLabel, basemap, minHeight = 520, onFeatureSelect }: HidraMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const adapterRef = useRef<HidraMapAdapter | undefined>(undefined);
   const dataRef = useRef(data);
@@ -28,6 +30,7 @@ export function HidraMap({ data, selectedFeatureId, ariaLabel, onFeatureSelect }
         ownedAdapter = createMapLibreAdapter(
           containerRef.current,
           (selection) => selectionHandlerRef.current(selection),
+          basemap,
         );
         adapterRef.current = ownedAdapter;
         ownedAdapter.setData(dataRef.current);
@@ -35,7 +38,7 @@ export function HidraMap({ data, selectedFeatureId, ariaLabel, onFeatureSelect }
       })
       .catch((error: unknown) => {
         if (!cancelled) {
-          setAdapterError(error instanceof Error ? error.message : 'Unable to initialize map adapter.');
+          setAdapterError(basemap?.errorLabel ?? (error instanceof Error ? error.message : 'Unable to initialize map adapter.'));
         }
       });
 
@@ -44,7 +47,7 @@ export function HidraMap({ data, selectedFeatureId, ariaLabel, onFeatureSelect }
       ownedAdapter?.destroy();
       if (adapterRef.current === ownedAdapter) adapterRef.current = undefined;
     };
-  }, []);
+  }, [basemap]);
 
   useEffect(() => {
     dataRef.current = data;
@@ -63,7 +66,7 @@ export function HidraMap({ data, selectedFeatureId, ariaLabel, onFeatureSelect }
   return (
     <Box aria-label={ariaLabel} role="region">
       {adapterError ? <Alert severity="error">{adapterError}</Alert> : null}
-      <Box ref={containerRef} sx={{ minHeight: 520, overflow: 'hidden', width: '100%' }} />
+      <Box ref={containerRef} sx={{ minHeight, overflow: 'hidden', width: '100%' }} />
     </Box>
   );
 }

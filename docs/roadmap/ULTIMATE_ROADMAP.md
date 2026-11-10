@@ -3323,3 +3323,20 @@ The owner requested the preview inside HidraWEB. This supersedes F19's standalon
 The authorized correction uses the existing signed-in Network route with `?view=preview` and effective `topology:map:read`. The default Network view continues to consume HidraAPI. The synthetic view loads on demand, retains its read-only fixtures and simulated role filters, and uses no operational data. The user returns to the map through the same application shell. The regular build includes the preview and the standard Network browser suite verifies it.
 
 Scope comprises the Network page and its view-switch translations, the relocated preview components, fixtures and styles, the Network browser suite, this append and the relocated [client walkthrough](HWEB-F19-Network-Preview.md). Retire the files under `preview/network/` and the standalone preview workflow. Verify login and direct-link permission denial, navigation back to operational topology, fixture behavior, keyboard access, the product build and the normal release manifest. Publish this correction as `feat(network): integrate the synthetic workspace preview`. Client walkthrough acceptance remains the gate before F20.
+
+## HWEB-F19 — owner correction for language and geographic map (2026-11-10)
+
+The owner requested translations and a real map in the integrated preview. Keep
+the signed-in Network entry and synthetic fixture boundary. The preview follows
+the existing French, English and Arabic language setting, including Arabic
+right-to-left layout, localized evidence and map controls. Replace the fictional
+schematic background with the existing MapLibre adapter and a locally served
+Natural Earth regional basemap. Pipelines, stations, coordinates and evidence
+remain synthetic.
+
+Scope comprises the preview, shared map options and adapter, Network browser
+suite, [client walkthrough](HWEB-F19-Network-Preview.md) and this append.
+Verify geographic data loading, marker/tree/alarm selection, language switching,
+permissions and the product build. Publish as
+`fix(network): localize preview and add geographic basemap`. Client walkthrough
+acceptance remains the gate before F20.

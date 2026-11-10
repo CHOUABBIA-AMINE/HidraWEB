@@ -28,3 +28,11 @@ export interface HidraMapAdapter {
   setSelectedFeature: (featureId?: string) => void;
   destroy: () => void;
 }
+
+export interface HidraGeographicBasemap {
+  url: string;
+  bounds: [[number, number], [number, number]];
+  center: [number, number];
+  locale: Record<string, string>;
+  errorLabel: string;
+}
