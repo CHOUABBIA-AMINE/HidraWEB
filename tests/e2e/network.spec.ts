@@ -566,7 +566,7 @@ test('F21 six-view telemetry excludes stale readings and supports historical com
   await expect(six.getByRole('button', { name: /Overlay historical samples/ })).toBeEnabled();
   await six.getByRole('button', { name: /Overlay historical samples/ }).click();
   await expect(six).toContainText('Other fixture window: 65.2');
-  await workspace(page).tree.getByRole('button', { name: /Atlas Compression/ }).click();
+  await workspace(page).tree.getByRole('button', { name: 'Atlas Compression Compressor', exact: true }).click();
   await workspace(page).window.selectOption('afternoon');
   await expect(six.getByRole('status')).toContainText('Stale evidence');
   await expect(six.getByRole('img')).toHaveCount(0);
