@@ -1,5 +1,3 @@
-import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import {
@@ -225,7 +223,7 @@ export function LoginPage() {
             <Typography
               component={auth.mode === 'multi' ? 'h1' : 'span'}
               variant="overline"
-              sx={{ color: '#A95400', fontWeight: 800, letterSpacing: '0.11em' }}
+              sx={{ display: 'block', textAlign: 'center', color: '#A95400', fontWeight: 800, letterSpacing: '0.11em' }}
             >
               {t('auth.login.eyebrow')}
             </Typography>
@@ -347,7 +345,6 @@ export function LoginPage() {
                   type="submit"
                   variant="contained"
                   size="large"
-                  endIcon={!checking ? <ArrowForwardRoundedIcon /> : undefined}
                   sx={{
                     minHeight: 52,
                     mt: 0.5,
@@ -378,7 +375,6 @@ export function LoginPage() {
                   onClick={beginEnterpriseSignIn}
                   variant="outlined"
                   size="large"
-                  startIcon={!checking ? <LockOutlinedIcon /> : undefined}
                   sx={{
                     minHeight: 52,
                     borderRadius: 2,
