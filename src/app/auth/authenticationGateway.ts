@@ -5,11 +5,12 @@ import {
   HIDRA_REQUEST_ID_HEADER,
 } from '@/api/client/diagnosticHeaders';
 import { hidraHttpClient } from '@/api/client/hidraHttpClient';
-import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
+import { HidraApiError, normalizeHidraApiError } from '@/api/errors/HidraApiError';
 import type {
   AuthenticationLoginRequest,
   AuthenticationLoginResponse,
   PrincipalView,
+  RefreshTokenRequest,
 } from '@/api/generated/identity-organization/model';
 import { runtimeConfig } from '@/app/bootstrap/runtimeConfig';
 
@@ -50,6 +51,7 @@ export interface HidraSessionResult {
   authenticationType: ProviderType;
   identityProviderId?: string;
   principal: HidraPrincipalView;
+  refresh?: { token: string; expiresAt: number };
 }
 
 export interface AuthenticationGateway {
@@ -59,7 +61,9 @@ export interface AuthenticationGateway {
     credentials: AuthenticationCredentials,
   ): Promise<HidraSessionResult>;
   completeOidcLogin(externalAccessToken: string): Promise<HidraSessionResult>;
-  loadCurrentPrincipal(): Promise<HidraPrincipalView>;
+  loadCurrentPrincipal(accessToken?: string): Promise<HidraPrincipalView>;
+  refreshLocal(refreshToken: string): Promise<HidraSessionResult>;
+  logoutLocal(refreshToken: string): Promise<void>;
 }
 
 const authenticationExchangeClient = axios.create({
@@ -99,7 +103,7 @@ export function normalizeAuthenticationResponse(
     throw new Error(`HidraAPI authenticated with ${authenticationType} instead of ${expectedType}.`);
   }
 
-  return {
+  const result: HidraSessionResult = {
     accessToken,
     expiresAt: parseExpiry(response.expiresAt),
     sessionId: response.sessionId,
@@ -116,6 +120,13 @@ export function normalizeAuthenticationResponse(
       permissions: response.permissions ?? [],
     },
   };
+  const refreshExpiresAt = response.refreshExpiresAt && Date.parse(response.refreshExpiresAt);
+  if (authenticationType === 'LOCAL' && typeof response.refreshToken === 'string'
+      && response.refreshToken.length === 80 && !/\s/.test(response.refreshToken)
+      && typeof refreshExpiresAt === 'number' && refreshExpiresAt > Date.now()) {
+    result.refresh = { token: response.refreshToken, expiresAt: refreshExpiresAt };
+  }
+  return result;
 }
 
 export function normalizeCurrentPrincipal(
@@ -134,12 +145,35 @@ export function normalizeCurrentPrincipal(
   };
 }
 
-async function loadCurrentPrincipal(): Promise<HidraPrincipalView> {
+async function loadCurrentPrincipal(accessToken?: string): Promise<HidraPrincipalView> {
+  const get = async <T,>(url: string): Promise<T> => {
+    if (accessToken === undefined) return hidraHttpClient<T>({ method: 'GET', url });
+    const { data } = await authenticationExchangeClient.get<T>(url, {
+      ...requestConfig(`Bearer ${accessToken}`), timeout: 15_000,
+    });
+    return data;
+  };
   const [principal, permissions] = await Promise.all([
-    hidraHttpClient<PrincipalView>({ method: 'GET', url: '/api/v1/identity/me' }),
-    hidraHttpClient<string[]>({ method: 'GET', url: '/api/v1/identity/me/permissions' }),
+    get<PrincipalView>('/api/v1/identity/me'),
+    get<string[]>('/api/v1/identity/me/permissions'),
   ]);
   return normalizeCurrentPrincipal(principal, permissions);
+}
+
+async function exchangeLocalProof<T>(operation: 'refresh' | 'logout', refreshToken: string): Promise<T> {
+  const request: RefreshTokenRequest = { refreshToken };
+  try {
+    const response = await authenticationExchangeClient.post<T>(
+      `/api/v1/identity/authentication/${operation}`, request, { ...requestConfig(), timeout: 15_000 },
+    );
+    if (response.status !== (operation === 'refresh' ? 200 : 204)) {
+      throw new HidraApiError('Unexpected LOCAL session response.', { status: response.status });
+    }
+    return response.data;
+  } catch (cause) {
+    const { status } = normalizeHidraApiError(cause);
+    throw new HidraApiError('The LOCAL session request failed.', { status });
+  }
 }
 
 async function postAuthentication<T>(
@@ -196,4 +230,13 @@ export const authenticationGateway: AuthenticationGateway = {
   },
 
   loadCurrentPrincipal,
+
+  async refreshLocal(refreshToken) {
+    const response = await exchangeLocalProof<AuthenticationLoginResponse>('refresh', refreshToken);
+    return normalizeAuthenticationResponse(response, 'LOCAL');
+  },
+
+  async logoutLocal(refreshToken) {
+    await exchangeLocalProof<void>('logout', refreshToken);
+  },
 };

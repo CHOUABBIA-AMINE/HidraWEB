@@ -138,9 +138,9 @@ const PLANNING_CURRENT_PROOF = {
 };
 const IDENTITY_ORGANIZATION_CURRENT_PROOF = {
  config: 'orval.identity-organization.config.ts',
- path: 'openapi/candidates/hidra-identity-organization-18e7a7596aea1b26e958130996c8811ae7fe27e4.json',
- sha256: 'sha256:050bf86810479d9cef87e3e200928f7993d342dbb51bf835d5110f15e53f94a4',
- paths: 57, schemas: 61,
+ path: 'openapi/candidates/hidra-identity-organization-720e9222b30fa45b7423ede9c9f141ab87298024.json',
+ sha256: 'sha256:95a9f9d224838d395a8348bf9a56c2374d5a29cb9e4e6dbb428ccc8d40e6c03b',
+ paths: 59, schemas: 62,
 };
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'openapi/compatibility/hidra-api-baseline.json'), 'utf8'));
@@ -453,7 +453,7 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exit(1);
 }
-console.log(`\nOpenAPI compatibility gate passed for ${configs.length} contracts: Risk from verified HidraAPI 81d46bcb8bc8821f67eafbb26cd1279f6d091457; Topology and Configuration from verified HidraAPI f1fdc206c916a5266f609810c045c6b5688bfd49; Workflow from verified HidraAPI 5817406923e53761577ac41bbc3f318b517c3977; Telemetry/Monitoring, Incident, Custody, Leak Detection and HSE from verified HidraAPI da4ce33ead7db40776049c861027947b61b96270; Assets, Integrity, Audit, Documents, Reporting, Analytics, Simulation and Alarm from verified HidraAPI 76b14cda4520f1eff242bd474c02ce4db317d385; Workbench from verified HidraAPI 016d972725ac9a02a46f08ec024e0a4b0f95bda6; Planning from verified HidraAPI d14c44fc527ea1115ad87baafa21a3264bf6950c; Identity/Organization and Party from verified HidraAPI 18e7a7596aea1b26e958130996c8811ae7fe27e4; all feature source pins SHA-256 verified against HidraAPI ${manifest.backendCommit}.`);
+console.log(`\nOpenAPI compatibility gate passed for ${configs.length} contracts: Risk from verified HidraAPI 81d46bcb8bc8821f67eafbb26cd1279f6d091457; Topology and Configuration from verified HidraAPI f1fdc206c916a5266f609810c045c6b5688bfd49; Workflow from verified HidraAPI 5817406923e53761577ac41bbc3f318b517c3977; Telemetry/Monitoring, Incident, Custody, Leak Detection and HSE from verified HidraAPI da4ce33ead7db40776049c861027947b61b96270; Assets, Integrity, Audit, Documents, Reporting, Analytics, Simulation and Alarm from verified HidraAPI 76b14cda4520f1eff242bd474c02ce4db317d385; Workbench from verified HidraAPI 016d972725ac9a02a46f08ec024e0a4b0f95bda6; Planning from verified HidraAPI d14c44fc527ea1115ad87baafa21a3264bf6950c; Identity/Organization from verified HidraAPI 720e9222b30fa45b7423ede9c9f141ab87298024; Party from verified HidraAPI 18e7a7596aea1b26e958130996c8811ae7fe27e4; all feature source pins SHA-256 verified against HidraAPI ${manifest.backendCommit}.`);
 
 function checkEvidence() {
   const required = ['repository', 'backendCommit', 'workflowRunId', 'artifactId', 'artifactName', 'artifactDigest', 'fullSpecSha256', 'fullContractGzipBase64Parts', 'fullContractGzipSha256', 'expectedOrvalContracts'];

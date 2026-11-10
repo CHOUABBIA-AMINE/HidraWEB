@@ -1,5 +1,5 @@
-import { AxiosError, AxiosHeaders } from 'axios';
-import { afterEach, describe, expect, it } from 'vitest';
+import { AxiosError, AxiosHeaders, type InternalAxiosRequestConfig } from 'axios';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
   HIDRA_CORRELATION_ID_HEADER,
@@ -7,6 +7,7 @@ import {
 } from '@/api/client/diagnosticHeaders';
 import { hidraAxios } from '@/api/client/hidraAxios';
 import { HIDRA_AUTH_UNAUTHORIZED_EVENT } from '@/app/auth/authEvents';
+import { registerAuthorizationHeaderFactory } from '@/app/auth/authorizationHeaderRegistry';
 import {
   configureTechnicalErrorSink,
   type TechnicalErrorReport,
@@ -14,6 +15,7 @@ import {
 
 afterEach(() => {
   configureTechnicalErrorSink(undefined);
+  registerAuthorizationHeaderFactory(() => undefined);
 });
 
 describe('hidraAxios diagnostics', () => {
@@ -167,4 +169,53 @@ describe('hidraAxios diagnostics', () => {
     }
   });
 
+});
+
+function rejectHttp(config: InternalAxiosRequestConfig, status: number): never {
+  throw new AxiosError('Request rejected', 'ERR_BAD_RESPONSE', config, undefined, {
+    data: { status }, status, statusText: 'Rejected', headers: new AxiosHeaders(), config,
+  });
+}
+
+describe('LOCAL session transport fencing', () => {
+  it('replays a safe read once and preserves its diagnostic identifiers', async () => {
+    let bearer = 'Bearer old';
+    const recover = vi.fn(async () => { bearer = 'Bearer new'; return true; });
+    registerAuthorizationHeaderFactory(() => bearer, {
+      pending: () => undefined, prepareRead: () => undefined, recoverRead: recover,
+    });
+    const sent: Array<[unknown, unknown]> = [];
+    await expect(hidraAxios.get('/api/v1/protected', {
+      adapter: async config => {
+        sent.push([config.headers.get('Authorization'), config.headers.get(HIDRA_REQUEST_ID_HEADER)]);
+        return rejectHttp(config, 401);
+      },
+    })).rejects.toMatchObject({ status: 401 });
+    expect(recover).toHaveBeenCalledExactlyOnceWith('Bearer old');
+    expect(sent).toEqual([['Bearer old', expect.any(String)], ['Bearer new', sent[0][1]]]);
+  });
+
+  it('does not refresh authorization denials or replay mutations', async () => {
+    const recover = vi.fn(async () => true);
+    registerAuthorizationHeaderFactory(() => 'Bearer current', {
+      pending: () => undefined, prepareRead: () => undefined, recoverRead: recover,
+    });
+    const read = vi.fn(async config => rejectHttp(config, 403));
+    const write = vi.fn(async config => rejectHttp(config, 401));
+    await expect(hidraAxios.get('/api/v1/protected', { adapter: read })).rejects.toMatchObject({ status: 403 });
+    await expect(hidraAxios.post('/api/v1/protected', {}, { adapter: write })).rejects.toMatchObject({ status: 401 });
+    expect(read).toHaveBeenCalledTimes(1);
+    expect(write).toHaveBeenCalledTimes(1);
+    expect(recover).not.toHaveBeenCalled();
+  });
+
+  it('rejects late data after the active session has been cleared', async () => {
+    registerAuthorizationHeaderFactory(() => 'Bearer old');
+    await expect(hidraAxios.get('/api/v1/protected', {
+      adapter: async config => {
+        registerAuthorizationHeaderFactory(() => undefined);
+        return { data: { protected: true }, status: 200, statusText: 'OK', headers: {}, config };
+      },
+    })).rejects.toMatchObject({ code: 'ERR_CANCELED' });
+  });
 });

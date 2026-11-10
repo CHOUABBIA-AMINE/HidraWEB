@@ -437,3 +437,139 @@ jobs:
           if [ -f "${RUNNER_TEMP}/w1-api.pid" ]; then
             kill "$(cat "${RUNNER_TEMP}/w1-api.pid")" 2>/dev/null || true
           fi
+
+  local-session-native:
+    name: F18 LOCAL session renewal and logout qualification
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: hidra_local_session_f18
+          POSTGRES_USER: hidra
+          POSTGRES_PASSWORD: hidra-f18-ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U hidra -d hidra_local_session_f18"
+          --health-interval=5s --health-timeout=5s --health-retries=12
+    env:
+      HIDRA_LOCAL_SESSION_NATIVE: '1'
+      HIDRA_FOUNDATION_API_URL: http://127.0.0.1:8080
+      HIDRA_FOUNDATION_ADMIN: f18-native-admin
+      HIDRA_TEST_DATASOURCE_URL: jdbc:postgresql://127.0.0.1:5432/hidra_local_session_f18
+      HIDRA_TEST_DATASOURCE_USERNAME: hidra
+      HIDRA_TEST_DATASOURCE_PASSWORD: hidra-f18-ci
+      HIDRA_SECURITY_AUTHENTICATION_MODE: jwt
+      HIDRA_SECURITY_BOOTSTRAP_USERNAME: f18-native-admin
+      HIDRA_SECURITY_BOOTSTRAP_EMAIL_ADDRESS: f18-admin@synthetic.invalid
+      HIDRA_IDENTITY_REFRESH_ENABLED: 'true'
+      HIDRA_IDENTITY_REFRESH_THROTTLE_MAX_ATTEMPTS: '1'
+      HIDRA_JWT_ACCESS_TOKEN_TTL_SECONDS: '40'
+      SPRING_PROFILES_ACTIVE: test
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: hidra
+      PGPASSWORD: hidra-f18-ci
+      PGDATABASE: hidra_local_session_f18
+    steps:
+      - name: Checkout WEB
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Checkout accepted HAPI-929 source
+        uses: actions/checkout@v5
+        with:
+          repository: CHOUABBIA-AMINE/HidraAPI
+          ref: 720e9222b30fa45b7423ede9c9f141ab87298024
+          path: .local-session-api
+          persist-credentials: false
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: .local-session-api/pom.xml
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install WEB, generate clients and install Chromium
+        run: |
+          npm ci --no-audit --no-fund
+          npm run prebuild
+          npx playwright install --with-deps chromium
+      - name: Build accepted API
+        working-directory: .local-session-api
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = 720e9222b30fa45b7423ede9c9f141ab87298024
+          for attempt in 1 2 3; do
+            if bash ./mvnw -B --version; then break; fi
+            test "${attempt}" -lt 3
+            sleep "$((attempt * 5))"
+          done
+          bash ./mvnw -B -q -Dmaven.test.skip=true package
+      - name: Qualify LOCAL sessions in Chromium against fresh PostgreSQL
+        shell: bash
+        run: |
+          set -euo pipefail
+          HIDRA_FOUNDATION_PASSWORD="$(openssl rand -hex 24)"
+          HIDRA_FOUNDATION_USER_PASSWORD="$(openssl rand -hex 24)"
+          HIDRA_JWT_HMAC_SECRET="$(openssl rand -hex 32)"
+          for secret in "${HIDRA_FOUNDATION_PASSWORD}" "${HIDRA_FOUNDATION_USER_PASSWORD}" "${HIDRA_JWT_HMAC_SECRET}"; do
+            printf '::add-mask::%s\n' "${secret}"
+          done
+          export HIDRA_FOUNDATION_PASSWORD HIDRA_FOUNDATION_USER_PASSWORD HIDRA_JWT_HMAC_SECRET
+          export HIDRA_SECURITY_BOOTSTRAP_PASSWORD="${HIDRA_FOUNDATION_PASSWORD}"
+          api_jar="$(find .local-session-api/target -maxdepth 1 -type f -name '*.jar' -print -quit)"
+          test -n "${api_jar}"
+          api_pid=
+          stop_api() {
+            if [ -n "${api_pid}" ]; then
+              kill "${api_pid}" 2>/dev/null || true
+              wait "${api_pid}" || true
+              api_pid=
+            fi
+          }
+          trap stop_api EXIT
+          start_api() {
+            java -jar "${api_jar}" --server.address=127.0.0.1 --server.port=8080 \
+              --management.server.port=8080 --hidra.security.bootstrap.enabled="$1" \
+              --hidra.platform.security.jwt.token-issuer=https://local-session.synthetic.invalid \
+              --hidra.platform.security.cors.allowed-origins=http://127.0.0.1:5173 \
+              > "${RUNNER_TEMP}/f18-native-api.log" 2>&1 &
+            api_pid=$!
+            for attempt in $(seq 1 75); do
+              if curl --fail --silent http://127.0.0.1:8080/actuator/health >/dev/null; then return; fi
+              if ! kill -0 "${api_pid}" 2>/dev/null; then break; fi
+              sleep 2
+            done
+            echo "Pinned F18 API failed to reach health."
+            return 1
+          }
+          start_api false
+          if ! command -v psql >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install --yes --no-install-recommends postgresql-client
+          fi
+          psql -X -v ON_ERROR_STOP=1 --file scripts/local-session-native-fixture.sql
+          stop_api
+          start_api true
+          test "$(psql -XAtqc "SELECT EXISTS (SELECT 1 FROM public.hidra_audit_event WHERE event_type_id='IDENTITY_LOCAL_ADMIN_BOOTSTRAP')")" = t
+          export PLAYWRIGHT_JSON_OUTPUT_NAME="${RUNNER_TEMP}/f18-local-session-results.json"
+          npx playwright test --config playwright.local-session.config.ts --reporter=list,json
+          python3 - <<'PY'
+          import json, os
+          with open(os.environ['PLAYWRIGHT_JSON_OUTPUT_NAME']) as report:
+              stats = json.load(report)['stats']
+          assert stats['expected'] == 5, stats
+          assert stats['unexpected'] == stats['flaky'] == stats['skipped'] == 0, stats
+          print('F18 native browser qualification: 5 passed, 0 failed/flaky/skipped')
+          PY
+          printf 'WEB_SHA=%s\nAPI_SHA=%s\n' "${GITHUB_SHA}" "$(git -C .local-session-api rev-parse HEAD)"
+          sha256sum openapi/candidates/hidra-identity-organization-720e9222b30fa45b7423ede9c9f141ab87298024.json

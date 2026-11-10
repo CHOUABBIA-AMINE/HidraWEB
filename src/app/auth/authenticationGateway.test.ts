@@ -91,3 +91,16 @@ describe('HWEB-016-05 authentication gateway', () => {
     ).toThrow('HidraAPI returned an authentication response without an access token.');
   });
 });
+
+describe('HAPI-929 LOCAL refresh response', () => {
+  it('admits only a bounded, unexpired LOCAL proof', () => {
+    const token = 'x'.repeat(80);
+    const expiresAt = Date.now() + 60_000;
+    const response = { accessToken: 'synthetic', refreshToken: token, refreshExpiresAt: new Date(expiresAt).toISOString() };
+    expect(normalizeAuthenticationResponse({ ...response, authenticationType: 'LOCAL' }).refresh)
+      .toEqual({ token, expiresAt });
+    expect(normalizeAuthenticationResponse({ ...response, authenticationType: 'OIDC' }).refresh).toBeUndefined();
+    expect(normalizeAuthenticationResponse({ ...response, authenticationType: 'LOCAL', refreshToken: 'short' }).refresh)
+      .toBeUndefined();
+  });
+});

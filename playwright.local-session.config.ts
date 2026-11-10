@@ -1,0 +1,32 @@
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './tests/e2e',
+  testMatch: ['local-session-live.spec.ts'],
+  forbidOnly: true,
+  retries: 0,
+  workers: 1,
+  timeout: 105_000,
+  reporter: 'list',
+  outputDir: 'test-results/local-session-native',
+  use: {
+    ...devices['Desktop Chrome'],
+    baseURL: 'http://127.0.0.1:5173',
+    trace: 'off',
+    screenshot: 'off',
+    video: 'off',
+  },
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://127.0.0.1:5173/login',
+    reuseExistingServer: false,
+    env: {
+      HIDRA_E2E_AUTH_MOCK: '0',
+      HIDRA_FOUNDATION_NATIVE_E2E: '1',
+      VITE_HIDRA_API_BASE_URL: '/',
+      VITE_HIDRA_AUTH_MODE: 'basic',
+      VITE_HIDRA_CREDENTIAL_PROVIDER: 'LOCAL',
+      VITE_HIDRA_DEFAULT_LOCALE: 'en',
+    },
+  },
+});
