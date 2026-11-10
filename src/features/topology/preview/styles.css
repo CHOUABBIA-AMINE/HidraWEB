@@ -126,3 +126,21 @@
   :where(.network-fixture-workspace) .control-bar { grid-template-columns: minmax(0, 1fr); }
   :where(.network-fixture-workspace) .layers, :where(.network-fixture-workspace) .map-caption { flex-wrap: wrap; }
 }
+
+:where(.network-fixture-workspace) .investigation-entry { padding: 0 .7rem .7rem; }
+:where(.network-fixture-workspace) .investigation-panel { margin-block-start: .85rem; }
+:where(.network-fixture-workspace) .investigation-heading { display: flex; align-items: center; flex-wrap: wrap; justify-content: space-between; gap: .65rem; }
+:where(.network-fixture-workspace) .investigation-body { padding: .9rem 1rem; }
+:where(.network-fixture-workspace) .investigation-scope,
+:where(.network-fixture-workspace) .investigation-evidence { display: flex; flex-wrap: wrap; gap: .35rem .8rem; }
+:where(.network-fixture-workspace) .investigation-scope { align-items: baseline; font-size: .82rem; }
+:where(.network-fixture-workspace) .investigation-evidence > div { flex: 1 1 11rem; min-width: 0; padding: .55rem; border: 1px solid var(--line); border-radius: .3rem; }
+:where(.network-fixture-workspace) .investigation-evidence dt { font-size: .79rem; font-weight: 700; }
+:where(.network-fixture-workspace) .investigation-evidence dd { margin: .2rem 0 0; color: var(--muted); font-size: .76rem; overflow-wrap: anywhere; }
+:where(.network-fixture-workspace) .investigation-condition { color: var(--teal); font-size: .82rem; font-weight: 750; }
+:where(.network-fixture-workspace) .investigation-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-block: .55rem; }
+:where(.network-fixture-workspace) .investigation-actions button { flex-shrink: 1; white-space: normal; text-align: start; }
+:where(.network-fixture-workspace) .investigation-notice { color: var(--muted); margin-block: .55rem; font-size: .78rem; }
+:where(.network-fixture-workspace) .investigation-timeline { padding-inline-start: 1.3rem; margin-block: .35rem; }
+:where(.network-fixture-workspace) .investigation-timeline li { padding-block: .35rem; border-block-end: 1px solid var(--line); font-size: .8rem; }
+:where(.network-fixture-workspace) .investigation-timeline li p { color: var(--muted); font-size: .74rem; overflow-wrap: anywhere; }

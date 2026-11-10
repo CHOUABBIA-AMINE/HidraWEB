@@ -49,3 +49,27 @@ The regional map is intended for the demonstration walkthrough.
 The standard Code CI includes the Network browser suite. Record the reviewed
 WEB SHA, fixture version, review date, reviewer, observations and findings.
 Client walkthrough acceptance is separate from passing the browser suite.
+
+## F20 station investigation walkthrough
+
+1. Select Atlas Compression on the map during the morning UTC window and open
+   **Open investigation**. Close it, select a different station, then open the
+   linked low-pressure alarm. Confirm both paths show the same station, UTC
+   window, alarm and technical revision.
+2. Review the fixture evidence before each simulated action. Record an alarm
+   acknowledgement and a separate follow-up. Confirm the condition stays active
+   after both. Advance the fixture to resolution to see the distinct scenario
+   event.
+3. Close and reopen the investigation. Confirm the timeline shows its simulated
+   actor and time and the original fixture revision and observation reference.
+4. Review the morning evidence and switch to the afternoon window before acting.
+   The stale review and degraded evidence leave the timeline unchanged. Verify
+   the observer can read the permitted history and the two out-of-scope roles
+   cannot see it.
+5. Try the keyboard at a narrow width and switch among French, Arabic and English.
+   Reset the preview to clear the in-memory history.
+
+F20 uses the existing `network-fixture-v2` evidence with
+`station-investigation-v1` for the simulated timeline. The walkthrough qualifies
+the preview only. Additional operational parameters and native follow-up
+integration require accepted HidraAPI contracts.

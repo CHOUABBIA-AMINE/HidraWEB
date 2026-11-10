@@ -104,8 +104,9 @@ test('map, tree and linked alarm open the same fixture asset and UTC window', as
   async function expectAtlas() {
     await expect(treeAtlas).toHaveAttribute('aria-pressed', 'true');
     await expect(mapAtlas).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.getByText('demo-gz2-atlas', { exact: true })).toBeVisible();
-    await expect(page.getByText('06:00–10:00 UTC', { exact: true }).last()).toBeVisible();
+    const evidence = page.getByRole('region', { name: 'Atlas Compression', exact: true });
+    await expect(evidence.getByText('demo-gz2-atlas', { exact: true })).toBeVisible();
+    await expect(evidence.getByText('06:00–10:00 UTC', { exact: true })).toBeVisible();
     await expect(view.technical).toContainText('REV-A03');
     await expect(view.telemetry).toContainText('64.1 bar(g)');
     await expect(view.telemetry.locator('time')).toHaveAttribute('datetime', '2026-11-06T09:45:00Z');
@@ -251,6 +252,13 @@ test('preview fixture interactions use no operational data or persistent browser
   const cookiesBefore = await context.cookies();
   const view = workspace(page);
 
+  await page.getByRole('button', { name: 'Open investigation' }).click();
+  const investigation = page.getByRole('region', { name: 'Station investigation' });
+  await investigation.getByRole('button', { name: 'Review fixture evidence' }).click();
+  await investigation.getByRole('button', { name: 'Simulate acknowledgement' }).click();
+  await expect(investigation.getByText('Alarm acknowledged')).toBeVisible();
+  await investigation.getByRole('button', { name: 'Close investigation' }).click();
+
   await view.system.selectOption('orion');
   await view.window.selectOption('afternoon');
   await view.map.getByRole('button', { name: 'Select Cedar Entry on map' }).click();
@@ -293,4 +301,109 @@ test('the preview follows French, Arabic and English without resetting the selec
   await chooseLanguage(page, 'EN');
   await expect(page.getByRole('heading', { name: 'West Intake' })).toBeVisible();
   await expect(page.getByRole('region', { name: 'Synthetic network preview' })).toHaveAttribute('dir', 'ltr');
+});
+
+test('station investigation opens from the map and linked alarm with the same evidence and separate simulated events', async ({ page }) => {
+  await openPreview(page);
+  const view = workspace(page);
+  await view.map.getByRole('button', { name: 'Select West Intake on map' }).click();
+  await view.map.getByRole('button', { name: 'Select Atlas Compression on map' }).click();
+  await page.getByRole('button', { name: 'Open investigation' }).click();
+  const panel = page.getByRole('region', { name: 'Station investigation' });
+  const timeline = panel.getByRole('region', { name: 'Simulated investigation timeline' });
+  await expect(panel.getByRole('heading', { name: 'Station investigation' })).toBeFocused();
+  await expect(panel).toContainText('demo-gz2-atlas');
+  await expect(panel).toContainText('06:00–10:00 UTC');
+  await expect(panel).toContainText('REV-A03');
+  await expect(panel).toContainText('64.1 bar(g)');
+  await expect(panel).toContainText('DEMO-204');
+  await panel.getByRole('button', { name: 'Close investigation' }).click();
+  await expect(page.getByRole('button', { name: 'Open investigation' })).toBeFocused();
+
+  await view.tree.getByRole('button', { name: /West Intake/ }).click();
+  await view.tree.getByRole('button', { name: /Low discharge pressure/ }).click();
+  await expect(panel).toContainText('demo-gz2-atlas');
+  await expect(panel).toContainText('REV-A03');
+
+  async function record(button: string) {
+    await panel.getByRole('button', { name: 'Review fixture evidence' }).click();
+    await panel.getByRole('button', { name: button }).click();
+  }
+  await record('Simulate acknowledgement');
+  await expect(timeline.getByRole('listitem')).toHaveCount(1);
+  await expect(panel.getByText('Condition active', { exact: true })).toBeVisible();
+  await record('Add simulated follow-up');
+  await expect(timeline.getByRole('listitem')).toHaveCount(2);
+  await expect(panel.getByText('Condition active', { exact: true })).toBeVisible();
+  await record('Advance fixture to resolution');
+
+  await panel.getByRole('button', { name: 'Close investigation' }).click();
+  await page.getByRole('button', { name: 'Open investigation' }).click();
+  const events = timeline.getByRole('listitem');
+  await expect(events).toHaveCount(3);
+  await expect(events.nth(0)).toContainText('Alarm acknowledged');
+  await expect(events.nth(0)).toContainText('Scoped operator · 09:46 UTC');
+  await expect(events.nth(1)).toContainText('Follow-up recorded');
+  await expect(events.nth(2)).toContainText('Condition resolved by fixture');
+  await expect(events.nth(2)).toContainText('Fixture scenario · 09:48 UTC');
+  for (const event of await events.all()) {
+    await expect(event).toContainText('Original fixture evidence · network-fixture-v2 · REV-A03 · DEMO-204 · Telemetry 09:45 UTC');
+  }
+
+  await page.getByRole('button', { name: 'Reset preview' }).click();
+  await expect(panel).toHaveCount(0);
+  await page.getByRole('button', { name: 'Open investigation' }).click();
+  await expect(timeline).toContainText('No simulated events in this context.');
+  await expect(panel.getByText('Condition active', { exact: true })).toBeVisible();
+});
+
+test('station investigation rejects stale and degraded evidence and scopes history to permitted roles', async ({ page }) => {
+  await openPreview(page);
+  const view = workspace(page);
+  await page.getByRole('button', { name: 'Open investigation' }).click();
+  const panel = page.getByRole('region', { name: 'Station investigation' });
+  const timeline = panel.getByRole('region', { name: 'Simulated investigation timeline' });
+  const review = panel.getByRole('button', { name: 'Review fixture evidence' });
+  await review.click();
+  await panel.getByRole('button', { name: 'Simulate acknowledgement' }).click();
+  await review.click();
+  await view.window.selectOption('afternoon');
+  await panel.getByRole('button', { name: 'Simulate acknowledgement' }).click();
+  await expect(panel.getByRole('status')).toContainText('The reviewed context has changed.');
+  await expect(timeline.getByRole('listitem')).toHaveCount(0);
+  await review.click();
+  await expect(panel.getByRole('status')).toContainText('Current evidence is incomplete or degraded.');
+  await view.window.selectOption('morning');
+  await expect(timeline.getByRole('listitem')).toHaveCount(1);
+
+  await view.role.selectOption('observer');
+  await expect(timeline).toContainText('Alarm acknowledged');
+  await expect(review).toHaveCount(0);
+  await expect(panel.getByRole('button', { name: 'Add simulated follow-up' })).toHaveCount(0);
+
+  for (const role of ['otherScope', 'otherCompany']) {
+    await view.role.selectOption(role);
+    await expect(panel).toHaveCount(0);
+    await expect(page.getByText('Alarm acknowledged')).toHaveCount(0);
+  }
+});
+
+test('the investigation follows the app language and can be opened by keyboard at a narrow width', async ({ page }) => {
+  await openPreview(page, 'FR');
+  await page.setViewportSize({ width: 360, height: 740 });
+  await page.getByRole('button', { name: 'Réduire la navigation' }).click();
+  await page.getByRole('button', { name: 'Ouvrir l’investigation' }).focus();
+  await page.keyboard.press('Enter');
+  const french = page.getByRole('region', { name: 'Investigation de la station' });
+  await expect(french.getByRole('heading', { name: 'Investigation de la station' })).toBeFocused();
+  await expect(french).toContainText('64,1 bar(g)');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(360);
+
+  await page.setViewportSize({ width: 1280, height: 740 });
+  await chooseLanguage(page, 'AR');
+  const arabic = page.getByRole('region', { name: 'التحقيق في حالة المحطة' });
+  await expect(arabic).toContainText('ضغط مخرج المحطة');
+  await expect(arabic.getByRole('button', { name: 'مراجعة بيانات العرض' })).toBeVisible();
+  await chooseLanguage(page, 'EN');
+  await expect(page.getByRole('region', { name: 'Station investigation' })).toContainText('REV-A03');
 });

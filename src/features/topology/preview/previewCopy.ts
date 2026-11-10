@@ -1,4 +1,8 @@
-import type { Organization, RoleId, StationId, StationKind, SystemId, TechnicalDescription } from './fixtures';
+import {
+  observedAt, windows,
+  type Organization, type RoleId, type StationId, type StationKind, type SystemId, type TechnicalDescription, type WindowId,
+} from './fixtures';
+import type { InvestigationAction, InvestigationNotice } from './stationInvestigation';
 
 type PreviewCopy = {
   badge: string;
@@ -56,7 +60,7 @@ type PreviewCopy = {
 
 export const previewCopy = {
   en: {
-    badge: 'Synthetic data · Read only',
+    badge: 'Synthetic data',
     heading: 'Synthetic network preview',
     intro: 'Explore a fictional gas corridor and its station evidence.',
     reset: 'Reset preview',
@@ -120,7 +124,7 @@ export const previewCopy = {
     },
   },
   fr: {
-    badge: 'Données synthétiques · Lecture seule',
+    badge: 'Données synthétiques',
     heading: 'Aperçu synthétique du réseau',
     intro: 'Explorez un corridor gazier fictif et les données de ses stations.',
     reset: 'Réinitialiser l’aperçu',
@@ -184,7 +188,7 @@ export const previewCopy = {
     },
   },
   ar: {
-    badge: 'بيانات اصطناعية · للقراءة فقط',
+    badge: 'بيانات اصطناعية',
     heading: 'معاينة الشبكة الاصطناعية',
     intro: 'استكشف مسار غاز افتراضياً وبيانات محطاته.',
     reset: 'إعادة ضبط المعاينة',
@@ -248,3 +252,111 @@ export const previewCopy = {
     },
   },
 } satisfies Record<'en' | 'fr' | 'ar', PreviewCopy>;
+
+export type PreviewLanguage = keyof typeof previewCopy;
+
+export function formatTime(iso: string, language: PreviewLanguage) {
+  return new Intl.DateTimeFormat(language, {
+    timeZone: 'UTC', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).format(new Date(iso));
+}
+
+export function windowLabel(windowId: WindowId, language: PreviewLanguage) {
+  return windows[windowId].map((time) => formatTime(observedAt(time), language)).join('–') + ' UTC';
+}
+
+type InvestigationCopy = {
+  heading: string;
+  open: string;
+  close: string;
+  review: string;
+  timeline: string;
+  noHistory: string;
+  provenance: string;
+  original: string;
+  active: string;
+  resolved: string;
+  fixtureActor: string;
+  actorTime: string;
+  buttons: Record<InvestigationAction, string>;
+  events: Record<InvestigationAction, string>;
+  notices: Record<InvestigationNotice, string>;
+};
+
+export const investigationCopy = {
+  en: {
+    heading: 'Station investigation',
+    open: 'Open investigation',
+    close: 'Close investigation',
+    review: 'Review fixture evidence',
+    timeline: 'Simulated investigation timeline',
+    noHistory: 'No simulated events in this context.',
+    provenance: 'Synthetic scenario · Simulated actions and readback',
+    original: 'Original fixture evidence',
+    active: 'Condition active',
+    resolved: 'Condition resolved by fixture',
+    fixtureActor: 'Fixture scenario',
+    actorTime: 'Simulated actor and time',
+    buttons: { acknowledge: 'Simulate acknowledgement', followUp: 'Add simulated follow-up', resolve: 'Advance fixture to resolution' },
+    events: { acknowledge: 'Alarm acknowledged', followUp: 'Follow-up recorded', resolve: 'Condition resolved by fixture' },
+    notices: {
+      reviewed: 'Evidence reviewed for the next simulated action.',
+      reviewRequired: 'Review the fixture evidence before recording an action.',
+      stale: 'The reviewed context has changed. Review the current evidence again.',
+      degraded: 'Current evidence is incomplete or degraded. No simulated action was recorded.',
+      denied: 'This demo role cannot act on the investigation.',
+      unavailable: 'This action is unavailable in the current fixture state.',
+      recorded: 'Simulated event recorded.',
+    },
+  },
+  fr: {
+    heading: 'Investigation de la station',
+    open: 'Ouvrir l’investigation',
+    close: 'Fermer l’investigation',
+    review: 'Examiner les données de démonstration',
+    timeline: 'Historique de l’investigation simulée',
+    noHistory: 'Aucun événement simulé dans ce contexte.',
+    provenance: 'Scénario synthétique · Actions et historique simulés',
+    original: 'Données de démonstration d’origine',
+    active: 'Anomalie active',
+    resolved: 'Anomalie résolue par le scénario',
+    fixtureActor: 'Scénario de démonstration',
+    actorTime: 'Acteur et heure simulés',
+    buttons: { acknowledge: 'Simuler l’acquittement', followUp: 'Ajouter un suivi simulé', resolve: 'Faire évoluer le scénario vers la résolution' },
+    events: { acknowledge: 'Alarme acquittée', followUp: 'Suivi enregistré', resolve: 'Anomalie résolue par le scénario' },
+    notices: {
+      reviewed: 'Données examinées pour la prochaine action simulée.',
+      reviewRequired: 'Examinez les données de démonstration avant d’enregistrer une action.',
+      stale: 'Le contexte examiné a changé. Examinez les données actuelles.',
+      degraded: 'Les données actuelles sont incomplètes ou dégradées. Aucune action simulée n’a été enregistrée.',
+      denied: 'Ce rôle de démonstration ne peut pas agir sur l’investigation.',
+      unavailable: 'Cette action est indisponible dans l’état actuel du scénario.',
+      recorded: 'Événement simulé enregistré.',
+    },
+  },
+  ar: {
+    heading: 'التحقيق في حالة المحطة',
+    open: 'فتح التحقيق',
+    close: 'إغلاق التحقيق',
+    review: 'مراجعة بيانات العرض',
+    timeline: 'السجل الزمني للتحقيق المحاكى',
+    noHistory: 'لا توجد أحداث محاكاة في هذا السياق.',
+    provenance: 'سيناريو اصطناعي · إجراءات وسجل محاكيان',
+    original: 'بيانات العرض الأصلية',
+    active: 'الحالة غير الطبيعية مستمرة',
+    resolved: 'عولجت الحالة ضمن السيناريو',
+    fixtureActor: 'سيناريو العرض',
+    actorTime: 'المنفذ والوقت في المحاكاة',
+    buttons: { acknowledge: 'محاكاة الإقرار بالإنذار', followUp: 'إضافة متابعة محاكاة', resolve: 'نقل السيناريو إلى مرحلة المعالجة' },
+    events: { acknowledge: 'تم الإقرار بالإنذار', followUp: 'تم تسجيل المتابعة', resolve: 'عولجت الحالة ضمن السيناريو' },
+    notices: {
+      reviewed: 'تمت مراجعة البيانات للإجراء المحاكى التالي.',
+      reviewRequired: 'راجع بيانات العرض قبل تسجيل إجراء.',
+      stale: 'تغيّر السياق الذي تمت مراجعته. راجع البيانات الحالية.',
+      degraded: 'البيانات الحالية ناقصة أو متدهورة الجودة. لم يُسجّل أي إجراء محاكى.',
+      denied: 'هذا الدور التجريبي لا يملك صلاحية اتخاذ إجراء في التحقيق.',
+      unavailable: 'هذا الإجراء غير متاح في الحالة الحالية للسيناريو.',
+      recorded: 'تم تسجيل الحدث المحاكى.',
+    },
+  },
+} satisfies Record<PreviewLanguage, InvestigationCopy>;

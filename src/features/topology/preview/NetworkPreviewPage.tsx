@@ -1,40 +1,24 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { HidraMap } from '@/components/map/HidraMap';
 import type { HidraGeographicBasemap, HidraMapFeatureCollection } from '@/components/map/mapTypes';
 
 import {
-  accessibleSystems, fixtureDate, fixtureVersion, observedAt, roles, windows,
+  accessibleSystems, fixtureDate, fixtureVersion, roles, windows,
   type Evidence, type GasSystem, type RoleId, type Station, type SystemId, type WindowId,
 } from './fixtures';
 import basemapUrl from './north-africa.geojson?url';
-import { previewCopy } from './previewCopy';
+import { formatTime, investigationCopy, previewCopy, windowLabel, type PreviewLanguage } from './previewCopy';
+import { StationInvestigationPanel } from './StationInvestigationPanel';
+import { initialInvestigation, investigationVersion, investigationView, updateInvestigation, type InvestigationContext } from './stationInvestigation';
 import './styles.css';
 
-type Context = {
-  role: RoleId;
-  systemId: SystemId;
-  assetId: string | null;
-  windowId: WindowId;
-};
-
-const initialContext: Context = {
+const initialContext: InvestigationContext = {
   role: 'operator', systemId: 'gz2', assetId: 'demo-gz2-atlas', windowId: 'morning',
 };
 const initialLayers = { pipelines: true, stations: true };
-type PreviewLanguage = keyof typeof previewCopy;
 const rolesList = Object.keys(roles) as RoleId[];
-
-function formatTime(iso: string, language: PreviewLanguage) {
-  return new Intl.DateTimeFormat(language, {
-    timeZone: 'UTC', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
-  }).format(new Date(iso));
-}
-
-function windowLabel(windowId: WindowId, language: PreviewLanguage) {
-  return windows[windowId].map((time) => formatTime(observedAt(time), language)).join('–') + ' UTC';
-}
 
 export function NetworkPreviewPage() {
   const { i18n } = useTranslation();
@@ -43,25 +27,42 @@ export function NetworkPreviewPage() {
   const date = new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(fixtureDate));
   const [context, setContext] = useState(initialContext);
   const [layers, setLayers] = useState(initialLayers);
+  const [investigation, setInvestigation] = useState(initialInvestigation);
+  const [investigationOpen, setInvestigationOpen] = useState(false);
+  const investigationTrigger = useRef<HTMLButtonElement>(null);
   const systems = useMemo(() => accessibleSystems(context.role), [context.role]);
   const system = systems.find(({ id }) => id === context.systemId);
   const station = system?.stations.find(({ id }) => id === context.assetId);
+  const openInvestigationView = investigationOpen ? investigationView(investigation, context) : undefined;
+  const investigationLabels = investigationCopy[language];
   const alarmLinks = system?.stations.flatMap((asset) => {
     const alarm = asset.evidence[context.windowId].alarm;
     return 'value' in alarm ? [{ asset, alarm: alarm.value }] : [];
   }) ?? [];
 
-  const selectRole = (role: RoleId) => setContext((previous) => {
-    const target = accessibleSystems(role).find(({ id }) => id === previous.systemId);
-    return { ...previous, role, assetId: target?.stations.some(({ id }) => id === previous.assetId) ? previous.assetId : null };
-  });
+  const selectRole = (role: RoleId) => {
+    const target = accessibleSystems(role).find(({ id }) => id === context.systemId);
+    const assetId = target?.stations.some(({ id }) => id === context.assetId) ? context.assetId : null;
+    if (!assetId) setInvestigationOpen(false);
+    setContext({ ...context, role, assetId });
+  };
   const selectAsset = (id: string) => setContext((previous) => {
     const target = accessibleSystems(previous.role).find(({ id }) => id === previous.systemId);
     return target?.stations.some((asset) => asset.id === id) ? { ...previous, assetId: id } : previous;
   });
+  const openInvestigation = (trigger: HTMLButtonElement) => {
+    investigationTrigger.current = trigger;
+    setInvestigationOpen(true);
+  };
+  const closeInvestigation = () => {
+    setInvestigationOpen(false);
+    investigationTrigger.current?.focus();
+  };
   const reset = () => {
     setContext(initialContext);
     setLayers(initialLayers);
+    setInvestigation(initialInvestigation);
+    setInvestigationOpen(false);
   };
 
   return (
@@ -86,7 +87,10 @@ export function NetworkPreviewPage() {
           <span>{copy.system}</span>
           <select disabled={!system} value={system?.id ?? ''} onChange={(event) => {
             const systemId = event.target.value as SystemId;
-            if (systems.some(({ id }) => id === systemId)) setContext({ ...context, systemId, assetId: null });
+            if (systems.some(({ id }) => id === systemId)) {
+              setContext({ ...context, systemId, assetId: null });
+              setInvestigationOpen(false);
+            }
           }}>
             {!system && <option value="">{copy.noSystem}</option>}
             {systems.map(({ id }) => <option value={id} key={id}>{copy.systems[id]}</option>)}
@@ -134,7 +138,10 @@ export function NetworkPreviewPage() {
             <h3 id="linked-alarms">{copy.linkedAlarms}</h3>
             {alarmLinks.length === 0 ? <p className="muted">{copy.noLinkedAlarms}</p> :
               alarmLinks.map(({ asset, alarm }) => (
-                <button key={alarm.id} onClick={() => selectAsset(asset.id)}>
+                <button key={alarm.id} onClick={(event) => {
+                  selectAsset(asset.id);
+                  openInvestigation(event.currentTarget);
+                }}>
                   <span className="alarm-dot" aria-hidden="true" />
                   <span><strong>{copy.lowDischarge}</strong><small>{copy.stations[asset.id]} · <bdi>{alarm.id}</bdi></small></span>
                 </button>
@@ -164,13 +171,28 @@ export function NetworkPreviewPage() {
               {station ? <><bdi>{station.id}</bdi><bdi>{windowLabel(context.windowId, language)}</bdi></> : copy.useMapOrTree}
             </p>
           </div>
-          {station && <EvidenceCards station={station} windowId={context.windowId} language={language} />}
+          {station && <>
+            <EvidenceCards station={station} windowId={context.windowId} language={language} />
+            <div className="investigation-entry">
+              <button className="secondary-button" aria-expanded={!!openInvestigationView}
+                aria-controls={openInvestigationView ? 'station-investigation' : undefined}
+                onClick={(event) => openInvestigation(event.currentTarget)}
+              >{investigationLabels.open}</button>
+            </div>
+          </>}
         </section>
       </div>}
 
+      {openInvestigationView && (
+        <StationInvestigationPanel view={openInvestigationView} context={context} language={language}
+          onCommand={(command) => setInvestigation((previous) => updateInvestigation(previous, context, command))}
+          onClose={closeInvestigation}
+        />
+      )}
+
       <footer>
         <span>{copy.syntheticDisclosure}</span>
-        <span>{copy.fixture} <code dir="ltr">{fixtureVersion}</code></span>
+        <span>{copy.fixture} <code dir="ltr">{fixtureVersion} / {investigationVersion}</code></span>
       </footer>
     </section>
   );
