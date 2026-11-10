@@ -1,4 +1,4 @@
-import { accessibleSystems, type GasSystem, type RoleId, type Station, type SystemId, type WindowId } from './fixtures';
+import { accessibleSystems, type GasSystem, type RoleId, type Station, type StationId, type SystemId, type WindowId } from './fixtures';
 
 export const sixViewFixtureVersion = 'six-interface-preview-v2';
 
@@ -35,7 +35,7 @@ const profileBySystem: Record<SystemId, readonly ElevationSample[]> = {
 };
 
 export type SixViewPoint = {
-  id: string;
+  id: StationId;
   chainageKm: number;
   elevationM: number;
   authoredFlowKgS: number;
