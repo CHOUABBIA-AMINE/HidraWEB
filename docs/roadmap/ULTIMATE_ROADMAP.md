@@ -3340,3 +3340,32 @@ Verify geographic data loading, marker/tree/alarm selection, language switching,
 permissions and the product build. Publish as
 `fix(network): localize preview and add geographic basemap`. Client walkthrough
 acceptance remains the gate before F20.
+
+## HWEB-F19 — owner acceptance of the integrated preview (2026-11-10)
+
+The owner accepted F19 at `861c3d3940efbdad3a0a346d30b284774b31a3e2` (parent `783e719f3a4952b317a9105a867438b11a7fff76`, tree `63b04d1d8b8f9cb42c40a74240fd5aad540b60d8`). [Code CI #1042](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42798367837) and [Documentation Validation #77](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/42798365490) passed on that SHA. Acceptance covers the signed-in Network preview, French, English and Arabic, and the local geographic basemap with synthetic infrastructure and evidence. At the owner's direction, additional operational parameters wait for completed and accepted HidraAPI contracts.
+
+## HWEB-F20 — station investigation and follow-up preview registration (2026-11-10)
+
+**Status.** Registered for the synthetic preview scope. The owner's acceptance and request to proceed select this documentation stage. Implementation requires successful exact-SHA Documentation Validation on the registration and a subsequent owner selection.
+
+**One deliverable.** Extend the existing signed-in `/network?view=preview` workflow. From the selected station and linked alarm, open a fixture investigation carrying the same company and organization scope, system, station ID, UTC window and evidence revision. Reuse the existing technical revision, pressure observations and alarm fixture. Keep synthetic provenance, units, quality and timestamps visible. Include an in-memory timeline that distinguishes simulated acknowledgement, a separate simulated follow-up, and fixture-driven condition resolution. An acknowledgement or follow-up does not resolve the condition. Reopen the timeline with its original evidence reference, actor and simulated time.
+
+**Ownership and authorization.** The preview owns the demo timeline and no operational record. The Alarm domain owns native alarm lifecycle. Technical revision and observation owners supply accepted evidence for native use. The eventual native follow-up contract and accountable owner must be confirmed before integration. Reuse F19's route and topology read permission for entry and fixture scopes for disclosure. The scoped demo operator can act only on an eligible reviewed fixture. A read-only observer can review authorized evidence and history. Same-company out-of-scope and cross-company demo roles cannot infer the investigation or its history. A stale review, missing or degraded evidence, or an unauthorized action leaves history unchanged. F20 uses no additional operational parameters and calls no product Alarm, Workflow or telemetry transport. F16 remains HOLD, and F22 retains its separate native contract and qualification gates.
+
+**Implementation commit** — `feat(preview): demonstrate station investigation`.
+
+| Change | Exact implementation path | Purpose |
+|---|---|---|
+| MODIFY | `src/features/topology/preview/NetworkPreviewPage.tsx` | Open the investigation within the selected fixture context. |
+| ADD | `src/features/topology/preview/StationInvestigationPanel.tsx` | Render the evidence, review actions and reopenable demo timeline. |
+| ADD | `src/features/topology/preview/stationInvestigation.ts` | Enforce deterministic fixture transitions, evidence binding and readback. |
+| ADD | `src/features/topology/preview/stationInvestigation.test.ts` | Verify transitions, original evidence, stale or denied actions and reset. |
+| MODIFY | `src/features/topology/preview/previewCopy.ts` | Translate the investigation in French, English and Arabic. |
+| MODIFY | `src/features/topology/preview/styles.css` | Keep investigation and timeline accessible within the preview. |
+| MODIFY | `tests/e2e/network.spec.ts` | Verify the investigation, role boundaries and isolation through HidraWEB. |
+| MODIFY | `docs/roadmap/HWEB-F19-Network-Preview.md` | Extend the integrated client walkthrough to F20. |
+
+**Acceptance.** In Chromium, start from the map and from the linked alarm and verify the same station, time and evidence. Acknowledge and add a separate follow-up, then reopen the timeline and check the original evidence, actor and time. Exercise fixture resolution, stale review, degraded evidence, the observer and both out-of-scope roles. Verify that rejected actions leave the timeline unchanged, reset restores the fixture, language and narrow keyboard paths work, and demo interactions make no business API calls. Run focused tests, lint, typecheck, production build and Code CI. Record exact SHA and fixture version. Client walkthrough acceptance precedes any F21 selection.
+
+**Registration publication.** Append only this canonical roadmap with `docs(roadmap): accept F19 and register F20 station investigation`. Use guarded direct-main publication with expected head `861c3d3940efbdad3a0a346d30b284774b31a3e2`, verify exact parent, tree and blob, and stop after observing exact-SHA Documentation Validation creation or start.
