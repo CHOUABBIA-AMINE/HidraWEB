@@ -544,7 +544,7 @@ test('F21 six synthetic interfaces present six scoped and keyboard-selectable vi
   for (const name of names) {
     await six.getByRole('tab', { name, exact: true }).click();
     await expect(six.getByRole('tabpanel')).toBeVisible();
-    await expect(six.getByRole('tabpanel').getByRole('img')).toBeVisible();
+    await expect(six.getByRole('tabpanel').locator('svg.six-view-figure[role="img"]')).toBeVisible();
   }
   await six.getByRole('tab', { name: names[0] }).focus();
   await page.keyboard.press('End');
