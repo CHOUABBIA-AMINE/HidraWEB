@@ -110,3 +110,16 @@ The six-interface addition extends the single F21 task. It is not a suffixed new
 8. Reopen the original station investigation and F21 independent decision walkthrough; original synthetic comparison and history must still work. Verify no new business HTTP requests, no OT actuation and no persistent local browser data.
 
 F21 requires explicit owner walkthrough acceptance after the source/CI evidence; F16 HOLD and F22 prerequisites remain unchanged.
+
+## F21 corrective walkthrough — conventional schematic symbols and altimetry (fixture v2)
+
+This addendum applies to synthetic version six-interface-preview-v2. It supersedes only the older fixture-version reference; the earlier six-view and decision walkthroughs remain valid.
+
+1. Geographic: ST station nodes are now square enclosure markers with a small valve-shaped glyph and a readable tag instead of plain circles. These are not exact surveyed positions.
+2. Schematic / P&ID: inspect dashed ST boundaries, XV gate valves drawn as paired triangles with stems, the K compressor symbol, and FT instrument bubbles with identifiers; check the legend, grayscale normal state and highlighting of fictional alarm evidence. No equipment-control buttons exist.
+3. 2D Station: inspect the station boundary, two header XV valves, one bypass XV, and a K or FT symbol corresponding to the fictional station kind. Switch permitted stations to verify the changed equipment type and the same revision context.
+4. Hydraulic & Elevation: GZ2 displays 14 independent fictional chainage/elevation samples, including 11 non-station points between three facilities. PK 76 km has elevation 370 m and is not a station; PK 85 km is Atlas Compression at 340 m. The profile table identifies terrain-only rows and does not attach invented pressure or mass flow to them. The pressure strip below contains observed synthetic station readings only, in bar(g). No claimed interpolation, terrain survey, pipe elevation, mass balance or solver.
+5. Orion has eight terrain samples and two stations. Verify stale/unavailable readings stay unplotted and demo role changes hide all out-of-scope values.
+6. Check EN, FR and Arabic RTL legend/caveats, narrow-screen and keyboard access, reset, and the earlier F21 independent decision history.
+
+Symbol families for future approved catalogs: ISO 10628-2:2012 (https://www.iso.org/standard/51841.html) and ANSI/ISA-5.1-2024 (https://www.isa.org/standards-and-publications/isa-standards/isa-standards-committees/isa5-1). Demo symbols are conventional approximations and not certified. F21 owner acceptance remains pending; HWEB-F16 HOLD and HWEB-F22 blocked.

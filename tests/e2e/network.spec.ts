@@ -535,7 +535,7 @@ test('digital-twin preview supports narrow keyboard entry and localized RTL copy
 test('F21 six synthetic interfaces present six scoped and keyboard-selectable views', async ({ page }) => {
   await openPreview(page);
   const six = page.getByRole('region', { name: 'Six-view digital twin simulation' });
-  await expect(six).toContainText('six-interface-preview-v1');
+  await expect(six).toContainText('six-interface-preview-v2');
   await expect(six.getByRole('tab')).toHaveCount(6);
   const names = [
     '1. Geographic / Spatial', '2. Hydraulic & Elevation', '3. Logical Schematic / P&ID',
@@ -591,4 +591,42 @@ test('F21 six views protect demo scope, localize and expose no control commands'
   await page.getByRole('button', { name: 'Réinitialiser l’aperçu' }).click();
   await expect(page.getByRole('region', { name: 'Simulation du jumeau numérique en six vues' })
     .getByRole('tab', { name: /Géographie/ })).toHaveAttribute('aria-selected', 'true');
+});
+
+
+test('F21 corrective review uses conventional process symbols and intermediate terrain elevation points', async ({ page }) => {
+  await openPreview(page);
+  const six = page.getByRole('region', { name: 'Six-view digital twin simulation' });
+
+  await six.getByRole('tab', { name: '1. Geographic / Spatial' }).click();
+  await expect(six.locator('[data-pid-symbol="station-marker"]')).toHaveCount(3);
+
+  await six.getByRole('tab', { name: '2. Hydraulic & Elevation' }).click();
+  await expect(six).toContainText('Illustrative intermediate elevation points');
+  const profile = six.getByRole('tabpanel');
+  await expect(profile.locator('[data-elevation-point]')).toHaveCount(14);
+  await expect(profile.locator('[data-station-elevation]')).toHaveCount(3);
+  await expect(profile.locator('[data-profile-chainage="76"]')).toContainText('370');
+  await expect(profile.locator('[data-profile-chainage="76"]')).toContainText('Intermediate terrain point');
+  await expect(profile.locator('[data-profile-chainage="85"]')).toContainText('Atlas Compression');
+  await expect(profile.locator('[data-profile-chainage="85"]')).toContainText('340');
+
+  await six.getByRole('tab', { name: '3. Logical Schematic / P&ID' }).click();
+  await expect(six.locator('svg.six-view-figure [data-pid-symbol="station-boundary"]')).toHaveCount(3);
+  await expect(six.locator('svg.six-view-figure [data-pid-symbol="gate-valve"]')).toHaveCount(3);
+  await expect(six.locator('svg.six-view-figure [data-pid-symbol="compressor"]')).toHaveCount(1);
+  await expect(six.locator('svg.six-view-figure [data-pid-symbol="flow-transmitter"]')).toHaveCount(2);
+  await expect(six).toContainText('not a reviewed ISO/ISA symbol catalog');
+  await expect(six).toContainText('No valve actuation or SCADA/PLC commands');
+
+  await six.getByRole('tab', { name: '6. 2D Station' }).click();
+  await expect(six.locator('svg.six-view-figure [data-pid-symbol="gate-valve"]')).toHaveCount(3);
+  await expect(six.locator('svg.six-view-figure [data-pid-symbol="compressor"]')).toHaveCount(1);
+  await expect(six.locator('svg.six-view-figure [data-pid-symbol="station-boundary"]')).toHaveCount(1);
+  await chooseLanguage(page, 'FR');
+  await expect(page.getByRole('region', { name: 'Simulation du jumeau numérique en six vues' }))
+    .toContainText('Symboles conventionnels de type P&ID');
+  await chooseLanguage(page, 'AR');
+  await expect(page.getByRole('region', { name: 'محاكاة التوأم الرقمي بست واجهات' }))
+    .toContainText('رموز شائعة');
 });

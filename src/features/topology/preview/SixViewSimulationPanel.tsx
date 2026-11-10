@@ -24,6 +24,54 @@ function chartPoints(values: readonly number[], x0: number, xSpan: number, y0: n
     (y0 + ySpan * (max - v) / range).toFixed(1)).join(' ');
 }
 
+/** Conventional independently drawn process symbols, not a certified P&ID library.
+ * A project-approved ISO/ISA symbol catalog and actual asset tags are still required.
+ */
+type ProcessGlyphKind = 'gate-valve' | 'compressor' | 'flow-transmitter';
+
+function ProcessGlyph({ kind, x, y, tag }: { kind: ProcessGlyphKind; x: number; y: number; tag: string }) {
+  return <g data-pid-symbol={kind} transform={'translate(' + x + ',' + y + ')'} stroke="#34434d" strokeWidth="2.8" fill="#f6f7f8">
+    <title>{tag + ' · ' + kind}</title>
+    {kind === 'gate-valve' ? <>
+      <path d="M -17 -12 L 0 0 L -17 12 Z M 17 -12 L 0 0 L 17 12 Z" />
+      <line x1="0" y1="-14" x2="0" y2="-23" />
+      <line x1="-9" y1="-23" x2="9" y2="-23" />
+    </> : kind === 'compressor' ? <>
+      <circle cx="0" cy="0" r="23" />
+      <path d="M -8 -16 L 15 0 L -8 16 Z" fill="#ccd5d9" />
+    </> : <>
+      <circle cx="0" cy="0" r="22" />
+      <text x="0" y="5" textAnchor="middle" fontSize="15" stroke="none" fill="#34434d" fontWeight="bold">FT</text>
+    </>}
+    <text x="0" y="42" textAnchor="middle" fontSize="12" stroke="none" fill="#34434d">{tag}</text>
+  </g>;
+}
+
+function SymbolLegend({ copy }: { copy: {
+  symbolLegend: string; stationSymbol: string; gateValve: string; compressorSymbol: string;
+  flowTransmitter: string; symbolsCaveat: string;
+} }) {
+  const entries = [
+    { kind: 'gate-valve', label: copy.gateValve, tag: 'XV' },
+    { kind: 'compressor', label: copy.compressorSymbol, tag: 'K' },
+    { kind: 'flow-transmitter', label: copy.flowTransmitter, tag: 'FT' },
+  ] as const;
+  return <div className="six-view-symbol-legend" aria-label={copy.symbolLegend}>
+    <p><strong>{copy.symbolLegend}:</strong> {copy.stationSymbol} · ST</p>
+    <div className="six-view-symbols">
+      {entries.map((entry) => <span key={entry.kind}>
+        <svg viewBox="0 0 74 85" role="img" aria-label={entry.label} className="six-view-legend-icon">
+          <ProcessGlyph kind={entry.kind} x={37} y={33} tag={entry.tag} />
+        </svg>{entry.label}
+      </span>)}
+    </div>
+    <p className="six-view-warning">{copy.symbolsCaveat}</p>
+  </div>;
+}
+
+const elevationX = (chainage: number, lastChainage: number) => 65 + 660 * chainage / Math.max(lastChainage, 1);
+const elevationY = (elevation: number, min: number, max: number) => 155 - 110 * (elevation - min) / Math.max(max - min, 1);
+
 export function SixViewSimulationPanel({ context, language, onSelect }: Props) {
   const [tab, setTab] = useState<Tab>('geography');
   const [showHca, setShowHca] = useState(false);
@@ -84,11 +132,19 @@ export function SixViewSimulationPanel({ context, language, onSelect }: Props) {
             {showWater && <path d="M 425 0 Q 345 105 498 280" fill="none" stroke="#658e9d" strokeWidth="15" opacity=".7" />}
             <polyline points={model.system.stations.map((_, i) => drawX(i, model.system.stations.length) + ',' + (177 - i % 2 * 55)).join(' ')}
               fill="none" stroke="#586b75" strokeWidth="8" strokeLinecap="round" />
-            {model.system.stations.map((s, i) => <g key={s.id}>
-              <circle cx={drawX(i, model.system.stations.length)} cy={177 - i % 2 * 55} r={model.station?.id === s.id ? 16 : 11}
-                stroke="#283946" strokeWidth="3" fill={model.station?.id === s.id ? '#fff' : '#899ba4'} />
-              <text x={drawX(i, model.system.stations.length)} y={210 - i % 2 * 55} textAnchor="middle" fontSize="17" fill="#22333d">{i + 1}</text>
-            </g>)}
+            {model.system.stations.map((s, i) => {
+              const x = drawX(i, model.system.stations.length);
+              const y = 177 - i % 2 * 55;
+              return <g key={s.id}>
+                <title>{copy.stations[s.id]}</title>
+                <rect data-pid-symbol="station-marker" x={x - 14} y={y - 14} width="28" height="28"
+                  stroke="#283946" strokeWidth="3" fill={model.station?.id === s.id ? '#fff' : '#b6c1c7'} />
+                <path d={'M ' + (x - 8) + ' ' + (y - 6) + ' L ' + x + ' ' + y + ' L ' + (x - 8) + ' ' + (y + 6) +
+                  ' Z M ' + (x + 8) + ' ' + (y - 6) + ' L ' + x + ' ' + y + ' L ' + (x + 8) + ' ' + (y + 6) + ' Z'}
+                  stroke="#354954" strokeWidth="1.8" fill="none" />
+                <text x={x} y={y + 34} textAnchor="middle" fontSize="17" fill="#22333d">ST-{i + 1}</text>
+              </g>;
+            })}
           </svg>
           <p className="six-view-warning">{t.anomaly}{model.alarmId ? ': ' + model.alarmId : ''}</p>
           <div className="six-view-actions" aria-label={t.stationSelect}>
@@ -99,53 +155,92 @@ export function SixViewSimulationPanel({ context, language, onSelect }: Props) {
         </div>}
 
         {tab === 'hydraulics' && <div className="six-view-inner">
-          <h3>{t.terrain}</h3>
-          <svg viewBox="0 0 800 320" role="img" aria-label={t.elevation + ' / ' + t.pressure} className="six-view-figure">
-            <title>{t.elevation} / {t.pressure}</title>
-            <line x1="60" y1="25" x2="60" y2="145" stroke="#596b76" strokeWidth="2" />
-            <line x1="60" y1="145" x2="744" y2="145" stroke="#596b76" strokeWidth="2" />
-            <line x1="60" y1="279" x2="744" y2="279" stroke="#596b76" strokeWidth="2" />
-            <text x="64" y="22" fontSize="16" fill="#263c4b">{t.elevation}</text>
-            <text x="64" y="175" fontSize="16" fill="#263c4b">{t.pressure}</text>
-            <text x="580" y="313" fontSize="16" fill="#263c4b">{t.chainage}</text>
-            <polyline fill="none" stroke="#6b7870" strokeWidth="5"
-              points={model.points.map((p, i) => drawX(i, model.points.length) + ',' + (143 - p.elevationM * .27)).join(' ')} />
-            {model.points.map((p, i) => <g key={p.id}>
-              <circle cx={drawX(i, model.points.length)} cy={143 - p.elevationM * .27} r="7" fill="#5e6f61" />
-              <text x={drawX(i, model.points.length)} y="158" textAnchor="middle" fontSize="13" fill="#304657">{p.chainageKm}</text>
-              <text x={drawX(i, model.points.length)} y={132 - p.elevationM * .27} textAnchor="middle" fontSize="13" fill="#304657">{p.elevationM} m</text>
-              {p.pressureBarG !== undefined && <>
-                <circle cx={drawX(i, model.points.length)} cy={267 - (p.pressureBarG - 40) * 2.1} r="7" fill="#234f68" />
-                <text x={drawX(i, model.points.length)} y={252 - (p.pressureBarG - 40) * 2.1} textAnchor="middle" fontSize="13" fill="#234f68">{p.pressureBarG.toFixed(1)}</text>
-              </>}
-            </g>)}
+          <h3>{t.profile}</h3>
+          <p className="six-view-warning">{t.profileSource}</p>
+          <svg viewBox="0 0 800 335" role="img" aria-label={t.elevation + ' / ' + t.pressure} className="six-view-figure">
+            <title>{t.profileSource}</title>
+            <line x1="60" y1="27" x2="60" y2="170" stroke="#596b76" strokeWidth="2" />
+            <line x1="60" y1="170" x2="744" y2="170" stroke="#596b76" strokeWidth="2" />
+            <line x1="60" y1="289" x2="744" y2="289" stroke="#596b76" strokeWidth="2" />
+            <text x="65" y="22" fontSize="16" fill="#263c4b">{t.elevation}</text>
+            <text x="65" y="207" fontSize="16" fill="#263c4b">{t.pressure}</text>
+            <text x="555" y="327" fontSize="16" fill="#263c4b">{t.chainage}</text>
+            {(() => {
+              const samples = model.elevationSamples;
+              const last = samples[samples.length - 1].chainageKm;
+              const values = samples.map((p) => p.elevationM);
+              const lo = Math.min(...values) - 20;
+              const hi = Math.max(...values) + 20;
+              const pressures = model.points.flatMap((p) => p.pressureBarG === undefined ? [] : [p.pressureBarG]);
+              const pmin = Math.min(...pressures);
+              const pmax = Math.max(...pressures);
+              const pressureY = (value: number) => 257 - 37 * (value - pmin) / Math.max(pmax - pmin, 1);
+              return <>
+                <polyline data-elevation-profile="synthetic" fill="none" stroke="#617f70" strokeWidth="3.5"
+                  points={samples.map((p) => elevationX(p.chainageKm, last) + ',' + elevationY(p.elevationM, lo, hi)).join(' ')} />
+                {samples.map((p) => <g key={p.chainageKm}>
+                  <title>{t.chainage + ': ' + p.chainageKm + ' · ' + t.elevation + ': ' + p.elevationM}</title>
+                  <circle data-elevation-point="synthetic" cx={elevationX(p.chainageKm, last)}
+                    cy={elevationY(p.elevationM, lo, hi)} r="3.8" fill="#f9fbfc" stroke="#456555" strokeWidth="2" />
+                </g>)}
+                {model.points.map((p, i) => {
+                  const x = elevationX(p.chainageKm, last);
+                  const y = elevationY(p.elevationM, lo, hi);
+                  return <g key={p.id}>
+                    <rect data-station-elevation={p.id} x={x - 6} y={y - 6} width="12" height="12" fill="#d1d7dc" stroke="#2b414c" strokeWidth="2" />
+                    <text x={x} y="186" textAnchor="middle" fontSize="13" fill="#304657">ST-{i + 1}</text>
+                    {p.pressureBarG !== undefined && <>
+                      <circle cx={x} cy={pressureY(p.pressureBarG)} r="6.5" fill="#265c78" stroke="#fff" strokeWidth="1.5" />
+                      <text x={x} y={pressureY(p.pressureBarG) - 12} textAnchor="middle" fontSize="14" fill="#234f68">{p.pressureBarG.toFixed(1)}</text>
+                    </>}
+                    <text x={x} y="308" textAnchor="middle" fontSize="13" fill="#304657">{p.chainageKm}</text>
+                  </g>;
+                })}
+              </>;
+            })()}
           </svg>
           <p className="six-view-warning">{t.physics}</p>
           <div className="six-view-table-scroll"><table className="digital-twin-table">
-            <caption>{t.flow}</caption>
-            <thead><tr><th scope="col">{t.chainage}</th><th scope="col">{t.elevation}</th><th scope="col">{t.flow}</th><th scope="col">{t.quality}</th></tr></thead>
-            <tbody>{model.points.map((p) => <tr key={p.id}><td>{p.chainageKm}</td><td>{p.elevationM}</td><td>{p.authoredFlowKgS.toFixed(1)}</td><td>{p.pressureState}</td></tr>)}</tbody>
+            <caption>{t.profileSource} · {t.flow}</caption>
+            <thead><tr>
+              <th scope="col">{t.chainage}</th><th scope="col">{t.elevation}</th>
+              <th scope="col">{t.pointType}</th><th scope="col">{t.flow}</th><th scope="col">{t.pressure}</th>
+            </tr></thead>
+            <tbody>{model.elevationSamples.map((sample) => {
+              const node = model.points.find((p) => p.chainageKm === sample.chainageKm);
+              return <tr key={sample.chainageKm} data-profile-chainage={sample.chainageKm}>
+                <td>{sample.chainageKm}</td><td>{sample.elevationM}</td>
+                <td>{node ? copy.stations[node.id] : t.terrainSample}</td>
+                <td>{node ? node.authoredFlowKgS.toFixed(1) : '—'}</td>
+                <td>{node?.pressureBarG?.toFixed(1) ?? '—'}</td>
+              </tr>;
+            })}</tbody>
           </table></div>
         </div>}
 
         {tab === 'schematic' && <div className="six-view-inner">
           <h3>{t.schematic}</h3>
-          <svg viewBox="0 0 800 230" role="img" aria-label={t.schematic} className="six-view-figure">
+          <svg viewBox="0 0 800 250" role="img" aria-label={t.schematic} className="six-view-figure">
             <title>{t.schematic}</title>
-            <line x1="44" y1="110" x2="755" y2="110" stroke="#62696d" strokeWidth="8" />
+            <line x1="12" y1="118" x2="788" y2="118" stroke="#58656c" strokeWidth="5" />
             {model.system.stations.map((s, i) => {
               const x = drawX(i, model.system.stations.length);
               const alarm = s.evidence[context.windowId].alarm;
               const alerted = 'value' in alarm;
               return <g key={s.id}>
-                <rect x={x - 42} y="75" width="84" height="70" rx="6" fill={alerted ? '#f6eee4' : '#dde1e3'} stroke={alerted ? '#ae5426' : '#46525a'} strokeWidth={alerted ? 5 : 3} />
-                <circle cx={x} cy="110" r="16" fill={alerted ? '#bb6331' : '#a1aaae'} stroke="#4c565c" strokeWidth="3" />
-                <text x={x} y="48" fontSize="17" textAnchor="middle" fill="#29383d">{i + 1}</text>
-                <text x={x} y="183" textAnchor="middle" fontSize="15" fill="#29383d">{s.kind.toUpperCase()}</text>
-                <path d={'M ' + (x + 49) + ' 96 l 10 14 -10 14 -10 -14 Z'} fill="#d0d4d6" stroke="#59646b" strokeWidth="2" />
+                <title>{copy.stations[s.id] + ' · ST-' + (i + 1)}</title>
+                <rect data-pid-symbol="station-boundary" x={x - 62} y="57" width="124" height="124"
+                  fill="none" stroke={alerted ? '#ac5829' : '#667580'} strokeWidth={alerted ? 4 : 2}
+                  strokeDasharray="7 5" />
+                <text x={x} y="43" fontSize="16" textAnchor="middle" fill="#263c4b">ST-{i + 1}</text>
+                <ProcessGlyph kind="gate-valve" x={x - 37} y={118} tag={'XV-' + (i + 1)} />
+                <ProcessGlyph kind={s.kind === 'compressor' ? 'compressor' : 'flow-transmitter'}
+                  x={x + 24} y={118} tag={(s.kind === 'compressor' ? 'K-' : 'FT-') + (i + 1)} />
+                <text x={x} y="209" fontSize="15" textAnchor="middle" fill="#29383d">{s.kind.toUpperCase()}</text>
               </g>;
             })}
           </svg>
+          <SymbolLegend copy={t} />
           <p>{t.normal} · <span className="six-view-alarm-key">{t.activeAlarm}</span></p>
           <p className="six-view-warning">{t.noControl}</p>
           <div className="six-view-actions">{model.system.stations.map(s => <button key={s.id} type="button" className="secondary-button" aria-pressed={model.station?.id === s.id} onClick={() => onSelect(s.id)}>{copy.stations[s.id]}</button>)}</div>
@@ -206,23 +301,24 @@ export function SixViewSimulationPanel({ context, language, onSelect }: Props) {
           <h3>{t.facility}</h3>
           {!model.station ? <p role="status">{t.noStation}</p> : <>
             <p><strong>{copy.stations[model.station.id]}</strong> · {t.revision}: <bdi>{model.revision ?? t.unknown}</bdi></p>
-            <svg viewBox="0 0 800 300" role="img" aria-label={t.facility} className="six-view-figure">
+            <svg viewBox="0 0 800 320" role="img" aria-label={t.facility} className="six-view-figure">
               <title>{t.facility}</title>
-              <rect x="32" y="46" width="736" height="207" rx="12" fill="#ebeff0" stroke="#9eaaaf" strokeWidth="2" />
-              <line x1="55" y1="130" x2="744" y2="130" stroke="#627078" strokeWidth="13" />
-              <path d="M 265 130 V 206 H 560 V 130" stroke="#8d969b" strokeWidth="9" fill="none" />
-              <rect x="340" y="94" width="135" height="74" rx="7" fill="#b6bdc1" stroke="#4e5e67" strokeWidth="3" />
-              <circle cx="407" cy="130" r="24" fill="#e2e6e7" stroke="#53616a" strokeWidth="4" />
-              <path d="M 405 109 L 423 133 L 393 141 Z" fill="#737f85" />
-              {[174, 612].map(x => <g key={x}>
-                <path d={'M ' + (x - 16) + ' 111 L ' + (x + 16) + ' 149 M ' + (x + 16) + ' 111 L ' + (x - 16) + ' 149'}
-                  stroke="#3f4d55" strokeWidth="7" />
-              </g>)}
-              <text x="63" y="82" fontSize="17" fill="#354650">{t.inlet}</text>
-              <text x="355" y="78" fontSize="17" fill="#354650">{t.train}</text>
-              <text x="588" y="82" fontSize="17" fill="#354650">{t.outlet}</text>
-              <text x="375" y="236" fontSize="17" fill="#354650">{t.bypass}</text>
+              <rect data-pid-symbol="station-boundary" x="24" y="36" width="752" height="251" rx="5"
+                fill="#edf1f2" stroke="#7f929d" strokeDasharray="9 6" strokeWidth="2.5" />
+              <line x1="52" y1="135" x2="748" y2="135" stroke="#626f77" strokeWidth="6" />
+              <path d="M 270 135 V 227 H 557 V 135" stroke="#8d969b" strokeWidth="5" fill="none" />
+              <ProcessGlyph kind="gate-valve" x={175} y={135} tag="XV-01" />
+              <ProcessGlyph kind={model.station.kind === 'compressor' ? 'compressor' : 'flow-transmitter'}
+                x={408} y={135} tag={model.station.kind === 'compressor' ? 'K-01' : 'FT-01'} />
+              <ProcessGlyph kind="gate-valve" x={621} y={135} tag="XV-02" />
+              <ProcessGlyph kind="gate-valve" x={408} y={227} tag="XV-03" />
+              <text x="64" y="89" fontSize="17" fill="#354650">{t.inlet}</text>
+              <text x="339" y="81" fontSize="17" fill="#354650">{t.train}</text>
+              <text x="610" y="89" fontSize="17" fill="#354650">{t.outlet}</text>
+              <text x="280" y="257" fontSize="17" fill="#354650">{t.bypass}</text>
+              <text x="52" y="311" fontSize="15" fill="#354650">ST · {model.station.kind.toUpperCase()}</text>
             </svg>
+            <SymbolLegend copy={t} />
             <p className="six-view-warning">{t.noControl}</p>
           </>}
         </div>}

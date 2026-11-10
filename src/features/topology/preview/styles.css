@@ -192,3 +192,11 @@
   :where(.network-fixture-workspace) .six-view-content { padding: .45rem; }
   :where(.network-fixture-workspace) .six-view-tabs button { flex-basis: 100%; }
 }
+
+
+/* F21 owner-feedback visual conventions: process symbols, local legend and terrain points. */
+:where(.network-fixture-workspace) .six-view-symbol-legend { display: grid; gap: .35rem; border: 1px solid var(--line); background: #f5f7f7; padding: .6rem; }
+:where(.network-fixture-workspace) .six-view-symbols { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem 1.2rem; }
+:where(.network-fixture-workspace) .six-view-symbols > span { display: inline-flex; align-items: center; gap: .35rem; font-size: .82rem; }
+:where(.network-fixture-workspace) .six-view-legend-icon { width: 4rem; height: 4.5rem; flex: none; direction: ltr; }
+:where(.network-fixture-workspace) .six-view-symbol-legend .six-view-warning { margin-block-start: .3rem; }
