@@ -144,3 +144,21 @@
 :where(.network-fixture-workspace) .investigation-timeline { padding-inline-start: 1.3rem; margin-block: .35rem; }
 :where(.network-fixture-workspace) .investigation-timeline li { padding-block: .35rem; border-block-end: 1px solid var(--line); font-size: .8rem; }
 :where(.network-fixture-workspace) .investigation-timeline li p { color: var(--muted); font-size: .74rem; overflow-wrap: anywhere; }
+
+:where(.network-fixture-workspace) .digital-twin-entry { margin-block-start: .7rem; }
+:where(.network-fixture-workspace) .digital-twin-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: .75rem; }
+:where(.network-fixture-workspace) .digital-twin-body > button { justify-self: start; }
+:where(.network-fixture-workspace) .digital-twin-panel .secondary-button,
+:where(.network-fixture-workspace) .digital-twin-entry .secondary-button { max-inline-size: 100%; overflow-wrap: anywhere; white-space: normal; }
+:where(.network-fixture-workspace) .digital-twin-controls { display: flex; flex-wrap: wrap; gap: .5rem .8rem; }
+:where(.network-fixture-workspace) .digital-twin-controls label { flex: 1 1 12rem; min-width: 0; }
+:where(.network-fixture-workspace) .digital-twin-controls label,
+:where(.network-fixture-workspace) .digital-twin-rationale label { display: grid; gap: .25rem; font-size: .8rem; font-weight: 650; }
+:where(.network-fixture-workspace) .digital-twin-rationale { margin-block-start: .55rem; }
+:where(.network-fixture-workspace) .digital-twin-rationale textarea { width: 100%; padding: .45rem; font: inherit; border: 1px solid #9aafb9; border-radius: .3rem; resize: vertical; }
+:where(.network-fixture-workspace) .digital-twin-rationale textarea:focus-visible { outline: 3px solid #a84013; outline-offset: 3px; }
+:where(.network-fixture-workspace) .digital-twin-table { width: 100%; border-collapse: collapse; margin-block: .35rem; font-size: .8rem; }
+:where(.network-fixture-workspace) .digital-twin-table th,
+:where(.network-fixture-workspace) .digital-twin-table td { border-block-end: 1px solid var(--line); padding: .45rem; text-align: start; overflow-wrap: anywhere; }
+:where(.network-fixture-workspace) .digital-twin-table thead { background: #edf2f5; }
+:where(.network-fixture-workspace) .digital-twin-tradeoff { font-size: .78rem; color: var(--muted); }

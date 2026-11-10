@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 
 const permissionRoutes = [
   { route: '/api/v1/topology/map/layers', methods: ['GET'], module: 'topology', resource: 'map', action: 'read', permission: 'topology:map:read', enforcementStatus: 'backend-enforced' },
@@ -257,6 +257,14 @@ test('preview fixture interactions use no operational data or persistent browser
   await investigation.getByRole('button', { name: 'Review fixture evidence' }).click();
   await investigation.getByRole('button', { name: 'Simulate acknowledgement' }).click();
   await expect(investigation.getByText('Alarm acknowledged')).toBeVisible();
+  await page.getByRole('button', { name: 'Open digital-twin decision' }).click();
+  const twin = page.getByRole('region', { name: 'Digital-twin decision preview' });
+  await createTwinProposal(twin);
+  await twin.getByLabel('Decision actor').selectOption('reviewer');
+  await twin.getByRole('button', { name: /Review proposal/ }).click();
+  await twin.getByLabel('Decision rationale').fill('Review the fixture pressure comparison.');
+  await twin.getByRole('button', { name: 'Approve proposal' }).click();
+  await expect(twin.getByText('Follow-up outcome · Unavailable · Unresolved')).toBeVisible();
   await investigation.getByRole('button', { name: 'Close investigation' }).click();
 
   await view.system.selectOption('orion');
@@ -406,4 +414,119 @@ test('the investigation follows the app language and can be opened by keyboard a
   await expect(arabic.getByRole('button', { name: 'مراجعة بيانات العرض' })).toBeVisible();
   await chooseLanguage(page, 'EN');
   await expect(page.getByRole('region', { name: 'Station investigation' })).toContainText('REV-A03');
+});
+
+async function openTwin(page: Page) {
+  await openPreview(page);
+  await page.getByRole('button', { name: 'Open investigation' }).click();
+  await page.getByRole('button', { name: 'Open digital-twin decision' }).click();
+  return page.getByRole('region', { name: 'Digital-twin decision preview' });
+}
+
+async function createTwinProposal(twin: Locator) {
+  await twin.getByRole('button', { name: 'Load precomputed comparison' }).click();
+  await twin.getByLabel('Decision actor').selectOption('engineer');
+  await twin.getByRole('button', { name: 'Propose the modeled alternative' }).click();
+}
+
+test('digital-twin comparison and independent review reopen with the original sources and unresolved outcome', async ({ page }) => {
+  const twin = await openTwin(page);
+  const manifest = twin.getByRole('region', { name: 'Versioned input manifest' });
+  await expect(manifest).toContainText('GZ2-ATLAS-PRESSURE-v1');
+  await expect(manifest).toContainText('REV-A03');
+  await expect(manifest).toContainText('64.1 bar(g) · 09:45 UTC · DEMO-204');
+  await createTwinProposal(twin);
+
+  const comparison = twin.getByRole('table', { name: 'Synthetic pressure comparison' });
+  await expect(comparison.getByRole('row', { name: /Fixture observation/ })).toContainText('64.1 bar(g)');
+  await expect(comparison.getByRole('row', { name: /Precomputed baseline/ })).toContainText('64.0 bar(g)');
+  await expect(comparison.getByRole('row', { name: /Precomputed alternative/ })).toContainText('65.2 bar(g)');
+  await expect(twin.getByRole('button', { name: /Review proposal/ })).toHaveCount(0);
+
+  await twin.getByLabel('Decision actor').selectOption('reviewer');
+  await twin.getByRole('button', { name: 'Review proposal · F21-P1' }).click();
+  await twin.getByRole('button', { name: 'Approve proposal' }).click();
+  await expect(twin.getByRole('status')).toContainText('Enter a rationale');
+  await twin.getByLabel('Decision rationale').fill('The fixture comparison warrants further review.');
+  await twin.getByRole('button', { name: 'Approve proposal' }).click();
+
+  await twin.getByRole('button', { name: 'Close digital-twin decision' }).click();
+  await expect(page.getByRole('button', { name: 'Open digital-twin decision' })).toBeFocused();
+  await page.getByRole('button', { name: 'Open digital-twin decision' }).click();
+  const events = twin.getByRole('region', { name: 'Digital-twin decision history' }).getByRole('listitem');
+  await expect(events).toHaveCount(3);
+  await expect(events.nth(2)).toContainText('Proposal approved F21-P1');
+  await expect(events.nth(2)).toContainText('Independent demo reviewer · 09:51 UTC');
+  await expect(events.nth(2)).toContainText('GZ2-ATLAS-PRESSURE-v1 · REV-A03 · F21-FIXTURE-RUN-01');
+  await expect(events.nth(2)).toContainText('The fixture comparison warrants further review.');
+  await expect(twin.getByText('Follow-up outcome · Unavailable · Unresolved')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Reset preview' }).click();
+  await expect(twin).toHaveCount(0);
+  await page.getByRole('button', { name: 'Open investigation' }).click();
+  await page.getByRole('button', { name: 'Open digital-twin decision' }).click();
+  await expect(events).toHaveCount(0);
+  await expect(comparison).toHaveCount(0);
+});
+
+test('digital-twin preview blocks incomplete inputs and stale decisions and scopes history', async ({ page }) => {
+  const twin = await openTwin(page);
+  const input = twin.getByLabel('Input revision fixture');
+  const history = twin.getByRole('region', { name: 'Digital-twin decision history' });
+  for (const [mode, message] of [
+    ['missing', 'The required fixture inputs are missing or degraded.'],
+    ['incompatible', 'The fixture input revision is incompatible with this comparison.'],
+  ]) {
+    await input.selectOption(mode);
+    await twin.getByRole('button', { name: 'Load precomputed comparison' }).click();
+    await expect(twin.getByRole('status')).toHaveText(message);
+    await expect(twin.getByRole('table')).toHaveCount(0);
+    await expect(history.getByRole('listitem')).toHaveCount(0);
+  }
+
+  await input.selectOption('matched');
+  await createTwinProposal(twin);
+  await twin.getByLabel('Decision actor').selectOption('reviewer');
+  await twin.getByRole('button', { name: /Review proposal/ }).click();
+  await twin.getByLabel('Decision rationale').fill('Prior window reviewed.');
+  await workspace(page).window.selectOption('afternoon');
+  await twin.getByRole('button', { name: 'Reject proposal' }).click();
+  await expect(twin.getByRole('status')).toContainText('The reviewed proposal or input context has changed.');
+  await expect(history.getByRole('listitem')).toHaveCount(0);
+  await workspace(page).window.selectOption('morning');
+  await expect(history.getByRole('listitem')).toHaveCount(2);
+
+  await workspace(page).role.selectOption('observer');
+  await expect(history).toContainText('Alternative proposed');
+  await expect(twin.getByLabel('Decision actor')).toHaveCount(0);
+  await expect(twin.getByRole('button', { name: /Review proposal/ })).toHaveCount(0);
+  for (const role of ['otherScope', 'otherCompany']) {
+    await workspace(page).role.selectOption(role);
+    await expect(twin).toHaveCount(0);
+    await expect(page.getByText('F21-P1')).toHaveCount(0);
+  }
+});
+
+test('digital-twin preview supports narrow keyboard entry and localized RTL copy', async ({ page }) => {
+  await openPreview(page, 'FR');
+  await page.getByRole('button', { name: 'Ouvrir l’investigation' }).click();
+  await page.setViewportSize({ width: 360, height: 740 });
+  await page.getByRole('button', { name: 'Réduire la navigation' }).click();
+  await page.getByRole('button', { name: 'Ouvrir la décision du jumeau numérique' }).focus();
+  await page.keyboard.press('Enter');
+  const french = page.getByRole('region', { name: 'Aperçu décisionnel du jumeau numérique' });
+  await expect(french.getByRole('heading', { name: 'Aperçu décisionnel du jumeau numérique' })).toBeFocused();
+  await expect(french).toContainText('64,1 bar(g)');
+  await french.getByRole('button', { name: 'Charger la comparaison précalculée' }).click();
+  await expect(french.getByRole('table')).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(360);
+
+  await page.setViewportSize({ width: 1280, height: 740 });
+  await chooseLanguage(page, 'AR');
+  const arabic = page.getByRole('region', { name: 'معاينة قرارات التوأم الرقمي' });
+  await expect(arabic).toBeVisible();
+  await expect(arabic.getByRole('table', { name: 'مقارنة اصطناعية للضغط' })).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+  await chooseLanguage(page, 'EN');
+  await expect(page.getByRole('region', { name: 'Digital-twin decision preview' })).toContainText('REV-A03');
 });

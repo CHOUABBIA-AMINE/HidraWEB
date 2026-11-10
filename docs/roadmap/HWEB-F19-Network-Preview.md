@@ -73,3 +73,25 @@ F20 uses the existing `network-fixture-v2` evidence with
 `station-investigation-v1` for the simulated timeline. The walkthrough qualifies
 the preview only. Additional operational parameters and native follow-up
 integration require accepted HidraAPI contracts.
+
+## F21 digital-twin decision walkthrough
+
+1. In the GZ2 morning fixture, open the Atlas Compression investigation and select
+   **Open digital-twin decision**. Check the input manifest, technical revision,
+   alarm reference, and observation time and units.
+2. As the demo operator, load the precomputed comparison. Compare the fixture
+   observation, baseline and alternative. Try the missing and incompatible input
+   options and verify that they block the comparison.
+3. Switch to the demo engineer and propose the alternative. Switch to the
+   independent demo reviewer, review the proposal and record an approve,
+   reject or return decision with a rationale.
+4. Close and reopen the preview to review the linked manifest, run, actor, time
+   and rationale. Approval leaves the unavailable follow-up outcome unresolved.
+   Change the UTC window after reviewing a proposal to exercise stale review.
+5. Verify that the read-only observer sees only the permitted context, and that
+   both out-of-scope roles lose access. Reset the preview to clear the in-memory
+   history.
+
+F21 uses `digital-twin-decision-v1` with `network-fixture-v2` observations.
+The pressure outputs are authored comparison fixtures. The preview performs
+no engine execution and records decisions solely within the walkthrough.

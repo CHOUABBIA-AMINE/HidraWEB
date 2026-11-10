@@ -4,6 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { HidraMap } from '@/components/map/HidraMap';
 import type { HidraGeographicBasemap, HidraMapFeatureCollection } from '@/components/map/mapTypes';
 
+import { DigitalTwinDecisionPanel } from './DigitalTwinDecisionPanel';
+import { digitalTwinCopy } from './digitalTwinCopy';
+import {
+  decisionFixtureVersion, decisionView, initialDecision, updateDecision, type DecisionActor, type InputSelection,
+} from './digitalTwinDecision';
 import {
   accessibleSystems, fixtureDate, fixtureVersion, roles, windows,
   type Evidence, type GasSystem, type RoleId, type Station, type SystemId, type WindowId,
@@ -30,11 +35,18 @@ export function NetworkPreviewPage() {
   const [investigation, setInvestigation] = useState(initialInvestigation);
   const [investigationOpen, setInvestigationOpen] = useState(false);
   const investigationTrigger = useRef<HTMLButtonElement>(null);
+  const [decision, setDecision] = useState(initialDecision);
+  const [decisionOpen, setDecisionOpen] = useState(false);
+  const [decisionActor, setDecisionActor] = useState<DecisionActor>('operator');
+  const [decisionInput, setDecisionInput] = useState<InputSelection>('matched');
+  const decisionTrigger = useRef<HTMLButtonElement>(null);
   const systems = useMemo(() => accessibleSystems(context.role), [context.role]);
   const system = systems.find(({ id }) => id === context.systemId);
   const station = system?.stations.find(({ id }) => id === context.assetId);
   const openInvestigationView = investigationOpen ? investigationView(investigation, context) : undefined;
   const investigationLabels = investigationCopy[language];
+  const twinLabels = digitalTwinCopy[language];
+  const twinView = openInvestigationView ? decisionView(decision, context, decisionInput) : undefined;
   const alarmLinks = system?.stations.flatMap((asset) => {
     const alarm = asset.evidence[context.windowId].alarm;
     return 'value' in alarm ? [{ asset, alarm: alarm.value }] : [];
@@ -43,7 +55,10 @@ export function NetworkPreviewPage() {
   const selectRole = (role: RoleId) => {
     const target = accessibleSystems(role).find(({ id }) => id === context.systemId);
     const assetId = target?.stations.some(({ id }) => id === context.assetId) ? context.assetId : null;
-    if (!assetId) setInvestigationOpen(false);
+    if (!assetId) {
+      setInvestigationOpen(false);
+      setDecisionOpen(false);
+    }
     setContext({ ...context, role, assetId });
   };
   const selectAsset = (id: string) => setContext((previous) => {
@@ -55,6 +70,7 @@ export function NetworkPreviewPage() {
     setInvestigationOpen(true);
   };
   const closeInvestigation = () => {
+    setDecisionOpen(false);
     setInvestigationOpen(false);
     investigationTrigger.current?.focus();
   };
@@ -63,6 +79,10 @@ export function NetworkPreviewPage() {
     setLayers(initialLayers);
     setInvestigation(initialInvestigation);
     setInvestigationOpen(false);
+    setDecision(initialDecision);
+    setDecisionOpen(false);
+    setDecisionActor('operator');
+    setDecisionInput('matched');
   };
 
   return (
@@ -90,6 +110,7 @@ export function NetworkPreviewPage() {
             if (systems.some(({ id }) => id === systemId)) {
               setContext({ ...context, systemId, assetId: null });
               setInvestigationOpen(false);
+              setDecisionOpen(false);
             }
           }}>
             {!system && <option value="">{copy.noSystem}</option>}
@@ -190,9 +211,30 @@ export function NetworkPreviewPage() {
         />
       )}
 
+      {twinView && (
+        <div className="digital-twin-entry">
+          <button ref={decisionTrigger} className="secondary-button" aria-expanded={decisionOpen}
+            aria-controls={decisionOpen ? 'digital-twin-decision' : undefined}
+            onClick={() => setDecisionOpen(true)}
+          >{twinLabels.open}</button>
+        </div>
+      )}
+
+      {twinView && decisionOpen && (
+        <DigitalTwinDecisionPanel view={twinView} context={context} language={language} actor={decisionActor} input={decisionInput}
+          onActor={setDecisionActor}
+          onInput={setDecisionInput}
+          onCommand={(command) => setDecision((previous) => updateDecision(previous, context, decisionInput, decisionActor, command))}
+          onClose={() => {
+            setDecisionOpen(false);
+            decisionTrigger.current?.focus();
+          }}
+        />
+      )}
+
       <footer>
         <span>{copy.syntheticDisclosure}</span>
-        <span>{copy.fixture} <code dir="ltr">{fixtureVersion} / {investigationVersion}</code></span>
+        <span>{copy.fixture} <code dir="ltr">{fixtureVersion} / {investigationVersion} / {decisionFixtureVersion}</code></span>
       </footer>
     </section>
   );
