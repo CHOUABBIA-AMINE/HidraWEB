@@ -1,8 +1,8 @@
 import { Alert, Box, Button, Chip, CircularProgress, Container, Paper, Stack, TextField, Typography } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 
 import type { Feature } from '@/api/generated/topology/model';
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
@@ -31,6 +31,10 @@ import {
 import { NetworkAuthoringPanel } from './components/NetworkAuthoringPanel';
 import { useContextDrawer } from '@/shell/context/useContextDrawer';
 
+const NetworkPreviewPage = lazy(async () => ({
+  default: (await import('./preview/NetworkPreviewPage')).NetworkPreviewPage,
+}));
+
 const MAP_PAGE_SIZE = 1000;
 const LAYER_SAMPLE_SIZE = 25;
 const SEARCH_PAGE_SIZE = 50;
@@ -40,6 +44,46 @@ function definedString(value: string | undefined): value is string {
 }
 
 export function NetworkTopologyPage() {
+  const { t } = useTranslation();
+  const [searchParams] = useSearchParams();
+  const canRead = usePermissions().can(TOPOLOGY_PERMISSIONS.read);
+  const { closeDrawer } = useContextDrawer();
+  const [authoring, setAuthoring] = useState(searchParams.has('draft') || searchParams.get('mode') === 'author');
+  const previewRequested = searchParams.get('view') === 'preview';
+  const previewActive = previewRequested && canRead;
+
+  useEffect(() => {
+    if (previewActive) closeDrawer();
+  }, [closeDrawer, previewActive]);
+
+  if (previewRequested && !canRead) {
+    return <Container maxWidth="xl" sx={{ py: 4 }}><Alert severity="warning">{t('topology.capabilityUnavailable')}</Alert></Container>;
+  }
+
+  const target = new URLSearchParams(searchParams);
+  if (previewActive) target.delete('view');
+  else target.set('view', 'preview');
+  const search = target.toString();
+
+  return (
+    <>
+      {canRead && (previewActive || !authoring) && (
+        <Box sx={{ px: { xs: 2, sm: 3 }, pt: 2 }}>
+          <Button component={Link} to={{ search: search ? '?' + search : '' }} variant="outlined">
+            {t(previewActive ? 'topology.preview.returnToMap' : 'topology.preview.open')}
+          </Button>
+        </Box>
+      )}
+      {previewActive ? (
+        <Suspense fallback={<Box sx={{ p: 3 }}><Typography role="status">{t('topology.preview.loading')}</Typography></Box>}>
+          <NetworkPreviewPage />
+        </Suspense>
+      ) : <OperationalTopology authoring={authoring} onToggleAuthoring={() => setAuthoring((current) => !current)} />}
+    </>
+  );
+}
+
+function OperationalTopology({ authoring, onToggleAuthoring }: { authoring: boolean; onToggleAuthoring: () => void }) {
   const { t } = useTranslation();
   const permissions = usePermissions();
   const drawer = useContextDrawer();
@@ -51,7 +95,6 @@ export function NetworkTopologyPage() {
   const [committedSearch, setCommittedSearch] = useState(linkedQuery);
   const [selectedFeatureId, setSelectedFeatureId] = useState<string>();
 
-  const [authoring, setAuthoring] = useState(searchParams.has('draft') || searchParams.get('mode') === 'author');
   const canRead = permissions.can(TOPOLOGY_PERMISSIONS.read);
   const canSearch = permissions.can(TOPOLOGY_PERMISSIONS.search);
 
@@ -135,7 +178,7 @@ export function NetworkTopologyPage() {
     setCommittedSearch('');
   };
 
-  const editorToggle = <Button onClick={() => setAuthoring(!authoring)}>{t(authoring ? 'topology.editor.map' : 'topology.editor.open')}</Button>;
+  const editorToggle = <Button onClick={onToggleAuthoring}>{t(authoring ? 'topology.editor.map' : 'topology.editor.open')}</Button>;
   if (authoring) return <Container maxWidth="xl" sx={{py:3}}>{editorToggle}<NetworkAuthoringPanel /></Container>;
 
   if (!canRead) {
