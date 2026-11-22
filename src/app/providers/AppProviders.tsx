@@ -1,11 +1,10 @@
-import { CssBaseline, ThemeProvider } from '@mui/material';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
 import type { PropsWithChildren } from 'react';
 
 import { AuthProvider } from '@/app/auth/AuthProvider';
 import { AppErrorBoundary } from '@/app/providers/AppErrorBoundary';
-import { hidraTheme } from '@/design-system/theme/theme';
+import { LocaleThemeProvider } from '@/app/providers/LocaleThemeProvider';
 import '@/design-system/theme/industrialTheme.css';
 import { PermissionProvider } from '@/features/permissions/PermissionProvider';
 import { RealtimeProvider } from '@/features/realtime/RealtimeProvider';
@@ -27,16 +26,15 @@ export function AppProviders({ children }: PropsWithChildren) {
   return (
     <AppErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider theme={hidraTheme}>
-          <CssBaseline />
-          <I18nextProvider i18n={i18n}>
+        <I18nextProvider i18n={i18n}>
+          <LocaleThemeProvider>
             <AuthProvider>
               <PermissionProvider>
                 <RealtimeProvider>{children}</RealtimeProvider>
               </PermissionProvider>
             </AuthProvider>
-          </I18nextProvider>
-        </ThemeProvider>
+          </LocaleThemeProvider>
+        </I18nextProvider>
       </QueryClientProvider>
     </AppErrorBoundary>
   );

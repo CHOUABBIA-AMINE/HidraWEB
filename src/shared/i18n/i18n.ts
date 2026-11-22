@@ -8,6 +8,7 @@ import { telemetryMonitoringTranslations } from '@/features/telemetry-monitoring
 import { topologyTranslations } from '@/features/topology/i18n/topologyTranslations';
 import { workbenchTranslations } from '@/features/workbench/i18n/workbenchTranslations';
 import { resources } from '@/shared/i18n/resources';
+import { resolveDisplayLocale } from '@/shared/i18n/localePresentation';
 
 const mergedResources = {
   fr: { translation: { ...resources.fr.translation, alarm: alarmTranslations.fr, context: contextTranslations.fr, telemetryMonitoring: telemetryMonitoringTranslations.fr, topology: topologyTranslations.fr, workbench: workbenchTranslations.fr } },
@@ -32,8 +33,9 @@ function applyDocumentDirection(language: string): void {
     return;
   }
 
-  document.documentElement.lang = language;
-  document.documentElement.dir = language.startsWith('ar') ? 'rtl' : 'ltr';
+  const locale = resolveDisplayLocale(language);
+  document.documentElement.lang = locale;
+  document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
 }
 
 applyDocumentDirection(runtimeConfig.defaultLocale);

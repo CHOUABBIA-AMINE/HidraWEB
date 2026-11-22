@@ -48,10 +48,13 @@ function iconFor(key: NavigationIconKey): ReactElement {
 
 interface HidraSidebarProps {
   collapsed: boolean;
+  mobile?: boolean;
+  open?: boolean;
+  onClose?: () => void;
 }
 
-export function HidraSidebar({ collapsed }: HidraSidebarProps) {
-  const { t } = useTranslation();
+export function HidraSidebar({ collapsed, mobile = false, open = false, onClose }: HidraSidebarProps) {
+  const { t, i18n } = useTranslation();
   const permissions = usePermissions();
   const location = useLocation();
   const navigate = useNavigate();
@@ -73,7 +76,7 @@ export function HidraSidebar({ collapsed }: HidraSidebarProps) {
         aria-current={selected ? 'page' : undefined}
         aria-label={label}
         disabled={!item.implemented}
-        onClick={item.implemented ? () => navigate(item.path) : undefined}
+        onClick={item.implemented ? () => { if (mobile) onClose?.(); void navigate(item.path); } : undefined}
         selected={selected}
         sx={{ minHeight: 46, px: collapsed ? 2.5 : 2 }}
       >
@@ -83,7 +86,7 @@ export function HidraSidebar({ collapsed }: HidraSidebarProps) {
     );
 
     return (
-      <Tooltip key={item.id} placement="right" title={collapsed ? `${label} · ${item.implemented ? '' : plannedTitle}` : (!item.implemented ? plannedTitle : '')}>
+      <Tooltip key={item.id} placement={i18n.dir() === 'rtl' ? 'left' : 'right'} title={collapsed ? `${label} · ${item.implemented ? '' : plannedTitle}` : (!item.implemented ? plannedTitle : '')}>
         <span>{button}</span>
       </Tooltip>
     );
@@ -91,22 +94,25 @@ export function HidraSidebar({ collapsed }: HidraSidebarProps) {
 
   return (
     <Drawer
+      anchor={i18n.dir() === 'rtl' ? 'right' : 'left'}
       aria-label={t('shell.sidebar')}
-      variant="permanent"
+      onClose={mobile ? onClose : undefined}
+      open={mobile ? open : true}
+      variant={mobile ? 'temporary' : 'permanent'}
       sx={{
-        flexShrink: 0,
-        width,
+        ...(!mobile ? { flexShrink: 0, width } : {}),
         '& .MuiDrawer-paper': {
           boxSizing: 'border-box',
           height: 'calc(100% - 64px)',
           overflowX: 'hidden',
           top: 64,
           transition: 'width 160ms ease',
-          width,
+          width: mobile ? 'min(88vw, 320px)' : width,
         },
+        ...(mobile ? { '& .MuiModal-backdrop': { top: 64 } } : {}),
       }}
     >
-      <List aria-label={t('shell.sidebar')} component="nav" disablePadding sx={{ py: 1 }}>
+      <List id="hidra-primary-navigation" aria-label={t('shell.sidebar')} component="nav" disablePadding sx={{ py: 1 }}>
         {visibleSections.map((section, sectionIndex) => (
           <div key={section.id}>
             {sectionIndex > 0 ? <Divider sx={{ my: 0.75 }} /> : null}

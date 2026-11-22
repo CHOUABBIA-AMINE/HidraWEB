@@ -30,9 +30,10 @@ export function HidraNavbar({ sidebarCollapsed, onToggleSidebar }: HidraNavbarPr
 
   return (
     <AppBar color="inherit" elevation={0} position="fixed" sx={{ borderBottom: 1, borderColor: 'divider', zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-      <Toolbar sx={{ gap: 1.5, minHeight: '64px !important' }}>
+      <Toolbar sx={{ gap: { xs: 0.5, sm: 1.5 }, minHeight: '64px !important' }}>
         <Tooltip title={sidebarCollapsed ? t('shell.expandNavigation') : t('shell.collapseNavigation')}>
           <IconButton
+            aria-controls="hidra-primary-navigation"
             aria-expanded={!sidebarCollapsed}
             aria-label={sidebarCollapsed ? t('shell.expandNavigation') : t('shell.collapseNavigation')}
             edge="start"
@@ -41,26 +42,26 @@ export function HidraNavbar({ sidebarCollapsed, onToggleSidebar }: HidraNavbarPr
             <MenuIcon />
           </IconButton>
         </Tooltip>
-        <Box sx={{ minWidth: { xs: 96, md: 220 } }}>
+        <Box sx={{ flexGrow: { xs: 1, md: 0 }, minWidth: { xs: 45, md: 220 } }}>
           <Typography color="primary" sx={{ fontWeight: 800, lineHeight: 1.1 }} variant="h6">Hidra</Typography>
           <Typography color="text.secondary" noWrap sx={{ display: { xs: 'none', md: 'block' } }} variant="caption">
             Hydrocarbon Intelligence for Data, Risk, and Analytics
           </Typography>
         </Box>
-        <Chip label={runtimeConfig.environment.toUpperCase()} size="small" variant="outlined" />
+        <Chip label={runtimeConfig.environment.toUpperCase()} size="small" sx={{ display: { xs: 'none', sm: 'inline-flex' } }} variant="outlined" />
         <OperationalContextSelector />
         <TextField
           disabled
           placeholder={t('shell.searchPlaceholder')}
           size="small"
           slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment> } }}
-          sx={{ display: { xs: 'none', md: 'block' }, ml: 'auto', width: { md: 190, xl: 280 } }}
+          sx={{ display: { xs: 'none', md: 'block' }, marginInlineStart: 'auto', width: { md: 190, xl: 280 } }}
         />
         <Tooltip title={t('shell.realtimeUnavailable')}>
-          <Chip icon={<WifiOffIcon />} label={realtime === 'not-connected' ? t('shell.realtimeOffline') : realtime} size="small" variant="outlined" />
+          <Chip icon={<WifiOffIcon />} label={realtime === 'not-connected' ? t('shell.realtimeOffline') : realtime} size="small" sx={{ maxWidth: { xs: 100, sm: 'none' }, '& .MuiChip-label': { overflow: 'hidden', textOverflow: 'ellipsis' } }} variant="outlined" />
         </Tooltip>
-        <Tooltip title={t('nav.tasks')}><span><IconButton aria-label={t('nav.tasks')} disabled><TaskAltIcon /></IconButton></span></Tooltip>
-        <Tooltip title={t('nav.notifications')}><span><IconButton aria-label={t('nav.notifications')} disabled><NotificationsNoneIcon /></IconButton></span></Tooltip>
+        <Tooltip title={t('nav.tasks')}><span><IconButton aria-label={t('nav.tasks')} disabled sx={{ display: { xs: 'none', md: 'inline-flex' } }}><TaskAltIcon /></IconButton></span></Tooltip>
+        <Tooltip title={t('nav.notifications')}><span><IconButton aria-label={t('nav.notifications')} disabled sx={{ display: { xs: 'none', md: 'inline-flex' } }}><NotificationsNoneIcon /></IconButton></span></Tooltip>
         <Select
           aria-label={t('shell.language')}
           onChange={(event) => { void i18n.changeLanguage(String(event.target.value)); }}

@@ -5,12 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { useContextDrawer } from '@/shell/context/useContextDrawer';
 
 export function ContextualDrawer() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const drawer = useContextDrawer();
 
   return (
     <Drawer
-      anchor="right"
+      anchor={i18n.dir() === 'rtl' ? 'left' : 'right'}
       onClose={drawer.closeDrawer}
       open={drawer.open}
       slotProps={{

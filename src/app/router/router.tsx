@@ -1,8 +1,10 @@
+import { lazy, Suspense } from 'react';
 import { Navigate, createBrowserRouter } from 'react-router';
 
 import { RequireAuthentication } from '@/app/auth/RequireAuthentication';
 import { PermissionBootstrapBoundary } from '@/features/permissions/PermissionBootstrapBoundary';
-import { AppShell } from '@/shell/AppShell';
+// Authenticated shell is loaded after authorization, protecting the 900 KiB startup gate.
+const AppShell = lazy(async () => ({ default: (await import('@/shell/AppShell')).AppShell }));
 
 export const router = createBrowserRouter([
   {
@@ -18,7 +20,9 @@ export const router = createBrowserRouter([
     element: (
       <RequireAuthentication>
         <PermissionBootstrapBoundary>
-          <AppShell />
+          <Suspense fallback={<div aria-busy="true" role="status" />}>
+            <AppShell />
+          </Suspense>
         </PermissionBootstrapBoundary>
       </RequireAuthentication>
     ),

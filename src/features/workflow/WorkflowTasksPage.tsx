@@ -35,6 +35,7 @@ import {
 } from '@/features/workflow/api/workflowApi';
 import { WorkflowStartPanel } from './components/WorkflowStartPanel';
 import { WORKFLOW_PERMISSIONS } from '@/features/workflow/api/workflowPermissions';
+import { formatDisplayInstant } from '@/shared/i18n/localePresentation';
 
 const INBOX_SIZE = 50;
 
@@ -46,12 +47,13 @@ export function workflowErrorMessage(error: unknown): string {
 }
 
 function TaskSummary({ task, onOpen }: { task: TaskView; onOpen: () => void }) {
+  const { i18n } = useTranslation();
   return (
     <TableRow hover>
       <TableCell>{task.taskLabel ?? task.id ?? '—'}</TableCell>
       <TableCell>{task.status ?? '—'}</TableCell>
       <TableCell>{task.priorityId ?? '—'}</TableCell>
-      <TableCell>{task.dueAt ?? '—'}</TableCell>
+      <TableCell>{formatDisplayInstant(task.dueAt, i18n.language, 'UTC')}</TableCell>
       <TableCell>{task.assignedActorDisplayName ?? task.assignedActorUsername ?? task.assignedRoleCode ?? '—'}</TableCell>
       <TableCell><Button onClick={onOpen} size="small">Open</Button></TableCell>
     </TableRow>
@@ -59,10 +61,11 @@ function TaskSummary({ task, onOpen }: { task: TaskView; onOpen: () => void }) {
 }
 
 function TimelineRow({ entry }: { entry: TimelineEntry }) {
+  const { i18n } = useTranslation();
   return (
     <TableRow>
       <TableCell>{entry.sequence ?? '—'}</TableCell>
-      <TableCell>{entry.occurredAt ?? '—'}</TableCell>
+      <TableCell>{formatDisplayInstant(entry.occurredAt, i18n.language, 'UTC')}</TableCell>
       <TableCell>{entry.actionType ?? entry.decision ?? '—'}</TableCell>
       <TableCell>{entry.actorDisplayName ?? entry.actorId ?? '—'}</TableCell>
       <TableCell>{entry.commentText ?? entry.decisionNote ?? '—'}</TableCell>

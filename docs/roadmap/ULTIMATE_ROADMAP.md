@@ -4128,3 +4128,39 @@ The 31 advertised [T39 Circle 1 consumer handoff](https://github.com/CHOUABBIA-A
 | Acceptance | Fresh exact-SHA Code CI proving **initial JS at or below 900 KiB** plus compatible contracts, lint, typecheck, full unit/performance, release and configured E2E/native tests; fresh documentation CI. |
 | Status | **REPAIR PUBLISHED/PENDING NEW CI**; do not declare bundle improvement from source alone or advance UXR-04. |
 
+
+---
+
+## P1 / UXR-04 — Locale, RTL and responsive foundation: registered implementation
+
+**Selection:** Owner's “Next” after [HidraWEB Code CI #1056 SUCCESS](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45021816849) and [Documentation Validation #92 SUCCESS](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45021816815), both pinned to UXR-03 `b01a06df5ae9615985ce1a04109dc94d0fd0b502`. The #1056 verify, A1 native PostgreSQL browser and F18 session jobs all succeeded; initial static JS was **899.9 KiB / 900 KiB**. UXR-03 is **CI-PASSED**, but no operational/SITE acceptance is implied. The new owner selection applies to whole registered P1 / UXR-04 only; P2 / UXR-05 is not selected.
+
+| Registration field | UXR-04 exact implementation envelope |
+|---|---|
+| Registered name | **P1 / UXR-04 · Locale, RTL and responsive foundation** |
+| Base head/tree | `b01a06df5ae9615985ce1a04109dc94d0fd0b502` / `e8e34907d63773b0ca1d103d592f8432992f3a39` |
+| Exact commit message | `feat(i18n): implement UXR-04 RTL mobile locale foundation` |
+| Backend ownership / REST | **None**; frontend-local presentation. Preserve existing HidraAPI identity, permission, workflow and telemetry authorization, raw ISO timestamps and units. |
+| CREATE | `src/app/providers/LocaleThemeProvider.tsx`: select MUI direction from i18next, preserving provider lifecycle. |
+| CREATE | `src/app/providers/LocaleThemeProvider.test.tsx`: FR–AR–EN theme and document direction qualification. |
+| CREATE | `src/shared/i18n/localePresentation.ts`: Intl-only, display-only number, quantity and offset-qualified instant formatting with explicit caller timezone. |
+| CREATE | `src/shared/i18n/localePresentation.test.ts`: regional subtag behavior; source unit/timestamp preservation; numeric and time-zone formatting; rejection of timezone-ambiguous inputs. |
+| CREATE | `tests/e2e/locale-responsive.spec.ts`: synthetic-permission browser FR/AR/EN language switch, 390px sidebar toggle/Escape, RTL drawer placement and navigation. |
+| UPDATE | `src/app/router/router.tsx`: lazy protected authenticated shell, preserving auth and permission bootstrap; no navigation routing changes. |
+| UPDATE | `src/app/providers/AppProviders.tsx`: existing i18next provider contains direction-aware theme; no mutation of auth, query, permission or realtime sequencing. |
+| UPDATE | `src/shared/i18n/i18n.ts`: normalize <html> language and RTL direction for the selected supported UI locale. |
+| UPDATE | `src/shared/i18n/resources.ts`: add language-specific skip-to-main labels; preserve all existing translations. |
+| UPDATE | `src/shell/AppShell.tsx`: keyboard skip link localization/logical positioning, mobile vs desktop sidebar behavior and responsive main width. |
+| UPDATE | `src/shell/navbar/HidraNavbar.tsx`: responsive chrome with persistent realtime indicator, logical spacing, linked navigation aria-controls. |
+| UPDATE | `src/shell/sidebar/HidraSidebar.tsx`: MUI mobile temporary Drawer, RTL-aware anchor and tooltip, keyboard/backdrop close; preserve all backend-grant filtering and implemented-only navigation. |
+| UPDATE | `src/shell/context/ContextualDrawer.tsx`: RTL-aware drawer anchor without changing its content authorization. |
+| UPDATE | `src/app/pages/OverviewPage.tsx`: localized presentation of authorized published-route/module counts; no API or counting semantics change. |
+| UPDATE | `src/features/workflow/WorkflowTasksPage.tsx`: UTC display-only task due time and timeline time using offset-qualified source ISO; no changes to workflow transitions, version checks, permissions or commands. |
+| UPDATE | `docs/10-Design-System-Specification.md`: this implementation/limitation explanation. |
+| UPDATE | `docs/roadmap/ULTIMATE_ROADMAP.md`: task registration and acceptance record (append-only). |
+| DELETE | None. |
+| Non-scope | No new API endpoints, Orval regeneration/re-pin, auth/organization permissions, new locale activation policy, altered engineering data/units/temporal instants, numerical solver or IT/OT control; HWEB-F16 HOLD/F21 synthetic-preview acceptance/F22 BLOCKED unchanged. |
+| Required tests | Existing full Code CI (OpenAPI compatibility/pins, lint, TS typecheck, unit + performance, unchanged 900 KiB initial bundle, artifact verification, E2E Playwright and A1/F18 native jobs) and Documentation Validation, both on exact publication SHA. |
+| Evidence status | **IMPLEMENTATION SOURCE PREPARED; exact-SHA CI NOT YET VERIFIED.** Typecheck, bundle, Playwright/mobile and browser accessibility are acceptance gates, not presumed results. |
+
+**G1 boundary:** UXR-03 industrial tokens CI-passed and UXR-04 locale/RTL/responsive foundation implemented at source level; G1 visual/accessibility/device acceptance awaits the UXR-04 exact-SHA Code CI and any owner-required browser/device evidence. The active roadmap remains unique. **UXR-05** is next *candidate only*, not automatically started.

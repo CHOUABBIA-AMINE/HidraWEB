@@ -6,9 +6,10 @@ import { useAuth } from '@/app/auth/useAuth';
 import { runtimeConfig } from '@/app/bootstrap/runtimeConfig';
 import { usePermissions } from '@/features/permissions/usePermissions';
 import { WORKBENCH_PERMISSIONS } from '@/features/workbench/api/workbenchPermissions';
+import { formatDisplayNumber } from '@/shared/i18n/localePresentation';
 
 export function OverviewPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const auth = useAuth();
   const permissions = usePermissions();
@@ -16,8 +17,8 @@ export function OverviewPage() {
   const cards = [
     { label: t('overview.environment'), value: runtimeConfig.environment },
     { label: t('overview.authMode'), value: auth.mode },
-    { label: t('overview.permissionRoutes'), value: String(permissions.routes.length) },
-    { label: t('overview.backendModules'), value: String(permissions.modules.size) },
+    { label: t('overview.permissionRoutes'), value: formatDisplayNumber(permissions.routes.length, i18n.language) },
+    { label: t('overview.backendModules'), value: formatDisplayNumber(permissions.modules.size, i18n.language) },
   ];
 
   return (
