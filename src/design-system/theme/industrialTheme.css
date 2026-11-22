@@ -1,0 +1,73 @@
+/*
+ * UXR-03 static presentation stylesheet. Values mirror industrialTokens.ts;
+ * CI's theme tests assert the shared focus, density, elevation and palette.
+ * Pure CSS rules stay out of the initial JavaScript bundle-size budget.
+ */
+:root {
+  --hidra-control-min: 44px;
+  --hidra-focus-color: #175CD3;
+  --hidra-focus-width: 3px;
+  --hidra-focus-offset: 2px;
+  --hidra-card-radius: 12px;
+  --hidra-card-shadow: 0 1px 3px rgba(16, 24, 40, 0.12);
+  --hidra-border: #D0D5DD;
+  --hidra-selection: #E7F3EC;
+  --hidra-primary: #0B5D3B;
+}
+
+html {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Explicit keyboard focus remains visible on every interactive element. */
+*:focus-visible {
+  outline: var(--hidra-focus-width) solid var(--hidra-focus-color);
+  outline-offset: var(--hidra-focus-offset);
+}
+
+/* Double-class specificity retains minimum touch size over MUI defaults. */
+.MuiButton-root.MuiButton-root,
+.MuiIconButton-root.MuiIconButton-root,
+.MuiListItemButton-root.MuiListItemButton-root {
+  min-height: var(--hidra-control-min);
+}
+
+.MuiIconButton-root.MuiIconButton-root {
+  min-width: var(--hidra-control-min);
+}
+
+.MuiListItemButton-root.MuiListItemButton-root.Mui-selected {
+  background-color: var(--hidra-selection);
+  border-inline-start: var(--hidra-focus-width) solid var(--hidra-primary);
+}
+
+.MuiCard-root.MuiCard-root {
+  border: 1px solid var(--hidra-border);
+  border-radius: var(--hidra-card-radius);
+  box-shadow: var(--hidra-card-shadow);
+}
+
+.MuiTableCell-root.MuiTableCell-root {
+  border-color: var(--hidra-border);
+  padding: 8px 12px;
+}
+
+.MuiTableCell-head.MuiTableCell-head,
+.MuiChip-root.MuiChip-root {
+  font-weight: 600;
+}
+
+@media (forced-colors: active) {
+  *:focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

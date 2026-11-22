@@ -4072,3 +4072,21 @@ The 31 advertised [T39 Circle 1 consumer handoff](https://github.com/CHOUABBIA-A
 | CI gate | Guarded single direct-main commit; applicable **HidraWEB Code CI** starts on its exact SHA (lint, TypeScript, unit, performance, build, browser, native jobs as configured). STOP after observing created/started; report actual state without assuming a pass. |
 
 **Existing capability preserved:** `AppProviders` remains the sole `ThemeProvider` and `CssBaseline` owner. The main authenticated shell remains unchanged. The `F16` HOLD, `F21` accepted synthetic preview, `F22` BLOCKED, and outstanding Circle 1 pinned contract gaps remain unaffected. UXR-04 is the next *candidate* (locale, RTL, responsive) and is NOT selected or automatically launched. Browser accessibility and layout tests for representative screens may still be needed before industrial deployment acceptance.
+
+---
+
+### P1 / UXR-03 — CI failure repair on the same indivisible task (22 November 2026)
+
+**Failure source:** [HidraWEB Code CI #1053](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45019743948) on `6c2c1e86cec7d330593e0921897ad47bba0d97ab`, `verify` job Production build → `npm run bundle:check`. The production compilation/Vite build itself succeeded; **initial static JS 902.5 KiB exceeds its registered 900 KiB budget by 2.5 KiB**. Previous successful Code CI #1052 reported 899.4 KiB. UXR-03's design-system and unit tests passed; A1 native and F18 native jobs were successful; [documentation CI #89](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45019743900) passed. **No budget relaxation is authorized.**
+
+| Repair control | Registered, bounded UXR-03 repair |
+|---|---|
+| Base SHA/tree | `6c2c1e86cec7d330593e0921897ad47bba0d97ab` / `693f35d17b6c1b5304d303d435d70bf27cf6ed46` |
+| Commit message | `fix(design-system): trim UXR-03 startup theme JS` |
+| UPDATE | `src/design-system/tokens/industrialTokens.ts` (named imports for tree-shaken runtime tokens), `src/design-system/theme/theme.ts` (lean MUI palette/type adapter), `src/design-system/theme/theme.test.ts` (CSS/typed-token parity), `src/app/providers/AppProviders.tsx` (one stylesheet import), `docs/10-Design-System-Specification.md` (performance tradeoff), this roadmap (failure/evidence). |
+| CREATE | `src/design-system/theme/industrialTheme.css` (static focus, forced colors, motion, density, elevation). |
+| DELETE | None. |
+| Preservation | 900 KiB original initial-JavaScript budget, bundle checker, all APIs, routing, security, provider hierarchy, standalone F21 preview, HWEB-F16 HOLD/F22 BLOCKED and original T39 consumer gap. |
+| Required proof | Exact-SHA Code CI: compatibility, 21 generated clients, lint, TypeScript, unit, performance, production build + unchanged bundle limits, release verification, Playwright, A1/F18 native lanes. Documentation CI starts on the same SHA. |
+| State | **Repair source prepared; Code CI not yet passed**. Stop once exact-SHA CI is queued or started; do not automatically advance UXR-04. |
+

@@ -6,6 +6,7 @@ import type { PropsWithChildren } from 'react';
 import { AuthProvider } from '@/app/auth/AuthProvider';
 import { AppErrorBoundary } from '@/app/providers/AppErrorBoundary';
 import { hidraTheme } from '@/design-system/theme/theme';
+import '@/design-system/theme/industrialTheme.css';
 import { PermissionProvider } from '@/features/permissions/PermissionProvider';
 import { RealtimeProvider } from '@/features/realtime/RealtimeProvider';
 import { i18n } from '@/shared/i18n/i18n';

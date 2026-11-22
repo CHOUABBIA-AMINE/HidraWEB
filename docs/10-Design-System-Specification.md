@@ -73,3 +73,11 @@ The canonical runtime tokens live in `src/design-system/tokens/industrialTokens.
 | Status integrity | Semantic color does not assert an operational alarm state, confidence, pressure limit or telemetry freshness. Always display meaningful text/icon/units from an authorized source; no API capability change. |
 
 The focused `src/design-system/theme/theme.test.ts` checks source colors, contrast of semantic foreground/background pairs, grid, breakpoints, tabular numerals, minimum action size and focus/elevation definitions. These tests are deterministic design-token checks, not a WCAG 2.2 AA audit or device/browser acceptance. The existing full HidraWEB code CI (including Playwright where available) is the required integration gate.
+
+### UXR-03 CI #1053 performance repair — CSS presentation path
+
+The original UXR-03 commit `6c2c1e86cec7d330593e0921897ad47bba0d97ab` passed static code checks, design-system tests, the F18 session and A1 PostgreSQL native jobs, but **failed** the unchanged HWEB-015-07 initial JavaScript size gate: **902.5 KiB vs 900 KiB** (last preceding green Code CI #1052: **899.4 KiB**). The failure was not a TypeScript, auth, data or numerical-solver failure.
+
+To preserve the approved industrial tokens and semantics without weakening the budget, source colors, breakpoints and typed token contracts remain in `industrialTokens.ts`; MUI `theme.ts` now owns the minimal semantic palette, contrast, base typography and spacing; and static density, focus, card elevation, selected-navigation and reduced-motion declarations live in `src/design-system/theme/industrialTheme.css`. `AppProviders.tsx` imports that stylesheet once for normal and signed app rendering. Tests validate that its values match the typed source tokens. CSS is still shipped and subject to visual/accessibility qualification: its exclusion from the *JavaScript-only* startup budget is not permission to omit presentation behavior.
+
+The Code CI gate retains the original **900 KiB** JavaScript threshold, all 21 OpenAPI compatibility inputs, generated-client checks, test shards and native workflows. A following repair commit is **not yet a passed CI run**; acceptance is conditioned on the new exact-SHA CI.

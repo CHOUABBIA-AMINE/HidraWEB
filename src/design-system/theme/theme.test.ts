@@ -1,6 +1,7 @@
 import { getContrastRatio } from '@mui/material/styles';
 import { describe, expect, it } from 'vitest';
 
+import themeCss from '@/design-system/theme/industrialTheme.css?raw';
 import { industrialTokens as tokens } from '@/design-system/tokens/industrialTokens';
 import { hidraTheme } from '@/design-system/theme/theme';
 
@@ -10,13 +11,12 @@ describe('UXR-03 / industrial design-system foundation', () => {
     expect(hidraTheme.palette.secondary.main).toBe('#334155');
     expect(hidraTheme.palette.background.default).toBe('#F8FAFC');
 
-    const semanticStatusColors = [
+    for (const color of [
       hidraTheme.palette.error,
       hidraTheme.palette.warning,
       hidraTheme.palette.success,
       hidraTheme.palette.info,
-    ];
-    for (const color of semanticStatusColors) {
+    ]) {
       expect(getContrastRatio(color.main, color.contrastText)).toBeGreaterThanOrEqual(4.5);
     }
     expect(getContrastRatio(hidraTheme.palette.text.primary, hidraTheme.palette.background.default))
@@ -34,12 +34,18 @@ describe('UXR-03 / industrial design-system foundation', () => {
     expect(hidraTheme.typography.body2.fontVariantNumeric).toBe('tabular-nums');
   });
 
-  it('defines keyboard focus, reduced-motion support, density and surface elevation', () => {
+  it('applies lightweight CSS for focus, reduced motion, control density and card elevation', () => {
     expect(tokens.density.control).toBeGreaterThanOrEqual(44);
     expect(tokens.focus.width).toBeGreaterThanOrEqual(3);
-    expect(hidraTheme.components?.MuiCssBaseline?.styleOverrides).toBeDefined();
     expect(hidraTheme.components?.MuiButton?.defaultProps?.disableElevation).toBe(true);
-    expect(hidraTheme.components?.MuiCard?.styleOverrides?.root).toBeDefined();
-    expect(tokens.elevation.card).not.toBe(tokens.elevation.overlay);
+
+    expect(themeCss).toContain(`--hidra-control-min: ${tokens.density.control}px`);
+    expect(themeCss).toContain(`--hidra-focus-color: ${tokens.color.focus}`);
+    expect(themeCss).toContain(`--hidra-focus-width: ${tokens.focus.width}px`);
+    expect(themeCss).toContain(`--hidra-focus-offset: ${tokens.focus.offset}px`);
+    expect(themeCss).toContain(`--hidra-card-radius: ${tokens.radius.card}px`);
+    expect(themeCss).toContain(`--hidra-card-shadow: ${tokens.elevation.card}`);
+    expect(themeCss).toContain('@media (forced-colors: active)');
+    expect(themeCss).toContain('@media (prefers-reduced-motion: reduce)');
   });
 });
