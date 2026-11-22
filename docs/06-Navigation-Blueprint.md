@@ -218,3 +218,14 @@ UXR-07 now uses two separate lifetimes:
 - **Protected-workspace identity** (exact `location.pathname`, authenticated principal, scope and effective authorized modules): the contextual inspector provider and routed workspace use it. Changing only query parameters or hashes on the **same path** preserves page-local work in progress and allowlisted tab history; changing the protected pathname, principal, selected scope or effective grants remounts and discards sensitive UI state. No record ID, tab identity or company authority is persisted by the shell.
 
 The previous statement that protected workspaces are remounted *per history entry* is superseded by this narrower, correct route/scope contract. The selected alarm is intentionally cleared after visiting a different pathname; a user must re-open the alarm from the authorized list before its acknowledge/close controls are available. Backend permission checks, concurrency and human decisions remain unchanged. No new OT or engineering data source is inferred.
+
+
+## UXR-07 CI #1067 lint repair — component-keyed navigation chrome (22 November 2026)
+
+The earlier UXR-07 correction introduced synchronous `setState(null)` calls in `useEffect` to clear the mobile drawer and manual accordion selections. Exact-SHA Code CI #1067 rejected both with `react-hooks/set-state-in-effect`. The existing browser/history requirements remain unchanged, and no test rule is suppressed.
+
+The corrected shell isolates **`ShellNavigation`** (navbar toggle + sidebar + mobile overlay) inside an authorized **history-entry key**. React remounts only that navigation chrome on route history, principal, effective modules, scope or responsive-mode transition, discarding open drawer and manually expanded group/submenu state by construction. The navigation/sidebar now need no effect-driven synchronous state clearing. The outer `AppShellFrame` remains mounted.
+
+Separately, the contextual drawer provider and routed `<Outlet>` retain their **pathname/principal/scope/effective-module workspace key**, not `location.key`. Same-path query or hash updates therefore preserve in-progress network authoring and tabbed page state. Cross-route and authority-context changes still discard protected page-local context. Existing six authorized groups, desktop widths, RTL anchors, keyboard and backend authority remain unchanged.
+
+CI #1067 verified the earlier native W2 authoring regression and both mandatory W4 decisions/denials successfully, but its main verification stopped at lint; this new source must still pass the complete fresh exact-SHA suite before UXR-07/G2 acceptance.

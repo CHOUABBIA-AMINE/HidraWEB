@@ -22,7 +22,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import SpeedIcon from '@mui/icons-material/Speed';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { Box, Collapse, Divider, Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Tooltip } from '@mui/material';
-import { useEffect, useState, type ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
 
@@ -81,12 +81,8 @@ export function HidraSidebar({ collapsed, mobile = false, open = false, onClose 
   // Back/Forward, scope switching and grant changes re-derive active ancestors.
   const [requestedGroup, setRequestedGroup] = useState<{ key: string; id: string } | null>(null);
   const [requestedSubmenu, setRequestedSubmenu] = useState<{ key: string; open: boolean } | null>(null);
-  // The frame is no longer remounted on every history entry, so clear old
-  // manual expansion explicitly; the next render derives authorized ancestry.
-  useEffect(() => {
-    setRequestedGroup(null);
-    setRequestedSubmenu(null);
-  }, [navigationKey]);
+  // The parent keys only navigation chrome per authorized history entry.
+  // This state resets on remount, while the protected workspace stays mounted.
   const visibleGroupIds = new Set(visibleSections.filter((section) => section.id !== 'root').map((section) => section.id));
   const defaultGroup = activeSection !== 'root' && activeSection && visibleGroupIds.has(activeSection)
     ? activeSection

@@ -168,3 +168,16 @@ Code CI #1066 demonstrates that remounting the **entire** shell and its workspac
 | Invariants | No widening backend authority, no additional REST endpoints, no abandoned W4 native qualification, no test skips, retries or timeout increases. |
 
 The earlier generalized promise of discarding page-local state for *every* history entry is withdrawn because it is incompatible with multi-step production-oriented authoring. Sensitive protected state still cannot be resurrected by cross-route or scope changes.
+
+
+## UXR-07 CI #1067 — lint-compliant navigation lifecycle (22 November 2026)
+
+The authoritative UXR-07 UI lifecycle uses two independent component identities. This clarification supersedes the earlier UXR-07 proposal to reset mobile/accordion state through a synchronous React effect:
+
+| Component boundary | Key and behavior |
+|---|---|
+| `ShellNavigation` (header toggle + sidebar + mobile drawer) | Keyed on authorized **history-entry identity** and current breakpoint mode; remount resets local open/expanded states with no effect-driven `setState`. Restored/back navigation derives only current authorized ancestors. |
+| `ContextDrawerProvider` / protected `Outlet` | Keyed on **pathname + principal + operational scope + effective modules**. Query-parameter changes on the same path keep active form state and allowlisted tab history; changing path or authority scope discards protected UI context. |
+| External guards | HidraAPI permission checks, effective grants and exact protected owner endpoints retain authority; UI state does not authorize an action. |
+
+The failure was ESLint `react-hooks/set-state-in-effect` in Code CI #1067 (two errors). A1 native W1–W3, W4 and F18 were independently green on that same failed Code CI commit. Full Playwright, units, performance and bundle checks were **not executed** by `verify` after lint failure and remain mandatory on the next commit. No test skips/timeouts, source authoring APIs, schemas or automation rules were changed.

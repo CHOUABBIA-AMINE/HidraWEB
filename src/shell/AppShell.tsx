@@ -1,5 +1,5 @@
 import { Box, Link, Toolbar, useMediaQuery } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet, useLocation } from 'react-router';
 
@@ -14,26 +14,41 @@ import { HidraSidebar } from '@/shell/sidebar/HidraSidebar';
 
 const mainContentId = 'hidra-main-content';
 
+/**
+ * Only the navigation chrome is keyed per authorized history entry.
+ * Remounting it closes the mobile drawer and resets manual accordion state
+ * without using effect-driven setState or unmounting active page forms.
+ */
+function ShellNavigation({ mobile }: { mobile: boolean }) {
+  const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
+  const sidebarCollapsed = useShellUiStore((state) => state.sidebarCollapsed);
+  const toggleSidebar = useShellUiStore((state) => state.toggleSidebar);
+  const navigationExpanded = mobile ? mobileNavigationOpen : !sidebarCollapsed;
+  const toggleNavigation = () => {
+    if (mobile) setMobileNavigationOpen((open) => !open);
+    else toggleSidebar();
+  };
+
+  return (
+    <>
+      <HidraNavbar onToggleSidebar={toggleNavigation} sidebarCollapsed={!navigationExpanded} />
+      <HidraSidebar
+        collapsed={!mobile && sidebarCollapsed}
+        mobile={mobile}
+        open={mobileNavigationOpen}
+        onClose={() => setMobileNavigationOpen(false)}
+      />
+    </>
+  );
+}
+
 function AppShellFrame() {
   const { t } = useTranslation();
   const location = useLocation();
   const navigationKey = useNavigationContextKey();
   const workspaceKey = useProtectedWorkspaceKey();
   const mobile = useMediaQuery(hidraTheme.breakpoints.down('md'));
-  // The drawer belongs to the authorized history entry; the effect below
-  // clears the old value so browser Back cannot resurrect a prior open drawer.
-  const [openedAtNavigationKey, setOpenedAtNavigationKey] = useState<string | null>(null);
-  const mobileNavigationOpen = openedAtNavigationKey === navigationKey;
-  useEffect(() => { setOpenedAtNavigationKey(null); }, [navigationKey]);
-  const sidebarCollapsed = useShellUiStore((state) => state.sidebarCollapsed);
-  const toggleSidebar = useShellUiStore((state) => state.toggleSidebar);
   const administrationRoute = location.pathname.startsWith('/administration/');
-
-  const navigationExpanded = mobile ? mobileNavigationOpen : !sidebarCollapsed;
-  const toggleNavigation = () => {
-    if (mobile) setOpenedAtNavigationKey((key) => key === navigationKey ? null : navigationKey);
-    else toggleSidebar();
-  };
 
   const focusMainContent = () => {
     document.getElementById(mainContentId)?.focus();
@@ -57,13 +72,7 @@ function AppShellFrame() {
       >
         {t('shell.skipToMain')}
       </Link>
-      <HidraNavbar onToggleSidebar={toggleNavigation} sidebarCollapsed={!navigationExpanded} />
-      <HidraSidebar
-        collapsed={!mobile && sidebarCollapsed}
-        mobile={mobile}
-        open={mobileNavigationOpen}
-        onClose={() => setOpenedAtNavigationKey(null)}
-      />
+      <ShellNavigation key={`${navigationKey}:${mobile ? 'mobile' : 'desktop'}`} mobile={mobile} />
       {/* Keep the authoring workspace mounted across same-path query changes.
           Only a new protected path/principal/scope/grant set discards its state. */}
       <ContextDrawerProvider key={workspaceKey}>

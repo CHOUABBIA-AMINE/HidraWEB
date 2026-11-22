@@ -4432,3 +4432,28 @@ The 31 advertised [T39 Circle 1 consumer handoff](https://github.com/CHOUABBIA-A
 | Remaining acceptance | Fresh exact-SHA Code CI must pass all 192+ units, performance, 900 KiB budget, full Playwright, **all** W1–W3 plus mandatory W4 real PostgreSQL/browser journeys, F18 LOCAL and Documentation Validation. UXR-07 and G2 remain **pending** until then. |
 
 **Status:** UXR-07 repair prepared, NOT CI-passed. P3/UXR-08 remains unselected.
+
+
+---
+
+### P2 / UXR-07 — Code CI #1067 React effect-state lint repair (22 November 2026)
+
+**Exact SHA and verification:** `main` at `3c6b069b2df7dd49b4ffd265d85b16224a94072f`, tree `01a0a87e57c3623238031b939f21a9cb44f5b2a4`. [HidraWEB Code CI #1067](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45049158286) attempt 1 **FAILED** exclusively in the `verify` job's `Lint` step. ESLint reported **2 errors, 7 pre-existing/non-blocking fast-refresh warnings**: `src/shell/AppShell.tsx:27` synchronous `setOpenedAtNavigationKey(null)` in `useEffect` and `src/shell/sidebar/HidraSidebar.tsx:87` synchronous `setRequestedGroup(null)` / `setRequestedSubmenu(null)` in `useEffect`. Rule `react-hooks/set-state-in-effect` correctly prohibits these cascading render patterns. The errors were introduced by UXR-07's previous query-lifecycle repair; suppressing the lint rule or relaxing the workflow is **not** authorized.
+
+**Other jobs were independently completed and green:** Native A1 API/PostgreSQL browser job **PASSED**: one A1 integrated case, all seven W1–W3 native browser cases (**7 passed, zero failed/flaky/skipped**), and both W4 independent human decision/denial cases (**2 passed, zero failed/flaky/skipped**). Native W2 persisted-system/station/installation/graph after browser reload **PASSED**; earlier query-keyed form-lifecycle failure is not present in this run. F18 LOCAL renewal/logout native job **PASSED** all five cases with no failed/flaky/skipped. [Documentation Validation #103](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45049158309) **PASSED** on the same exact SHA. Main `verify` stopped at lint: **TypeScript, unit/component tests, performance/bundle and full Playwright were not run on #1067**, so no new end-to-end acceptance can be asserted.
+
+**Root cause:** The previous repair intentionally stopped remounting the full shell to preserve live authoring through query-string changes, but replaced keyed navigation lifecycle with effect-driven synchronous setters. The source and ESLint errors directly establish the cause; seven Fast Refresh warnings are not blocking and are outside the new change's scope. CI logs show no native database, API or authentication failure. A pathname-keyed workspace remains necessary.
+
+**Bounded UXR-07 repair envelope:**
+
+| Action | Exact path | Required fix |
+|---|---|---|
+| UPDATE | `src/shell/AppShell.tsx` | Extract local `ShellNavigation` with mobile open state and desktop sidebar toggle; render **only that child** with an authorized navigation-entry + breakpoint key; remove synchronous effect and preserve permanently mounted outer shell and pathname-keyed protected `ContextDrawerProvider`/`Outlet`. |
+| UPDATE | `src/shell/sidebar/HidraSidebar.tsx` | Remove invalid synchronous state-clearing effect; keyed navigation chrome remount resets manual group/submenu on history/principal/scope/grant changes, with existing keyed guard and permission-filtered active ancestry still applied. |
+| UPDATE | `docs/06-Navigation-Blueprint.md`, `docs/10-Design-System-Specification.md`, this `docs/roadmap/ULTIMATE_ROADMAP.md` | Append-only technical correction, exact-SHA failure evidence and acceptance gate. |
+| CREATE/DELETE | None | No change to route ownership, backend endpoints, access checks, database, alarms, workbench, native fixtures, lint/CI policies or timeout/skips. |
+| Exact message | `fix(shell): reset UXR-07 navigation through keyed chrome` | One guarded direct-main repair, no PR/branch. |
+| Local validation | Inspected exact source and prepared deterministic source diff removing both `useEffect` violations; **no local npm/TypeScript/Playwright/PostgreSQL execution claimed**. |
+| Acceptance | Fresh exact-SHA Code CI must pass Lint, TypeScript, **192+ unit tests**, six performance tests, initial JS **under 900 KiB**, complete Playwright including mobile/deep-link and alarm journey, native A1 W1–W3 **and** mandatory W4, F18 LOCAL, and matching Documentation Validation. |
+
+**Current state:** UXR-07 **repair prepared, CI acceptance open**; P3/UXR-08 **not started**. Code CI #1067 native success alone is insufficient to close G2.
