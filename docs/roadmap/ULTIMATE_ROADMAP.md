@@ -4396,3 +4396,39 @@ The 31 advertised [T39 Circle 1 consumer handoff](https://github.com/CHOUABBIA-A
 **Required exact-SHA acceptance:** Code CI OpenAPI compatibility, lint, TypeScript, complete unit/component + performance, packaged build/bundle, full Chromium Playwright including UXR-07 and all preexisting tests, successful A1 six-module API/PostgreSQL W4 human review/denial and F18 LOCAL session qualification, plus Documentation Validation. Local source inspection and synthetic fixtures are not site validation.
 
 **Current status:** **IMPLEMENTATION PREPARED; NEW EXACT-SHA CI PENDING.** G2 remains OPEN until UXR-07 CI and any applicable engineering acceptance. Next registered phase is P3/UXR-08, **not selected or executed**.
+
+
+---
+
+### P2 / UXR-07 — Code CI #1066 full dual-failure assessment and bounded repair (22 November 2026)
+
+**Predecessor and failing exact SHA:** UXR-06 passed the full Code CI #1065 and Documentation Validation #101 on `b330b46e276ab45de4c5a22a2ff545b12286f703`. The UXR-07 source commit `88c36b3087a7869720af134412224112de931d99` (tree `61c5fbd9ca884a4929aaac96c1e55de2475fc498`) triggered [HidraWEB Code CI #1066](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45034979672), attempt 1, **FAILED**; [Documentation Validation #102](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45034979710) **PASSED**.
+
+**All failed jobs and step evidence:**
+
+| CI job / stage | Actual observed result and location | Classification |
+|---|---|---|
+| `verify` (failed) | OpenAPI/client contract, lint, TypeScript **PASS**; **192 unit/component tests PASS**; **6 performance tests PASS**; initial JS **728.9 KiB / 900 KiB PASS**; production build passed. Full Playwright: **90 passed, 1 failed, 15 skipped**. The sole failing browser test is HWEB-008 alarm suppression/response at `tests/e2e/alarm.spec.ts:61`, `getByRole('button',{name:'Acquitter'}).click()` after `page.goBack()`; no element found during all three attempts (test's existing 30s timeout). | Cross-route selected-record restoration was intentionally removed by UXR-07; legacy test assumed alarm detail panel remained open after Back. The specific test must reopen the authorized alarm record from its list before it can execute the preserved backend acknowledgement. No test command or permission checks may be dropped. |
+| A1 six-module native API/PostgreSQL (failed) | Preflight / API and fresh synthetic PostgreSQL setup ran. The mandatory W1–W3 browser lane: **6 passed, 1 failed**; failure `tests/e2e/foundation-topology-live.spec.ts:18` and `:38` at `Station type` combobox click, `Test timeout of 90000ms exceeded`; log records `element is not stable`, then `element was detached from the DOM`. W1–W3 remaining denial test passed. **W4 browser qualification NOT REACHED**, so no W4 acceptance claim on this SHA. | UXR-07 keyed `AppShellFrame` and the inner contextual `Outlet` to `location.key`. Native authoring changes query parameters with `setSearchParams({company,system,...})` within `/network`, creating router entries, remounting and losing the ongoing form. This source-level cause is a confirmed architectural incompatibility and consistent with the logged unstable/detached element; exact browser event timing is not independently proven from the truncated console trace. |
+| F18 LOCAL session (passed) | Native renewal and logout **5 passed, 0 failed/flaky/skipped** | Not a cause of either failure. |
+| Documentation Validation #102 (passed) | Docs workflow success on same exact SHA | Docs pass does not override Code CI failure. |
+
+**Related risks assessed:** Other workflows that update `location.search`, especially the new Alarm/Analytics allowlisted `?tab=` controls, could lose form/selection state under a full-frame history-entry remount. A route switch **must** still clear the prior selected record/inspector; preserving it would contradict the registered security intent. Avoid increasing W2/Playwright timeouts, skipping native cases, pinning a default in test data, loosening backend permissions, dropping status/rollback/409 checks or altering the SQL/OT boundary. The Node `setup-java@v4` deprecation/Node 20 compatibility warnings are unrelated to the recorded test failures; the A1 failure is *not* established as a PostgreSQL migration or lock fault.
+
+**Bounded repair envelope — same registered UXR-07, NOT a new phase:**
+
+| Action | Path | Exact reason |
+|---|---|---|
+| UPDATE | `src/shell/navigation/useNavigationContextKey.ts` | Keep the deterministic **entry identity** for mobile/accordion but add pathname-only **protected workspace identity** for same-path URL query stability; both include current principal/scope/effective module grants. |
+| UPDATE | `src/shell/navigation/useNavigationContextKey.test.ts` | Assert query-history variation preserves workspace identity; verify route/principal/scope/grant changes invalidate it; retain entry-key tests. |
+| UPDATE | `src/shell/AppShell.tsx` | Remove whole-`AppShellFrame` `location.key` remount; key only the protected `ContextDrawerProvider` / `Outlet` by pathname/principal/scope/grants. Clear mobile open state on a navigation-entry identity change without stale Back/Forward resurrection. Preserve toolbar/RTL/skip link. |
+| UPDATE | `src/shell/sidebar/HidraSidebar.tsx` | Explicitly clear manual accordion/submenu selections when the authorized history-entry key changes, since the whole shell is now stable. Keep six groups and permission filtering, 272/72, nested Assets. |
+| UPDATE | `tests/e2e/alarm.spec.ts` | After Back from workflow Tasks, assert Alarm URL/list, reopen the existing alarm, check detail/shelving and enabled acknowledge, then execute and retain busy-state, backend command and success assertions. Maintain the separate UXR-07 tab-history test. |
+| UPDATE | `src/shell/context/ContextDrawerProvider.scope.test.tsx` | Add same-path context-survival and different-path cleanup assertions, maintaining no-stale-inspector tests. |
+| UPDATE | `docs/06-Navigation-Blueprint.md`, `docs/10-Design-System-Specification.md`, `docs/roadmap/ULTIMATE_ROADMAP.md` | Append-only correction of the earlier overly-broad history-entry remount contract, exact CI evidence and still-open acceptance. |
+| CREATE/DELETE | None | No API, migration, security boundary, test workflow or test timeout changes. |
+| Exact repair commit | `fix(shell): keep UXR-07 workspaces stable across query history` | Publish directly to existing `main` with expected-head guard. |
+| Local validation | Exact source diff and failed-test assertions reviewed; **no local Node, real PostgreSQL or Chromium execution claimed**. |
+| Remaining acceptance | Fresh exact-SHA Code CI must pass all 192+ units, performance, 900 KiB budget, full Playwright, **all** W1–W3 plus mandatory W4 real PostgreSQL/browser journeys, F18 LOCAL and Documentation Validation. UXR-07 and G2 remain **pending** until then. |
+
+**Status:** UXR-07 repair prepared, NOT CI-passed. P3/UXR-08 remains unselected.

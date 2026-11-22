@@ -27,11 +27,33 @@ export function navigationContextKey(
   ]);
 }
 
-export function useNavigationContextKey(): string {
+/** A workspace survives a query/hash update on the same route, but never a
+ * principal, effective-grant, selected-scope or protected path change. */
+export function workspaceScopeKey(
+  pathname: string,
+  principalId: string | undefined,
+  scope: { scopeId: number; type?: string; targetId?: string } | undefined,
+  modules: ReadonlySet<string>,
+): string {
+  return navigationContextKey(pathname, principalId, scope, modules);
+}
+
+function useViewIdentity(includeHistoryEntry: boolean): string {
   const location = useLocation();
   const auth = useAuth();
   const permissions = usePermissions();
   const scope = useShellUiStore((state) => state.operationalContext);
+  const principalId = auth.session?.principal?.userId;
 
-  return navigationContextKey(location.key, auth.session?.principal?.userId, scope, permissions.modules);
+  return includeHistoryEntry
+    ? navigationContextKey(location.key, principalId, scope, permissions.modules)
+    : workspaceScopeKey(location.pathname, principalId, scope, permissions.modules);
+}
+
+export function useNavigationContextKey(): string {
+  return useViewIdentity(true);
+}
+
+export function useProtectedWorkspaceKey(): string {
+  return useViewIdentity(false);
 }

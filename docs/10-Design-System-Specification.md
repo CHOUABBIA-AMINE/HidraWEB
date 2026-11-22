@@ -153,3 +153,18 @@ This is a frontend navigation-presentation improvement, **not** evidence that an
 | Local view tabs | Alarm `active`/`history`; Analytics `datasets`, `insights`, `metric-definitions`, `metric-evaluations`. Only allowlisted `?tab=` values are recognized, unknowns fall back to the default, and unrelated query coordinates remain intact. Tab state is not treated as authorization. |
 | Deep links/fallbacks | Existing guarded login return destination, index redirect to `/overview`, generic 404 and safe return action. Existing backend/page authorization guards continue to decide whether a protected target can reveal data. |
 | Invariants | No new REST endpoint, backend readiness claims, sensitive browser persistence, 900 KiB limit changes, altered test retries/skips or unapproved site acceptance. |
+
+
+## UXR-07 CI #1066 correction — route lifetime versus history-entry lifetime (22 November 2026)
+
+Code CI #1066 demonstrates that remounting the **entire** shell and its workspaces on every URL-history change breaks operational authoring forms, because URL query coordinates may be updated within the same workspace. This supersedes the earlier UXR-07 description of keying the navigation frame or protected workspace by the same history identity.
+
+| UI lifecycle | Exact corrected contract |
+|---|---|
+| Mobile drawer | Preserve one shell frame; open state tagged to the current authorized history-entry key. Clear the previous key on history/principal/scope/grant change; no old Back/Forward drawer resurrection. |
+| Accordion | Manual expansion tagged to the current authorized history entry; clear when history/principal/scope/grant key changes. Recompute allowed active path and group from the backend-grant-filtered registry; preserve at most one group. |
+| Workspace and contextual inspector | Key their context on **pathname, principal, scope and effective grants**, **not** `location.key` or `location.search`. Same-page query updates keep form fields and tab-local view state; route/scope/grants changes discard prior protected context. |
+| Browser proof | Native W2 topology authoring must sustain company/system/draft URL updates without detached selection controls; full HWEB-008 alarm response must explicitly reselect a record after cross-workspace Back navigation, then prove the genuine acknowledgement command/disabled busy state. |
+| Invariants | No widening backend authority, no additional REST endpoints, no abandoned W4 native qualification, no test skips, retries or timeout increases. |
+
+The earlier generalized promise of discarding page-local state for *every* history entry is withdrawn because it is incompatible with multi-step production-oriented authoring. Sensitive protected state still cannot be resurrected by cross-route or scope changes.

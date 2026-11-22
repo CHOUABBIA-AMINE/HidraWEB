@@ -57,7 +57,13 @@ test('HWEB-008 presents backend-governed alarm response and suppression semantic
   await page.getByRole('button', { name: 'Ouvrir mes tâches' }).click();
   await expect(page).toHaveURL(/\/work\/tasks\?instanceId=wf-1$/);
   await page.goBack();
-
+  await expect(page).toHaveURL(/\/alarms$/);
+  // UXR-07 intentionally discards record-specific state on route changes.
+  // Reopen through the authorized list, then exercise the actual backend command.
+  await expect(page.getByText('Pression élevée')).toBeVisible();
+  await page.getByRole('button', { name: 'Ouvrir', exact: true }).click();
+  await expect(page.getByText('MAINT')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Acquitter' })).toBeEnabled();
   await page.getByRole('button', { name: 'Acquitter' }).click();
   await expect(page.getByRole('button', { name: 'Clôturer' })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Mettre en étagère' })).toBeDisabled();

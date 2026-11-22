@@ -3,6 +3,7 @@ import { I18nextProvider } from 'react-i18next';
 import { describe, expect, it } from 'vitest';
 
 import { i18n } from '@/shared/i18n/i18n';
+import { workspaceScopeKey } from '@/shell/navigation/useNavigationContextKey';
 import { ContextDrawerProvider } from '@/shell/context/ContextDrawerProvider';
 import { ContextualDrawer } from '@/shell/context/ContextualDrawer';
 import { useContextDrawer } from '@/shell/context/useContextDrawer';
@@ -25,6 +26,22 @@ function ShellContext({ viewKey }: { viewKey: string }) {
 }
 
 describe('UXR-07 scoped contextual drawer', () => {
+  it('keeps in-progress context mounted for same-path query changes but not a different path', () => {
+    const modules = new Set(['topology']);
+    const scope = { scopeId: 7, targetId: 'GZ2' };
+    // A new history entry for ?company=...&system=... uses the same pathname.
+    const key = workspaceScopeKey('/network', 'operator', scope, modules);
+    const app = render(<ShellContext viewKey={key} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Inspect asset' }));
+    expect(screen.getByText('Protected asset reference')).toBeInTheDocument();
+
+    app.rerender(<ShellContext viewKey={workspaceScopeKey('/network', 'operator', scope, modules)} />);
+    expect(screen.getByText('Protected asset reference')).toBeInTheDocument();
+
+    app.rerender(<ShellContext viewKey={workspaceScopeKey('/work/tasks', 'operator', scope, modules)} />);
+    expect(screen.queryByText('Protected asset reference')).not.toBeInTheDocument();
+  });
+
   it('never restores a prior route/scope inspector on Back or authorization context changes', () => {
     const app = render(<ShellContext viewKey="route-a:scope-1" />);
     fireEvent.click(screen.getByRole('button', { name: 'Inspect asset' }));

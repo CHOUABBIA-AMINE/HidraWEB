@@ -204,3 +204,17 @@ A **route entry + authenticated principal + authorized module snapshot + selecte
 The Alarm Console's `active`/`history` and Analytics' `datasets`/`insights`/`metric-definitions`/`metric-evaluations` local tabs now use an explicit allowlist and the optional `tab` URL query coordinate. Browser history can restore this low-sensitivity view identity while private record selections are not serialized. Unknown or forged tab names fall back to the first tab. No cross-module tab selection, resource IDs, company access, approval or decision authority are placed in global shell state or browser storage. Existing module-specific query parameters and hashes are retained by normal router history operations.
 
 **Acceptance tests:** source/unit checks cover the route/principal/scope/grant key and allowlisted tabs, plus remount-clearing of contextual drawer content. Browser coverage exercises mobile Escape, route-change closure, Back/Forward, protected direct links, nested active ancestry and unauthorized/404/root redirect behavior; Alarm tabs verify Back/Forward view restoration. HidraAPI server authorization and existing page-owned guards remain authoritative. Revalidation of independent business caches after changing operating context remains separately registered in UXR-09/P3 and does not become an implicit permission grant here.
+
+
+## UXR-07 correction — separating route-entry navigation from workspace lifecycle (22 November 2026)
+
+The preceding UXR-07 section documents the initial implementation and must be read together with this append-only correction following exact-SHA Code CI #1066 failure.
+
+**Do not remount the entire shell or protected workspace for every history entry.** The topology-authoring process legitimately uses `setSearchParams` to record a company/system/draft in the URL while staying on the same `/network` page. React Router changes the location key for a new entry. Keying the whole `AppShellFrame` and `<Outlet>` to that key destroys the live authoring form; its dropdowns can detach and incomplete form state is lost.
+
+UXR-07 now uses two separate lifetimes:
+
+- **Navigation-entry identity** (React Router `location.key`, authenticated principal, scope and effective authorized modules): the temporary mobile drawer and sidebar's manual accordion expansion use it. When the identity changes, old expansion is cleared and the active authorized ancestor is derived again. Re-entering an earlier history entry does **not** reopen an old drawer.
+- **Protected-workspace identity** (exact `location.pathname`, authenticated principal, scope and effective authorized modules): the contextual inspector provider and routed workspace use it. Changing only query parameters or hashes on the **same path** preserves page-local work in progress and allowlisted tab history; changing the protected pathname, principal, selected scope or effective grants remounts and discards sensitive UI state. No record ID, tab identity or company authority is persisted by the shell.
+
+The previous statement that protected workspaces are remounted *per history entry* is superseded by this narrower, correct route/scope contract. The selected alarm is intentionally cleared after visiting a different pathname; a user must re-open the alarm from the authorized list before its acknowledge/close controls are available. Backend permission checks, concurrency and human decisions remain unchanged. No new OT or engineering data source is inferred.
