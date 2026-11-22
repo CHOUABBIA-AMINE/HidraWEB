@@ -34,9 +34,9 @@ describe('UXR-03 / industrial design-system foundation', () => {
     expect(hidraTheme.spacing(1)).toBe('4px');
     expect(hidraTheme.spacing(3)).toBe('12px');
     expect(hidraTheme.breakpoints.values).toEqual(tokens.breakpoints);
+    expect(hidraTheme.shape.borderRadius).toBe(tokens.radius.control);
     expect(hidraTheme.typography.fontFamily).toContain('Noto Sans Arabic');
-    expect(hidraTheme.typography.body1.fontVariantNumeric).toBe('tabular-nums');
-    expect(hidraTheme.typography.body2.fontVariantNumeric).toBe('tabular-nums');
+    expect(themeCss).toContain(`font-variant-numeric: ${tokens.typography.numeric}`);
   });
 
   it('applies lightweight CSS for focus, reduced motion, control density and card elevation', () => {

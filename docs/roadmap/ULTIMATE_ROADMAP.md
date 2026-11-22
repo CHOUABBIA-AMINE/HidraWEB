@@ -4109,3 +4109,22 @@ The 31 advertised [T39 Circle 1 consumer handoff](https://github.com/CHOUABBIA-A
 | Validated prepublication | The tracked stylesheet was opened at this exact SHA; all eight CSS literal/at-rule values asserted by the test were verified. The existing 177 passing tests, typecheck and native jobs are historical CI evidence; the new source requires a fresh exact-SHA run. |
 | Pending acceptance | **Code CI: unit suite, unchanged 900 KiB initial JS bundle gate, production build, browser, A1/F18 native jobs.** Documentation CI must also start. Do not assert success before those checks complete. |
 | Forward gate | UXR-04 remains NOT STARTED; HWEB-F16 HOLD, F21 accepted synthetic preview and F22 BLOCKED remain unchanged. |
+
+---
+
+### P1 / UXR-03 — exact-SHA #1055 initial bundle overage repair (22 November 2026)
+
+**Failure:** [Code CI #1055](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45021057342) on `8b56abf0a248710235ea363bec425cb3aeb9df0e` completed FAILURE in `verify → Production build → npm run bundle:check`. Code CI output reported `initial static JavaScript: 900.2 KiB / 900 KiB` (0.2 KiB over); the first UXR-03 attempt was 902.5 KiB and the last pre-UXR-03 green build was 899.4 KiB. In #1055 the CSS test harness correction **passed**: 178/178 tests and 6/6 performance tests, lint and TypeScript succeeded. A1 native PostgreSQL browser and F18 session suites succeeded, as did [Documentation #91](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45021057388). Production bundle threshold remains unmet, so the indivisible task is **not completed**.
+
+**Bounded fix under UXR-03 (not a new stage):** remove redundant MUI runtime breakpoint override already identical to default, repeated custom contrastText values (MUI chooses contrast automatically; test keeps 4.5:1), redundant custom `body1/body2/caption` tabular-figure typography (existing CSS handles inheritance), and the explicitly duplicated white paper default. Keep MUI industrial semantic main palette, text colors, 4px grid, 8px radius, Arabic-capable font and button elevation policy. Tests continue to check exact breakpoints, semantic contrast and tabular figures in the loaded CSS.
+
+| Repair control | Scope and evidence |
+|---|---|
+| Base SHA/tree | `8b56abf0a248710235ea363bec425cb3aeb9df0e` / `afdf601d26a631479100f01e6c7b4ac863482d5a` |
+| Exact commit message | `fix(design-system): reduce UXR-03 MUI theme runtime payload` |
+| UPDATE | `src/design-system/theme/theme.ts` (remove redundant MUI configuration, retain source colors and spacing), `src/design-system/theme/theme.test.ts` (test CSS-owned numerals and theme default breakpoint/radius), `docs/10-Design-System-Specification.md` (architecture and regression explanation), this append-only roadmap record. |
+| CREATE/DELETE | None. |
+| No changes | `scripts/check-bundle-budgets.mjs`, Vite config, dependencies, generated clients, CSS styling, backend/security workflows, route declarations, GZ2 simulator/operator contracts, HWEB-F16/F21/F22 gates. |
+| Acceptance | Fresh exact-SHA Code CI proving **initial JS at or below 900 KiB** plus compatible contracts, lint, typecheck, full unit/performance, release and configured E2E/native tests; fresh documentation CI. |
+| Status | **REPAIR PUBLISHED/PENDING NEW CI**; do not declare bundle improvement from source alone or advance UXR-04. |
+
