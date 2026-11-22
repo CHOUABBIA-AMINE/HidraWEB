@@ -4090,3 +4090,22 @@ The 31 advertised [T39 Circle 1 consumer handoff](https://github.com/CHOUABBIA-A
 | Required proof | Exact-SHA Code CI: compatibility, 21 generated clients, lint, TypeScript, unit, performance, production build + unchanged bundle limits, release verification, Playwright, A1/F18 native lanes. Documentation CI starts on the same SHA. |
 | State | **Repair source prepared; Code CI not yet passed**. Stop once exact-SHA CI is queued or started; do not automatically advance UXR-04. |
 
+
+---
+
+### P1 / UXR-03 — follow-up same-task CI test harness repair (22 November 2026)
+
+**Exact failure:** [HidraWEB Code CI #1054](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45020440015), head `0155b1d0b216f5c2dc3c39d2886954e62297c438`, `verify` job, **Unit and component tests**. `theme.test.ts` failed one of 178 tests (`177 passed, 1 failed`) because Vitest's jsdom CSS transformer returned an **empty string** for `industrialTheme.css?raw`. The assertion expected `--hidra-control-min: 44px`. The stylesheet source **actually contains** the token. This is a test-loading error rather than evidence that the CSS or token is missing in the application. CI never reached Production build/bundle:check; **the 900 KiB JS budget remains unverified** on this SHA. [Documentation CI #90](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45020439992), the A1 PostgreSQL native browser job and F18 session job passed.
+
+**Bounded repair:** replace the test's CSS `?raw` transform import with Node `readFileSync(resolve(process.cwd(), 'src/design-system/theme/industrialTheme.css'), 'utf8')`, used only by Vitest to inspect the tracked stylesheet. Keep the **same assertions** for CSS-to-typed-token consistency, contrast, spacing and breakpoints. Do **not** modify application CSS, MUI theme, Node/npm dependencies, generated API clients, bundle thresholds, routes or workflow configuration. `process.cwd()` is the repository root for `npm run test` and CI. The test uses the actual repository file and fails closed if it is missing.
+
+| Repair registration | Value |
+|---|---|
+| Parent task | **UXR-03** (not a new task or suffix) |
+| Base source/tree | `0155b1d0b216f5c2dc3c39d2886954e62297c438` / `8747c2d6c401386bfe4d60084af1af4985376a8d` |
+| Exact commit message | `test(design-system): read UXR-03 CSS fixture from disk` |
+| UPDATE | `src/design-system/theme/theme.test.ts` (Node filesystem test harness only); `docs/roadmap/ULTIMATE_ROADMAP.md` (append-only failure and correction evidence) |
+| CREATE/DELETE | None |
+| Validated prepublication | The tracked stylesheet was opened at this exact SHA; all eight CSS literal/at-rule values asserted by the test were verified. The existing 177 passing tests, typecheck and native jobs are historical CI evidence; the new source requires a fresh exact-SHA run. |
+| Pending acceptance | **Code CI: unit suite, unchanged 900 KiB initial JS bundle gate, production build, browser, A1/F18 native jobs.** Documentation CI must also start. Do not assert success before those checks complete. |
+| Forward gate | UXR-04 remains NOT STARTED; HWEB-F16 HOLD, F21 accepted synthetic preview and F22 BLOCKED remain unchanged. |

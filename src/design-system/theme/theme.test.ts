@@ -1,7 +1,12 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
 import { getContrastRatio } from '@mui/material/styles';
 import { describe, expect, it } from 'vitest';
 
-import themeCss from '@/design-system/theme/industrialTheme.css?raw';
+// Vitest's jsdom CSS transform returns an empty string for ?raw stylesheets.
+// Read the tracked file directly so token assertions inspect the actual CSS.
+const themeCss = readFileSync(resolve(process.cwd(), 'src/design-system/theme/industrialTheme.css'), 'utf8');
 import { industrialTokens as tokens } from '@/design-system/tokens/industrialTokens';
 import { hidraTheme } from '@/design-system/theme/theme';
 
