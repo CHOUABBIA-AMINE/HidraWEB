@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { OperationalScopeResponse } from '@/api/generated/identity-organization/model';
 
-import { activeOperationalScopes, effectiveRegionalScopes, isPositiveRegionalAccess } from '@/features/context/model/operationalContextModel';
+import { activeOperationalScopes, effectiveRegionalScopes, isPositiveRegionalAccess, supportsRegionalAccess } from '@/features/context/model/operationalContextModel';
 
 describe('activeOperationalScopes', () => {
   it('uses canonical scope objects from active responsibilities and de-duplicates by registry id', () => {
@@ -24,6 +24,15 @@ describe('activeOperationalScopes', () => {
 
 describe('UXR-09 exact company and regional access', () => {
   const scope: OperationalScopeResponse = { id: 7, type: 'PIPELINE_SYSTEM', targetId: 'gz2', name: 'GZ2' };
+  it('includes the accepted T33 PIPELINE_SEGMENT kind but excludes invalid resource identifiers', () => {
+    const segment = { type: 'PIPELINE_SEGMENT', targetId: 'segment-gz2-1' };
+    expect(supportsRegionalAccess(segment)).toBe(true);
+    expect(isPositiveRegionalAccess({
+      resourceKind: 'PIPELINE_SEGMENT', resourceId: 'segment-gz2-1', companyPartyId: 'company', permitted: true,
+    }, 'company', segment)).toBe(true);
+    expect(supportsRegionalAccess({ ...segment, targetId: ' segment-gz2-1' })).toBe(false);
+    expect(supportsRegionalAccess({ type: 'ORGANIZATION_UNIT', targetId: 'segment-gz2-1' })).toBe(false);
+  });
   it('excludes expired, future, suspended and unsupported scopes', () => {
     const at = Date.parse('2026-11-22T18:00:00Z');
     expect(effectiveRegionalScopes([

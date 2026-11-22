@@ -4574,3 +4574,41 @@ and append this roadmap; CREATE/DELETE none. **Exact repair message:**
 No API or other module changes, no skipped checks, no relaxed types or bypass.
 **Status:** UXR-09 CI qualification pending a new exact-SHA Code CI and Docs CI.
 The next unselected task remains UXR-10; G3 remains open.
+
+
+### P3 / UXR-09 — Code CI #1074 and complete-failure review (22 November 2026)
+
+[Code CI #1074](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45057610961)
+on `9b197e474faccc5c70ba9100ee8b40a1a14228e6` failed in the `verify`
+unit/component stage. OpenAPI compatibility, pinned client generation, lint
+(0 errors, 7 warnings), and TypeScript passed. Vitest finished 202 passing
+and 1 failing assertions across 72 files: the newly added
+`identityOrganizationApi.regional.test.ts` opaque 404 denial assertion
+reported `Error: 404` at its mocked rejection. No other failed tests were
+reported by that completed Vitest run. Subsequent `verify` performance,
+build/bundle, release package/verification and full Chromium steps were
+**not executed** and therefore cannot be claimed to pass. Independent A1
+six-module native API/PostgreSQL and F18 LOCAL qualification and
+[Documentation CI #110](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45057610918)
+passed on that SHA.
+
+A same-task source/accepted-backend review also found a supported resource-kind
+omission: the accepted HidraAPI T33 `ResolveRegionalAccessUseCase.ResourceKind`
+at `f0310330ae8eb58f8bf00400b29afeb5baccb869` supports
+`PIPELINE_SEGMENT`, while the WEB local candidate predicate excluded it.
+
+**Bounded repair:** explicitly catch the mocked 404 and verify its original
+error identity and exact GET/params, preserving the fail-closed denial
+assertion; admit `PIPELINE_SEGMENT` to the local candidate filter only and
+add positive/negative model regression assertions. The server remains the
+sole authority for exact current company/resource access. Existing strict
+CI checks, independent native qualification, and all other behavior remain
+unchanged. Exact UPDATE scope: `src/features/context/api/identityOrganizationApi.regional.test.ts`,
+`src/features/context/model/operationalContextModel.ts`,
+`src/features/context/model/operationalContextModel.test.ts`, and this
+append-only roadmap. CREATE/DELETE none. Exact message:
+`fix(context): qualify UXR-09 denial and segment access`.
+
+**Acceptance:** fresh exact-SHA full Code CI and Documentation Validation still
+required; downstream gates cannot be predicted from the prior truncated run.
+UXR-10 is the next registered **unselected** task; G3 remains open.

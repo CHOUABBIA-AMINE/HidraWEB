@@ -17,8 +17,20 @@ describe('UXR-09 regional-access adapter', () => {
       params: { companyPartyId: 'company' },
     });
   });
-  it('does not swallow opaque denial', async () => {
-    http.mockRejectedValue(new Error('404'));
-    await expect(fetchCurrentRegionalAccess('PIPELINE', 'private', 'company')).rejects.toThrow('404');
+  it('preserves opaque 404 denial without converting it into a permitted response', async () => {
+    const denial = new Error('404');
+    http.mockRejectedValueOnce(denial);
+    let received: unknown;
+    try {
+      await fetchCurrentRegionalAccess('PIPELINE', 'private', 'company');
+    } catch (error) {
+      received = error;
+    }
+    expect(received).toBe(denial);
+    expect(http).toHaveBeenCalledWith({
+      method: 'GET',
+      url: '/api/v1/identity/me/regional-access/PIPELINE/private',
+      params: { companyPartyId: 'company' },
+    });
   });
 });

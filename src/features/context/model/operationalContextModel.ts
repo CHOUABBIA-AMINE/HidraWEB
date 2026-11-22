@@ -12,7 +12,7 @@ export function activeOperationalScopes(responsibilities: readonly Responsibilit
 }
 
 
-const REGIONAL_KINDS: readonly string[] = ['PIPELINE_SYSTEM', 'PIPELINE', 'FACILITY', 'EQUIPMENT'];
+const REGIONAL_KINDS: readonly string[] = ['PIPELINE_SYSTEM', 'PIPELINE', 'PIPELINE_SEGMENT', 'FACILITY', 'EQUIPMENT'];
 
 export function supportsRegionalAccess(scope: { type?: string; targetId?: string }): boolean {
   return REGIONAL_KINDS.includes(scope.type ?? '') &&
