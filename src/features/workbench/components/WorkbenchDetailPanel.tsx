@@ -1,8 +1,10 @@
-import { Box, Divider, Typography } from '@mui/material';
+import { Alert, Box, Divider, Typography } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
 import { fetchWorkbenchRecord, workbenchQueryKeys } from '@/features/workbench/api/workbenchApi';
+import { WORKBENCH_PERMISSIONS } from '@/features/workbench/api/workbenchPermissions';
+import { usePermissions } from '@/features/permissions/usePermissions';
 import { WorkbenchErrorState, WorkbenchLoadingState } from '@/features/workbench/components/WorkbenchState';
 
 interface WorkbenchDetailPanelProps {
@@ -27,19 +29,35 @@ function valueText(value: unknown): string {
 
 export function WorkbenchDetailPanel({ module, resource, id }: WorkbenchDetailPanelProps) {
   const { t } = useTranslation();
+  const permissions = usePermissions();
+  const canInspect = permissions.status === 'ready'
+    && permissions.can(WORKBENCH_PERMISSIONS.detailRead);
   const detailQuery = useQuery({
     queryKey: workbenchQueryKeys.detail(module, resource, id),
     queryFn: () => fetchWorkbenchRecord(module, resource, id),
+    enabled: canInspect,
+    retry: false,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
 
-  if (detailQuery.isLoading) {
+  if (!canInspect) {
+    return <Alert severity="warning">{t('workbench.capabilityUnavailable')}</Alert>;
+  }
+  // Previously cached owner detail must not remain visible during revalidation.
+  if (detailQuery.isPending || detailQuery.isFetching) {
     return <WorkbenchLoadingState label={t('workbench.loadingDetail')} />;
   }
   if (detailQuery.error) {
     return <WorkbenchErrorState error={detailQuery.error} onRetry={() => { void detailQuery.refetch(); }} />;
   }
-  if (!detailQuery.data) {
-    return null;
+  if (!detailQuery.data
+    || detailQuery.data.module !== module
+    || detailQuery.data.resource !== resource
+    || String(detailQuery.data.id ?? '') !== id) {
+    return <Alert severity="warning">{t('workbench.errors.notFound')}</Alert>;
   }
 
   return (

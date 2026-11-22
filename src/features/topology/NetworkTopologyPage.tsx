@@ -175,6 +175,7 @@ function OperationalTopology({ authoring, onToggleAuthoring }: { authoring: bool
           : { kind: 'ready' };
 
   const openFeature = (feature: Feature) => {
+    if (!canRead) return;
     setSelectedFeatureId(feature.id);
     drawer.openDrawer({
       title: topologyFeatureLabel(feature),
@@ -183,11 +184,14 @@ function OperationalTopology({ authoring, onToggleAuthoring }: { authoring: bool
   };
 
   const selectMapFeature = (selection: HidraMapSelection) => {
+    if (!canRead || geoJsonQuery.isFetching || geoJsonQuery.isError) return;
     const feature = findTopologyFeature(geoJsonQuery.data, selection.featureId);
     if (feature) openFeature(feature);
   };
 
   const toggleLayer = (layerId: string) => {
+    drawer.closeDrawer();
+    setSelectedFeatureId(undefined);
     setHiddenLayerIds((current) => {
       const next = new Set(current);
       if (next.has(layerId)) next.delete(layerId);

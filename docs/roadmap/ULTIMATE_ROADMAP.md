@@ -4836,3 +4836,54 @@ visual position) and append-only this roadmap. No tests, permissions,
 backend endpoints, data contracts, workflows or CI gates removed or weakened.
 The final acceptance requires a new exact-SHA Code CI and Documentation CI
 pass; UXR-14 remains unselected. No engineering/SITE acceptance inferred.
+
+
+### P4 / UXR-14 — owner-bound ContextInspector and Right Drawer (22 November 2026)
+
+**Admission evidence:** UXR-13 repair `743d32768d7654a2ccfdf27c8302de696145e18e`
+(tree `dd3c927fb873c8a8d76ff0f2dc1cb0b3ec9a91a9`) passed
+[Code CI #1081 attempt 2](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45073557962):
+verify, F18 LOCAL and A1 native PostgreSQL/API all succeeded. The first
+attempt's W4 missing-timeline error did not recur on the failed-job retry;
+its transient cause is not proven. [Documentation CI #117](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45073557869)
+succeeded. Only UXR-14 is selected by Next; later P4/P5 stages remain
+unselected.
+
+**Authorized scope and message:** `feat(workspace): add UXR-14 owner-bound context inspector`.
+CREATE `src/shell/context/ContextInspector.tsx` (labelled responsive MUI
+modal drawer, close/Escape, MUI focus restoration),
+`src/shell/context/ContextInspector.test.tsx` (atomic selection and absence
+of old content),
+`src/features/workbench/components/WorkbenchDetailPanel.test.tsx` (exact
+owner read, absent grant, denial and response mismatch) and
+`tests/e2e/context-inspector.spec.ts` (keyboard focus, narrow viewport,
+owner denial). UPDATE `src/shell/context/ContextDrawerProvider.tsx` (single
+atomic selection with current scope key retained),
+`src/shell/context/ContextualDrawer.tsx` (delegate to shared inspector),
+`src/features/workbench/components/WorkbenchDetailPanel.tsx` (exact owner
+GET with no stale cached details, current detail-grant check, no blind retry,
+record-identity match), `src/features/workbench/OperationalWorkbenchPage.tsx`
+(selection invalidation and defensive owner scope),
+`src/features/context/components/FixedResourceWorkspace.tsx` (same fixed
+resource selection guards), `src/features/topology/NetworkTopologyPage.tsx`
+(clear legacy map selection on layer changes and no stale map click),
+`docs/06-Navigation-Blueprint.md` and this append-only roadmap. DELETE none.
+No backend modules, Java/migrations, OpenAPI pins, authorization outcomes,
+Workflow transition rules, CI workflows or pre-existing tests changed.
+
+**Meaning and limits:** context inspector is a presentation/selection
+boundary; the specialized owner chooses the detail read and claims its own
+scope. Verified Workbench generic detail GET is the native read-back example.
+Unscoped topology feature inspection continues to show already owner-issued
+map features; it does not claim fresh pipeline dossier GET, cross-owner
+join, or regional/engineering qualification. The regional T34 URL-bound
+feature GET remains separate and unmodified. The Workflow exact-task GET
+remains the W4 native flow, not moved into a modal. No 19-workspace migration,
+new REST endpoint, simulator, live OT feed or production qualification implied.
+
+**Pending exact-SHA acceptance:** OpenAPI compatibility, lint, TypeScript,
+unit/component tests, performance threshold, production bundle and artifact
+checks, full Chromium (including UXR-14), independent A1 W1–W4 PostgreSQL/API,
+F18 LOCAL and Documentation Validation. Do not mark UXR-14 CI-passed until
+this SHA satisfies all gates. UXR-15 is the next registered **unselected**
+stage.

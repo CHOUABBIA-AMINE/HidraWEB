@@ -1,34 +1,11 @@
-import CloseIcon from '@mui/icons-material/Close';
-import { Box, Divider, Drawer, IconButton, Typography } from '@mui/material';
-import { useTranslation } from 'react-i18next';
-
+import { ContextInspector } from '@/shell/context/ContextInspector';
 import { useContextDrawer } from '@/shell/context/useContextDrawer';
 
 export function ContextualDrawer() {
-  const { t, i18n } = useTranslation();
   const drawer = useContextDrawer();
-
   return (
-    <Drawer
-      anchor={i18n.dir() === 'rtl' ? 'left' : 'right'}
-      onClose={drawer.closeDrawer}
-      open={drawer.open}
-      slotProps={{
-        paper: {
-          sx: {
-            height: 'calc(100% - 64px)',
-            top: 64,
-            width: { xs: '100%', sm: 420 },
-          },
-        },
-      }}
-    >
-      <Box sx={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', minHeight: 64, px: 2 }}>
-        <Typography component="h2" variant="h6">{drawer.title ?? t('shell.contextDrawer')}</Typography>
-        <IconButton aria-label={t('shell.closeDrawer')} onClick={drawer.closeDrawer}><CloseIcon /></IconButton>
-      </Box>
-      <Divider />
-      <Box sx={{ overflow: 'auto', p: 2 }}>{drawer.content}</Box>
-    </Drawer>
+    <ContextInspector open={drawer.open} title={drawer.title} onClose={drawer.closeDrawer}>
+      {drawer.content}
+    </ContextInspector>
   );
 }

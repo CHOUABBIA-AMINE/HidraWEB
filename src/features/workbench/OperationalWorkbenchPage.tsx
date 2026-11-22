@@ -82,6 +82,7 @@ export function OperationalWorkbenchPage() {
   }, [descriptor, recordsQuery.data]);
 
   const selectModule = (module: string) => {
+    drawer.closeDrawer();
     setSelectedModule(module);
     setSelectedResource('');
     setPage(0);
@@ -92,6 +93,7 @@ export function OperationalWorkbenchPage() {
   };
 
   const selectResource = (resource: string) => {
+    drawer.closeDrawer();
     setSelectedResource(resource);
     setPage(0);
     setCommittedQuery('');
@@ -101,12 +103,14 @@ export function OperationalWorkbenchPage() {
   };
 
   const basicSearch = () => {
+    drawer.closeDrawer();
     setPage(0);
     setCommittedQuery(queryInput.trim());
     setAdvancedRequest(null);
   };
 
   const applyAdvanced = () => {
+    drawer.closeDrawer();
     const filters = advanced.filterField && advanced.filterValue
       ? { [advanced.filterField]: advanced.filterValue }
       : {};
@@ -123,6 +127,7 @@ export function OperationalWorkbenchPage() {
   };
 
   const resetSearch = () => {
+    drawer.closeDrawer();
     setPage(0);
     setQueryInput('');
     setCommittedQuery('');
@@ -203,17 +208,20 @@ export function OperationalWorkbenchPage() {
         {descriptor && recordsQuery.data && recordsQuery.data.items.length > 0 ? (
           <WorkbenchDataGrid
             descriptor={descriptor}
-            detailEnabled={permissions.can(WORKBENCH_PERMISSIONS.detailRead)}
+            detailEnabled={permissions.can(WORKBENCH_PERMISSIONS.detailRead) && recordsQuery.isSuccess && !recordsQuery.isFetching}
             onInspect={(record) => {
-              if (record.id === null || record.id === undefined) return;
+              if (!recordsEnabled || !permissions.can(WORKBENCH_PERMISSIONS.detailRead)
+                || recordsQuery.isFetching || !recordsQuery.isSuccess
+                || record.module !== effectiveModule || record.resource !== effectiveResource
+                || record.id === null || record.id === undefined) return;
               const id = String(record.id);
               drawer.openDrawer({
                 title: `${record.resource} · ${id}`,
-                content: <WorkbenchDetailPanel id={id} module={record.module} resource={record.resource} />,
+                content: <WorkbenchDetailPanel key={`${record.module}/${record.resource}/${id}`} id={id} module={record.module} resource={record.resource} />,
               });
             }}
-            onPageChange={setPage}
-            onPageSizeChange={(nextSize) => { setSize(nextSize); setPage(0); }}
+            onPageChange={(nextPage) => { drawer.closeDrawer(); setPage(nextPage); }}
+            onPageSizeChange={(nextSize) => { drawer.closeDrawer(); setSize(nextSize); setPage(0); }}
             page={recordsQuery.data}
           />
         ) : null}

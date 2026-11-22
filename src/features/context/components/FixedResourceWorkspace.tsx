@@ -73,6 +73,7 @@ export function FixedResourceWorkspace({ module, resource, title, description }:
               onChange={(event) => setQueryInput(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === 'Enter') {
+                  drawer.closeDrawer();
                   setPage(0);
                   setQuery(queryInput.trim());
                 }
@@ -81,7 +82,7 @@ export function FixedResourceWorkspace({ module, resource, title, description }:
               value={queryInput}
             />
             <Button
-              onClick={() => { setPage(0); setQuery(queryInput.trim()); }}
+              onClick={() => { drawer.closeDrawer(); setPage(0); setQuery(queryInput.trim()); }}
               variant="outlined"
             >
               {t('context.search')}
@@ -103,17 +104,20 @@ export function FixedResourceWorkspace({ module, resource, title, description }:
       {descriptor && recordsQuery.data && recordsQuery.data.items.length > 0 ? (
         <WorkbenchDataGrid
           descriptor={descriptor}
-          detailEnabled={permissions.can(WORKBENCH_PERMISSIONS.detailRead)}
+          detailEnabled={permissions.can(WORKBENCH_PERMISSIONS.detailRead) && recordsQuery.isSuccess && !recordsQuery.isFetching}
           onInspect={(record) => {
-            if (record.id === null || record.id === undefined) return;
+            if (!recordsEnabled || !permissions.can(WORKBENCH_PERMISSIONS.detailRead)
+              || !recordsQuery.isSuccess || recordsQuery.isFetching
+              || record.module !== module || record.resource !== resource
+              || record.id === null || record.id === undefined) return;
             const id = String(record.id);
             drawer.openDrawer({
               title: `${record.resource} · ${id}`,
-              content: <WorkbenchDetailPanel id={id} module={record.module} resource={record.resource} />,
+              content: <WorkbenchDetailPanel key={`${module}/${resource}/${id}`} id={id} module={module} resource={resource} />,
             });
           }}
-          onPageChange={setPage}
-          onPageSizeChange={(nextSize) => { setSize(nextSize); setPage(0); }}
+          onPageChange={(nextPage) => { drawer.closeDrawer(); setPage(nextPage); }}
+          onPageSizeChange={(nextSize) => { drawer.closeDrawer(); setSize(nextSize); setPage(0); }}
           page={recordsQuery.data}
         />
       ) : null}

@@ -362,3 +362,52 @@ and their respective backend owners. No simulated preview is relabelled as
 an operational live view. Unit and browser checks cover variants, detail
 landmarks, denied/empty/degraded isolation, responsive summary, register and
 map failure. This stage is not SITE/OT acceptance.
+
+
+## P4 / UXR-14 — owner-bound ContextInspector (22 November 2026)
+
+The existing `ContextDrawerProvider` remains keyed by the current protected
+route, principal, current grants and operational scope through `AppShell`.
+It now stores one atomic current selection (title plus content) rather than
+separate values. Closing the drawer discards the protected selection; route,
+principal, grant or scope transitions remount the provider and cannot
+restore old content. Same-path query changes preserve the current inspector
+only when the owner considers that selection safe.
+
+`src/shell/context/ContextInspector.tsx` defines the reusable right-hand
+inspector presentation: a labelled, temporary MUI modal drawer with close,
+Escape and backdrop dismissal, the existing MUI focus trap and focus-return
+action, a close control that is keyboard focusable, and a scrollable details
+body. The panel remains approximately 420 px on desktops, full viewport
+width at the smallest breakpoint, and follows the UI direction (right in
+LTR, left in RTL). There is no permanent shell column. A selected business
+record is not an access grant; the component issues no REST calls itself.
+
+The specialized owner or workbench adapter remains responsible for providing
+an authorized record. For the generic workbench, the admitted list's
+Inspect control is disabled during a refresh and on missing effective detail
+permission, and opening an inspector mounts an exact
+`GET /api/v1/workbench/{module}/{resource}/{id}` owner read. Every mount
+and refocus requires a fresh fetch, with no retry on a denied request. Cached
+details are hidden during an owner read, and a 403, absent capability, 404,
+missing record or owner/id mismatch displays no prior record attributes.
+Changing a workbench module, resource, search, page or page size closes the
+prior inspector. Administration's fixed-resource workbench follows the same
+pattern. This is a frontend admission gate; HidraAPI is the authoritative
+read and scope decision maker.
+
+The legacy unscoped Topology map continues its published map-collection read
+and existing source-issued feature inspection. The selected geometry is a
+**map response snapshot** and is not mistaken for a fresh pipeline dossier,
+regional-scope proof or telemetry signal. The map inspector closes when
+visible layers change and does not accept map clicks while owner geometry is
+being refreshed or is unavailable. The regional T34 detail flow continues
+revalidating the exact scoped feature through its own owner GET, and is not
+silently replaced by the legacy unscoped map inspector. Loading newer records,
+custom dossier joins and cross-workspace deep-links are separately gated by
+UXR-15/16 and UXR-22/23.
+
+Tests cover modal labels and atomic replacement, denied/incorrect workbench
+records, narrow widths, Escape and keyboard focus return, plus existing
+route/scope/remount guards. All fixtures are synthetic. Neither drawer
+presentation nor a successful local test establishes industrial acceptance.
