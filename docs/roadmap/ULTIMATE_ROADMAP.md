@@ -4302,3 +4302,27 @@ The 31 advertised [T39 Circle 1 consumer handoff](https://github.com/CHOUABBIA-A
 | Acceptance | Fresh exact-SHA Code CI (unit and remaining performance/bundle/full Playwright + mandatory native lanes) and Documentation Validation. |
 | Status | **REPAIR SOURCE PREPARED — NEW CI PENDING**. UXR-06 is not yet CI-passed, G2 open, UXR-07 not started. |
 
+
+---
+
+### P2 / UXR-06 — Code CI #1063 Playwright locator repair (22 November 2026)
+
+**Exact-SHA evidence.** [HidraWEB Code CI #1063](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45030547023) on `30b735ba70316a9dbd3668caffe3c84107702974` **FAILED** only in `verify → Full Playwright regression suite`: **81 passed, 4 failed, 15 skipped**. TypeScript, lint, API/OpenAPI compatibility, **187 unit/component tests**, six performance tests and initial JS **728.8 KiB / 900 KiB** passed. A1 native PostgreSQL/browser, including mandatory W4, and F18 LOCAL session jobs both **PASSED**. [Documentation Validation #99](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45030547064) **PASSED**. No backend or numeric-engine failure is evidenced.
+
+**Failure classification.** `tests/e2e/critical-operational-journeys.spec.ts:190` clicked the first enabled button with a non-exact `Opérations` locator, selecting the uppercase **OPÉRATIONS accordion group** and leaving the URL at `/overview` instead of selecting the **Opérations** destination. Both `tests/e2e/operations.spec.ts` HWEB-006 cases failed a Playwright strict-mode ambiguity between that header and destination. `tests/e2e/sidebar-groups.spec.ts:37` matched both the exact `Intégrité & maintenance` destination and the separate `Afficher les sous-sections : Intégrité & maintenance` submenu control. These four failures are browser selector/navigation-test alignment issues triggered by the UXR-06 registered hierarchy, not demonstrated authorization or backend gaps.
+
+| Control | Bounded source repair |
+|---|---|
+| Registered stage | **P2 / UXR-06** only; not UXR-07 |
+| Base SHA/tree | `30b735ba70316a9dbd3668caffe3c84107702974` / `3159d36dc0ffe438f6882d2030d672f810c5f9d2` |
+| Commit message | `test(shell): disambiguate UXR-06 browser navigation` |
+| UPDATE | `tests/e2e/critical-operational-journeys.spec.ts`: scope enabled-target locator to the accessible authorized navigation landmark and use `exact: true`, distinguishing header from process destination and disabled global task shortcut. Explicitly expand Work before selecting My Tasks and verify Alarms is no longer exposed from the collapsed Operations group. Preserve monitor → alarm acknowledgement → workflow approval journey and its assertions. |
+| UPDATE | `tests/e2e/operations.spec.ts`: both telemetry/monitoring permission cases select the exact Operations **destination** inside the named primary navigation, not the similarly named accordion group. Retain displayed data and negative telemetry-permission proof. |
+| UPDATE | `tests/e2e/sidebar-groups.spec.ts`: assert the exact Integrity & Maintenance destination, leaving the distinct submenu toggle, keyboard activation, text-only Assets and one-group behavior fully tested. |
+| UPDATE | `docs/roadmap/ULTIMATE_ROADMAP.md`: append-only evidence and implementation register. |
+| CREATE/DELETE | None. |
+| Preserve | No production shell, permission, router, REST/API client, workflow, test skip/retry/timeout or CI threshold changes. Preserve 272px/72px, 900 KiB, native A1/W4/F18 qualification, G2 not accepted, HWEB-F16 HOLD/F21 synthetic preview/F22 BLOCKED, UXR-07 not selected. |
+| Local validation | Exact-source substitution and locator specificity examined against failing Playwright trace text; local browser execution is **not** claimed. |
+| Acceptance gate | Fresh exact-SHA Code CI must pass all four affected browser regressions, full Playwright, existing 187+ unit, performance/build/budget, native A1/F18, and matching Documentation Validation. |
+| Current state | **SOURCE REPAIR PREPARED; new exact-SHA CI not yet verified**. UXR-06 remains CI-pending. Do not advance UXR-07. |
+

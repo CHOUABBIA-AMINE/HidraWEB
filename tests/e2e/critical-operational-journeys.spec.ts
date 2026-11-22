@@ -167,7 +167,11 @@ async function signIn(page: Page) {
 }
 
 async function clickEnabledNavigation(page: Page, name: string) {
-  const candidates = page.getByRole('button', { name }).filter({ visible: true });
+  // Select a destination inside the backend-filtered navigation landmark only.
+  // Exact matching distinguishes the 'OPÉRATIONS' accordion header from
+  // the 'Opérations' workspace and avoids disabled global shortcuts.
+  const candidates = page.getByRole('navigation', { name: 'Navigation principale' })
+    .getByRole('button', { name, exact: true }).filter({ visible: true });
   const count = await candidates.count();
   for (let index = 0; index < count; index += 1) {
     const candidate = candidates.nth(index);
@@ -204,6 +208,13 @@ test('HWEB-015-09 protects the monitor-to-response-to-workflow operator journey'
   await page.getByRole('button', { name: 'Acquitter' }).click();
   await expect(page.getByText('Opération enregistrée par HidraAPI.')).toBeVisible();
 
+  // UXR-06 exposes one group at a time. Switch to Work before selecting
+  // the authorized workflow destination; never click the global shortcut.
+  const navigation = page.getByRole('navigation', { name: 'Navigation principale' });
+  const workGroup = navigation.getByRole('button', { name: 'TRAVAIL', exact: true });
+  await workGroup.click();
+  await expect(workGroup).toHaveAttribute('aria-expanded', 'true');
+  await expect(navigation.getByRole('button', { name: 'Alarmes', exact: true })).toHaveCount(0);
   await clickEnabledNavigation(page, 'Mes tâches');
   await expect(page).toHaveURL(/\/work\/tasks$/);
   await expect(page.getByText('Validate pressure deviation')).toBeVisible();

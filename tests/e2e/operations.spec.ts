@@ -60,7 +60,9 @@ test('HWEB-006 loads monitoring and telemetry through published contracts', asyn
   await mockOperations(page);
   await signIn(page);
 
-  await page.getByRole('button', { name: 'Opérations' }).click();
+  // Disambiguate the Operations workspace from the OPÉRATIONS accordion group.
+  await page.getByRole('navigation', { name: 'Navigation principale' })
+    .getByRole('button', { name: 'Opérations', exact: true }).click();
   await expect(page).toHaveURL(/\/operations$/);
   await expect(page.getByRole('heading', { name: 'Opérations · télémétrie & surveillance' })).toBeVisible();
   await expect(page.getByText('PRESSURE-HIGH')).toBeVisible();
@@ -81,7 +83,9 @@ test('HWEB-006 hides telemetry controls when only monitoring grants are availabl
   await mockOperations(page);
   await signIn(page);
 
-  await page.getByRole('button', { name: 'Opérations' }).click();
+  // Disambiguate the Operations workspace from the OPÉRATIONS accordion group.
+  await page.getByRole('navigation', { name: 'Navigation principale' })
+    .getByRole('button', { name: 'Opérations', exact: true }).click();
   await expect(page.getByText('Accès télémétrie indisponible pour cet utilisateur.')).toBeVisible();
   await expect(page.getByText('PRESSURE-HIGH')).toBeVisible();
 });

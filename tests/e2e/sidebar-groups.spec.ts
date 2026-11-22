@@ -34,7 +34,8 @@ test('UXR-06 allows only one authorized expanded group and an explicit text-only
   await expect(engineering).toHaveAttribute('aria-expanded', 'true');
   await expect(operations).toHaveAttribute('aria-expanded', 'false');
   await expect(page.getByRole('button', { name: 'Réseau' })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Intégrité & maintenance' })).toBeVisible();
+  // Exact destination label: the distinct submenu toggle includes this text.
+  await expect(page.getByRole('button', { name: 'Intégrité & maintenance', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Actifs' })).toHaveCount(0);
 
   const submenu = page.getByRole('button', { name: 'Afficher les sous-sections : Intégrité & maintenance' });
