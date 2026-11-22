@@ -23,7 +23,7 @@ describe('activeOperationalScopes', () => {
 
 
 describe('UXR-09 exact company and regional access', () => {
-  const scope = { id: 7, type: 'PIPELINE_SYSTEM', targetId: 'gz2', name: 'GZ2' };
+  const scope: OperationalScopeResponse = { id: 7, type: 'PIPELINE_SYSTEM', targetId: 'gz2', name: 'GZ2' };
   it('excludes expired, future, suspended and unsupported scopes', () => {
     const at = Date.parse('2026-11-22T18:00:00Z');
     expect(effectiveRegionalScopes([

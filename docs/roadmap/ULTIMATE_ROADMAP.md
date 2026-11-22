@@ -4549,3 +4549,28 @@ fresh Identity and Organization responses; only after the result/denial is known
 change the navigation key and return to Overview. Unmount/session transition
 invalidates pending request epochs. Clear the selected company on sign-out from
 AuthProvider, preventing a following principal inheriting stale context.
+
+
+### P3 / UXR-09 — Code CI #1073 test-fixture TypeScript repair (22 November 2026)
+
+[Code CI #1073](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45056835932)
+at UXR-09 source SHA `71c58776c454702c15cbc3c947b8c345d9465fbf`
+failed in `verify` at `npm run typecheck`: four TS2322 errors in
+`src/features/context/model/operationalContextModel.test.ts` because the
+UXR-09 test constant `scope` widened `type: 'PIPELINE_SYSTEM'` to
+`string`, not the generated `OperationalScopeResponseType` union.
+OpenAPI compatibility and ESLint passed (seven non-blocking warnings);
+tests/performance/build/complete Playwright did not run in `verify` after
+typecheck. Independent A1 six-module native PostgreSQL/API browser qualification,
+F18 LOCAL and [Docs #109](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45056835960)
+passed on the failed SHA; these do not substitute for the missing `verify` gates.
+
+**Bounded same-task repair:** annotate that exact fixture as the already imported
+generated `OperationalScopeResponse`, preserving positive/negative assertions,
+all production logic and the original strict test/CI settings.
+Exact UPDATE scope: `src/features/context/model/operationalContextModel.test.ts`
+and append this roadmap; CREATE/DELETE none. **Exact repair message:**
+`test(context): type UXR-09 regional scope fixture`.
+No API or other module changes, no skipped checks, no relaxed types or bypass.
+**Status:** UXR-09 CI qualification pending a new exact-SHA Code CI and Docs CI.
+The next unselected task remains UXR-10; G3 remains open.
