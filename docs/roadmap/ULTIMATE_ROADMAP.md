@@ -4048,3 +4048,27 @@ The 31 advertised [T39 Circle 1 consumer handoff](https://github.com/CHOUABBIA-A
 **Task decision:** UXR-02's **source and gap qualification** is documented with exact checksum-backed backend proof, full existing Orval-input inventory, and explicit 31-route T39 handoff. **Native consumer compatibility remains NOT VERIFIED** because the actual machine pin, generated clients and native browser test were intentionally not mutated in this bounded documentation execution. This is not an authorization to declare Circle 1 operationally accepted or an instruction to bypass HWEB-F16. If full machine pin is a required completion criterion for UXR-02 itself, keep the **same indivisible UXR-02 open** rather than calling the documentation receipt full completion; do not invent a suffix task.
 
 **Publication/CI rule:** guarded direct `main` update of this one file using the exact message above; verify that HidraWEB Documentation Validation starts on the new SHA, then STOP. Code CI should not trigger from Markdown-only scope. No next UXR task is executed by this publication.
+
+
+---
+
+## P1 / UXR-03 — industrial theme and layout token implementation
+
+**Owner selection:** “next” after P0 / UXR-02. **Registered task:** P1 / UXR-03, indivisible, React/MUI presentation foundation. The preceding UXR-02 source-evidence commit `da9ec8024ccd5cf0041aac8e9c98352cb51344bc` has [HidraWEB Documentation Validation #88 SUCCESS](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45019281992); it does *not* certify T39 web client re-pinning. UXR-03 has **no HidraAPI modules, Circles or REST dependencies**.
+
+| Execution control | UXR-03 scope |
+|---|---|
+| Baseline | HidraWEB `da9ec8024ccd5cf0041aac8e9c98352cb51344bc` (tree `00b84f47db8a9e4e2ac96968e57dc987b2df7767`). |
+| Task state | **IMPLEMENTED IN SOURCE — exact-SHA Code CI required**. Not production, WCAG, device or enterprise accepted on source inspection alone. |
+| Commit message | `feat(design-system): implement UXR-03 industrial theme tokens` |
+| CREATE | `src/design-system/tokens/industrialTokens.ts`: typed immutable palette, typography, density, focus, 4px grid, breakpoints and elevation tokens. |
+| UPDATE | `src/design-system/theme/theme.ts`: reuse the existing MUI provider, add approved semantic palette, text/contrast, focus/motion accessibility, density, cards and typography. |
+| CREATE | `src/design-system/theme/theme.test.ts`: 4.5:1 paired contrast, source palette, spacing, breakpoint, font and touch/focus checks. |
+| UPDATE | `docs/10-Design-System-Specification.md`: source→runtime mapping and explicit non-acceptance of RTL/full WCAG. |
+| UPDATE | `docs/roadmap/ULTIMATE_ROADMAP.md`: this execution boundary and acceptance/evidence record. |
+| DELETE | None. |
+| Non-scope | No route/navigation renaming, no CSS framework or package-lock changes, no generated clients/OpenAPI/API-contract moves, no business-data semantics, no SCADA/simulation, no authorization or locale/RTL implementation, no UXR-04/05 work. |
+| Unit validation | Contrast for white-on-critical/amber/success/info pairs, canvas text contrast, 4px grid, 44px control minimum, breakpoints, MUI focus-visible and forced-colors/reduced-motion configuration. |
+| CI gate | Guarded single direct-main commit; applicable **HidraWEB Code CI** starts on its exact SHA (lint, TypeScript, unit, performance, build, browser, native jobs as configured). STOP after observing created/started; report actual state without assuming a pass. |
+
+**Existing capability preserved:** `AppProviders` remains the sole `ThemeProvider` and `CssBaseline` owner. The main authenticated shell remains unchanged. The `F16` HOLD, `F21` accepted synthetic preview, `F22` BLOCKED, and outstanding Circle 1 pinned contract gaps remain unaffected. UXR-04 is the next *candidate* (locale, RTL, responsive) and is NOT selected or automatically launched. Browser accessibility and layout tests for representative screens may still be needed before industrial deployment acceptance.
