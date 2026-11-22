@@ -64,3 +64,25 @@ test('HWEB-008 presents backend-governed alarm response and suppression semantic
   await expect(page.getByRole('button', { name: 'Retirer de l’étagère' })).toBeDisabled();
   await expect(page.getByText('Opération enregistrée par HidraAPI.')).toBeVisible();
 });
+
+test('UXR-07 alarm view tabs survive Back/Forward through allowlisted URL state', async ({ page }) => {
+  await mockAlarm(page);
+  await signIn(page);
+  await page.getByRole('navigation', { name: 'Navigation principale' })
+    .getByRole('button', { name: 'Alarmes', exact: true }).click();
+  await expect(page).toHaveURL(/\/alarms$/);
+
+  const tabs = page.getByRole('tab');
+  await expect(tabs.nth(0)).toHaveAttribute('aria-selected', 'true');
+  await tabs.nth(1).click();
+  await expect(page).toHaveURL(/\/alarms\?tab=history$/);
+  await expect(page.getByRole('tab').nth(1)).toHaveAttribute('aria-selected', 'true');
+
+  await page.goBack();
+  await expect(page).toHaveURL(/\/alarms$/);
+  await expect(page.getByRole('tab').nth(0)).toHaveAttribute('aria-selected', 'true');
+
+  await page.goForward();
+  await expect(page).toHaveURL(/\/alarms\?tab=history$/);
+  await expect(page.getByRole('tab').nth(1)).toHaveAttribute('aria-selected', 'true');
+});

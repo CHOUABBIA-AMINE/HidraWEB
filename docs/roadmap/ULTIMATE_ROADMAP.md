@@ -4361,3 +4361,38 @@ The 31 advertised [T39 Circle 1 consumer handoff](https://github.com/CHOUABBIA-A
 | Required acceptance | Fresh exact-SHA Code CI must demonstrate all unit/component tests, performance checks, 900 KiB initial JS limit, production build/release, complete Playwright suite and A1/F18 native jobs; Documentation Validation must pass. |
 | Current state | **REPAIR PREPARED — RECHECK EXACT-SHA CI AFTER GUARDED PUBLICATION**. UXR-06 CI not yet accepted; G2 open, UXR-07 not selected. |
 
+
+---
+
+## P2 / UXR-07 — route-aware mobile navigation, deep links and local view tabs (22 November 2026)
+
+**Selection and predecessor acceptance.** Owner “Next” authorizes exactly one registered task **P2 / UXR-07**. Exact current `main` `b330b46e276ab45de4c5a22a2ff545b12286f703`, tree `1700c11f287fa56ca50c6a651b2a14107f35a64e`. [HidraWEB Code CI #1065](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45032330688) **SUCCESS**, attempt 1, on that SHA: **187/187 unit tests**, **6/6 performance tests**, initial static JS **728.8 / 900 KiB**, full Playwright **85 passed, 15 repository-configured skipped**, and all three jobs including A1 native API/PostgreSQL/W4 and F18 LOCAL **SUCCESS**. [Documentation Validation #101](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45032330729) **SUCCESS** on the same SHA. Therefore UXR-06 is **CI-passed**; no claim of site/industrial acceptance.
+
+**Registered acceptance goal G2.** Preserve the six-group, one-open-group, 272px/72px hierarchy of UXR-06; add responsive mobile drawer lifecycle, keyboard and history Back/Forward, safe *authorized* active-ancestor restoration, bounded local tab/context restoration, existing fallback/Not Found and root redirect. C1 identity/security + target Circle, using existing `GET /api/v1/identity/me/permissions` and target module routes; no invented endpoint. Grant/scope change must not resurrect protected selections. Page-owned API checks remain authoritative, and company/resource authorization remains with HidraAPI.
+
+**Bounded implementation register, one task, one guarded commit:**
+
+| Action | Exact file | Contract / role |
+|---|---|---|
+| CREATE | `src/shell/navigation/useNavigationContextKey.ts` | Pure deterministic ephemeral view key + hook from router history entry, current authenticated principal, operational scope and effective authorized modules; no storage or permission grant inference. |
+| CREATE | `src/shell/navigation/useNavigationContextKey.test.ts` | Negative cases for history, principal, scope and grant changes, plus order-independent module snapshot. |
+| UPDATE | `src/shell/AppShell.tsx` | Key shell navigation frame and protected contextual inspector boundary by view identity; old mobile drawer cannot reopen on browser Back, route or authorization-scope changes; preserve existing main/header/skip link and responsive/RTL defaults. |
+| UPDATE | `src/shell/sidebar/HidraSidebar.tsx` | Key manual group/submenu state to current view identity and derive active parent from exactly published authorized registry after Back/Forward or permission/scope change. Do not change route permissions, six sections or drawer dimensions. |
+| CREATE | `src/shell/navigation/localTabRoute.ts` | Read/write only allowlisted non-sensitive `tab` query identities; preserve unrelated browser history query coordinates; default for unknown/forged tab IDs. |
+| CREATE | `src/shell/navigation/localTabRoute.test.ts` | Allowlist, forged query fallback, unrelated query preservation and default tab omission. |
+| UPDATE | `src/features/alarm/AlarmConsolePage.tsx` | Existing Active/History tabs use allowlisted `?tab=history` and browser Back/Forward; selection and alarm record/command details remain page-local and server-gated. |
+| UPDATE | `src/features/analytics/AnalyticsWorkspacePage.tsx` | Existing four Analytics views use allowlisted URL `tab` coordinates and existing page permission checks; no new analytics calculations or backend queries. |
+| CREATE | `src/shell/context/ContextDrawerProvider.scope.test.tsx` | Verify inspector content cannot reappear across scope/history boundary remount, including return to previously visited context. |
+| CREATE | `tests/e2e/mobile-deeplinks.spec.ts` | Five synthetic browser cases covering mobile Escape/open/close, Back/Forward non-reopening, direct nested link and exact active ancestry, unauthorized ancestor hiding, generic 404 and protected root redirect. |
+| UPDATE | `tests/e2e/alarm.spec.ts` | Browser Back/Forward tab restoration and current selected tab without weakening HWEB-008 alarm response checks. |
+| UPDATE | `docs/06-Navigation-Blueprint.md`, `docs/10-Design-System-Specification.md`, this `docs/roadmap/ULTIMATE_ROADMAP.md` | Append-only architecture, acceptance, legacy/status and evidence record. |
+| DELETE | None. |
+| Exact commit message | `feat(shell): implement UXR-07 safe mobile and deep-link restoration` | Existing `main` with expected-head guard; no branch or PR. |
+
+**Existing behavior preserved, not reimplemented:** `src/app/router/router.tsx` already has an authenticated index redirect from `/` to `/overview`, a protected `*` / Not Found fallback, lazy route loading and guarded login return location. MUI temporary Drawer already handles keyboard/Escape and LTR/RTL anchors. UXR-07 adds safe state lifetime and browser proofs rather than duplicating those components. Current non-tab resource/form/selected-record context remains **page-owned and non-persisted**; it must be discarded when route/scope/grants change, never inferred from an untrusted URL.
+
+**Security/operation boundaries and limitations:** A tab ID, route URL or selected sidebar group carries **zero authority**. The sidebar continues hiding items missing the current effective-grant/published-route module intersection; protected data still needs backend and page permission checks. UXR-09/P3 owns full operational-context reauthorization and cross-module query cache invalidation; UXR-07 alone is not proof of authoritative scope-switch authorization, production readiness or SITE acceptance. No OT access or numerical simulation changes. No Playwright skips/retries, runtime timeouts, test fixture relaxations or 900 KiB budget changes.
+
+**Required exact-SHA acceptance:** Code CI OpenAPI compatibility, lint, TypeScript, complete unit/component + performance, packaged build/bundle, full Chromium Playwright including UXR-07 and all preexisting tests, successful A1 six-module API/PostgreSQL W4 human review/denial and F18 LOCAL session qualification, plus Documentation Validation. Local source inspection and synthetic fixtures are not site validation.
+
+**Current status:** **IMPLEMENTATION PREPARED; NEW EXACT-SHA CI PENDING.** G2 remains OPEN until UXR-07 CI and any applicable engineering acceptance. Next registered phase is P3/UXR-08, **not selected or executed**.

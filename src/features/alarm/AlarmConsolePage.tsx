@@ -24,7 +24,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
 import type { AcknowledgeAlarmRequest, AlarmView, CloseAlarmRequest, ShelveAlarmRequest, ShelvingView } from '@/api/generated/alarm/model';
@@ -41,6 +41,7 @@ import {
 import { ALARM_PERMISSIONS } from '@/features/alarm/api/alarmPermissions';
 import { AlarmSuppressionPanel } from '@/features/alarm/AlarmSuppressionPanel';
 import { usePermissions } from '@/features/permissions/usePermissions';
+import { readLocalTab, writeLocalTab } from '@/shell/navigation/localTabRoute';
 
 const PAGE_SIZE = 50;
 const ALARM_STATES = ['RAISED', 'ACTIVE', 'ACKNOWLEDGED', 'SHELVED', 'SUPPRESSED', 'CLEARED', 'CLOSED', 'ESCALATED', 'CANCELLED'] as const;
@@ -120,7 +121,8 @@ export function AlarmConsolePage() {
   const permissions = usePermissions();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [view, setView] = useState<AlarmViewMode>('active');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const view = readLocalTab(searchParams.get('tab'), ['active', 'history'] as const, 'active');
   const [page, setPage] = useState(0);
   const [selectedAlarmId, setSelectedAlarmId] = useState('');
   const [draftFilters, setDraftFilters] = useState({ state: '', severityId: '', topologyAssetId: '', from: '', to: '' });
@@ -230,7 +232,10 @@ export function AlarmConsolePage() {
             <Paper variant="outlined" sx={{ p: 2 }}>
               <Stack spacing={2}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
-                  <Tabs onChange={(_, value: AlarmViewMode) => { setView(value); setPage(0); }} value={view}>
+                  <Tabs onChange={(_, value: AlarmViewMode) => {
+                     setPage(0);
+                     setSearchParams((previous) => writeLocalTab(previous, value, ['active', 'history'] as const, 'active'));
+                   }} value={view}>
                     <Tab label={t('alarm.active')} value="active" />
                     <Tab label={t('alarm.history')} value="history" />
                   </Tabs>

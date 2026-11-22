@@ -19,9 +19,11 @@ import {
 } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router';
 
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
 import { usePermissions } from '@/features/permissions/usePermissions';
+import { readLocalTab, writeLocalTab } from '@/shell/navigation/localTabRoute';
 import { AnalyticsExecutionPanel } from '@/features/analytics/components/AnalyticsExecutionPanel';
 import {
   fetchWorkbenchRecord,
@@ -45,6 +47,8 @@ type ViewDefinition = {
   statusKeys: readonly string[];
   columns: Array<{ key: string; label: string }>;
 };
+
+const ANALYTICS_TABS = ['datasets', 'insights', 'metric-definitions', 'metric-evaluations'] as const;
 
 const VIEWS: ViewDefinition[] = [
   {
@@ -206,7 +210,9 @@ function AnalyticsResourceView({
 
 export function AnalyticsWorkspacePage() {
   const permissions = usePermissions();
-  const [tab, setTab] = useState(0);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = readLocalTab(searchParams.get('tab'), ANALYTICS_TABS, 'datasets');
+  const tab = ANALYTICS_TABS.indexOf(activeTab);
 
   const listPermission = permissionForRoute(permissions.routes, WORKBENCH_LIST_ROUTE, 'GET');
   const detailPermission = permissionForRoute(permissions.routes, WORKBENCH_DETAIL_ROUTE, 'GET');
@@ -268,7 +274,10 @@ export function AnalyticsWorkspacePage() {
         {resourcesQuery.isError ? <Alert severity="error">{errorMessage(resourcesQuery.error, 'analytics resources')}</Alert> : null}
 
         <Paper variant="outlined">
-          <Tabs aria-label="Analytics views" value={tab} onChange={(_, value: number) => setTab(value)} variant="scrollable" scrollButtons="auto">
+          <Tabs aria-label="Analytics views" value={tab} onChange={(_, value: number) => {
+             const requested = ANALYTICS_TABS[value];
+             if (requested) setSearchParams((previous) => writeLocalTab(previous, requested, ANALYTICS_TABS, 'datasets'));
+           }} variant="scrollable" scrollButtons="auto">
             {VIEWS.map((view) => <Tab key={view.label} label={view.label} />)}
           </Tabs>
         </Paper>

@@ -141,3 +141,15 @@ The permanent application frame remains the existing MUI/React shell. This stage
 | Acceptance | Unit tests check six sections, no deeper-than-three registry nesting, exact authorized path ancestry and negative assets visibility. Browser tests check one-open-group behavior, keyboard submenu, text-only descendant and collapsed 72px state. Existing Bootstrap, Workflow and authorized native organization browser tests now expand the necessary product group before clicking its visible destination, rather than relying on all five groups permanently open. |
 
 This is a frontend navigation-presentation improvement, **not** evidence that any hidden business endpoint became backend-ready. UI labels and group structure do not disclose protected resource counts or override HidraAPI permission checks. UXR-07 remains the separate stage for back/forward, route/ancestor, tab and scoped-context restoration, and G2 remains open.
+
+
+## UXR-07 — navigation-history and local view-state contract (22 November 2026)
+
+| UI element | Registered UXR-07 behavior |
+|---|---|
+| Mobile primary drawer | Existing MUI temporary overlay, toolbar offset and LTR/RTL side. Menu button `aria-expanded` follows open state; Escape/overlay dismissal closes it. Drawer cannot reopen from an old browser history entry because the navigation frame is keyed to the route/principal/scope/grants identity. |
+| Desktop accordion | Existing six groups, one open group and no more than three levels. Manual expansion applies to one authorized history entry; a route change/Back/Forward derives the exact current parent and nested submenu only when its module is present in the effective backend grant+published-route set. |
+| Page context | Contextual inspector and protected workspace are keyed to the same navigation identity and discard local record selection on route, principal, grant or scope changes; no hidden inspector data is restored automatically. |
+| Local view tabs | Alarm `active`/`history`; Analytics `datasets`, `insights`, `metric-definitions`, `metric-evaluations`. Only allowlisted `?tab=` values are recognized, unknowns fall back to the default, and unrelated query coordinates remain intact. Tab state is not treated as authorization. |
+| Deep links/fallbacks | Existing guarded login return destination, index redirect to `/overview`, generic 404 and safe return action. Existing backend/page authorization guards continue to decide whether a protected target can reveal data. |
+| Invariants | No new REST endpoint, backend readiness claims, sensitive browser persistence, 900 KiB limit changes, altered test retries/skips or unapproved site acceptance. |

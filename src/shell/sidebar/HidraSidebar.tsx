@@ -27,6 +27,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
 
 import { usePermissions } from '@/features/permissions/usePermissions';
+import { useNavigationContextKey } from '@/shell/navigation/useNavigationContextKey';
 import {
   authorizedNavigationSections,
   navigationSectionForPath,
@@ -69,25 +70,29 @@ export function HidraSidebar({ collapsed, mobile = false, open = false, onClose 
   const permissions = usePermissions();
   const location = useLocation();
   const navigate = useNavigate();
+  const navigationKey = useNavigationContextKey();
   const width = collapsed ? collapsedWidth : expandedWidth;
 
   // A group exists only if it contains an authorized destination. Never expose
   // inaccessible child counts or inherited capabilities through the sidebar.
   const visibleSections = authorizedNavigationSections(navigationSections, permissions.modules);
   const activeSection = navigationSectionForPath(visibleSections, location.pathname);
-  const [requestedGroup, setRequestedGroup] = useState<string | null>(null);
-  const [requestedSubmenu, setRequestedSubmenu] = useState<boolean | null>(null);
+  // Manual expansion applies only to the current authorized history entry.
+  // Back/Forward, scope switching and grant changes re-derive active ancestors.
+  const [requestedGroup, setRequestedGroup] = useState<{ key: string; id: string } | null>(null);
+  const [requestedSubmenu, setRequestedSubmenu] = useState<{ key: string; open: boolean } | null>(null);
   const visibleGroupIds = new Set(visibleSections.filter((section) => section.id !== 'root').map((section) => section.id));
   const defaultGroup = activeSection !== 'root' && activeSection && visibleGroupIds.has(activeSection)
     ? activeSection
     : visibleGroupIds.has('operations') ? 'operations' : visibleSections.find((section) => section.id !== 'root')?.id;
   // Empty string deliberately means "all closed"; at most one group can open.
-  const expandedGroup = requestedGroup === '' ? undefined
-    : requestedGroup !== null && visibleGroupIds.has(requestedGroup) ? requestedGroup : defaultGroup;
+  const manualGroup = requestedGroup?.key === navigationKey ? requestedGroup.id : null;
+  const expandedGroup = manualGroup === '' ? undefined
+    : manualGroup !== null && visibleGroupIds.has(manualGroup) ? manualGroup : defaultGroup;
 
-  const goTo = (item: NavigationItem, sectionId: string) => {
+  const goTo = (item: NavigationItem) => {
     if (!item.implemented) return;
-    if (sectionId !== 'root') setRequestedGroup(sectionId);
+    // The next history entry selects its authorized ancestor automatically.
     if (mobile) onClose?.();
     void navigate(item.path);
   };
@@ -99,14 +104,14 @@ export function HidraSidebar({ collapsed, mobile = false, open = false, onClose 
     const children = item.children ?? [];
     const hasSubmenu = children.length > 0;
     const routeInSubmenu = children.some((child) => child.implemented && child.path === location.pathname);
-    const submenuOpen = requestedSubmenu ?? routeInSubmenu;
+    const submenuOpen = requestedSubmenu?.key === navigationKey ? requestedSubmenu.open : routeInSubmenu;
 
     const destination = (
       <ListItemButton
         aria-current={selected ? 'page' : undefined}
         aria-label={label}
         disabled={!item.implemented}
-        onClick={item.implemented ? () => goTo(item, sectionId) : undefined}
+        onClick={item.implemented ? () => goTo(item) : undefined}
         selected={selected}
         sx={{
           minHeight: 46,
@@ -140,7 +145,7 @@ export function HidraSidebar({ collapsed, mobile = false, open = false, onClose 
               aria-controls={`hidra-nav-submenu-${item.id}`}
               aria-expanded={submenuOpen}
               aria-label={t(submenuOpen ? 'nav.collapseSubmenu' : 'nav.expandSubmenu', { name: label })}
-              onClick={() => setRequestedSubmenu(!submenuOpen)}
+              onClick={() => setRequestedSubmenu({ key: navigationKey, open: !submenuOpen })}
               size="small"
               sx={{ flexShrink: 0, minHeight: 44, minWidth: 44 }}
             >
@@ -198,7 +203,10 @@ export function HidraSidebar({ collapsed, mobile = false, open = false, onClose 
                 aria-controls={`hidra-nav-group-${section.id}`}
                 aria-expanded={groupOpen}
                 aria-label={label}
-                onClick={() => setRequestedGroup(groupOpen ? '' : section.id)}
+                onClick={() => {
+                  setRequestedGroup({ key: navigationKey, id: groupOpen ? '' : section.id });
+                  setRequestedSubmenu(null);
+                }}
                 selected={groupOpen}
                 sx={{ minHeight: 48, px: collapsed ? 2.5 : 2 }}
               >

@@ -6,6 +6,7 @@ import { Outlet, useLocation } from 'react-router';
 import { AdministrationGovernanceNotice } from '@/features/administration';
 import { hidraTheme } from '@/design-system/theme/theme';
 import { ContextDrawerProvider } from '@/shell/context/ContextDrawerProvider';
+import { useNavigationContextKey } from '@/shell/navigation/useNavigationContextKey';
 import { ContextualDrawer } from '@/shell/context/ContextualDrawer';
 import { useShellUiStore } from '@/shell/model/useShellUiStore';
 import { HidraNavbar } from '@/shell/navbar/HidraNavbar';
@@ -16,18 +17,19 @@ const mainContentId = 'hidra-main-content';
 function AppShellFrame() {
   const { t } = useTranslation();
   const location = useLocation();
+  const navigationKey = useNavigationContextKey();
   const mobile = useMediaQuery(hidraTheme.breakpoints.down('md'));
-  // Record the route entry on which the mobile drawer was opened.
-  // A route change closes it by derivation; no effect-driven setState is needed.
-  const [mobileNavigationRoute, setMobileNavigationRoute] = useState<string | null>(null);
-  const mobileNavigationOpen = mobileNavigationRoute === location.key;
+  // Mobile drawer state is bound to the route entry, principal, active grants
+  // and scope. History navigation/revocation closes it without an effect.
+  const [openedAtNavigationKey, setOpenedAtNavigationKey] = useState<string | null>(null);
+  const mobileNavigationOpen = openedAtNavigationKey === navigationKey;
   const sidebarCollapsed = useShellUiStore((state) => state.sidebarCollapsed);
   const toggleSidebar = useShellUiStore((state) => state.toggleSidebar);
   const administrationRoute = location.pathname.startsWith('/administration/');
 
   const navigationExpanded = mobile ? mobileNavigationOpen : !sidebarCollapsed;
   const toggleNavigation = () => {
-    if (mobile) setMobileNavigationRoute((key) => key === location.key ? null : location.key);
+    if (mobile) setOpenedAtNavigationKey((key) => key === navigationKey ? null : navigationKey);
     else toggleSidebar();
   };
 
@@ -58,18 +60,25 @@ function AppShellFrame() {
         collapsed={!mobile && sidebarCollapsed}
         mobile={mobile}
         open={mobileNavigationOpen}
-        onClose={() => setMobileNavigationRoute(null)}
+        onClose={() => setOpenedAtNavigationKey(null)}
       />
-      <Box component="main" aria-label={t('shell.workspace')} id={mainContentId} tabIndex={-1} sx={{ flexGrow: 1, minWidth: 0, width: { xs: '100%', md: 'auto' } }}>
-        <Toolbar sx={{ minHeight: '64px !important' }} />
-        {administrationRoute ? <AdministrationGovernanceNotice /> : null}
-        <Outlet />
-      </Box>
-      <ContextualDrawer />
+      {/* Rebuild protected page and inspector context on a changed route/scope.
+          No stale record inspector content may revive through browser history. */}
+      <ContextDrawerProvider key={navigationKey}>
+        <Box component="main" aria-label={t('shell.workspace')} id={mainContentId} tabIndex={-1} sx={{ flexGrow: 1, minWidth: 0, width: { xs: '100%', md: 'auto' } }}>
+          <Toolbar sx={{ minHeight: '64px !important' }} />
+          {administrationRoute ? <AdministrationGovernanceNotice /> : null}
+          <Outlet />
+        </Box>
+        <ContextualDrawer />
+      </ContextDrawerProvider>
     </Box>
   );
 }
 
 export function AppShell() {
-  return <ContextDrawerProvider><AppShellFrame /></ContextDrawerProvider>;
+  // The history/scope/grant identity remounts navigation controls, preventing
+  // an old mobile drawer from reopening when the browser returns to a prior entry.
+  const navigationKey = useNavigationContextKey();
+  return <AppShellFrame key={navigationKey} />;
 }
