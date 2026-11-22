@@ -40,6 +40,11 @@ test('HWEB-015-06 supports keyboard-only shell bypass and navigation', async ({ 
   await mockAccessibleShell(page);
   await signIn(page);
 
+  // One named banner, one authorized navigation landmark, and one workspace main.
+  await expect(page.getByRole('banner', { name: 'En-tête Hidra' })).toHaveCount(1);
+  await expect(page.getByRole('navigation', { name: 'Navigation principale' })).toHaveCount(1);
+  await expect(page.getByRole('main', { name: 'Espace de travail' })).toHaveCount(1);
+
   const skipLink = page.getByRole('link', { name: 'Aller au contenu principal' });
   await skipLink.focus();
   await expect(skipLink).toBeFocused();

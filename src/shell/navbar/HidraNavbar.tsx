@@ -29,7 +29,7 @@ export function HidraNavbar({ sidebarCollapsed, onToggleSidebar }: HidraNavbarPr
   const closeProfile = () => setProfileAnchor(null);
 
   return (
-    <AppBar color="inherit" elevation={0} position="fixed" sx={{ borderBottom: 1, borderColor: 'divider', zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+    <AppBar component="header" aria-label={t('shell.productHeader')} color="inherit" elevation={0} position="fixed" sx={{ borderBottom: 1, borderColor: 'divider', zIndex: (theme) => theme.zIndex.drawer + 1 }}>
       <Toolbar sx={{ gap: { xs: 0.5, sm: 1.5 }, minHeight: '64px !important' }}>
         <Tooltip title={sidebarCollapsed ? t('shell.expandNavigation') : t('shell.collapseNavigation')}>
           <IconButton

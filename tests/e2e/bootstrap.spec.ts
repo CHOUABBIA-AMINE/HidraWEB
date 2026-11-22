@@ -122,6 +122,8 @@ test('HWEB-002 authenticates and builds a capability-filtered accessible shell',
   await expect(page.getByRole('button', { name: 'Organisation' })).toBeEnabled();
   await expect(page.getByRole('button', { name: 'Identité & accès' })).toBeEnabled();
   await expect(page.getByRole('button', { name: 'Planification' })).toHaveCount(0);
+  await expect(page.getByRole('banner', { name: 'En-tête Hidra' })).toHaveCount(1);
+  await expect(page.getByRole('main', { name: 'Espace de travail' })).toHaveCount(1);
 
   const toggle = page.getByRole('button', { name: 'Réduire la navigation' });
   await toggle.focus();
@@ -151,6 +153,8 @@ test('HWEB-002 fails closed when permission metadata is forbidden during session
   await page.getByRole('button', { name: 'Se connecter' }).click();
   await expect(page.getByRole('alert')).toContainText('Forbidden');
   await expect(page).toHaveURL(/\/login$/);
+  // No authenticated shell or capability-filtered navigation survives failed bootstrap.
+  await expect(page.getByRole('navigation', { name: 'Navigation principale' })).toHaveCount(0);
 });
 
 test('HWEB-002 renders the authenticated 404 state inside the shell', async ({ page }) => {

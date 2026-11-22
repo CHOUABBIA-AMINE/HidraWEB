@@ -60,7 +60,7 @@ function AppShellFrame() {
         open={mobileNavigationOpen}
         onClose={() => setMobileNavigationRoute(null)}
       />
-      <Box component="main" id={mainContentId} tabIndex={-1} sx={{ flexGrow: 1, minWidth: 0, width: { xs: '100%', md: 'auto' } }}>
+      <Box component="main" aria-label={t('shell.workspace')} id={mainContentId} tabIndex={-1} sx={{ flexGrow: 1, minWidth: 0, width: { xs: '100%', md: 'auto' } }}>
         <Toolbar sx={{ minHeight: '64px !important' }} />
         {administrationRoute ? <AdministrationGovernanceNotice /> : null}
         <Outlet />

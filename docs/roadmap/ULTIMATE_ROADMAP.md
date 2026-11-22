@@ -4203,3 +4203,31 @@ The 31 advertised [T39 Circle 1 consumer handoff](https://github.com/CHOUABBIA-A
 | Required acceptance | Fresh exact-SHA HidraWEB Code CI: full Playwright suite including the six regressions, unchanged lint/TS/unit/performance/bundle checks and A1/F18 native lanes; Documentation Validation. |
 | State | **SOURCE REPAIR PREPARED; CI NOT YET PASSED**. Do not select UXR-05 until UXR-04 acceptance is observed. |
 
+
+---
+
+## P2 / UXR-05 — Semantic application shell, registered stage (22 November 2026)
+
+**Selection and predecessor gate:** The owner's “Next” selected the next indivisible registered task **P2 / UXR-05**, after [Code CI #1059](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45025257094) and [Documentation Validation #95](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45025257056) completed successfully on UXR-04 SHA `e2f3bd2d644a9023f80c230c168b23f38f3aafa1`. Code #1059 verified lint, TypeScript, 182 unit tests, six performance tests, **726.2 KiB initial JS under the unchanged 900 KiB cap**, 83 passed/15 skipped Playwright cases, and A1 native PostgreSQL/browser and F18 LOCAL session qualification. This is **CI-passed UXR-04**, not certified industrial deployment/visual/SITE acceptance.
+
+**Registered scope:** Permanent header/sidebar, workspace frame, skip link and landmarks, authenticated workspace outlet, route-loading and protected failure/denial boundaries. Owner is frontend application shell/identity-security composition. HidraAPI ownership: identity + security platform; **Circle C1**, existing `GET /api/v1/identity/me`, `GET /api/v1/identity/me/permissions`, `GET /api/v1/security/permissions/routes`, `GET /api/v1/security/permissions/catalog` via existing providers; `GET /api/v1/identity/me/operation-capabilities` is in roadmap but is not introduced as a new consumer in this task. No new backend request or permission/authorization mechanism.
+
+| Field | Bounded UXR-05 implementation envelope |
+|---|---|
+| Source HEAD/tree | `e2f3bd2d644a9023f80c230c168b23f38f3aafa1` / `56d99244a4b81fabdf3d17e4a7a01f622ca43e2d` |
+| Commit message | `feat(shell): implement UXR-05 semantic protected workspace frame` |
+| CREATE | `src/shell/ShellLoadingFallback.tsx`: localized, accessible protected shell loading state; `src/shell/ShellRouteError.tsx`: guarded errorElement with generic 403/404/503 and no backend response disclosure. |
+| CREATE | `src/shell/ShellLoadingFallback.test.tsx`: accessible loading landmark/status; `src/shell/ShellRouteError.test.tsx`: failed route 403/500 displays generic result, does not leak mock protected data. |
+| UPDATE | `src/app/router/router.tsx`: reusable protected Suspense fallback and errorElement wrapped under current authentication and permission bootstrap gates; do not weaken lazy initial JS, route tree or REST calls. |
+| UPDATE | `src/app/auth/RequireAuthentication.tsx`: localized authentication-check status/main. Existing sign-in redirect, memory-only credentials and return-path behavior unchanged. |
+| UPDATE | `src/features/permissions/PermissionBootstrapBoundary.tsx`: status/main for permission loading and failed bootstrap; existing 403/503/retry/authorization decisions preserved. |
+| UPDATE | `src/shell/AppShell.tsx`: named, focusable semantic main workspace preserving skip-to-content, mobile/RTL and contextual drawer; `src/shell/navbar/HidraNavbar.tsx`: explicit named header, no new controls. |
+| UPDATE | `src/shared/i18n/resources.ts`: FR/EN/AR for header, workspace, authentication and loading, generic route failure. |
+| UPDATE | `tests/e2e/accessibility-keyboard.spec.ts`: assert unique banner/navigation/main and unchanged skip-to-main keyboard focus; `tests/e2e/bootstrap.spec.ts`: authenticated landmarks and fail-closed shell absence after permission bootstrap refusal. |
+| UPDATE | `docs/10-Design-System-Specification.md`: shell semantic contracts and technical limits; `docs/roadmap/ULTIMATE_ROADMAP.md`: append-only registration and truthful acceptance record. |
+| DELETE | None. |
+| Preserved and deferred | UXR-06 six-group hierarchy and nested submenu **not started**; UXR-07 restoration/back-forward logic **not started**. Existing backend-authoritative authorization, 900 KiB startup JS and 21 pinned generated clients, engineering source instants/units, GZ2-first flows, HWEB-F16 HOLD, F21 owner-accepted synthetic preview, HWEB-F22 BLOCKED remain unchanged. |
+| Required acceptance | Fresh exact-SHA HidraWEB Code CI (OpenAPI contract verification, lint, typecheck, all unit/performance tests, unchanged bundle, release artifact, full Playwright and A1/F18 native jobs) plus Documentation Validation. UI accessibility beyond automated scope and SITE remain distinct. |
+| Current status | **IMPLEMENTATION SOURCE PREPARED; publication and exact-SHA CI not yet verified.** UXR-05 is not CI-passed and does not authorize UXR-06 without owner “Next”. |
+
+**G2 gate:** UXR-05 source-level semantic shell is distinct from UXR-06's six-group sidebar and UXR-07's safe route restoration; P2/G2 remains open until all registered work and required evidence are complete.
