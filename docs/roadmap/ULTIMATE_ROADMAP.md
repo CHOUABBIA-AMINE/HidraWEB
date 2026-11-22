@@ -4809,3 +4809,30 @@ TypeScript, all unit/component and performance tests, bundle size, release
 artifact verification, full Chromium (including UXR-13), native A1 W1–W4,
 F18 LOCAL and Documentation CI. UXR-14 remains the next **unselected** task;
 do not advance until this SHA passes and the owner invokes Next.
+
+
+### P4 / UXR-13 — CI #1080 TypeScript repair (22 November 2026)
+
+**Observed source of truth:** `main` at UXR-13 commit
+`cea1af876719f4de72703eefb7fc267b73c41dfd` (tree
+`068f0fec6b1bed231dcacc04de53aaa7ef618a08`).
+[Code CI #1080](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45072766690)
+completed FAILURE in `verify` during Typecheck after OpenAPI generation and
+lint. The sole reported compiler error was `TS2769` at
+`src/shell/workspace/WorkspaceCanvas.tsx:62`: the pinned MUI `Stack`
+component does not accept direct `alignItems` with current typings.
+Lint completed with zero errors and seven warnings. The unit/component,
+performance, production-build, release-package and full Chromium steps were
+**skipped** and remain unverified, not accepted.
+The independent F18 LOCAL and A1 native PostgreSQL/API jobs succeeded, and
+[Documentation Validation #116](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45072766661)
+succeeded. All CI job conclusions and failed steps were examined.
+
+**Repair message:** `fix(workspace): use sx alignment in UXR-13 loading canvas`.
+UPDATE only `src/shell/workspace/WorkspaceCanvas.tsx` (move the centered
+loading-state alignment from the unsupported `Stack.alignItems` prop into
+`Stack.sx` while keeping the same content, role, loading behavior and
+visual position) and append-only this roadmap. No tests, permissions,
+backend endpoints, data contracts, workflows or CI gates removed or weakened.
+The final acceptance requires a new exact-SHA Code CI and Documentation CI
+pass; UXR-14 remains unselected. No engineering/SITE acceptance inferred.

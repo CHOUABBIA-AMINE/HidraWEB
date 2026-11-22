@@ -59,7 +59,7 @@ export function WorkspaceCanvas({
   );
 
   const stateContent = state.kind === 'loading' ? (
-    <Stack alignItems="center" role="status" aria-live="polite" spacing={1.5} sx={{ py: 3 }}>
+    <Stack role="status" aria-live="polite" spacing={1.5} sx={{ alignItems: 'center', py: 3 }}>
       <CircularProgress size={24} />
       <Typography color="text.secondary" variant="body2">{state.message}</Typography>
       <Skeleton aria-hidden="true" variant="rounded" height={28} width="100%" />
