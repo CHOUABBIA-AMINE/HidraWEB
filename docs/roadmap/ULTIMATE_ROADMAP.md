@@ -3916,3 +3916,135 @@ The **two operational anchors** are separate from the 19 numbered workspaces; do
 - **Source limitations:** the 20/22 November external design attachment filenames are cited in the adopted roadmap, but their original bytes were not re-opened as part of this GitHub source review. This record reconciles the **owner-adopted summary**, canonical IA and live source, not an independent line-by-line certification of those external files. No new backend OpenAPI download or industrial deployment evidence was acquired.
 - **Publication gate:** one guarded direct-`main` documentation commit with the exact message and single-file allowlist above, followed by an exact-SHA **HidraWEB Documentation Validation** run observed queued/started. Do not claim the run has passed before it completes. Code CI is not expected for Markdown-only changes.
 - **Completion gate:** UXR-01 may be promoted from IMPLEMENTED to VERIFIED only after the applicable documentation CI succeeds and any owner-required design walkthrough/attachment check is accepted. Do not automatically start UXR-02.
+
+---
+
+## P0 / UXR-02 — T39 API handoff qualification
+
+**Registered:** 22 November 2026. **Selection:** owner “next” immediately after P0 / UXR-01. This is **one whole P0 documentation/contract-reconciliation task**, not a source implementation or a split of HWEB-F16. The preceding UXR-01 commit `6ea41eb9a425b933a4d55e5f72eae79e662071e5` has [HidraWEB Documentation Validation #87 success](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45015618070). The prior P0 UXR-01 recorded caveat about independent original-attachment walkthrough remains preserved.
+
+| Execution control | UXR-02 bounded registration |
+|---|---|
+| Exact task | **P0 / UXR-02 · Qualify API handoff** |
+| Owner selection | This “next” authorizes UXR-02 only; UXR-03 and native consumer feature work are NOT selected |
+| Baselines | HidraWEB `6ea41eb9a425b933a4d55e5f72eae79e662071e5`, tree `db4b9500a2e75933516799fe65fe5093601e8883`; HidraAPI T39 `f0310330ae8eb58f8bf00400b29afeb5baccb869`; observed current API main `33a0ec866496c04ba437c4017a5362192523c764` is a distinct release-alignment head |
+| Exact allowlist | **UPDATE ONLY** `docs/roadmap/ULTIMATE_ROADMAP.md` (this append-only evidence and task record) |
+| Commit message | `docs(roadmap): qualify UXR-02 T39 API handoff` |
+| Non-scope | No generated client, Orval input, compatibility manifest, runtime API, permission, TypeScript source, workflow, fixtures, CI workflow, backend code or production environment mutation |
+| Acceptance | Capture exact T39 CI-artifact/raw JSON/fixture receipt, check 31 handoff operations, inventory all 21 checked-in Orval slice inputs, identify required transport/schema/permission/security qualification and missing consumer pins without claiming native frontend acceptance |
+| Evidence state | **DOCUMENTED / BACKEND EVIDENCE VERIFIED; CONSUMER RE-PIN NOT VERIFIED**. Documentation CI pending on publication; do not label native Circle 1 implementation complete. |
+| Next proposed execution | P1 / UXR-03 **only after** this source qualification is accepted and the actual API-client pin/gap work is independently admitted to the relevant consumer task; no automatic task advance |
+
+### A. Immutable T39 backend artifact and signed synthetic evidence
+
+| Evidence | Verified value / limit |
+|---|---|
+| Accepted backend implementation | [`f0310330ae8eb58f8bf00400b29afeb5baccb869`](https://github.com/CHOUABBIA-AMINE/HidraAPI/commit/f0310330ae8eb58f8bf00400b29afeb5baccb869) |
+| T39 CI | [HidraAPI CI #1358 attempt 2](https://github.com/CHOUABBIA-AMINE/HidraAPI/actions/runs/44999120757/attempts/2), completed **success** on the same source SHA |
+| OpenAPI archive | [GitHub Actions artifact 14745595446](https://github.com/CHOUABBIA-AMINE/HidraAPI/actions/runs/44999120757/artifacts/14745595446), `hidra-api-openapi-f0310330ae8eb58f8bf00400b29afeb5baccb869-44999120757-1-api-contract` |
+| Actual ZIP SHA-256 | `afff2538c0c454635d3e2227ed1df94c6afc57640465d555d6e0e80dca006c86`, matched artifact digest; **not** the raw JSON digest |
+| ZIP member / raw JSON SHA-256 | `hidra-api.json` / `386858e3a3e7c78180cdb2d97a58102b973a22bcd723f5ad2ca29c33aaf20bbe`; independently recomputed from 1,170,060 extracted bytes |
+| OpenAPI coverage | OpenAPI 3.1.0; **491** path objects, **536** method operations, **586** component schemas |
+| Full verification artifact | [Artifact 14745428477](https://github.com/CHOUABBIA-AMINE/HidraAPI/actions/runs/44999120757/artifacts/14745428477), ZIP SHA-256 `71cdd4b9575152ee3539f4f8fb883ab3778f5bb9ae9c9ff48e6b703d7023425e`, matched GitHub digest |
+| Gate receipt | `gate.json`: T39 source SHA, run `44999120757`, attempt 2; 611 classes, 4,563 tests, **0 failures, 0 errors, 0 skips**. This is development/partitioned evidence, not independent production/site acceptance. |
+| Credential-free GZ2 fixture receipt | Full evidence shard-1 Surefire XML `TEST-dz.sh.hidra.qualification.Gz2SignedWorkflowNativeHttpPostgresIntegrationTest.xml`; one passing test and one `HIDRA_CIRCLE1_HANDOFF_V1` JSON line inside nested `system-out`. Canonical JSON (UTF-8; keys sorted; no whitespace) SHA-256: `0328beeb85ac87fc56aad0ab8083d9f8c87fce4cb48b7f188d917194b50d3f86`. |
+| Fixture structure and assertions | `version=1`; role labels `foreign,sibling,author,primary,reviewer,revoked`; linked company/pipeline/section/facility scope; exact source/observation/pressure evidence and workflow binding/decision/restart evidence. Eight checks: scoped-map, same-token-revocation, map-dossier-facility-join, design-vs-qualified-limit, trusted-fresh-stale-unavailable, workflow-vs-publication, scope-safe-evidence, independent-restart. Synthetic fixture identifiers are not fixed deployment identities. |
+| Boundary | These are **backend contract and test receipts**. There is no new HidraWEB native signed browser replay and no full external enterprise/OT qualification in this UXR-02 task. |
+
+The **immutable transport pin** for proposed frontend admission is the T39 raw JSON SHA-256 above plus its exact CI run/artifact/source. This is a *documentation/evidence pin*, **not** a substitution of the checked-in `openapi/compatibility/hidra-api-baseline.json` or a new generated Orval client. Do not claim that the existing frontend build validates against T39 until a separately authorized, exact digest-verified consumer update runs.
+
+### B. All checked-in feature-client contract inputs (source inventory)
+
+The source baseline contains **21 Orval configuration files** `orval.<slice>.config.ts` (excluding the unpinned full `orval.config.ts`) and their existing checked-in candidate JSON inputs. A clean checkout intentionally omits committed generated TypeScript files under `src/api/generated/`; the build generates them from these configured inputs. Each row below was reopened and its source JSON parsed at the exact HidraWEB SHA above.
+
+| Orval slice | Existing candidate API SHA | Paths | Methods | Schemas | T39 consumer status |
+| --- | --- | --- | --- | --- | --- |
+| `alarm` | `76b14cda4520…` | 13 | 16 | 11 | **NOT RE-PINNED** |
+| `analytics` | `76b14cda4520…` | 9 | 9 | 8 | **NOT RE-PINNED** |
+| `assets` | `76b14cda4520…` | 8 | 8 | 7 | **NOT RE-PINNED** |
+| `audit` | `76b14cda4520…` | 7 | 7 | 6 | **NOT RE-PINNED** |
+| `configuration` | `f1fdc206c916…` | 13 | 17 | 14 | **NOT RE-PINNED** |
+| `custody` | `da4ce33ead7d…` | 7 | 7 | 6 | **NOT RE-PINNED** |
+| `documents` | `76b14cda4520…` | 9 | 9 | 7 | **NOT RE-PINNED** |
+| `hse` | `da4ce33ead7d…` | 9 | 11 | 9 | **NOT RE-PINNED** |
+| `identity-organization` | `720e9222b30f…` | 59 | 65 | 62 | **NOT RE-PINNED** |
+| `incident` | `da4ce33ead7d…` | 8 | 9 | 6 | **NOT RE-PINNED** |
+| `integrity` | `76b14cda4520…` | 7 | 7 | 6 | **NOT RE-PINNED** |
+| `leak` | `da4ce33ead7d…` | 9 | 11 | 9 | **NOT RE-PINNED** |
+| `party` | `18e7a7596aea…` | 11 | 13 | 9 | **NOT RE-PINNED** |
+| `planning` | `d14c44fc527e…` | 16 | 18 | 20 | **NOT RE-PINNED** |
+| `reporting` | `76b14cda4520…` | 9 | 9 | 8 | **NOT RE-PINNED** |
+| `risk` | `81d46bcb8bc8…` | 10 | 10 | 9 | **NOT RE-PINNED** |
+| `simulation` | `76b14cda4520…` | 9 | 9 | 8 | **NOT RE-PINNED** |
+| `telemetry-monitoring` | `da4ce33ead7d…` | 17 | 19 | 16 | **NOT RE-PINNED** |
+| `topology` | `f1fdc206c916…` | 58 | 69 | 113 | **NOT RE-PINNED** |
+| `workbench` | `016d972725ac…` | 9 | 9 | 4 | **NOT RE-PINNED** |
+| `workflow` | `5817406923e5…` | 14 | 15 | 17 | **NOT RE-PINNED** |
+
+**Reconciliation outcome:** all 21 configured inputs are **older than the T39 accepted implementation**. They are not 21 independent T39 acceptances; the previously accepted GitHub Code CI only qualifies its own checked-in baseline and accepted source. `openapi/compatibility/hidra-api-baseline.json` currently names `c72eae39cab0b1ec1e20654386fe95ed43b134ab`, artifact `11955308898`, full-spec SHA-256 `547570323f48a2c4cfb33740cb579f3fe464af85bb43f0596cf819e935580fe7` and `expectedOrvalContracts: 21`. It must not be silently rewritten without placing corresponding T39 bytes and checking every consumed route/schema with regeneration, lint, typecheck, unit, performance, build and browser tests. Prior 21-slice compatibility against an older baseline is not a T39 result.
+
+### C. T39 Circle 1 route and DTO handoff inventory
+
+The 31 advertised [T39 Circle 1 consumer handoff](https://github.com/CHOUABBIA-AMINE/HidraAPI/blob/f0310330ae8eb58f8bf00400b29afeb5baccb869/doc/api/CIRCLE_1_CONSUMER_HANDOFF.md) method/path pairs were matched against **the downloaded raw T39 JSON**: **31/31 method/path entries exist**. The type names below come from the backend handoff, not handwritten frontend transport DTOs; the named source DTO is not necessarily present as a generated successful response schema.
+
+| Owner | T39 method and path | Source DTO or response type |
+| --- | --- | --- |
+| Identity | `POST /api/v1/identity/authentication/login` | AuthenticationLoginRequest → AuthenticationLoginResponse |
+| Regional access | `GET /api/v1/identity/me/regional-access/{resourceKind}/{resourceId}` | RegionalAccessResponse |
+| Telemetry | `GET /api/v1/telemetry/assets/{assetType}/{assetId}/points` | CommissionedPointsView |
+| Telemetry | `GET /api/v1/telemetry/assets/{assetType}/{assetId}/points/{pointId}/trusted-readings/history` | ObservationHistoryView |
+| Telemetry | `GET /api/v1/telemetry/assets/{assetType}/{assetId}/points/{pointId}/trusted-readings/latest` | LatestObservationView |
+| Operating constraints | `GET /api/v1/topology/operating-constraints/pipelines/{pipelineId}` | QualifiedOperatingConstraintView |
+| Operating constraints | `POST /api/v1/topology/operating-constraints/pipelines/{pipelineId}/restriction-requests` | PressureRestrictionSubmission → PressureRestrictionRequest |
+| Operating constraints | `GET /api/v1/topology/operating-constraints/pipelines/{pipelineId}/restriction-requests/{requestId}` | PressureRestrictionRequest |
+| Operating constraints | `GET /api/v1/topology/operating-constraints/pipelines/{pipelineId}/restriction-requests/{requestId}/evidence` | PressureRestrictionDecisionEvidence |
+| Operating constraints | `POST /api/v1/topology/operating-constraints/pipelines/{pipelineId}/restriction-requests/{requestId}/publication` | PressureRestrictionPublicationCommand → PressureRestrictionPublicationReceipt |
+| Operating constraints | `GET /api/v1/topology/operating-constraints/pipelines/{pipelineId}/sections/{sectionId}` | QualifiedOperatingConstraintView |
+| Pipeline dossier | `GET /api/v1/topology/pipeline-dossiers/{pipelineId}` | PipelineView |
+| Pipeline dossier | `GET /api/v1/topology/pipeline-dossiers/{pipelineId}/baseline` | BaselineView |
+| Pipeline dossier | `GET /api/v1/topology/pipeline-dossiers/{pipelineId}/connections` | ConnectionsPage |
+| Pipeline dossier | `GET /api/v1/topology/pipeline-dossiers/{pipelineId}/equipment` | EquipmentPage |
+| Pipeline dossier | `GET /api/v1/topology/pipeline-dossiers/{pipelineId}/sections` | SectionsPage |
+| Pipeline dossier | `GET /api/v1/topology/pipeline-dossiers/{pipelineId}/sections/{sectionId}` | SectionView — source-defined; 2xx schema absent |
+| Regional map | `GET /api/v1/topology/regional-map/geojson` | FeatureCollection |
+| Regional map | `GET /api/v1/topology/regional-map/layers` | LayerDescriptor[] |
+| Regional map | `GET /api/v1/topology/regional-map/layers/{layerId}` | LayerDescriptor — source-defined; 2xx schema absent |
+| Regional map | `GET /api/v1/topology/regional-map/layers/{layerId}/features` | FeatureCollection |
+| Regional map | `GET /api/v1/topology/regional-map/layers/{layerId}/features/{entityId}` | Feature — source-defined; 2xx schema absent |
+| Regional map | `GET /api/v1/topology/regional-map/search` | SearchResult |
+| Workflow | `GET /api/v1/workflow/definitions` | Definition[] |
+| Workflow | `POST /api/v1/workflow/instances` | StartWorkflowInstanceRequest → WorkflowInstanceResponse |
+| Workflow | `GET /api/v1/workflow/instances/{id}` | InstanceView |
+| Workflow | `GET /api/v1/workflow/instances/{id}/timeline` | TimelineEntry[] |
+| Workflow | `POST /api/v1/workflow/tasks` | CreateWorkflowTaskRequest → WorkflowTaskResponse |
+| Workflow | `GET /api/v1/workflow/tasks/{id}` | TaskView |
+| Workflow | `GET /api/v1/workflow/tasks/{id}/available-actions` | AvailableActionView[] |
+| Workflow | `POST /api/v1/workflow/tasks/{taskId}/transitions/{transitionId}/execute` | ExecuteWorkflowTransitionRequest → WorkflowTransitionExecutionResponse |
+
+**Machine-contract exceptions:** the T39 generated 2xx operation descriptions omit a usable success schema for `GET /api/v1/topology/pipeline-dossiers/{pipelineId}/sections/{sectionId}`, `GET /api/v1/topology/regional-map/layers/{layerId}` and `GET /api/v1/topology/regional-map/layers/{layerId}/features/{entityId}`. The handoff supplies `SectionView`, `LayerDescriptor` and `Feature` respectively as **source-defined response types**; this does *not* prove Orval-generated typed response bindings on those operations. Preserve explicit boundary normalization or request a backend contract correction in the responsible scope. Do not silently cast responses as verified.
+
+**Other T39-authentication/organization endpoints in the adopted UXR-02 row** were separately inspected in the raw runtime spec: `POST /api/v1/identity/authentication/refresh` and `POST /api/v1/identity/authentication/logout` use `RefreshTokenRequest`; successful login/refresh is `AuthenticationLoginResponse`, logout is 204 with no response body. `GET /api/v1/identity/me` returns `PrincipalView`; `GET /api/v1/identity/me/permissions` carries an inline 2xx schema; `GET /api/v1/organization/responsibilities` accepts `scopeId`, `assigneeType`, `assigneeId` filters. These routes are **T39-present** but are not thereby wired into the currently pinned web authentication/organization clients.
+
+### D. Authorization, temporal and response acceptance gates
+
+- **Identity and regional scope:** a signed Hidra bearer is required for protected reads. `identity:me:read` plus current regional authority for the selected resource is not a global company grant. Map/dossier require `topology:regional-resource:read` and specific `topology:regional-map:read/search` or `topology:pipeline-dossiers:read`. Server-side denial/opaque 404 takes precedence over a visible widget; never disclose unauthorized counts, geometry or identifiers in cache.
+- **Physical joins:** map `properties.entityId` identifies the pipeline dossier, not the namespaced outer feature ID; use dossier-owned section IDs and the explicitly returned facility ID for Telemetry. Keep `companyPartyId` and resource scope coherent across these reads. Geometry coordinates and feature counts come only from the source.
+- **Qualified pressure:** `GET` constraint uses `conditionCode` and UTC `effectiveAt`; distinguish design pressure from qualified operating limit, with units/basis/source revision and time. `UNAVAILABLE` and `CONFLICT` must not be rendered as safe numeric pressure; pipeline and section constraints are independently resolved.
+- **Trusted observation:** `telemetry:assets:read`, current asset scope and commissioned source-point authority apply. Point discovery uses UTC `at` and exclusive `afterPointId`; history uses half-open `[from,until)`, `maxAgeSeconds`, paired `afterObservedAt/afterTrustedId`, and returned quality/source/unit. Distinguish FRESH, STALE and UNAVAILABLE, and never infer live OT actuation.
+- **Governed restriction:** backend application ownership and permission checks include `topology:operating-constraints:read/execute`, and task-specific `topology:pressure-restriction:submit/review/publish/evidence-read` where applicable. Workflow uses current task, independent eligible actor, exact candidate and transition, expected stream version, and durable publication/evidence readback. An approved Workflow action alone is not an effective Topology publication.
+- **Error/concurrency semantics:** 400 validation, 401 unauthenticated, 403 denied, masked 404, 409 stale/conflicting/reused decision; unknown write outcome cannot be represented as confirmed rejection. Respect backend `Cache-Control: private, no-store` on protected records and clear context-sensitive UI state on changed authorization.
+
+### E. Explicit unsupported/unverified frontend consumption
+
+| Contract area | T39 backend fact | HidraWEB at the inspected baseline | Delivery gate |
+|---|---|---|---|
+| Login/refresh/logout, regional access | Present in raw T39; source-defined request/response schemas and access rules | Existing authentication transport predates T39 and current general compatibility pin is older | Qualify provider/session state, exact DTO, current-region check, revoked-token 401/403 and no credential disclosure before enabling new flow |
+| Regional map + pipeline dossier + constraints | Handed off and 31/31 Circle 1 route existence validated | Existing Topology client points to `f1fdc206c916…`, not T39; F21 is synthetic preview | New accepted slice, spatial/dossier joins, tenant-safe queries and three response-schema exceptions before native Circle 1 UX |
+| Trusted asset observations | Present in T39 + signed disposable PostgreSQL evidence | Existing Telemetry/Monitoring client points to `da4ce33ead7d…` | Qualify binding/quality/UTC/cursor/permissions and native browser readback |
+| Workflow and restriction publication | Present with source version, current action and human review boundaries | Existing Workflow client points to `5817406923e5…`; old alarms remain F16 HOLD | Qualify exact Workflows/Topology invocation, actor independence, replay, conflict and audit; no automatic actuation |
+| Other 17 candidate slices | Checked-in source contracts inventory is recorded above | Current candidate pins are older; no T39 all-slice drift audit or TypeScript regeneration was executed by this documentation task | Update only within separately registered consumer compatibility/test scope; no unsupported endpoint/DTO inference |
+| F16/F21/F22 and numerical P3 | T39 contract/test acceptance is **not** a release of these frontend gates | F16 HOLD; F21 owner-accepted preview; F22 BLOCKED; simulation runtime not established | Preserve each authority and gate without task splitting or fake qualified results |
+
+**Task decision:** UXR-02's **source and gap qualification** is documented with exact checksum-backed backend proof, full existing Orval-input inventory, and explicit 31-route T39 handoff. **Native consumer compatibility remains NOT VERIFIED** because the actual machine pin, generated clients and native browser test were intentionally not mutated in this bounded documentation execution. This is not an authorization to declare Circle 1 operationally accepted or an instruction to bypass HWEB-F16. If full machine pin is a required completion criterion for UXR-02 itself, keep the **same indivisible UXR-02 open** rather than calling the documentation receipt full completion; do not invent a suffix task.
+
+**Publication/CI rule:** guarded direct `main` update of this one file using the exact message above; verify that HidraWEB Documentation Validation starts on the new SHA, then STOP. Code CI should not trigger from Markdown-only scope. No next UXR task is executed by this publication.
