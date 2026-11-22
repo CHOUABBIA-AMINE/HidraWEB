@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { App } from '@/app/App';
@@ -89,14 +89,16 @@ describe('HWEB-002 / HWEB-004 / HWEB-005 / HWEB-007 / HWEB-008 capability-driven
     expect(tasks).toBeEnabled();
     expect(work).toHaveAttribute('aria-expanded', 'true');
     expect(operations).toHaveAttribute('aria-expanded', 'false');
-    expect(within(navigation).queryByRole('button', { name: 'Réseau' })).not.toBeInTheDocument();
+    // MUI Collapse unmounts after its exit transition, not synchronously with aria-expanded.
+    await waitFor(() => expect(within(navigation).queryByRole('button', { name: 'Réseau' })).not.toBeInTheDocument());
 
     fireEvent.click(administration);
     expect(await within(navigation).findByRole('button', { name: 'Organisation' })).toBeEnabled();
     expect(within(navigation).getByRole('button', { name: 'Identité & accès' })).toBeEnabled();
     expect(work).toHaveAttribute('aria-expanded', 'false');
     expect(administration).toHaveAttribute('aria-expanded', 'true');
-    expect(within(navigation).queryByRole('button', { name: 'Mes tâches' })).not.toBeInTheDocument();
+    // The newly collapsed Work group must finish exiting before its children disappear.
+    await waitFor(() => expect(within(navigation).queryByRole('button', { name: 'Mes tâches' })).not.toBeInTheDocument());
     expect(within(navigation).queryByRole('button', { name: 'Planification' })).not.toBeInTheDocument();
 
     const navigationToggle = screen.getByRole('button', { name: 'Réduire la navigation' });

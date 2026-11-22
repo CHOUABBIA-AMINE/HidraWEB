@@ -4326,3 +4326,38 @@ The 31 advertised [T39 Circle 1 consumer handoff](https://github.com/CHOUABBIA-A
 | Acceptance gate | Fresh exact-SHA Code CI must pass all four affected browser regressions, full Playwright, existing 187+ unit, performance/build/budget, native A1/F18, and matching Documentation Validation. |
 | Current state | **SOURCE REPAIR PREPARED; new exact-SHA CI not yet verified**. UXR-06 remains CI-pending. Do not advance UXR-07. |
 
+
+---
+
+### P2 / UXR-06 — Code CI #1064 exhaustive failure assessment and test repair (22 November 2026)
+
+**Evidence and status.** [HidraWEB Code CI #1064](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45031454727), attempt 1, exact WEB SHA `0e4775274d3d930e56c4dbf4e838f13077e52b22`, **FAILED** at `verify → Unit and component tests`. The single deterministic failure in that execution was `src/app/App.test.tsx:99:82`, with `expect(element).not.toBeInTheDocument()` receiving an existing `<div role="button" aria-label="Mes tâches">`. Unit result: **186 passed, 1 failed** (67 files; 66 passed, 1 failed). OpenAPI/Orval generation, lint and TypeScript were completed successfully before that step; lint emitted seven **non-blocking** `react-refresh/only-export-components` warnings. The `verify` job **did not execute** subsequent performance, production bundle or full Playwright gates at #1064. [Documentation Validation #100](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45031454720) **PASSED**, A1 six-module native API/PostgreSQL browser **PASSED** (seven W1–W3 plus both W4 browser cases, no failed/flaky/skipped), and F18 LOCAL session renewal/logout **PASSED** (five native cases). These successful native jobs are specific evidence, not a substitute for missing full regression.
+
+**Verified cause and adjacent risk.** The shell is a one-group accordion using MUI `<Collapse in={groupOpen} timeout="auto" unmountOnExit>`. After clicking Administration, the Work header immediately has `aria-expanded="false"` and Administration has `aria-expanded="true"`; Work's previously rendered destination **remains in the DOM during the exit transition**. The failing test asserted physical absence synchronously after the Administration destination became available, so it raced with the asynchronous unmount. This is a test-timing/source-contract mismatch, **not evidence** that Work is independently authorized when it should be denied, and is distinct from UXR-06's registered effective-grant pruning. The same immediate absence assertion after Operations → Work at line 92 passed in this execution but has the same potential race. Both waits must be corrected consistently and should still fail if collapsed children never leave the DOM. The observed `Mes tâches` node belonged to primary sidebar navigation, not the disabled global-header shortcut.
+
+**Full log triage — separate potential issues.**
+
+| Area | Observed exact-SHA evidence | Cause classification / action |
+|---|---|---|
+| Root blocking error | App unit assertion sees exiting `Mes tâches` button after Work → Administration | Confirmed mismatch between synchronous DOM assertion and MUI Collapse `timeout="auto"` delayed unmount; await actual removal, retain `aria-expanded` and grant assertions |
+| Adjacent same-pattern risk | App unit assertion after Operations → Work checks immediate removal; it passed on #1064 after awaited task visibility | Potential timing race; apply same eventual-removal assertion before it can regress |
+| API, lint, TypeScript | OpenAPI compatibility/client generation, lint and TypeScript passed; seven nonfatal React fast-refresh export warnings | No blocking API/type error evidenced; warnings are unrelated maintenance issues, not grounds to weaken checks |
+| Browser regression | Not executed on #1064; the preceding [Code CI #1063](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45030547023) had four specific navigation-selector failures; their fixes are in the #1064 source but were not independently exercised in #1064 | **Open acceptance risk**: cannot claim the selector repair passed until a later exact-SHA full Playwright gate runs |
+| A1 native PostgreSQL/W4 | Seven W1–W3 and both W4 mandatory browser cases completed; PostgreSQL emitted `could not obtain lock` `NOWAIT` diagnostics on a characteristic revision relation during the run | Observed lock contention / fail-closed diagnostic, **not causal evidence for the unit failure**; its contract significance requires a separate investigation if native acceptance changes; do not rewrite locks/migrations during UXR-06 |
+| F18 LOCAL session | Five native browser tests completed with zero failed/flaky/skipped | Not a cause of this failure |
+| Nonblocking tooling warnings | Node deprecated `punycode` / `url.parse`, `setup-java@v4` and actions pinned to Node 20 compatibility, plus a passing route-error test with missing `HydrateFallback` notice | Cleanup opportunities, **not failed steps** and not proof of application regressions; avoid unrelated workflow changes |
+
+**Delivery envelope (same registered task; not UXR-07).**
+
+| Field | Bounded UXR-06 CI repair |
+|---|---|
+| Parent SHA/tree | `0e4775274d3d930e56c4dbf4e838f13077e52b22` / `ab556441d84c351a8a3d2f6cf3e343e2899e33ff` |
+| Commit message | `test(shell): await UXR-06 accordion exit before DOM absence assertions` |
+| UPDATE | `src/app/App.test.tsx`: import `waitFor` and await removal of the previously expanded Operations and Work destinations after respective switches. Retain all authentication, authorization, one-group `aria-expanded`, semantic navigation, negative Planning and shell collapse checks. |
+| UPDATE | `docs/roadmap/ULTIMATE_ROADMAP.md`: append-only failure details, confirmed/possible causes, evidence and pending acceptance. |
+| CREATE/DELETE | None. |
+| Production files / contracts | **No changes** to shell, navigation registry, permissions, backend APIs, security gates, native DB fixtures, workflow concurrency or OpenAPI. |
+| CI integrity | Do not change skips, retries, test/global timeouts or bundle budgets. Source inspection is not local Node 24/npm 11 execution; **no local CI pass claimed**. |
+| Required acceptance | Fresh exact-SHA Code CI must demonstrate all unit/component tests, performance checks, 900 KiB initial JS limit, production build/release, complete Playwright suite and A1/F18 native jobs; Documentation Validation must pass. |
+| Current state | **REPAIR PREPARED — RECHECK EXACT-SHA CI AFTER GUARDED PUBLICATION**. UXR-06 CI not yet accepted; G2 open, UXR-07 not selected. |
+
