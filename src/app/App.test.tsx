@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { App } from '@/app/App';
@@ -71,13 +71,33 @@ describe('HWEB-002 / HWEB-004 / HWEB-005 / HWEB-007 / HWEB-008 capability-driven
     fireEvent.click(screen.getByRole('button', { name: 'Se connecter' }));
 
     expect(await screen.findByRole('heading', { name: /Vue d/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Réseau' })).not.toHaveAttribute('aria-disabled', 'true');
-    const taskButtons = screen.getAllByRole('button', { name: 'Mes tâches' });
-    expect(taskButtons.some((button) => !button.hasAttribute('disabled') && button.getAttribute('aria-disabled') !== 'true')).toBe(true);
-    expect(screen.getByRole('button', { name: 'Alarmes' })).not.toHaveAttribute('aria-disabled', 'true');
-    expect(screen.getByRole('button', { name: 'Organisation' })).not.toHaveAttribute('aria-disabled', 'true');
-    expect(screen.getByRole('button', { name: 'Identité & accès' })).not.toHaveAttribute('aria-disabled', 'true');
-    expect(screen.queryByRole('button', { name: 'Planification' })).not.toBeInTheDocument();
+    const navigation = screen.getByRole('navigation', { name: 'Navigation principale' });
+    const operations = within(navigation).getByRole('button', { name: 'OPÉRATIONS' });
+    const work = within(navigation).getByRole('button', { name: 'TRAVAIL' });
+    const administration = within(navigation).getByRole('button', { name: 'ADMINISTRATION' });
+
+    // The current product group alone is expanded: verify authorized visible children
+    // and do not mistake the disabled global My Tasks shortcut for sidebar navigation.
+    expect(operations).toHaveAttribute('aria-expanded', 'true');
+    expect(work).toHaveAttribute('aria-expanded', 'false');
+    expect(within(navigation).getByRole('button', { name: 'Réseau' })).not.toHaveAttribute('aria-disabled', 'true');
+    expect(within(navigation).getByRole('button', { name: 'Alarmes' })).not.toHaveAttribute('aria-disabled', 'true');
+    expect(within(navigation).queryByRole('button', { name: 'Planification' })).not.toBeInTheDocument();
+
+    fireEvent.click(work);
+    const tasks = await within(navigation).findByRole('button', { name: 'Mes tâches' });
+    expect(tasks).toBeEnabled();
+    expect(work).toHaveAttribute('aria-expanded', 'true');
+    expect(operations).toHaveAttribute('aria-expanded', 'false');
+    expect(within(navigation).queryByRole('button', { name: 'Réseau' })).not.toBeInTheDocument();
+
+    fireEvent.click(administration);
+    expect(await within(navigation).findByRole('button', { name: 'Organisation' })).toBeEnabled();
+    expect(within(navigation).getByRole('button', { name: 'Identité & accès' })).toBeEnabled();
+    expect(work).toHaveAttribute('aria-expanded', 'false');
+    expect(administration).toHaveAttribute('aria-expanded', 'true');
+    expect(within(navigation).queryByRole('button', { name: 'Mes tâches' })).not.toBeInTheDocument();
+    expect(within(navigation).queryByRole('button', { name: 'Planification' })).not.toBeInTheDocument();
 
     const navigationToggle = screen.getByRole('button', { name: 'Réduire la navigation' });
     expect(navigationToggle).toHaveAttribute('aria-expanded', 'true');

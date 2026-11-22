@@ -4281,3 +4281,24 @@ The 31 advertised [T39 Circle 1 consumer handoff](https://github.com/CHOUABBIA-A
 | Required acceptance | Fresh exact-SHA HidraWEB Code CI must pass TypeScript, unit/performance, 900 KiB bundle, **all** Playwright and A1 mandatory W4 native approval/rejection **plus** denial, and F18; Documentation Validation must pass too. |
 | Status | **REPAIR PREPARED; CI NOT YET VERIFIED**. UXR-06 remains awaiting Code CI, G2 remains open, UXR-07 not selected. |
 
+
+---
+
+### P2 / UXR-06 — Code CI #1062 unit-contract repair (22 November 2026)
+
+**CI evidence at exact SHA:** [HidraWEB Code CI #1062](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45029721945) on `7270638b57e5794f82e2fcdbf4cb6ecd63cbddda` **FAILED** solely in `verify → Unit and component tests`. The first failing assertion is `src/app/App.test.tsx:76:127` in the HWEB-002/004/005/007/008 capability-driven shell test: it expected an enabled `Mes tâches` button while the registered UXR-06 accordion kept the **Operations** group expanded and **Work** collapsed. The visible global My Tasks shortcut is intentionally disabled; it is not the authorized sidebar destination. CI reported **186 passed / 1 failed** unit tests. OpenAPI, lint, TypeScript completed earlier in the verify job; performance, bundle, full browser regression and release gates were **not reached** by that job. The A1 native API/PostgreSQL/browser lane (including mandatory W4 approval/rejection and denial) and F18 LOCAL session lane **PASSED**; [Documentation Validation #98](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45029721872) also **PASSED**. No evidence of a persistent W4/DB regression on this SHA.
+
+**Indivisible repair envelope:** One existing test is updated, without production code or API modifications. `src/app/App.test.tsx` now explicitly scopes the capability checks to the `Navigation principale` landmark, verifies an enabled Network/Alarms in the expanded Operations group and absence of unauthorized Planning, opens Work to validate the genuinely authorized **My Tasks** destination (distinct from the disabled header shortcut), then opens Administration to verify Organization/Identity while checking that Work destinations are no longer exposed. The existing desktop collapse toggle assertion stays. This **increases** explicit accordion/permission regression coverage; it does not turn off or relax tests.
+
+| Control | Exact bounded register |
+|---|---|
+| Stage | **P2 / UXR-06** repair only. UXR-07 remains unselected. |
+| Parent SHA/tree | `7270638b57e5794f82e2fcdbf4cb6ecd63cbddda` / `92f7fedce8cdf4d4428c682849061f1507770c1c` |
+| Commit message | `test(shell): align UXR-06 capability test with accordion` |
+| UPDATE | `src/app/App.test.tsx` for focused group/authorization assertions; `docs/roadmap/ULTIMATE_ROADMAP.md` append-only failure and repair record. |
+| CREATE/DELETE | None. |
+| Preserve | Existing six groups, one-expanded-group and text-only nested Assets, keyboard/RTL/mobile behavior, 272/72 px widths, effective backend permissions and REST guards, 900 KiB startup budget, exact native W4/LOCAL tests, no retries/skips, pinned API clients and HWEB-F16/F21/F22 statuses. |
+| Local verification | Exact source assertions inspected; no local Node 24/npm 11 / Playwright or PostgreSQL execution claimed. |
+| Acceptance | Fresh exact-SHA Code CI (unit and remaining performance/bundle/full Playwright + mandatory native lanes) and Documentation Validation. |
+| Status | **REPAIR SOURCE PREPARED — NEW CI PENDING**. UXR-06 is not yet CI-passed, G2 open, UXR-07 not started. |
+
