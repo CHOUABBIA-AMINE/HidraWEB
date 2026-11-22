@@ -3794,3 +3794,125 @@ G8 · Exact source/evidence pins, security, accessibility, performance and hando
 - [HidraWEB canonical roadmap](https://github.com/CHOUABBIA-AMINE/HidraWEB/blob/84538a585e81cb605f815abde259e3fbf5eeaf93/docs/roadmap/ULTIMATE_ROADMAP.md), [router](https://github.com/CHOUABBIA-AMINE/HidraWEB/blob/84538a585e81cb605f815abde259e3fbf5eeaf93/src/app/router/router.tsx), [navigation registry](https://github.com/CHOUABBIA-AMINE/HidraWEB/blob/84538a585e81cb605f815abde259e3fbf5eeaf93/src/shell/navigation/navigationRegistry.ts), and [current API consumer pins](https://github.com/CHOUABBIA-AMINE/HidraWEB/tree/84538a585e81cb605f815abde259e3fbf5eeaf93/openapi).
 - **HidraWEB_Layout_Implementation_Roadmap_2026-11-22.md** supplied P0–P8, UXR-01–39 and design-to-task ownership. **HidraWEB_Comprehensive_Discussion_Synthesis_2026-11-20(1).md** supplied the approved layout, workspace views and component rules.
 - **HidraWEB_Circle_1_Readiness_Assessment_and_Gap_Closure_Roadmap_2026-11-22.md** supplied the C1 journeys and scope cut. **HidraAPI_Architecture_Gaps_Circles_Synthesis_2026-11-22.docx** supplied the 24-module Circle classification and engineering-source semantics.
+
+---
+
+## P0 / UXR-01 — approved-scope reconciliation execution record
+
+**Recorded:** 22 November 2026. **Owner selection:** “HidraWEB start implementing P0 / UXR-01”. The 22 November adoption statement above is preserved as the historical *not-yet-selected* snapshot; this later entry registers **UXR-01 only**. The other UXR aliases remain planning candidates, not blanket implementation authority.
+
+| Execution field | Registered UXR-01 disposition |
+|---|---|
+| Whole task / parent | **P0 / UXR-01 · Reconcile approved scope**; one indivisible documentation/reconciliation task, no suffix or child package |
+| Bounded context | Frontend product information architecture, layout inventory, navigation/scope reconciliation; all 24 HidraAPI modules are inventory dependencies across C1–C5, not new backend work |
+| Input baseline | HidraWEB main `fe976e5bb994ba8e9ebf2d9f8554901f8fbabbc2`, tree `c4aabd952a01e6572ef4442a05e4c03644957c02`, canonical roadmap, canonical information architecture and checked-in router/shell/navigation; adopted T39 API evidence is **referenced**, not newly re-certified |
+| Preconditions | 22 November owner-adopted roadmap and explicit UXR-01 selection; no F16 admission or numerical simulation required for an inventory-only review |
+| Exact file allowlist | **UPDATE ONLY** `docs/roadmap/ULTIMATE_ROADMAP.md`; preserve all historical sections, registered statuses, source, tests, OpenAPI pins, workflows and preview |
+| Exact commit message | `docs(roadmap): reconcile UXR-01 approved layout scope` |
+| Acceptance | Record 7 page/layout patterns, 10 header elements, 6 sidebar groups, 19 numbered workspaces and 2 unnumbered operational anchors; reconcile auxiliary routes, existing code, delivery gaps and prior HWEB obligations; preserve gating; documentation validator must run against the new exact SHA |
+| State | **IMPLEMENTED — documentation CI pending at publication**, not runtime-verified or product-accepted by this record |
+| Next task candidate | **P0 / UXR-02**, not selected; requires its own exact OpenAPI/permissions/DTO pin and admission before code changes |
+
+### Frozen design-to-source inventory
+
+The **seven layout families** below use the seven named page patterns in `docs/architecture/HidraWeb-Information-Architecture.md`, crosswalked to the current source. These are presentation patterns, not seven additional browser routes. Existing pages show implementation footprints; adoption of the common component contract remains planned in P4/P5/P7.
+
+| Layout family | Current source examples | Reconciliation / remaining obligation |
+|---|---|---|
+| Operational Overview | src/app/pages/OverviewPage.tsx; src/features/telemetry-monitoring/TelemetryMonitoringPage.tsx | Existing screens; approved common frame and owner-scoped summary remain UXR-12/13/35. |
+| Workbench List | src/features/workbench/OperationalWorkbenchPage.tsx | Existing secondary workbench; reusable authorized registers remain UXR-17. |
+| Entity Workspace | src/features/custody/CustodyWorkspacePage.tsx; src/features/topology/NetworkTopologyPage.tsx | Existing domain screens; standardized heading, selection and owner evidence remain UXR-12–16. |
+| Topology Workspace | src/features/topology/NetworkTopologyPage.tsx | Existing map and topology source; native Circle 1 qualification remains UXR-22–28. |
+| Alarm Console | src/features/alarm/AlarmConsolePage.tsx | Existing console; whole-task HWEB-F16 native alarm gate remains HOLD. |
+| Task Workspace | src/features/workflow/WorkflowTasksPage.tsx | Existing tasks route; integrated restriction decision remains UXR-26/28. |
+| Timeline / Evidence | src/features/assets/AssetHistoryTimeline.tsx; src/features/incident/IncidentWorkspacePage.tsx | Existing evidence presentations; shared provenance/timeline pattern remains UXR-15. |
+
+The **ten permanent Global Header elements** are crosswalked to `src/shell/navbar/HidraNavbar.tsx`; component existence does not assert the associated global workflow or backend authority.
+
+| # | Approved element | Current source | Observed boundary / delivery |
+|---|---|---|---|
+| 1 | Sidebar toggle | HidraNavbar + AppShell | Present; collapsible navigation. |
+| 2 | Product identity / home | HidraNavbar | Present as Hidra; target HyFlo presentation alignment is not claimed. |
+| 3 | Environment indicator | HidraNavbar; runtimeConfig | Present label; not an availability signal. |
+| 4 | Operational context | OperationalContextSelector | Present; exact principal/scope refresh and revocation require UXR-09 qualification. |
+| 5 | Global search | HidraNavbar | Disabled placeholder; UXR-11; do not invent cross-domain search. |
+| 6 | Connection status | HidraNavbar; useRealtimeStatus | Status chip present; business-event freshness not established; UXR-10. |
+| 7 | My Tasks shortcut | HidraNavbar | Disabled icon; task page route exists; UXR-10. |
+| 8 | Notifications shortcut | HidraNavbar | Disabled icon; notification page route exists; UXR-10. |
+| 9 | Language selector | HidraNavbar | FR/EN/AR selection present; full RTL/accessibility qualification UXR-04/36. |
+| 10 | Principal/profile/sign-out | HidraNavbar; AuthProvider | Profile and sign-out present; session/provider behavior remains subject to actual auth gates. |
+
+The **six sidebar groups**, including the Overview root group, are verified against `src/shell/navigation/navigationRegistry.ts` and `src/shell/sidebar/HidraSidebar.tsx`. They contain current, permission-filtered navigation items; the registered sidebar is still flat, not a delivered nested mobile navigation tree. Expanded/collapsed widths in source are 272/72 px.
+
+| Group | Current registry ID | Current destinations | Current comparison |
+|---|---|---|---|
+| Overview | root | /overview | Single root item present. |
+| Operations | operations | /network, /operations, /alarms, /events, /planning | Five entries present. |
+| Engineering | engineering | /engineering, /custody | Two primary entries; /engineering/assets is separately routed. |
+| Intelligence | intelligence | /intelligence/risk, /intelligence/analytics, /intelligence/simulation, /intelligence/reports | Four entries present. |
+| Work | work | /work/tasks, /work/notifications | Two entries present. |
+| Administration | administration | /administration/organization, /administration/users, /administration/parties, /administration/configuration, /administration/audit, /administration/documents, /administration/integrations | Seven entries present; Parties is an existing addition to older IA. |
+
+The **19 numbered workspaces** below are a stable product inventory, **not 19 accepted UXR features**. Each referenced route exists in `src/app/router/router.tsx` at the pinned source. A routed screen, an existing historical HWEB acceptance, a generated client and a new UXR workflow are different evidence levels.
+
+| Workspace | Approved workspace | Current browser route(s) | Future task / qualification |
+|---|---|---|---|
+| WS-01 | Overview | /overview | UXR-35 |
+| WS-02 | Alarm Console | /alarms | UXR-29; F16 HOLD |
+| WS-03 | Events / Incidents / Leak / HSE | /events | UXR-29 |
+| WS-04 | Planning | /planning | UXR-29 |
+| WS-05 | Integrity & Maintenance | /engineering; /engineering/assets | UXR-25 |
+| WS-06 | Metering & Custody | /custody | UXR-30 |
+| WS-07 | Risk | /intelligence/risk | UXR-31 |
+| WS-08 | Analytics | /intelligence/analytics | UXR-31 |
+| WS-09 | Simulation metadata | /intelligence/simulation | UXR-32; solver/P3 deferred |
+| WS-10 | Reporting | /intelligence/reports | UXR-32 |
+| WS-11 | My Tasks | /work/tasks | UXR-33 |
+| WS-12 | Notifications | /work/notifications | UXR-33 |
+| WS-13 | Organization | /administration/organization | UXR-21 |
+| WS-14 | Identity & Access | /administration/users | UXR-21 |
+| WS-15 | Parties | /administration/parties | UXR-34 |
+| WS-16 | Configuration | /administration/configuration | UXR-34 |
+| WS-17 | Audit | /administration/audit | UXR-27 |
+| WS-18 | Documents | /administration/documents | UXR-34 |
+| WS-19 | Integrations | /administration/integrations | UXR-34 |
+
+The **two operational anchors** are separate from the 19 numbered workspaces; do not double-count them as WS-20/21.
+
+| Anchor | Current browser route | Code / owner task | Current comparison |
+|---|---|---|---|
+| Network & Topology | /network | NetworkTopologyPage; UXR-22/23; historical HWEB-005 | Route implemented; native dossier/overlay/readback remain unqualified. |
+| Operational Monitoring | /operations | TelemetryMonitoringPage; UXR-24; historical HWEB-006 | Route implemented; trusted, scope-safe native monitoring journey remains unqualified. |
+
+**Auxiliary and preserved surfaces** must not be dropped when reworking the approved shell.
+
+| Route / surface | Purpose | Disposition |
+|---|---|---|
+| / | Root redirects to /overview | Existing, authenticated via AppShell. |
+| /login | LOCAL/provider entry | Existing; keep original auth gate. |
+| /auth/callback | OIDC callback | Existing; configure external provider before asserting enterprise acceptance. |
+| /workbench | Secondary generic workbench | Existing, deliberately not a primary sidebar destination. |
+| * | Authenticated Not Found fallback | Existing wildcard; do not turn missing feature into success. |
+| preview/network/ | Standalone F21 synthetic six-view preview | Separate from product router; owner-accepted synthetic preview, not native telemetry or solver. |
+
+### Registered-overlap and sequencing disposition
+
+| Existing governance / prior implementation | Reconciled decision |
+|---|---|
+| HWEB-R01–R17 and HWEB-P01–P12 historical completions; HWEB-001–015 historical source and CI | Preserve as historical evidence. No reopen, relabel, retroactive approval or deletion under UXR-01. |
+| HWEB-F16 (whole alarm contract and native operator qualification) | **HOLD / NOT ADMITTED**. UXR-10 and UXR-29 do not split or bypass this single registered task. Alarm route presence is not authorization to acknowledge/shelve/close. |
+| HWEB-F21 synthetic six-view preview | **Owner-accepted synthetic preview only**. Retain independent preview and its existing six-view evidence; do not claim native map, qualified hydraulic results, live OT, or numerical solver. |
+| HWEB-F22 native six-view expansion | **BLOCKED** on F16 admission and accepted backend/native scope; UXR-22/23 cannot silently activate it. |
+| Existing product routes, Orval clients, security and CI | Leave unchanged. Subsequent UXR tasks must qualify accepted contracts, authorized scopes, error/denial behavior, tests and exact-SHA CI individually. |
+| Owner-adopted sequence | **P0/UXR-01 → candidate UXR-02 → P1 → P2 → P3 → P4 → P5 → gated P6 → gated P7 → P8**; each whole UXR task needs separate selection. No blanket admission of a phase. |
+| Independent Circle 1 ahead of HWEB-F16 | **NOT AUTHORIZED BY UXR-01**. Such work may be prepared and sequenced independently only after a separately recorded owner sequencing decision and its own backend/WEB gate; keep F16 HOLD in the meantime. |
+| API scope and simulation | UXR-01 is read-only inventory, **no REST operations or source changes**. No new runtime OpenAPI validation, T39 regression, station actuation, SCADA connectivity or numerical P3 inference. |
+
+### Evidence, limitations and acceptance gates
+
+- **Verified by exact-SHA source inspection:** `src/app/router/router.tsx`, `src/shell/AppShell.tsx`, `src/shell/navbar/HidraNavbar.tsx`, `src/shell/sidebar/HidraSidebar.tsx`, `src/shell/navigation/navigationRegistry.ts`, `docs/architecture/HidraWeb-Information-Architecture.md` and this canonical roadmap at `fe976e5bb994ba8e9ebf2d9f8554901f8fbabbc2`. The shell has a skip link, authenticated/permission-bootstrap outlet, navigation, navbar and contextual drawer.
+- **Deterministic prepublication reconciliation checks:** cardinalities 7/10/6/19/2; all 19 current route declarations; two anchor route declarations; six registry group IDs; seven canonical page patterns; shell/header/sidebar source cues; preserved F16/F21/F22 and P0 owner-adopted statements. These checks inspect source text; they are not browser E2E tests.
+- **Actual gaps, not defects to silently fix here:** global search, header task and notification icons are disabled; the legacy nav remains flat; source names the product “Hidra” despite recorded HyFlo presentation direction; newer scope-sensitive header, responsive, RTL, provenance and Circle 1 journeys require their registered implementation/acceptance work. No unverified route is described as fully production-ready.
+- **Source limitations:** the 20/22 November external design attachment filenames are cited in the adopted roadmap, but their original bytes were not re-opened as part of this GitHub source review. This record reconciles the **owner-adopted summary**, canonical IA and live source, not an independent line-by-line certification of those external files. No new backend OpenAPI download or industrial deployment evidence was acquired.
+- **Publication gate:** one guarded direct-`main` documentation commit with the exact message and single-file allowlist above, followed by an exact-SHA **HidraWEB Documentation Validation** run observed queued/started. Do not claim the run has passed before it completes. Code CI is not expected for Markdown-only changes.
+- **Completion gate:** UXR-01 may be promoted from IMPLEMENTED to VERIFIED only after the applicable documentation CI succeeds and any owner-required design walkthrough/attachment check is accepted. Do not automatically start UXR-02.
