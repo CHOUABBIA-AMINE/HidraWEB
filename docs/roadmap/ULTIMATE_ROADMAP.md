@@ -4651,3 +4651,42 @@ unit+performance, production bundle budget, release artifact, full Chromium
 (including explicit UXR-10 synthetic shortcut/denial/reconnect scenarios),
 A1 native PostgreSQL W1–W4, F18 LOCAL, Documentation CI. No mock is SITE
 or production acceptance. Next registered task UXR-11 remains unselected.
+
+
+### P3 / UXR-11 — typed Topology-local regional search (22 November 2026)
+
+**Predecessor:** `5e8e43d9e6404e38225908389954144a251c7de5`, tree
+`bdfae9303ee83b69a359ee50995b16c9a5a95052`, passed
+[HidraWEB Code CI #1076](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45065184616)
+and [Docs CI #112](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45065184673).
+Owner's Next selected **one** whole UXR-11 task. Repository README, canonical
+architecture, active roadmap and project WEB_AGENTS guidance govern; root
+AGENTS.md is absent from the verified WEB tree.
+
+**Accepted contract:** source at HidraAPI
+`f0310330ae8eb58f8bf00400b29afeb5baccb869` T34
+`RegionalTopologyMapController` and port require exact companyPartyId for
+`GET /api/v1/topology/regional-map/search` and for exact feature detail,
+with `topology:regional-map:search` and `topology:regional-map:read` route
+grants, Identity resource filtering, post-scope totals, no-store and opaque
+404. Generated pinned legacy Topology slice lacks regional endpoints; the
+adapter reuses its `Feature` and `SearchResult` DTOs.
+
+**Exact commit message:** `feat(topology): qualify UXR-11 regional network search`.
+UPDATE `src/features/topology/NetworkTopologyPage.tsx` (context-split route),
+`src/features/topology/i18n/topologyTranslations.ts` (EN/FR/AR),
+`docs/06-Navigation-Blueprint.md` and this roadmap (append-only).
+CREATE `src/features/topology/api/regionalTopologyApi.ts` (scoped T34 GETs),
+`src/features/topology/api/regionalTopologyApi.test.ts`,
+`src/features/topology/model/regionalTopologySearch.ts` (admission,
+canonical identifiers), `src/features/topology/model/regionalTopologySearch.test.ts`,
+`src/features/topology/components/RegionalTopologySearch.tsx` (server-paged
+search and fresh typed navigation) and
+`tests/e2e/regional-topology-search.spec.ts` (browser allowed/denied,
+selected-context no legacy map, opaque denial). DELETE none.
+
+**Acceptance:** exact-SHA Code CI OpenAPI/generation, lint, typecheck,
+unit/component and performance, build and 900 KiB budget, release packaging,
+full Chromium, independent A1 native API/PostgreSQL W1–W4, F18 LOCAL and Docs CI.
+Synthetic browser checks are not operational/SITE acceptance. UXR-12 is next
+registered **unselected** task; G3 engineering acceptance still separate.

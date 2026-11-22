@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router';
+import { useShellUiStore } from '@/shell/model/useShellUiStore';
+import { RegionalTopologySearch } from '@/features/topology/components/RegionalTopologySearch';
 
 import type { Feature } from '@/api/generated/topology/model';
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
@@ -46,6 +48,7 @@ function definedString(value: string | undefined): value is string {
 export function NetworkTopologyPage() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
+  const selected = useShellUiStore((state) => state.operationalContext);
   const canRead = usePermissions().can(TOPOLOGY_PERMISSIONS.read);
   const { closeDrawer } = useContextDrawer();
   const [authoring, setAuthoring] = useState(searchParams.has('draft') || searchParams.get('mode') === 'author');
@@ -78,7 +81,8 @@ export function NetworkTopologyPage() {
         <Suspense fallback={<Box sx={{ p: 3 }}><Typography role="status">{t('topology.preview.loading')}</Typography></Box>}>
           <NetworkPreviewPage />
         </Suspense>
-      ) : <OperationalTopology authoring={authoring} onToggleAuthoring={() => setAuthoring((current) => !current)} />}
+      ) : selected ? <RegionalTopologySearch />
+        : <OperationalTopology authoring={authoring} onToggleAuthoring={() => setAuthoring((current) => !current)} />}
     </>
   );
 }

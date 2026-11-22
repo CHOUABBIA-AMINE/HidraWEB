@@ -272,3 +272,24 @@ Only the ability to reach the WEB origin is asserted; it does not establish
 HidraAPI health, SSE/STOMP events, telemetry freshness, OT control/network
 availability or SITE acceptance. The existing conservative disconnected
 RealtimeProvider remains unchanged; it does not subscribe to domain topics.
+
+
+## P3 / UXR-11 — scoped network-local search (22 November 2026)
+
+Global cross-domain search remains disabled: no accepted cross-module index
+or authorization contract exists. If a UXR-09 operational context is selected,
+`/network` mounts only the T34 region-specific search rather than the older
+unscoped administrator map. The exact `companyPartyId`, current authenticated
+principal, canonical selected scope, published GET route and effective
+`topology:regional-map:search` grant are required. T34 still owns every
+fresh read and post-scope total; the frontend provides no independent authority.
+Typed link URLs carry only the backend-issued `properties.layer` and
+`properties.entityId`, **not** outer namespaced feature IDs or company
+credentials. A link triggers a new `GET
+/api/v1/topology/regional-map/layers/{layerId}/features/{entityId}` with
+`companyPartyId` after checking the published regional-map read grant.
+Invalid links, opaque denials, malformed responses or lost scope fail closed,
+with no previous search/detail shown while requests are pending. Unselected
+administrative map behavior stays under its existing distinct permissions.
+No new backend APIs, cross-domain search, realtime/OT integration, hydraulic
+solver or qualified industrial calculation are claimed.
