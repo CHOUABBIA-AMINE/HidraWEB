@@ -21,6 +21,8 @@ describe('UXR-07 protected navigation restoration scope', () => {
     expect(workspaceScopeKey('/network', 'another', context, modules)).not.toBe(first);
     expect(workspaceScopeKey('/network', 'operator', { scopeId: 10 }, modules)).not.toBe(first);
     expect(workspaceScopeKey('/network', 'operator', context, new Set())).not.toBe(first);
+    expect(workspaceScopeKey('/network', 'operator', { ...context, companyPartyId: 'other' }, modules)).not.toBe(first);
+    expect(workspaceScopeKey('/network', 'operator', { ...context, principalId: 'other' }, modules)).not.toBe(first);
   });
 
   it('invalidates remembered mobile/menu expansion on history, scope, principal or grant changes', () => {

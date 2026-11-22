@@ -229,3 +229,25 @@ The corrected shell isolates **`ShellNavigation`** (navbar toggle + sidebar + mo
 Separately, the contextual drawer provider and routed `<Outlet>` retain their **pathname/principal/scope/effective-module workspace key**, not `location.key`. Same-path query or hash updates therefore preserve in-progress network authoring and tabbed page state. Cross-route and authority-context changes still discard protected page-local context. Existing six authorized groups, desktop widths, RTL anchors, keyboard and backend authority remain unchanged.
 
 CI #1067 verified the earlier native W2 authoring regression and both mandatory W4 decisions/denials successfully, but its main verification stopped at lint; this new source must still pass the complete fresh exact-SHA suite before UXR-07/G2 acceptance.
+
+
+## UXR-09 — governed regional context revalidation (22 November 2026)
+
+Operational context is no longer auto-selected from an Organization responsibility.
+The chooser shows active and time-effective regional resource responsibilities of
+the linked employee. The current principal and responsibility responses do not
+carry authoritative company-party choices, so the operator supplies the exact
+companyPartyId. Identity then verifies the company/resource tuple; the browser
+never derives authority from a role, route, scope name or local selection.
+
+Before applying, HidraWEB fetches fresh principal, effective permissions,
+responsibilities and Identity regional-access decision. Denial or mismatch fails
+closed. Context changes clear old scoped queries and inspectable state, returning
+to Overview rather than restoring old sensitive deep-link selections. Current
+scope identity includes authenticated principal and exact company. Periodic and
+focus rechecks retract revoked contexts. Server-side owner authorization remains
+required. No live industrial access, company directory or control is asserted.
+
+UXR-09 race and sign-out safeguard: async rebind runs before the keyed shell
+is changed, discards late answers after unmount or identity transition, and
+AuthProvider removes the selected scope synchronously with session revocation.

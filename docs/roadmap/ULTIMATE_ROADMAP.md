@@ -4508,3 +4508,44 @@ In `tests/e2e/alarm.spec.ts`, the post-Back text locator matched both the alarm 
 **Repair scope:** the alarm browser test and this append-only evidence entry. **Exact commit message:** `test(alarm): wait for workflow before checking Back restoration`.
 
 **Acceptance:** UXR-08 awaits fresh exact-SHA Code CI and Documentation Validation. The next registered task is UXR-09.
+
+
+### P3 / UXR-09 — exact operational scope rebind (22 November 2026)
+
+Owner explicitly selected UXR-09 after the UXR-08 correction at WEB main
+d25cd6740c8b52e372d45741d99ea0304173417b. Code CI #1072 and
+Documentation Validation #108 passed at that exact SHA.
+
+Exact commit message: feat(context): qualify UXR-09 operational scope rebinding.
+UPDATE allowlist: src/features/context/api/identityOrganizationApi.ts,
+src/features/context/components/OperationalContextSelector.tsx,
+src/features/context/model/operationalContextModel.ts,
+src/features/context/model/operationalContextModel.test.ts,
+src/shell/model/useShellUiStore.ts, src/app/auth/AuthProvider.tsx,
+src/shell/navigation/useNavigationContextKey.ts,
+src/shell/navigation/useNavigationContextKey.test.ts,
+src/shared/i18n/resources.ts, docs/06-Navigation-Blueprint.md and this roadmap.
+CREATE allowlist: src/features/context/api/identityOrganizationApi.regional.test.ts.
+DELETE: none. No API, migrations, release, simulation or OT changes.
+
+T39 current Identity access must match companyPartyId, resource kind and ID.
+The earlier pinned generated Identity slice omits that newer read. The bounded
+adapter uses an unknown response and strict positive exact-match validation,
+not a competing hand-authored DTO. Current principal/Organization DTOs lack a
+safe company lookup, so explicit company input is required and then checked
+against Identity. No unapproved company-scope inference is introduced.
+
+Required acceptance: fresh same-user principal and effective grants, linked
+employee's time-effective responsibilities, exact positive Identity decision,
+fail-closed denial and revocation, old scoped-cache and route clearing,
+UXR-07 navigation lifetime regression, EN/FR/AR usability, and exact-SHA
+Code CI (OpenAPI, lint, TS, unit, performance, bundle, Chromium, A1 native
+PostgreSQL/API W4 and F18 LOCAL) plus Documentation CI. State on publication:
+IMPLEMENTED / HOSTED CI PENDING; no production/SITE acceptance.
+Next registered candidate P3/UXR-10 remains unselected. G3 remains open.
+
+UXR-09 prepublication review: keep the context chooser mounted while it verifies
+fresh Identity and Organization responses; only after the result/denial is known
+change the navigation key and return to Overview. Unmount/session transition
+invalidates pending request epochs. Clear the selected company on sign-out from
+AuthProvider, preventing a following principal inheriting stale context.

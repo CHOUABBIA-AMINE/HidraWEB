@@ -222,3 +222,15 @@ const employeePath = (id: string) => `/api/v1/organization/employees/${encodeURI
 export const fetchEmployeeLifecycle = (id: string) => hidraHttpClient<OrganizationFoundationEmployeeState>({ method: 'GET', url: `${employeePath(id)}/lifecycle` });
 export const activateEmployee = (id: string, data: OrganizationFoundationActivationRequest) => hidraHttpClient<OrganizationFoundationEmployeeState>({ method: 'POST', url: `${employeePath(id)}/activate`, data });
 export const fetchEmployeeLifecycleHistory = (id: string) => hidraHttpClient<OrganizationFoundationActivationEvent[]>({ method: 'GET', url: `${employeePath(id)}/lifecycle-history` });
+
+
+/** UXR-09 T39 Identity regional-access check (not in the older Orval slice).
+ * Keep the response opaque until its complete positive tuple is verified.
+ */
+export function fetchCurrentRegionalAccess(kind: string, resourceId: string, companyPartyId: string): Promise<unknown> {
+  return hidraHttpClient<unknown>({
+    method: 'GET',
+    url: '/api/v1/identity/me/regional-access/' + encodeURIComponent(kind) + '/' + encodeURIComponent(resourceId),
+    params: { companyPartyId },
+  });
+}

@@ -14,7 +14,7 @@ import { useShellUiStore } from '@/shell/model/useShellUiStore';
 export function navigationContextKey(
   routeKey: string,
   principalId: string | undefined,
-  scope: { scopeId: number; type?: string; targetId?: string } | undefined,
+  scope: { scopeId: number; type?: string; targetId?: string; companyPartyId?: string; principalId?: string } | undefined,
   modules: ReadonlySet<string>,
 ): string {
   return JSON.stringify([
@@ -23,6 +23,8 @@ export function navigationContextKey(
     scope?.scopeId ?? null,
     scope?.type ?? null,
     scope?.targetId ?? null,
+    scope?.companyPartyId ?? null,
+    scope?.principalId ?? null,
     [...modules].sort(),
   ]);
 }
@@ -32,7 +34,7 @@ export function navigationContextKey(
 export function workspaceScopeKey(
   pathname: string,
   principalId: string | undefined,
-  scope: { scopeId: number; type?: string; targetId?: string } | undefined,
+  scope: { scopeId: number; type?: string; targetId?: string; companyPartyId?: string; principalId?: string } | undefined,
   modules: ReadonlySet<string>,
 ): string {
   return navigationContextKey(pathname, principalId, scope, modules);

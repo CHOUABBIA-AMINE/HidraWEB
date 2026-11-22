@@ -2,6 +2,8 @@ import { create } from 'zustand';
 
 export interface OperationalContextSelection {
   scopeId: number;
+  companyPartyId: string;
+  principalId: string;
   type?: string;
   targetId?: string;
   code?: string;

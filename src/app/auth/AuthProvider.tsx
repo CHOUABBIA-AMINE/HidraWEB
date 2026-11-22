@@ -11,6 +11,7 @@ import { beginOidcAuthorization, completeOidcAuthorization } from '@/app/auth/oi
 import { registerAuthorizationHeaderFactory, type AuthorizationRenewal } from '@/app/auth/authorizationHeaderRegistry';
 import { runtimeConfig, type HidraCredentialProvider } from '@/app/bootstrap/runtimeConfig';
 import { permissionEndpoints } from '@/features/permissions/api/permissionEndpoints';
+import { useShellUiStore } from '@/shell/model/useShellUiStore';
 
 const TOKEN_EXPIRY_SKEW_MS = 30_000;
 const HIDRA_QUERY_ROOT = ['hidra'] as const;
@@ -95,6 +96,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   const clearSession = useCallback(() => {
     discardCredentials();
+    // A newly authenticated principal must never inherit a prior user's company.
+    useShellUiStore.getState().setOperationalContext(undefined);
     queryClient.removeQueries({ queryKey: HIDRA_QUERY_ROOT });
     queryClient.getMutationCache().clear();
     setSession(undefined);
