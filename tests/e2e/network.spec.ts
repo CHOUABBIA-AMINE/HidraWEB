@@ -204,7 +204,7 @@ test('both authorized roles can read and denied scopes disclose no protected fix
 test('narrow workspace supports keyboard selection with visible focus', async ({ page }) => {
   await openPreview(page);
   await page.setViewportSize({ width: 360, height: 740 });
-  await page.getByRole('button', { name: 'Collapse navigation' }).click();
+  await expect(page.getByRole('button', { name: 'Expand navigation' })).toHaveAttribute('aria-expanded', 'false');
   await page.getByRole('link', { name: 'Return to operational map' }).focus();
 
   const target = workspace(page).tree.getByRole('button', { name: /West Intake/ });
@@ -399,7 +399,7 @@ test('station investigation rejects stale and degraded evidence and scopes histo
 test('the investigation follows the app language and can be opened by keyboard at a narrow width', async ({ page }) => {
   await openPreview(page, 'FR');
   await page.setViewportSize({ width: 360, height: 740 });
-  await page.getByRole('button', { name: 'Réduire la navigation' }).click();
+  await expect(page.getByRole('button', { name: 'Développer la navigation' })).toHaveAttribute('aria-expanded', 'false');
   await page.getByRole('button', { name: 'Ouvrir l’investigation' }).focus();
   await page.keyboard.press('Enter');
   const french = page.getByRole('region', { name: 'Investigation de la station' });
@@ -511,7 +511,7 @@ test('digital-twin preview supports narrow keyboard entry and localized RTL copy
   await openPreview(page, 'FR');
   await page.getByRole('button', { name: 'Ouvrir l’investigation' }).click();
   await page.setViewportSize({ width: 360, height: 740 });
-  await page.getByRole('button', { name: 'Réduire la navigation' }).click();
+  await expect(page.getByRole('button', { name: 'Développer la navigation' })).toHaveAttribute('aria-expanded', 'false');
   await page.getByRole('button', { name: 'Ouvrir la décision du jumeau numérique' }).focus();
   await page.keyboard.press('Enter');
   const french = page.getByRole('region', { name: 'Aperçu décisionnel du jumeau numérique' });

@@ -4183,3 +4183,23 @@ The 31 advertised [T39 Circle 1 consumer handoff](https://github.com/CHOUABBIA-A
 | Validation | Static targeted source check confirms the lint-triggering synchronous effect is absent and mobile drawer state is derived from router entry key. The next **exact-SHA Code CI** must prove ESLint, TypeScript, unit, performance, unchanged bundle, Playwright, native jobs and release checks. |
 | Status | **Repair source bounded; CI acceptance PENDING**. No claim that #1057 passed, nor that UXR-04 is complete. UXR-05 remains not started. |
 
+
+---
+
+### P1 / UXR-04 — Playwright contract repair after exact-SHA CI #1058 (22 November 2026)
+
+**Source evidence:** [HidraWEB Code CI #1058](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45023877248), attempt 1 on `5db331399cead2af4ac548a8442865c4973057e7`, failed only at `verify → Full Playwright regression suite`; **77 passed, 6 failed, 15 skipped**. The preceding gates passed: 182 unit/component tests; six performance tests; lint and TypeScript; `npm run build` with **726.2 KiB initial JS against the unchanged 900 KiB limit**; A1 native PostgreSQL browser and F18 LOCAL session suites. [Documentation Validation #94](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45023877235) passed. Do not claim the UXR-04 Playwright gate is met.
+
+**The six failed assertions are from four test files/contexts:** `tests/e2e/accessibility-keyboard.spec.ts` old English skip-link in FR; `tests/e2e/network.spec.ts` three narrow viewport tests invoking the obsolete “Collapse/ Réduire la navigation” control (mobile now initializes with the temporary drawer closed); and `tests/e2e/locale-responsive.spec.ts` two cases using an absent MUI-generated anchor class and a role-based navbar locator while a modal's aria-hidden behavior correctly hides the background. The tests' keyboard and physical layout requirements remain valid; only the legacy/misaligned selectors and expectations are corrected.
+
+| Repair control | Registered bounded change |
+|---|---|
+| Task | **UXR-04** only, no suffix/child package |
+| Base SHA/tree | `5db331399cead2af4ac548a8442865c4973057e7` / `9addf6decdc2fa9326382bba6cb530c7ed8a19ba` |
+| Exact commit message | `test(shell): align UXR-04 Playwright with mobile RTL contract` |
+| UPDATE | `tests/e2e/accessibility-keyboard.spec.ts`: FR skip link, existing keyboard-focus navigation preserved; `tests/e2e/network.spec.ts`: three narrow-width tests assert the new mobile drawer is initially closed, while retaining keyboard selection, no horizontal scrolling, French/Arabic/English engineering UI checks; `tests/e2e/locale-responsive.spec.ts`: verify RTL physical navigation paper position and navbar toggle ARIA state while modal open, keeping Escape, route-change and locale switching checks; `docs/10-Design-System-Specification.md`: explicit reason/limits; `docs/roadmap/ULTIMATE_ROADMAP.md`: append this evidence. |
+| CREATE/DELETE | None |
+| Preservation | Unchanged runtime source, authorization and route guards, all 21 Orval pins, F16 HOLD/F21 synthetic preview/F22 BLOCKED, 900 KiB budget, no weakened permission, keyboard, RTL or engineering acceptance requirements. |
+| Required acceptance | Fresh exact-SHA HidraWEB Code CI: full Playwright suite including the six regressions, unchanged lint/TS/unit/performance/bundle checks and A1/F18 native lanes; Documentation Validation. |
+| State | **SOURCE REPAIR PREPARED; CI NOT YET PASSED**. Do not select UXR-05 until UXR-04 acceptance is observed. |
+

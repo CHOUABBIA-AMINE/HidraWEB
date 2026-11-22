@@ -43,7 +43,13 @@ test('UXR-04 switches FR → AR → EN and mirrors the authenticated shell witho
   await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
   await expect(page.getByRole('heading', { name: 'نظرة عامة' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'الانتقال إلى المحتوى الرئيسي' })).toHaveCount(1);
-  await expect(page.locator('.MuiDrawer-paperAnchorRight').first()).toBeAttached();
+  // Assert the actual navigation paper's physical alignment, not an internal MUI class.
+  const desktopNavigationPaper = page.locator('.MuiDrawer-paper').first();
+  await expect(desktopNavigationPaper).toBeVisible();
+  await expect.poll(async () => {
+    const rect = await desktopNavigationPaper.boundingBox();
+    return rect ? Math.round(rect.x + rect.width) : -1;
+  }).toBe(page.viewportSize()!.width);
 
   await page.getByRole('combobox', { name: 'اللغة' }).click();
   await page.getByRole('option', { name: 'EN' }).click();
@@ -62,7 +68,10 @@ test('UXR-04 mobile navigation uses a keyboard-dismissable drawer and reverses i
 
   await openNavigation.click();
   await expect(page.getByRole('navigation', { name: 'Navigation principale' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Réduire la navigation' })).toHaveAttribute('aria-expanded', 'true');
+  // Modal dialogs correctly hide background AppBar buttons from the accessibility
+  // tree while open; inspect its stable DOM ARIA contract instead.
+  const navbarToggle = page.locator('button[aria-controls="hidra-primary-navigation"]');
+  await expect(navbarToggle).toHaveAttribute('aria-expanded', 'true');
   await page.keyboard.press('Escape');
   await expect(page.getByRole('button', { name: 'Développer la navigation' })).toHaveAttribute('aria-expanded', 'false');
 
@@ -70,7 +79,13 @@ test('UXR-04 mobile navigation uses a keyboard-dismissable drawer and reverses i
   await page.getByRole('option', { name: 'AR' }).click();
   await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
   await page.getByRole('button', { name: 'توسيع التنقل' }).click();
-  await expect(page.locator('.MuiDrawer-paperAnchorRight').first()).toBeVisible();
+  const mobileNavigationPaper = page.locator('.MuiDrawer-paper:visible').first();
+  await expect(mobileNavigationPaper).toBeVisible();
+  await expect.poll(async () => {
+    const rect = await mobileNavigationPaper.boundingBox();
+    return rect ? Math.round(rect.x + rect.width) : -1;
+  }).toBe(390);
+  await expect(navbarToggle).toHaveAttribute('aria-expanded', 'true');
   await page.getByRole('button', { name: 'الشبكة' }).click();
   await expect(page).toHaveURL(/\/network$/);
   await expect(page.getByRole('button', { name: 'توسيع التنقل' })).toHaveAttribute('aria-expanded', 'false');

@@ -40,7 +40,7 @@ test('HWEB-015-06 supports keyboard-only shell bypass and navigation', async ({ 
   await mockAccessibleShell(page);
   await signIn(page);
 
-  const skipLink = page.getByRole('link', { name: 'Skip to main content' });
+  const skipLink = page.getByRole('link', { name: 'Aller au contenu principal' });
   await skipLink.focus();
   await expect(skipLink).toBeFocused();
   await page.keyboard.press('Enter');
