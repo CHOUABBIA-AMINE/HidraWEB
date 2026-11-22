@@ -1,6 +1,6 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { I18nextProvider } from 'react-i18next';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import { i18n } from '@/shared/i18n/i18n';
 import { workspaceScopeKey } from '@/shell/navigation/useNavigationContextKey';
@@ -26,6 +26,8 @@ function ShellContext({ viewKey }: { viewKey: string }) {
 }
 
 describe('UXR-07 scoped contextual drawer', () => {
+  afterEach(cleanup);
+
   it('keeps in-progress context mounted for same-path query changes but not a different path', () => {
     const modules = new Set(['topology']);
     const scope = { scopeId: 7, targetId: 'GZ2' };

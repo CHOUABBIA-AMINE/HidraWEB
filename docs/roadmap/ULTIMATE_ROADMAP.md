@@ -4457,3 +4457,14 @@ The 31 advertised [T39 Circle 1 consumer handoff](https://github.com/CHOUABBIA-A
 | Acceptance | Fresh exact-SHA Code CI must pass Lint, TypeScript, **192+ unit tests**, six performance tests, initial JS **under 900 KiB**, complete Playwright including mobile/deep-link and alarm journey, native A1 W1–W3 **and** mandatory W4, F18 LOCAL, and matching Documentation Validation. |
 
 **Current state:** UXR-07 **repair prepared, CI acceptance open**; P3/UXR-08 **not started**. Code CI #1067 native success alone is insufficient to close G2.
+
+
+### P2 / UXR-07 — Code CI #1068 contextual drawer test isolation (22 November 2026)
+
+[HidraWEB Code CI #1068](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45050246333) attempt 1 failed on `0ccd4a950ced76c2c7fd5602447b6d2d748a853f` (tree `8af277a5417b21001dccb0f3877ba61136698a0c`). OpenAPI compatibility, lint and TypeScript passed. The unit and component step reported 193 passed and one failed. Native A1 API/PostgreSQL/browser qualification and F18 LOCAL passed independently. [Documentation Validation #104](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45050246360) passed on the same SHA. The main verification job stopped before performance, build and full Playwright.
+
+The second test in `src/shell/context/ContextDrawerProvider.scope.test.tsx` found two accessible “Inspect asset” buttons because the first test left its React tree mounted. The failure reproduced locally. The repair registers Testing Library cleanup in a suite-local Vitest `afterEach` hook. Both scoped drawer cases and the related drawer/navigation tests passed after the change, with their original assertions.
+
+**Repair scope:** the scoped drawer test and this append-only evidence entry. **Commit:** `test(shell): isolate UXR-07 contextual drawer tests`.
+
+**Acceptance:** UXR-07 and G2 remain open pending fresh exact-SHA Code CI and Documentation Validation, including unit and performance checks, the 900 KiB budget, full Playwright, native A1/W1–W4 and F18 LOCAL. The next registered task is P3 / UXR-08.
