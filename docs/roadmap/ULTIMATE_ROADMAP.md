@@ -4164,3 +4164,22 @@ The 31 advertised [T39 Circle 1 consumer handoff](https://github.com/CHOUABBIA-A
 | Evidence status | **IMPLEMENTATION SOURCE PREPARED; exact-SHA CI NOT YET VERIFIED.** Typecheck, bundle, Playwright/mobile and browser accessibility are acceptance gates, not presumed results. |
 
 **G1 boundary:** UXR-03 industrial tokens CI-passed and UXR-04 locale/RTL/responsive foundation implemented at source level; G1 visual/accessibility/device acceptance awaits the UXR-04 exact-SHA Code CI and any owner-required browser/device evidence. The active roadmap remains unique. **UXR-05** is next *candidate only*, not automatically started.
+
+---
+
+### P1 / UXR-04 — exact-SHA CI #1057 lint repair (22 November 2026)
+
+**Failure:** [HidraWEB Code CI #1057](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45023123714) on `b3df6e6407857a956be8acd0a382af7b092ed578` stopped at **Lint** in the `verify` job, with exactly one ESLint error in `src/shell/AppShell.tsx:25:21`: `react-hooks/set-state-in-effect`. The UXR-04 mobile navigation route-change effect synchronously called `setMobileNavigationOpen(false)`, violating the configured React Hooks guidance; seven pre-existing/additional Fast Refresh warnings are nonfatal. The checks after lint (typecheck, browser tests, initial 900 KiB bundle) did not run in this job. A1 six-module native API/PostgreSQL browser qualification and F18 LOCAL session qualification passed, as did [Documentation Validation #93](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45023123715).
+
+**Indivisible UXR-04 repair:** replace the effect with route-scoped local state. Store the React Router `location.key` of the entry where the mobile menu opened. Derive `mobileNavigationOpen` by equality against the *current* route key. Thus route navigation immediately hides the temporary drawer, while an explicit close/Escape/backdrop or implemented sidebar item resets the route token to `null`. Desktop collapse continues to use the existing Zustand store. No permission bypass or route behavior is introduced.
+
+| Control | Exact scope |
+|---|---|
+| Base SHA/tree | `b3df6e6407857a956be8acd0a382af7b092ed578` / `7ab716e036f73384b785cd71c0ea35e5ea42428b` |
+| Commit message | `fix(shell): close UXR-04 mobile menu without effect state` |
+| UPDATE | `src/shell/AppShell.tsx`: remove `useEffect`, use `location.key`-scoped mobile-menu state, preserve responsive and RTL shell. `docs/roadmap/ULTIMATE_ROADMAP.md`: this append-only failure and correction record. |
+| CREATE/DELETE | None |
+| Preserve | Existing 900 KiB startup budget, all 21 Orval/API contracts and pinned checks, permission-filtered navigation, FR/EN/AR and RTL behavior, exact source units/timestamps, CSS focus, acceptance tests, native CI jobs, F16 HOLD/F21 synthetic preview/F22 BLOCKED. |
+| Validation | Static targeted source check confirms the lint-triggering synchronous effect is absent and mobile drawer state is derived from router entry key. The next **exact-SHA Code CI** must prove ESLint, TypeScript, unit, performance, unchanged bundle, Playwright, native jobs and release checks. |
+| Status | **Repair source bounded; CI acceptance PENDING**. No claim that #1057 passed, nor that UXR-04 is complete. UXR-05 remains not started. |
+

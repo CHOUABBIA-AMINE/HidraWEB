@@ -1,5 +1,5 @@
 import { Box, Link, Toolbar, useMediaQuery } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet, useLocation } from 'react-router';
 
@@ -17,16 +17,17 @@ function AppShellFrame() {
   const { t } = useTranslation();
   const location = useLocation();
   const mobile = useMediaQuery(hidraTheme.breakpoints.down('md'));
-  const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
+  // Record the route entry on which the mobile drawer was opened.
+  // A route change closes it by derivation; no effect-driven setState is needed.
+  const [mobileNavigationRoute, setMobileNavigationRoute] = useState<string | null>(null);
+  const mobileNavigationOpen = mobileNavigationRoute === location.key;
   const sidebarCollapsed = useShellUiStore((state) => state.sidebarCollapsed);
   const toggleSidebar = useShellUiStore((state) => state.toggleSidebar);
   const administrationRoute = location.pathname.startsWith('/administration/');
 
-  useEffect(() => { setMobileNavigationOpen(false); }, [location.pathname]);
-
   const navigationExpanded = mobile ? mobileNavigationOpen : !sidebarCollapsed;
   const toggleNavigation = () => {
-    if (mobile) setMobileNavigationOpen((value) => !value);
+    if (mobile) setMobileNavigationRoute((key) => key === location.key ? null : location.key);
     else toggleSidebar();
   };
 
@@ -57,7 +58,7 @@ function AppShellFrame() {
         collapsed={!mobile && sidebarCollapsed}
         mobile={mobile}
         open={mobileNavigationOpen}
-        onClose={() => setMobileNavigationOpen(false)}
+        onClose={() => setMobileNavigationRoute(null)}
       />
       <Box component="main" id={mainContentId} tabIndex={-1} sx={{ flexGrow: 1, minWidth: 0, width: { xs: '100%', md: 'auto' } }}>
         <Toolbar sx={{ minHeight: '64px !important' }} />
