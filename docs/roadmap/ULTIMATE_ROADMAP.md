@@ -4761,3 +4761,51 @@ No component/production source, backend, migrations, workflow, configuration,
 acceptance thresholds or tests were removed or weakened. No new API evidence
 required. Exact-SHA full Code CI and Documentation Validation remain pending
 before UXR-12 can be marked CI-passed; next UXR-13 remains unselected.
+
+
+### P4 / UXR-13 — six owner-controlled workspace canvas layouts (22 November 2026)
+
+**Predecessor exact-SHA acceptance:** UXR-12 repair
+`41879471ac1c970c17b568af31a4f7f2acd10a2c`, tree
+`2c951fc907cf1765529fb26d12be3597823e4f84`, passed
+[Code CI #1079](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45070824709)
+and [Documentation CI #115](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45070824737),
+including verify, A1 native PostgreSQL/API, F18 LOCAL and documentation.
+Only registered UXR-13 is selected by the owner's Next.
+
+**Registered scope:** six responsive presentation canvases (`map`,
+`synoptic`, `summary`, `register`, `trend-detail`, `editor`) with
+explicit ready/loading/empty/degraded/unavailable states. Layout selection,
+labels and data admission belong to their owning page; this frame contains
+no new API, permission rules, caching or domain calculations. Real map and
+trusted Telemetry endpoints remain the existing owner contracts; UXR-24
+station-signal placement/synoptic is **not** established by a frame.
+
+**Exact commit message:** `feat(workspace): qualify UXR-13 responsive canvas layouts`.
+CREATE `src/shell/workspace/WorkspaceCanvas.tsx` (typed variants, optional
+trend/detail aside, explicit state replacement and authorized retry),
+`src/shell/workspace/WorkspaceCanvas.test.tsx` (all six modes, state
+isolation, owner-only retry and accessible landmarks), and
+`tests/e2e/workspace-canvas.spec.ts` (narrow summary, granted/denied Workflow
+register, degraded Topology map without stale geometry). UPDATE
+`src/app/pages/OverviewPage.tsx` (four-card summary layout),
+`src/features/workflow/WorkflowTasksPage.tsx` (assigned register state),
+`src/features/topology/NetworkTopologyPage.tsx` (only legacy admin-map
+canvas and safe error/empty rendering),
+`src/features/topology/i18n/topologyTranslations.ts` (EN/FR/AR map empty and
+canvas descriptions), `docs/06-Navigation-Blueprint.md`, and this canonical
+append-only roadmap. DELETE none. UXR-12 heading/toolbar, T34 regional
+search, all security gates, owner Workflow transitions and CI tooling retained.
+
+**Known boundaries:** only Overview, My Tasks and the existing admin map
+adopt canvases in this step; all six reusable variants are tested but true
+operational synoptic signal placement, persisted editor flow, data trends and
+owner-provenance belong to their separately registered tasks. Explicit
+loading/empty/failure states are not evidence of real measurements. Existing
+G4 is still unaccepted. No production deployment or SITE qualification.
+
+**Pending exact-SHA acceptance:** OpenAPI generation compatibility, lint,
+TypeScript, all unit/component and performance tests, bundle size, release
+artifact verification, full Chromium (including UXR-13), native A1 W1–W4,
+F18 LOCAL and Documentation CI. UXR-14 remains the next **unselected** task;
+do not advance until this SHA passes and the owner invokes Next.

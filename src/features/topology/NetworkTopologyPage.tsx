@@ -32,6 +32,7 @@ import {
 } from '@/features/topology/model/topologyPresentation';
 import { NetworkAuthoringPanel } from './components/NetworkAuthoringPanel';
 import { useContextDrawer } from '@/shell/context/useContextDrawer';
+import { WorkspaceCanvas, type WorkspaceCanvasState } from '@/shell/workspace/WorkspaceCanvas';
 
 const NetworkPreviewPage = lazy(async () => ({
   default: (await import('./preview/NetworkPreviewPage')).NetworkPreviewPage,
@@ -153,6 +154,25 @@ function OperationalTopology({ authoring, onToggleAuthoring }: { authoring: bool
   const mapFeatures = geoJsonQuery.data?.features ?? [];
   const mapPage = geoJsonQuery.data?.page ?? 0;
   const mapTotalPages = geoJsonQuery.data?.totalPages ?? 0;
+  // Do not continue displaying geometry or cached children after a failed owner read.
+  const mapFailure = geoJsonQuery.error ? normalizeHidraApiError(geoJsonQuery.error) : undefined;
+  const mapCanvasState: WorkspaceCanvasState = visibleLayerIds.length === 0
+    ? { kind: 'empty', message: t('topology.noVisibleLayers') }
+    : geoJsonQuery.isFetching || (!geoJsonQuery.data && !geoJsonQuery.error)
+      ? { kind: 'loading', message: t('topology.loadingMap') }
+      : mapFailure
+        ? {
+            kind: 'degraded',
+            message: t(mapFailure.status === 403 ? 'topology.errorForbidden' : 'topology.errorGeneric'),
+            retry: {
+              label: t('status.retry'),
+              permitted: canRead && mapFailure.status !== 403 && mapFailure.status !== 404,
+              onRetry: () => { void geoJsonQuery.refetch(); },
+            },
+          }
+        : mapFeatures.length === 0
+          ? { kind: 'empty', message: t('topology.mapEmpty') }
+          : { kind: 'ready' };
 
   const openFeature = (feature: Feature) => {
     setSelectedFeatureId(feature.id);
@@ -289,24 +309,17 @@ function OperationalTopology({ authoring, onToggleAuthoring }: { authoring: bool
         </Paper>
 
         <Stack spacing={2}>
-          <Paper variant="outlined" sx={{ overflow: 'hidden', p: 1 }}>
+          <WorkspaceCanvas label={t('topology.mapCanvas')} variant="map" state={mapCanvasState}>
             <MapLegend layers={visibleRegistry} />
-            {visibleLayerIds.length === 0 ? <Alert severity="info" sx={{ mt: 1 }}>{t('topology.noVisibleLayers')}</Alert> : null}
-            {geoJsonQuery.isLoading ? <Alert severity="info" sx={{ mt: 1 }}>{t('topology.loadingMap')}</Alert> : null}
-            {geoJsonQuery.error ? (
-              <Alert severity="error" sx={{ mt: 1 }}>
-                {t(normalizeHidraApiError(geoJsonQuery.error).status === 403 ? 'topology.errorForbidden' : 'topology.errorGeneric')}
-              </Alert>
-            ) : null}
             <HidraMap
               ariaLabel={t('topology.map')}
               data={mapData}
               onFeatureSelect={selectMapFeature}
               selectedFeatureId={selectedFeatureId}
             />
-          </Paper>
+          </WorkspaceCanvas>
 
-          {geoJsonQuery.data ? (
+          {mapCanvasState.kind === 'ready' && geoJsonQuery.data ? (
             <Paper variant="outlined" sx={{ p: 2 }}>
               <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
                 <Chip label={t('topology.loadedCount', { loaded: mapFeatures.length, total: geoJsonQuery.data.totalFeatures ?? 0 })} size="small" />

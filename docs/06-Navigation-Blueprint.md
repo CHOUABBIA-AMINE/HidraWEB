@@ -320,3 +320,45 @@ owner error handling, scope-switch and direct-route guards remain unchanged.
 Other workspaces will adopt the shared frame only when separately selected;
 no blanket 19-workspace migration, status aggregation or new REST API is
 implied by UXR-12.
+
+
+## P4 / UXR-13 — owned workspace canvas layouts (22 November 2026)
+
+The `WorkspaceCanvas` presentation primitive lives in
+`src/shell/workspace/WorkspaceCanvas.tsx`. It supports six explicit
+variants: `map`, `synoptic`, `summary`, `register`, `trend-detail` and
+`editor`. Responsive single-column fallbacks apply to visual/record editors,
+summary cards use one/two/four cards by viewport, and trend/detail places an
+independently named aside beside the trend only on wide screens. No permanent
+right-hand shell column is added. No chart engine, MapLibre SDK, telemetry
+contract or simulation adapter is imported by this layout component.
+
+Every owner chooses an explicit data state: `ready`, `loading`, `empty`,
+`degraded`, or `unavailable`. Non-ready states render only accessible
+loading text/skeletons or an informational/warning state. They **never mount**
+existing protected child content or supporting details. A degraded-state
+retry button is available only when the owning workspace supplies an explicit
+`permitted: true` handler; an opaque unauthorized/unavailable state does not
+expose a retry action. A layout state alone cannot grant resource access,
+relabel engineering status, reuse an old response or qualify an owner result.
+
+Bounded initial adoption: `/overview` presents its four existing shell
+metadata cards inside the summary canvas, preserving its previous permission
+constraints; `/work/tasks` renders only its already-authorized Workflow
+assigned inbox inside the register canvas, with owner-supplied loading/empty/
+request-failed messages and no stale row rendering after a failed read.
+`/network`'s **existing unscoped administrator map** uses the map canvas,
+with geometry hidden during loading, when no layers/features are available,
+or after a failed read; any retry still calls the same owner API and is not
+offered after 403/404. Feature list/counts only render when the map owner
+read is ready. The separately scoped T34 regional search path is unchanged:
+no unscoped fallback, new cross-domain data join or authorization bypass.
+
+`synoptic`, `trend-detail` and `editor` frames are delivered as reusable
+presentation contracts and exercised with synthetic component fixtures.
+Actual station signal placement, qualified trend provenance, timeline, owner
+actions and editor save contracts remain separately gated under UXR-14–24
+and their respective backend owners. No simulated preview is relabelled as
+an operational live view. Unit and browser checks cover variants, detail
+landmarks, denied/empty/degraded isolation, responsive summary, register and
+map failure. This stage is not SITE/OT acceptance.

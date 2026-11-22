@@ -8,6 +8,7 @@ import { usePermissions } from '@/features/permissions/usePermissions';
 import { WORKBENCH_PERMISSIONS } from '@/features/workbench/api/workbenchPermissions';
 import { formatDisplayNumber } from '@/shared/i18n/localePresentation';
 import { WorkspaceHeading } from '@/shell/workspace/WorkspaceHeading';
+import { WorkspaceCanvas } from '@/shell/workspace/WorkspaceCanvas';
 
 export function OverviewPage() {
   const { t, i18n } = useTranslation();
@@ -38,13 +39,15 @@ export function OverviewPage() {
           onClick: () => navigate('/workbench'),
         }]}
       />
-      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' }, mt: 4 }}>
-        {cards.map((card) => (
-          <Paper key={card.label} variant="outlined" sx={{ p: 2.5 }}>
-            <Typography color="text.secondary" variant="body2">{card.label}</Typography>
-            <Typography sx={{ mt: 0.5 }} variant="h5">{card.value}</Typography>
-          </Paper>
-        ))}
+      <Box sx={{ mt: 4 }}>
+        <WorkspaceCanvas label={t('overview.title')} variant="summary" state={{ kind: 'ready' }}>
+          {cards.map((card) => (
+            <Paper key={card.label} variant="outlined" sx={{ p: 2.5 }}>
+              <Typography color="text.secondary" variant="body2">{card.label}</Typography>
+              <Typography sx={{ mt: 0.5 }} variant="h5">{card.value}</Typography>
+            </Paper>
+          ))}
+        </WorkspaceCanvas>
       </Box>
       <Alert severity="info" sx={{ mt: 3 }}>
         {permissions.catalogOnly ? t('overview.catalogOnlyNotice') : t('overview.backendAuthorizationNotice')}

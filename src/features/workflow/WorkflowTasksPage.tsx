@@ -38,6 +38,7 @@ import { WORKFLOW_PERMISSIONS } from '@/features/workflow/api/workflowPermission
 import { formatDisplayInstant } from '@/shared/i18n/localePresentation';
 import { WorkspaceHeading } from '@/shell/workspace/WorkspaceHeading';
 import { WorkspaceToolbar } from '@/shell/workspace/WorkspaceToolbar';
+import { WorkspaceCanvas, type WorkspaceCanvasState } from '@/shell/workspace/WorkspaceCanvas';
 
 const INBOX_SIZE = 50;
 
@@ -127,7 +128,17 @@ export function WorkflowTasksPage() {
   const tasks = tasksQuery.data?.content ?? [];
   const actions = actionsQuery.data ?? [];
   const timeline = timelineQuery.data ?? [];
-  const firstError = tasksQuery.error ?? taskQuery.error ?? actionsQuery.error ?? instanceQuery.error ?? timelineQuery.error;
+  // The register canvas presents the inbox request failure; other owner errors remain independent.
+  const firstError = taskQuery.error ?? actionsQuery.error ?? instanceQuery.error ?? timelineQuery.error;
+  const inboxCanvasState: WorkspaceCanvasState = !canTasks
+    ? { kind: 'unavailable', message: t('workflow.unavailable') }
+    : tasksQuery.isFetching
+      ? { kind: 'loading', message: t('shell.loadingWorkspace') }
+      : tasksQuery.isError
+        ? { kind: 'degraded', message: workflowErrorMessage(tasksQuery.error) }
+        : tasks.length === 0
+          ? { kind: 'empty', message: t('workflow.empty') }
+          : { kind: 'ready' };
 
   const closeTask = () => {
     setSelectedTaskId('');
@@ -184,17 +195,10 @@ export function WorkflowTasksPage() {
 
         {canTasks ? (
           <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', lg: selectedTaskId ? 'minmax(0, 1fr) minmax(360px, 0.8fr)' : '1fr' } }}>
-            <Paper variant="outlined" sx={{ p: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, alignItems: 'center' }}>
-                <Box>
-                  <Typography component="h2" variant="h6">{t('workflow.inbox')}</Typography>
-                  <Typography color="text.secondary" variant="caption">{t('workflow.loaded', { loaded: tasks.length, total: tasksQuery.data?.totalElements ?? tasks.length })}</Typography>
-                </Box>
-              </Box>
-              {tasks.length ? (
-                <TableContainer sx={{ mt: 1 }}><Table size="small"><TableHead><TableRow><TableCell>{t('workflow.task')}</TableCell><TableCell>{t('workflow.status')}</TableCell><TableCell>{t('workflow.priority')}</TableCell><TableCell>{t('workflow.due')}</TableCell><TableCell>{t('workflow.assignee')}</TableCell><TableCell /></TableRow></TableHead><TableBody>{tasks.map((task, index) => <TaskSummary key={task.id ?? `task-${index}`} task={task} onOpen={() => { closeTask(); setSelectedTaskId(task.id ?? ''); }} />)}</TableBody></Table></TableContainer>
-              ) : !tasksQuery.isLoading && !tasksQuery.error ? <Alert severity="info" sx={{ mt: 2 }}>{t('workflow.empty')}</Alert> : null}
-            </Paper>
+            <WorkspaceCanvas label={t('workflow.inbox')} title={t('workflow.inbox')} variant="register" state={inboxCanvasState}>
+              <Typography color="text.secondary" variant="caption">{t('workflow.loaded', { loaded: tasks.length, total: tasksQuery.data?.totalElements ?? tasks.length })}</Typography>
+              <TableContainer sx={{ mt: 1 }}><Table size="small"><TableHead><TableRow><TableCell>{t('workflow.task')}</TableCell><TableCell>{t('workflow.status')}</TableCell><TableCell>{t('workflow.priority')}</TableCell><TableCell>{t('workflow.due')}</TableCell><TableCell>{t('workflow.assignee')}</TableCell><TableCell /></TableRow></TableHead><TableBody>{tasks.map((task, index) => <TaskSummary key={task.id ?? `task-${index}`} task={task} onOpen={() => { closeTask(); setSelectedTaskId(task.id ?? ''); }} />)}</TableBody></Table></TableContainer>
+            </WorkspaceCanvas>
 
             {selectedTaskId ? (
               <Paper variant="outlined" sx={{ p: 2 }}>
