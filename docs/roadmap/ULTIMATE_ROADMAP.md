@@ -4231,3 +4231,30 @@ The 31 advertised [T39 Circle 1 consumer handoff](https://github.com/CHOUABBIA-A
 | Current status | **IMPLEMENTATION SOURCE PREPARED; publication and exact-SHA CI not yet verified.** UXR-05 is not CI-passed and does not authorize UXR-06 without owner “Next”. |
 
 **G2 gate:** UXR-05 source-level semantic shell is distinct from UXR-06's six-group sidebar and UXR-07's safe route restoration; P2/G2 remains open until all registered work and required evidence are complete.
+
+---
+
+## P2 / UXR-06 — Six-group sidebar, registered implementation (22 November 2026)
+
+**Selection and predecessor acceptance:** Owner's “next” selects one registered stage **P2 / UXR-06** after verification of [HidraWEB Code CI #1060](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45026305888) and [Documentation Validation #96](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45026305909), both **SUCCESS** on `41af3804e9534c15b13c8e627e7efaee997d8068`. #1060 verified 185 unit/component tests, six performance tests, 83 Playwright passes (15 repository-configured skips), initial static JavaScript **728.4 KiB / 900 KiB** unchanged, plus successful A1 native PostgreSQL/browser and F18 LOCAL session jobs. UXR-05 is **CI-passed**, not independently engineering/SITE accepted.
+
+**Registered functional contract:** Exactly six navigation groups (Overview, Operations, Engineering, Intelligence, Work, Administration); desktop widths **272px / 72px**, maximum three levels, **one expanded group at a time**, one nested submenu with text-only descendants; app-registered process names and routes preserved. Identity/security backend owners, **C1**. Existing `GET /api/v1/identity/me/permissions`, `GET /api/v1/security/permissions/routes`, `GET /api/v1/security/permissions/catalog` remain used by the existing provider. `GET /api/v1/identity/me/operation-capabilities` is an identified API dependency in the source roadmap but **not introduced as a new client call** here.
+
+| Scope | Exact bounded implementation envelope |
+|---|---|
+| Base SHA/tree | `41af3804e9534c15b13c8e627e7efaee997d8068` / `a0292243a13e4d1cbe66219d4a465c133363603b` |
+| Exact commit message | `feat(shell): implement UXR-06 permission-aware accordion navigation` |
+| UPDATE | `src/shell/navigation/navigationRegistry.ts`: optional third-level child for already-implemented `/engineering/assets`; exact `authorizedNavigationSections` and `navigationSectionForPath` public helpers. No new route or backend API. Descendant refers to `UXR-25` Assets product stage, not unrelated workflow `HWEB-F14`. |
+| UPDATE | `src/shell/sidebar/HidraSidebar.tsx`: permission-filtered one-at-a-time group controls, one explicit text-only Assets child submenu and keyboard/ARIA controls. Preserve desktop 272/72 widths and prior mobile/RTL drawers. |
+| UPDATE | `src/shell/navigation/navigationRegistry.test.ts`: six-group inventory, max three levels, published/effective module-grant prune, nested-assets negative and exact-route cases. |
+| UPDATE | `src/shared/i18n/resources.ts`: existing FR/EN/AR translation dictionaries add Assets label and submenu action labels; no pre-existing translations removed. |
+| CREATE | `tests/e2e/sidebar-groups.spec.ts`: synthetic permissions, one-expanded-group, keyboard open, text-only asset descendant, negative authorization, icon-only collapse and 72px width. |
+| UPDATE | `tests/e2e/bootstrap.spec.ts`, `tests/e2e/workflow.spec.ts` and `tests/e2e/foundation-context-live.spec.ts`: retain existing real-browser access and protected-action assertions while opening/selecting authorized navigation groups explicitly; no skip or relaxation. |
+| UPDATE | `docs/06-Navigation-Blueprint.md`, `docs/10-Design-System-Specification.md` and this append-only `docs/roadmap/ULTIMATE_ROADMAP.md`: behavior, ownership and acceptance limits. |
+| DELETE | None. |
+| Preserved | No modifications to backend or REST/OpenAPI/Orval generated contracts, router routes, authorization gates, decision/approval provenance, global header, numerical simulation or OT integrations, original 900 KiB initial JS cap, database history, HWEB-F16 HOLD/F21 owner-approved synthetic preview/F22 BLOCKED. |
+| Deferred | UXR-07 deep-link, history, active-ancestor and scoped-tab restoration. UXR-25 actual Assets workspace maturity. No production-language activation or deployment claims. |
+| Required CI | Exact-SHA Code CI proving contract compatibility, lint/typecheck, all unit and performance tests, unchanged budget, full Playwright and native A1/F18 qualification, plus same-SHA Docs validation. Site/physical accessibility is a separate qualified gate. |
+| Status | **SOURCE IMPLEMENTATION PREPARED; EXACT-SHA CI PENDING**. Publish one guarded `main` commit, verify exact paths/parent/tree and CI-created state, then STOP. Do not advance UXR-07. |
+
+**G2 status:** UXR-05 CI passed; UXR-06 awaits its exact-SHA CI; UXR-07 not selected. G2 is **OPEN**, not accepted on the basis of a code commit alone.

@@ -119,7 +119,10 @@ test('HWEB-002 authenticates and builds a capability-filtered accessible shell',
 
   await expect(page.getByRole('button', { name: 'Réseau' })).toBeEnabled();
   await expect(page.getByRole('button', { name: 'Mes tâches' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'ADMINISTRATION' })).toHaveAttribute('aria-expanded', 'false');
+  await page.getByRole('button', { name: 'ADMINISTRATION' }).click();
   await expect(page.getByRole('button', { name: 'Organisation' })).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Réseau' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Identité & accès' })).toBeEnabled();
   await expect(page.getByRole('button', { name: 'Planification' })).toHaveCount(0);
   await expect(page.getByRole('banner', { name: 'En-tête Hidra' })).toHaveCount(1);
@@ -201,6 +204,7 @@ test('HWEB-004 exposes backend-supported identity and organization context works
   await mockIdentityOrganization(page);
   await signIn(page);
 
+  await page.getByRole('button', { name: 'ADMINISTRATION' }).click();
   await page.getByRole('button', { name: 'Identité & accès' }).click();
   await expect(page).toHaveURL(/\/administration\/users$/);
   await expect(page.getByRole('heading', { name: 'Identité & accès' })).toBeVisible();
@@ -231,6 +235,7 @@ test('HWEB-004 surfaces backend 403 when an identity mutation is refused', async
   });
   await signIn(page);
 
+  await page.getByRole('button', { name: 'ADMINISTRATION' }).click();
   await page.getByRole('button', { name: 'Identité & accès' }).click();
   await page.getByLabel('Nom d’utilisateur').fill('new-operator');
   await page.getByRole('button', { name: 'Créer un utilisateur' }).click();

@@ -185,3 +185,11 @@ Where supported, operational records shall provide `Show on map` navigation to t
 Previous conceptual routes such as `/topology`, `/monitoring`, `/alarm`, `/incident`, `/workflow` and similar module-first paths are not the canonical primary IA.
 
 If such routes are implemented for compatibility or generic workbench access, they shall redirect to or coexist behind the canonical process routes without redefining the sidebar structure.
+
+## UXR-06 — implemented hierarchical navigation (22 November 2026)
+
+The existing primary process names, ordered group membership, canonical routes and backend ownership remain unchanged. UXR-06 upgrades the interaction from the prior always-open section lists to one expanded accessible group at a time. The six stable top-level destinations are Overview (root item), Operations, Engineering, Intelligence, Work and Administration. The existing 272px expanded and 72px collapsed widths are not changed.
+
+Group headings are keyboard-operable and report `aria-expanded`/`aria-controls`. Authorized children alone populate an expanded group. Empty groups and unauthorized descendants are removed before rendering. The only registered depth-three example is `Engineering → Integrity & Maintenance → Assets` at the **existing** `/engineering/assets` route; Assets is a text-only descendant controlled by an independent submenu toggle and gated on the `assets` module from effective backend-grant/route intersection. The asset workspace's subsequent full product evolution is **UXR-25**, not a UXR-06 new API contract. On direct authenticated entry, an authorized active route can select its group/submenu; back/forward and sensitive-context restoration remain deferred to UXR-07.
+
+The frontend `navigationSections` registry is still an interface process map, not a source of principal authority. Backend server-side permission enforcement remains decisive; no group or descendant grants itself access. Tests cover grant-pruned visibility, group exclusivity, nested item permissions, keyboard activation, icon-only collapse and screen-height/RTL foundational preservation. No extra route, backend endpoint, fake API response or workflow decision is published by this change.

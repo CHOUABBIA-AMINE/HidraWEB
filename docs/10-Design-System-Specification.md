@@ -129,3 +129,15 @@ The permanent application frame remains the existing MUI/React shell. This stage
 **Backend contract:** No new REST endpoint or DTO is introduced. The shell consumes the existing identity principal/grant and security permission metadata contracts through `AuthProvider` and `PermissionProvider`. Server-side authorizations remain mandatory; the frontend shell does not establish new capability or permission grants. `GET /api/v1/identity/me/operation-capabilities` is a roadmap dependency, **not proof of a new UXR-05 client call**.
 
 **Acceptance limit:** Automated tests can show semantic landmarks and safe loading/denial handling for synthetic fixtures but do not qualify all enterprise page routes, user entitlements, physical device accessibility or operations acceptance. Evidence is the exact-SHA Code CI and Documentation Validation; no production/SITE claims.
+
+## UXR-06 — six-group sidebar and bounded nested submenu (22 November 2026)
+
+| Concern | Behavior, source and evidence boundary |
+|---|---|
+| Registered process hierarchy | `src/shell/navigation/navigationRegistry.ts` retains all six sections: Overview, Operations, Engineering, Intelligence, Work and Administration. New `authorizedNavigationSections` filters entries and optional descendants using the current effective-grant/published-route module intersection. `navigationSectionForPath` identifies only exact registered authorized routes. |
+| Accordion behavior | `src/shell/sidebar/HidraSidebar.tsx` displays one expanded group at a time through accessible labelled, keyboard-operable MUI controls with `aria-expanded` and `aria-controls`. No new role-name authorization logic. The collapsed state may leave no group open, but never multiple open. |
+| One depth-three example | Under Engineering's existing Integrity & Maintenance, optional text-only `Assets` links to already-present `/engineering/assets`, visible only if `assets` capability is present. It has an independent expand/collapse control and no additional child icon. The owner for subsequent full Assets workflow is UXR-25. No new page or ownership is invented. |
+| Width/layout invariants | Desktop `272px` expanded / `72px` collapsed and the prior 44px touch/focus minimum stay in place. UXR-04 mobile temporary drawer and explicit RTL anchors stay unchanged. |
+| Acceptance | Unit tests check six sections, no deeper-than-three registry nesting, exact authorized path ancestry and negative assets visibility. Browser tests check one-open-group behavior, keyboard submenu, text-only descendant and collapsed 72px state. Existing Bootstrap, Workflow and authorized native organization browser tests now expand the necessary product group before clicking its visible destination, rather than relying on all five groups permanently open. |
+
+This is a frontend navigation-presentation improvement, **not** evidence that any hidden business endpoint became backend-ready. UI labels and group structure do not disclose protected resource counts or override HidraAPI permission checks. UXR-07 remains the separate stage for back/forward, route/ancestor, tab and scoped-context restoration, and G2 remains open.

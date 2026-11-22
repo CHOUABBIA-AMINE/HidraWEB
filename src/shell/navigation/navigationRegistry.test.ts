@@ -4,6 +4,8 @@ import { normalizePermissionMetadata } from '@/features/permissions/model/permis
 import {
   isNavigationItemAuthorized,
   navigationSections,
+  authorizedNavigationSections,
+  navigationSectionForPath,
 } from '@/shell/navigation/navigationRegistry';
 
 function item(id: string) {
@@ -73,5 +75,32 @@ describe('permission-aware navigation', () => {
     );
 
     expect(isNavigationItemAuthorized(item('alarms'), normalized.modules)).toBe(true);
+  });
+  it('keeps exactly six registered product groups with no more than three levels', () => {
+    expect(navigationSections.map((group) => group.id)).toEqual([
+      'root', 'operations', 'engineering', 'intelligence', 'work', 'administration',
+    ]);
+    const descendants = navigationSections.flatMap((group) => group.items.flatMap((item) => item.children ?? []));
+    expect(descendants.map((item) => [item.id, item.path])).toEqual([
+      ['engineering-assets', '/engineering/assets'],
+    ]);
+    expect(descendants.every((item) => !item.children?.length)).toBe(true);
+  });
+
+  it('filters both groups and nested assets from published effective module grants', () => {
+    const networkOnly = authorizedNavigationSections(navigationSections, new Set(['topology']));
+    expect(networkOnly.map((group) => group.id)).toEqual(['root', 'operations']);
+    expect(networkOnly.find((group) => group.id === 'operations')?.items.map((item) => item.id)).toEqual(['network']);
+    expect(navigationSectionForPath(networkOnly, '/engineering/assets')).toBeUndefined();
+    expect(navigationSectionForPath(networkOnly, '/network')).toBe('operations');
+
+    const integrityOnly = authorizedNavigationSections(navigationSections, new Set(['integrity']));
+    expect(integrityOnly.find((group) => group.id === 'engineering')?.items[0]?.children).toEqual([]);
+    expect(navigationSectionForPath(integrityOnly, '/engineering/assets')).toBeUndefined();
+
+    const assetAccess = authorizedNavigationSections(navigationSections, new Set(['assets']));
+    expect(assetAccess.find((group) => group.id === 'engineering')?.items[0]?.children?.[0]?.id).toBe('engineering-assets');
+    expect(navigationSectionForPath(assetAccess, '/engineering/assets')).toBe('engineering');
+    expect(navigationSectionForPath(assetAccess, '/engineering/unknown')).toBeUndefined();
   });
 });

@@ -8,6 +8,8 @@ import EngineeringIcon from '@mui/icons-material/Engineering';
 import EventIcon from '@mui/icons-material/Event';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 import HubIcon from '@mui/icons-material/Hub';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InsightsIcon from '@mui/icons-material/Insights';
 import IntegrationInstructionsIcon from '@mui/icons-material/IntegrationInstructions';
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -19,14 +21,15 @@ import SecurityIcon from '@mui/icons-material/Security';
 import SettingsIcon from '@mui/icons-material/Settings';
 import SpeedIcon from '@mui/icons-material/Speed';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import { Divider, Drawer, List, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Tooltip } from '@mui/material';
-import type { ReactElement } from 'react';
+import { Box, Collapse, Divider, Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Tooltip } from '@mui/material';
+import { useState, type ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
 
 import { usePermissions } from '@/features/permissions/usePermissions';
 import {
-  isNavigationItemAuthorized,
+  authorizedNavigationSections,
+  navigationSectionForPath,
   navigationSections,
   type NavigationIconKey,
   type NavigationItem,
@@ -53,6 +56,14 @@ interface HidraSidebarProps {
   onClose?: () => void;
 }
 
+const groupIcons: Record<string, NavigationIconKey> = {
+  operations: 'operations',
+  engineering: 'engineering',
+  intelligence: 'analytics',
+  work: 'tasks',
+  administration: 'identity',
+};
+
 export function HidraSidebar({ collapsed, mobile = false, open = false, onClose }: HidraSidebarProps) {
   const { t, i18n } = useTranslation();
   const permissions = usePermissions();
@@ -60,35 +71,91 @@ export function HidraSidebar({ collapsed, mobile = false, open = false, onClose 
   const navigate = useNavigate();
   const width = collapsed ? collapsedWidth : expandedWidth;
 
-  const visibleSections = navigationSections
-    .map((section) => ({
-      ...section,
-      items: section.items.filter((item) => isNavigationItemAuthorized(item, permissions.modules)),
-    }))
-    .filter((section) => section.items.length > 0);
+  // A group exists only if it contains an authorized destination. Never expose
+  // inaccessible child counts or inherited capabilities through the sidebar.
+  const visibleSections = authorizedNavigationSections(navigationSections, permissions.modules);
+  const activeSection = navigationSectionForPath(visibleSections, location.pathname);
+  const [requestedGroup, setRequestedGroup] = useState<string | null>(null);
+  const [requestedSubmenu, setRequestedSubmenu] = useState<boolean | null>(null);
+  const visibleGroupIds = new Set(visibleSections.filter((section) => section.id !== 'root').map((section) => section.id));
+  const defaultGroup = activeSection !== 'root' && activeSection && visibleGroupIds.has(activeSection)
+    ? activeSection
+    : visibleGroupIds.has('operations') ? 'operations' : visibleSections.find((section) => section.id !== 'root')?.id;
+  // Empty string deliberately means "all closed"; at most one group can open.
+  const expandedGroup = requestedGroup === '' ? undefined
+    : requestedGroup !== null && visibleGroupIds.has(requestedGroup) ? requestedGroup : defaultGroup;
 
-  const renderItem = (item: NavigationItem) => {
+  const goTo = (item: NavigationItem, sectionId: string) => {
+    if (!item.implemented) return;
+    if (sectionId !== 'root') setRequestedGroup(sectionId);
+    if (mobile) onClose?.();
+    void navigate(item.path);
+  };
+
+  const renderDestination = (item: NavigationItem, sectionId: string, descendant = false) => {
     const label = t(item.labelKey);
-    const plannedTitle = t('nav.planned', { task: item.deliveryTask });
     const selected = item.implemented && location.pathname === item.path;
-    const button = (
+    const plannedTitle = t('nav.planned', { task: item.deliveryTask });
+    const children = item.children ?? [];
+    const hasSubmenu = children.length > 0;
+    const routeInSubmenu = children.some((child) => child.implemented && child.path === location.pathname);
+    const submenuOpen = requestedSubmenu ?? routeInSubmenu;
+
+    const destination = (
       <ListItemButton
         aria-current={selected ? 'page' : undefined}
         aria-label={label}
         disabled={!item.implemented}
-        onClick={item.implemented ? () => { if (mobile) onClose?.(); void navigate(item.path); } : undefined}
+        onClick={item.implemented ? () => goTo(item, sectionId) : undefined}
         selected={selected}
-        sx={{ minHeight: 46, px: collapsed ? 2.5 : 2 }}
+        sx={{
+          minHeight: 46,
+          minWidth: 0,
+          px: descendant ? 2 : collapsed ? 2.5 : 2,
+          ...(descendant ? { paddingInlineStart: 6 } : {}),
+        }}
       >
-        <ListItemIcon sx={{ minWidth: collapsed ? 0 : 40, justifyContent: 'center' }}>{iconFor(item.icon)}</ListItemIcon>
-        {!collapsed ? <ListItemText primary={label} secondary={!item.implemented ? item.deliveryTask : undefined} /> : null}
+        {!descendant ? (
+          <ListItemIcon sx={{ minWidth: collapsed ? 0 : 40, justifyContent: 'center' }}>
+            {iconFor(item.icon)}
+          </ListItemIcon>
+        ) : null}
+        {descendant || !collapsed ? (
+          <ListItemText primary={label} secondary={!item.implemented ? item.deliveryTask : undefined} />
+        ) : null}
       </ListItemButton>
     );
 
     return (
-      <Tooltip key={item.id} placement={i18n.dir() === 'rtl' ? 'left' : 'right'} title={collapsed ? `${label} · ${item.implemented ? '' : plannedTitle}` : (!item.implemented ? plannedTitle : '')}>
-        <span>{button}</span>
-      </Tooltip>
+      <Box key={item.id}>
+        <Box sx={{ alignItems: 'center', display: 'flex' }}>
+          <Tooltip
+            placement={i18n.dir() === 'rtl' ? 'left' : 'right'}
+            title={collapsed ? `${label} · ${item.implemented ? '' : plannedTitle}` : (!item.implemented ? plannedTitle : '')}
+          >
+            <Box sx={{ display: 'flex', flexGrow: 1, minWidth: 0 }}>{destination}</Box>
+          </Tooltip>
+          {hasSubmenu && !collapsed ? (
+            <IconButton
+              aria-controls={`hidra-nav-submenu-${item.id}`}
+              aria-expanded={submenuOpen}
+              aria-label={t(submenuOpen ? 'nav.collapseSubmenu' : 'nav.expandSubmenu', { name: label })}
+              onClick={() => setRequestedSubmenu(!submenuOpen)}
+              size="small"
+              sx={{ flexShrink: 0, minHeight: 44, minWidth: 44 }}
+            >
+              {submenuOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            </IconButton>
+          ) : null}
+        </Box>
+        {hasSubmenu && !collapsed ? (
+          <Collapse in={submenuOpen} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding id={`hidra-nav-submenu-${item.id}`}>
+              {children.map((child) => renderDestination(child, sectionId, true))}
+            </List>
+          </Collapse>
+        ) : null}
+      </Box>
     );
   };
 
@@ -113,17 +180,42 @@ export function HidraSidebar({ collapsed, mobile = false, open = false, onClose 
       }}
     >
       <List id="hidra-primary-navigation" aria-label={t('shell.sidebar')} component="nav" disablePadding sx={{ py: 1 }}>
-        {visibleSections.map((section, sectionIndex) => (
-          <div key={section.id}>
-            {sectionIndex > 0 ? <Divider sx={{ my: 0.75 }} /> : null}
-            {!collapsed && section.labelKey ? (
-              <ListSubheader component="div" sx={{ bgcolor: 'inherit', lineHeight: '32px' }}>
-                {t(section.labelKey)}
-              </ListSubheader>
-            ) : null}
-            {section.items.map(renderItem)}
-          </div>
-        ))}
+        {visibleSections.map((section, index) => {
+          if (section.id === 'root' || !section.labelKey) {
+            return (
+              <Box key={section.id}>
+                {section.items.map((item) => renderDestination(item, section.id))}
+              </Box>
+            );
+          }
+
+          const groupOpen = expandedGroup === section.id;
+          const label = t(section.labelKey);
+          return (
+            <Box key={section.id}>
+              {index > 0 ? <Divider sx={{ my: 0.75 }} /> : null}
+              <ListItemButton
+                aria-controls={`hidra-nav-group-${section.id}`}
+                aria-expanded={groupOpen}
+                aria-label={label}
+                onClick={() => setRequestedGroup(groupOpen ? '' : section.id)}
+                selected={groupOpen}
+                sx={{ minHeight: 48, px: collapsed ? 2.5 : 2 }}
+              >
+                <ListItemIcon sx={{ minWidth: collapsed ? 0 : 40, justifyContent: 'center' }}>
+                  {iconFor(groupIcons[section.id] ?? 'overview')}
+                </ListItemIcon>
+                {!collapsed ? <ListItemText primary={label} primaryTypographyProps={{ fontWeight: 700, variant: 'caption' }} /> : null}
+                {!collapsed ? (groupOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />) : null}
+              </ListItemButton>
+              <Collapse in={groupOpen} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding id={`hidra-nav-group-${section.id}`}>
+                  {section.items.map((item) => renderDestination(item, section.id))}
+                </List>
+              </Collapse>
+            </Box>
+          );
+        })}
       </List>
     </Drawer>
   );

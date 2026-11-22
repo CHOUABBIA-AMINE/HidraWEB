@@ -93,6 +93,10 @@ test('native LOCAL user creation, credential initialization, activation and real
 test('native Party registration, activation, persisted history and eligible chooser', async ({ page, request }) => {
   await login(page);
   // Keep the transient native session alive through React Router navigation.
+  const administrationGroup = page.getByRole('button', { name: /^(ADMINISTRATION|الإدارة)$/ });
+  if (await administrationGroup.getAttribute('aria-expanded') === 'false') {
+    await administrationGroup.click();
+  }
   await page.getByRole('button', { name: /^(Partenaires|Parties|الجهات)$/ }).click();
   await expect(page).toHaveURL(`${web}/administration/parties`);
   await expect(page.getByRole('heading', { level: 1, name: /Administration des partenaires|Party administration|إدارة الجهات/ })).toBeVisible();
@@ -133,6 +137,10 @@ test('native Party registration, activation, persisted history and eligible choo
 
 test('native employee registration, activation and lifecycle history', async ({ page, request }) => {
   await login(page);
+  const administrationGroup = page.getByRole('button', { name: /^(ADMINISTRATION|الإدارة)$/ });
+  if (await administrationGroup.getAttribute('aria-expanded') === 'false') {
+    await administrationGroup.click();
+  }
   await page.getByRole('button', { name: /^(Organisation|Organization|التنظيم)$/ }).click();
   await expect(page).toHaveURL(`${web}/administration/organization`);
   await expect(page.getByRole('heading', { level: 1, name: /^(Organisation|Organization|التنظيم)$/ })).toBeVisible();

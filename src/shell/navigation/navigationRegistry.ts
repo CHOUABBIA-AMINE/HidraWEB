@@ -12,6 +12,7 @@ export interface NavigationItem {
   icon: NavigationIconKey;
   implemented: boolean;
   deliveryTask: string;
+  children?: readonly NavigationItem[];
 }
 
 export function isNavigationItemAuthorized(
@@ -40,7 +41,9 @@ export const navigationSections: readonly NavigationSection[] = [
     { id: 'planning', labelKey: 'nav.planning', path: '/planning', capabilityModules: ['planning'], icon: 'planning', implemented: true, deliveryTask: 'HWEB-010' },
   ] },
   { id: 'engineering', labelKey: 'nav.groups.engineering', items: [
-    { id: 'integrity', labelKey: 'nav.integrity', path: '/engineering', capabilityModules: ['integrity', 'assets'], icon: 'engineering', implemented: true, deliveryTask: 'HWEB-011' },
+    { id: 'integrity', labelKey: 'nav.integrity', path: '/engineering', capabilityModules: ['integrity', 'assets'], icon: 'engineering', implemented: true, deliveryTask: 'HWEB-011', children: [
+      { id: 'engineering-assets', labelKey: 'nav.assets', path: '/engineering/assets', capabilityModules: ['assets'], icon: 'engineering', implemented: true, deliveryTask: 'UXR-25' },
+    ] },
     { id: 'custody', labelKey: 'nav.custody', path: '/custody', capabilityModules: ['custody', 'party'], icon: 'custody', implemented: true, deliveryTask: 'HWEB-012' },
   ] },
   { id: 'intelligence', labelKey: 'nav.groups.intelligence', items: [
@@ -63,3 +66,34 @@ export const navigationSections: readonly NavigationSection[] = [
     { id: 'integrations', labelKey: 'nav.integrations', path: '/administration/integrations', capabilityModules: ['integration'], icon: 'integrations', implemented: true, deliveryTask: 'HWEB-014-04' },
   ] },
 ] as const;
+
+/** Drop unauthorized leaves before rendering group headings or expandable submenus. */
+export function authorizedNavigationSections(
+  sections: readonly NavigationSection[],
+  modules: ReadonlySet<string>,
+): NavigationSection[] {
+  return sections
+    .map((section) => ({
+      ...section,
+      items: section.items
+        .filter((item) => isNavigationItemAuthorized(item, modules))
+        .map((item) => ({
+          ...item,
+          children: item.children?.filter((child) => isNavigationItemAuthorized(child, modules)),
+        })),
+    }))
+    .filter((section) => section.items.length > 0);
+}
+
+/** Exact registered paths only; do not infer entitlement from unregistered path prefixes. */
+export function navigationSectionForPath(
+  sections: readonly NavigationSection[],
+  pathname: string,
+): string | undefined {
+  return sections.find((section) =>
+    section.items.some((item) =>
+      (item.implemented && item.path === pathname) ||
+      item.children?.some((child) => child.implemented && child.path === pathname),
+    ),
+  )?.id;
+}

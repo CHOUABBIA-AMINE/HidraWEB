@@ -42,6 +42,8 @@ test('HWEB-007 executes only a backend-permitted workflow transition with the ta
   await mockWorkflow(page);
   await signIn(page);
 
+  // Workflow is the only authorized group in this synthetic session.
+  await expect(page.getByRole('button', { name: 'TRAVAIL' })).toHaveAttribute('aria-expanded', 'true');
   const taskNavigation = page.getByRole('button', { name: 'Mes tâches' }).filter({ visible: true });
   const count = await taskNavigation.count();
   let clicked = false;
