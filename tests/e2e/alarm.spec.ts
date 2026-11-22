@@ -56,12 +56,19 @@ test('HWEB-008 presents backend-governed alarm response and suppression semantic
   await expect(page.getByRole('button', { name: 'Open topology context' })).toBeVisible();
   await page.getByRole('button', { name: 'Ouvrir mes tâches' }).click();
   await expect(page).toHaveURL(/\/work\/tasks\?instanceId=wf-1$/);
+  await expect(page.getByRole('heading', { name: 'Mes tâches', level: 1 })).toBeVisible();
   await page.goBack();
   await expect(page).toHaveURL(/\/alarms$/);
   // UXR-07 intentionally discards record-specific state on route changes.
   // Reopen through the authorized list, then exercise the actual backend command.
-  await expect(page.getByText('Pression élevée')).toBeVisible();
-  await page.getByRole('button', { name: 'Ouvrir', exact: true }).click();
+  const alarmRow = page.getByRole('row').filter({
+    has: page.getByRole('cell', { name: 'Pression élevée', exact: true }),
+  });
+  const alarmDetail = page.getByRole('heading', { name: 'Pression élevée', exact: true, level: 2 });
+  await expect(alarmRow).toBeVisible();
+  await expect(alarmDetail).toHaveCount(0);
+  await alarmRow.getByRole('button', { name: 'Ouvrir', exact: true }).click();
+  await expect(alarmDetail).toBeVisible();
   await expect(page.getByText('MAINT')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Acquitter' })).toBeEnabled();
   await page.getByRole('button', { name: 'Acquitter' }).click();

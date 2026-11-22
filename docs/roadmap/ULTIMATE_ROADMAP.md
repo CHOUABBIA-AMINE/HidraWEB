@@ -4497,3 +4497,14 @@ The second test in `src/shell/context/ContextDrawerProvider.scope.test.tsx` foun
 **Repair:** Use a type-only import for the Vitest partial mock type, retaining the original runtime config and OIDC test assertions. The repair changes the login test and appends this evidence entry. **Exact commit message:** `test(auth): fix UXR-08 login test type import`.
 
 **Acceptance:** UXR-08 awaits fresh exact-SHA Code CI and Documentation Validation. UXR-09 remains the next registered task.
+
+
+### P3 / UXR-08 — Code CI #1071 alarm navigation regression test (22 November 2026)
+
+[Code CI #1071](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45053626091) attempt 1 failed on `99f825f82c2e22c74f548d9e71293dacacf8e337`, tree `471284b35ec00fc772b9ba17918d2c1c139bb05e`. Lint, type checking, 199 unit/component tests, six performance tests, build and the 729.7 / 900 KiB startup budget passed. The full Playwright run reported 91 passed, 15 configured skips and one failure. The A1 native PostgreSQL/browser and F18 LOCAL jobs and [Documentation Validation #107](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45053626104) passed.
+
+In `tests/e2e/alarm.spec.ts`, the post-Back text locator matched both the alarm list cell and the prior detail heading. The test had waited only for the workflow URL before going Back. Wait for the workflow heading, then target the exact list row, assert the detail was discarded, and reopen that row before keeping the existing acknowledgement and suppression checks.
+
+**Repair scope:** the alarm browser test and this append-only evidence entry. **Exact commit message:** `test(alarm): wait for workflow before checking Back restoration`.
+
+**Acceptance:** UXR-08 awaits fresh exact-SHA Code CI and Documentation Validation. The next registered task is UXR-09.
