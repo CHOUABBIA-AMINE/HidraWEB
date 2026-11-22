@@ -4887,3 +4887,33 @@ checks, full Chromium (including UXR-14), independent A1 W1–W4 PostgreSQL/API,
 F18 LOCAL and Documentation Validation. Do not mark UXR-14 CI-passed until
 this SHA satisfies all gates. UXR-15 is the next registered **unselected**
 stage.
+
+
+### P4 / UXR-14 — CI #1082 isolated i18n test-harness repair (22 November 2026)
+
+**Observed exact-SHA failure:** `main` at
+`505d01a3543a918970cfc45cd9bdbc270d70190a`, tree
+`5ed43cfa42f6403ee606f5c381089b5d57c90e35`. In
+[Code CI #1082](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45075606086),
+the `verify` job passed OpenAPI generation, lint and TypeScript but failed
+`Unit and component tests`: 228 passed, one failed across 81 files. The
+single failure was `src/features/workbench/components/WorkbenchDetailPanel.test.tsx:56`,
+where the missing-current-grant test expected the translated French
+Workbench-unavailable warning but the isolated render emitted the untranslated
+key `workbench.capabilityUnavailable`. The test mounted only QueryClient;
+it omitted `I18nextProvider`, and the CI log reported a missing react-i18next
+instance. The application i18n resource contains the French message. This is
+a test harness setup error, not proven missing authorization. Independent A1
+fresh PostgreSQL/API and F18 LOCAL jobs passed. [Documentation CI #118](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45075606049)
+passed. Performance, production build, release artifact and full Chromium
+steps were **skipped**, not accepted.
+
+**Exact repair message:** `fix(workspace): provide i18n in UXR-14 detail test harness`.
+UPDATE only `src/features/workbench/components/WorkbenchDetailPanel.test.tsx`
+(import the existing application `i18n` and wrap the existing test render
+with `I18nextProvider`), and append-only this roadmap. Keep every existing
+assertion: no unauthorized request, no protected detail, denied response,
+current exact-record identity and successful authorized read. No production
+component, backend calls, permissions, tests, migrations, OpenAPI pins or CI
+thresholds removed or weakened. The pending acceptance is new exact-SHA full
+Code CI plus Documentation CI; UXR-15 remains unselected.
