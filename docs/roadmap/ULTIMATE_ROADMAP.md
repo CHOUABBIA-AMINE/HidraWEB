@@ -4732,3 +4732,32 @@ unit/component and performance, build and 900 KiB budget, release verification,
 full Chromium, A1 native PostgreSQL/API W1–W4, F18 LOCAL and Documentation CI.
 No skipped gates or weakened existing tests. Next registered task UXR-13
 remains **unselected**; G4 stays open pending remaining work and acceptance.
+
+
+### P4 / UXR-12 — exact-SHA Code CI #1078 failed unit-test isolation repair (22 November 2026)
+
+**Observed failure at main** `ddbcfa41fb51720efe32cdc38a9dd7afefad3a6f`, tree
+`7ad7e1c9166c78a76f21a3c926a9ae3afeee2695`:
+[Code CI #1078](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45069746898)
+completed FAILURE, one test of 219 failed (218 passed; 78 test files).
+`verify` passed generation, lint and TypeScript, then failed at
+`src/shell/workspace/WorkspaceHeading.test.tsx:46` because the first test's
+rendered owner `OPEN` status remained mounted when the second test asserted
+that a status should be absent. `tests/setup.ts` has no RTL cleanup and
+`vitest.config.ts` uses non-global Vitest. This is test isolation, not an
+observed authorization-policy or production-rendering defect. The independent
+A1 fresh-PostgreSQL/API and F18 LOCAL jobs passed, and
+[Documentation CI #114](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45069746892)
+passed. Code CI performance, production bundle, release artifact and full
+Chromium were **skipped**, not passed. All reported job failures reviewed;
+later skipped gates remain unverified.
+
+**Bounded repair message:** `fix(workspace): isolate UXR-12 component test renders`.
+UPDATE only `src/shell/workspace/WorkspaceHeading.test.tsx`,
+`src/shell/workspace/WorkspaceToolbar.test.tsx` and append-only roadmap.
+Explicit `afterEach(cleanup)` in the new UXR-12 tests prevents cross-test
+DOM leakage while preserving all authorization and status-negative assertions.
+No component/production source, backend, migrations, workflow, configuration,
+acceptance thresholds or tests were removed or weakened. No new API evidence
+required. Exact-SHA full Code CI and Documentation Validation remain pending
+before UXR-12 can be marked CI-passed; next UXR-13 remains unselected.

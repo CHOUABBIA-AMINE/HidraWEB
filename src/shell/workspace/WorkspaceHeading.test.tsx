@@ -1,8 +1,11 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { WorkspaceHeading } from '@/shell/workspace/WorkspaceHeading';
+
+// Vitest does not enable RTL auto-cleanup in this repository's non-global setup.
+afterEach(cleanup);
 
 describe('UXR-12 shared workspace heading', () => {
   it('renders one accessible heading and only explicitly permitted actions', () => {

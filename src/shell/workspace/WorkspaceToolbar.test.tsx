@@ -1,8 +1,11 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { TextField } from '@mui/material';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { WorkspaceToolbar } from '@/shell/workspace/WorkspaceToolbar';
+
+// Keep independent renders from leaking role queries into subsequent tests.
+afterEach(cleanup);
 
 describe('UXR-12 shared workspace toolbar', () => {
   it('shows owner-provided filter controls and the permitted refresh action', () => {
