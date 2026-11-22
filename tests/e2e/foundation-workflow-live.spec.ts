@@ -34,7 +34,15 @@ test('W4 native discovered process and independent human APPROVE/REJECT persist 
   // Wait for the refreshed native task state before issuing a deliberate stale command.
   await expect(page.getByRole('button',{name:decision,exact:true})).toHaveCount(0);
   const replay=await request.post(result.url(),{headers:reviewHeaders,data:result.request().postDataJSON()});expect(replay.status()).toBe(409);
-  const reloadedTimeline=response(page,`/instances/${instance}/timeline`,'GET');await login(page,reviewer,userPassword!,`/work/tasks?taskId=${task}`);expect((await reloadedTimeline).status()).toBe(200);await expect(page.getByRole('button',{name:decision,exact:true})).toHaveCount(0);await expect(page.getByRole('heading',{name:'Timeline',exact:true})).toBeVisible();
+  // A hard navigation creates a fresh query cache: wait for the persisted
+  // timeline to render instead of coupling correctness to response-event timing.
+  // The server-side exact-instance GET and decision-count assertions below
+  // still prove the durable backend record and independent approval/rejection.
+  await login(page,reviewer,userPassword!,`/work/tasks?taskId=${task}`);
+  await expect(page.getByRole('button',{name:decision,exact:true})).toHaveCount(0);
+  const reloadedTimeline=page.getByRole('heading',{name:'Timeline',exact:true}).locator('..').getByRole('table');
+  await expect(reloadedTimeline).toBeVisible();
+  await expect.poll(async()=>reloadedTimeline.getByRole('row').count()).toBeGreaterThan(1);
   const timeline=await request.get(`${api}/api/v1/workflow/instances/${instance}/timeline`,{headers:reviewHeaders});expect(timeline.status()).toBe(200);const entries=await timeline.json();expect(entries.filter((e:{decision?:string})=>e.decision===decision)).toHaveLength(1);
   const current=await request.get(`${api}/api/v1/workflow/instances/${instance}`,{headers:reviewHeaders});expect(current.status()).toBe(200);expect((await current.json()).status).toBe('COMPLETED');
   const draft=await request.get(`${api}/api/v1/topology/installed-units/${unit}/characteristic-links/${link}?companyPartyId=${company}`,{headers:reviewHeaders});expect(draft.status()).toBe(200);expect((await draft.json()).link.state).toBe('DRAFT');

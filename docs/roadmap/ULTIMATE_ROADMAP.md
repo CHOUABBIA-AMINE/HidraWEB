@@ -4258,3 +4258,26 @@ The 31 advertised [T39 Circle 1 consumer handoff](https://github.com/CHOUABBIA-A
 | Status | **SOURCE IMPLEMENTATION PREPARED; EXACT-SHA CI PENDING**. Publish one guarded `main` commit, verify exact paths/parent/tree and CI-created state, then STOP. Do not advance UXR-07. |
 
 **G2 status:** UXR-05 CI passed; UXR-06 awaits its exact-SHA CI; UXR-07 not selected. G2 is **OPEN**, not accepted on the basis of a code commit alone.
+
+---
+
+### P2 / UXR-06 — exact-SHA Code CI #1061 two-gate repair (22 November 2026)
+
+**Source/acceptance evidence:** The registered UXR-06 source commit `97a907352bdf558f7c8017e8af82d6cd42cf07a6` (tree `435601a81a9f5ae59f37e5b4a6d3c5d4cc77a5cb`) triggered [HidraWEB Code CI #1061](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45028845368), attempt 1: **FAILED**. Verification job stopped at Typecheck: `src/shell/sidebar/HidraSidebar.tsx:208:61`, `TS2322`, because `ListItemText.primaryTypographyProps` is not supported by installed MUI types; lint and OpenAPI compatibility passed, later verify gates did **not** execute. A1 six-module native API/PostgreSQL browser job also **FAILED** in the mandatory W4 review/denial lane: the first W4 native case timed out at 90 seconds on a `page.waitForResponse` event watcher for the timeline GET after reloading the selected task (`tests/e2e/foundation-workflow-live.spec.ts:37`). The W4 unrelated-actor denial case passed, the seven W1–W3 browser cases passed, and the F18 LOCAL session job **PASSED**. [Documentation Validation #97](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45028845344) **PASSED**. The trace does not establish why the post-reload response watcher never resolved; it must not be falsely classified as an API or database defect solely from the timeout. PostgreSQL NOWAIT lock diagnostics were emitted but their causal relationship to the timed-out browser watcher was not established.
+
+**Bounded implementation:**
+
+| Register | Exact UXR-06 repair |
+|---|---|
+| Stage | **P2 / UXR-06** only; UXR-07 NOT STARTED |
+| Parent/tree | `97a907352bdf558f7c8017e8af82d6cd42cf07a6` / `435601a81a9f5ae59f37e5b4a6d3c5d4cc77a5cb` |
+| Commit message | `fix(shell): repair UXR-06 MUI types and W4 reload assertion` |
+| UPDATE | `src/shell/sidebar/HidraSidebar.tsx`: replace invalid `primaryTypographyProps` with MUI's supported `slotProps.primary` containing the same font weight and caption variant; preserve all six-group/permission/RTL/accordion behavior. |
+| UPDATE | `tests/e2e/foundation-workflow-live.spec.ts`: replace a timing-coupled, post-reload `page.waitForResponse` event watcher with an explicit assertion that persisted timeline rows are rendered after a fresh page navigation/login. This **does not** skip the W4 test: it retains independent human APPROVE and REJECT, exact persisted instance/task checks, 409 stale replay, one matching decision in a fresh authenticated backend timeline GET, draft target, and unrelated-actor denial/count-history non-disclosure. The new UI assertion still fails if the reloaded timeline does not render. |
+| UPDATE | `docs/roadmap/ULTIMATE_ROADMAP.md`: append-only evidence, scope, pending acceptance. |
+| CREATE/DELETE | None. |
+| Preservation | No changes to native API, Flyway/PostgreSQL functions, authorization, W4 fixtures/credentials, Playwright or TypeScript timeouts, workflow concurrency, test skip settings, initial JS 900 KiB limit, OpenAPI/Orval pins, HWEB-F16 HOLD/F21 synthetic preview/F22 BLOCKED. |
+| Local validation | Exact source substitution and append-only scope inspected. No claim of local Node 24/npm 11 or live PostgreSQL/Playwright execution. |
+| Required acceptance | Fresh exact-SHA HidraWEB Code CI must pass TypeScript, unit/performance, 900 KiB bundle, **all** Playwright and A1 mandatory W4 native approval/rejection **plus** denial, and F18; Documentation Validation must pass too. |
+| Status | **REPAIR PREPARED; CI NOT YET VERIFIED**. UXR-06 remains awaiting Code CI, G2 remains open, UXR-07 not selected. |
+

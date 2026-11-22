@@ -205,7 +205,7 @@ export function HidraSidebar({ collapsed, mobile = false, open = false, onClose 
                 <ListItemIcon sx={{ minWidth: collapsed ? 0 : 40, justifyContent: 'center' }}>
                   {iconFor(groupIcons[section.id] ?? 'overview')}
                 </ListItemIcon>
-                {!collapsed ? <ListItemText primary={label} primaryTypographyProps={{ fontWeight: 700, variant: 'caption' }} /> : null}
+                {!collapsed ? <ListItemText primary={label} slotProps={{ primary: { sx: { fontWeight: 700 }, variant: 'caption' } }} /> : null}
                 {!collapsed ? (groupOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />) : null}
               </ListItemButton>
               <Collapse in={groupOpen} timeout="auto" unmountOnExit>
