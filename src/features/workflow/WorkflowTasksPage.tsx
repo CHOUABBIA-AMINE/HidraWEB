@@ -36,6 +36,8 @@ import {
 import { WorkflowStartPanel } from './components/WorkflowStartPanel';
 import { WORKFLOW_PERMISSIONS } from '@/features/workflow/api/workflowPermissions';
 import { formatDisplayInstant } from '@/shared/i18n/localePresentation';
+import { WorkspaceHeading } from '@/shell/workspace/WorkspaceHeading';
+import { WorkspaceToolbar } from '@/shell/workspace/WorkspaceToolbar';
 
 const INBOX_SIZE = 50;
 
@@ -140,14 +142,28 @@ export function WorkflowTasksPage() {
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
       <Stack spacing={2}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, alignItems: { xs: 'flex-start', md: 'center' }, flexDirection: { xs: 'column', md: 'row' } }}>
-          <Box>
-            <Typography color="text.secondary" variant="overline">HWEB-007</Typography>
-            <Typography component="h1" variant="h4">{t('workflow.title')}</Typography>
-            <Typography color="text.secondary">{t('workflow.subtitle')}</Typography>
-          </Box>
-          <Chip label="BACKEND-AUTHORITATIVE" variant="outlined" />
-        </Box>
+        <WorkspaceHeading
+          breadcrumbsLabel={t('shell.workspace')}
+          breadcrumbs={[{ label: t('nav.overview'), to: '/overview' }, { label: t('nav.tasks') }]}
+          eyebrow="HWEB-007"
+          title={t('workflow.title')}
+          description={t('workflow.subtitle')}
+          accessory={<Chip label="BACKEND-AUTHORITATIVE" variant="outlined" />}
+          ownerStatus={canTasks && taskQuery.isSuccess && taskQuery.data?.status
+            ? { label: `${t('workflow.status')}: ${taskQuery.data.status}`, source: 'HidraAPI Workflow' }
+            : undefined}
+        />
+        {canTasks ? (
+          <WorkspaceToolbar
+            label={t('workflow.inbox')}
+            refresh={{
+              label: t('workflow.refresh'),
+              permitted: canTasks,
+              disabled: tasksQuery.isFetching || transitionMutation.isPending,
+              onRefresh: () => { void tasksQuery.refetch(); },
+            }}
+          />
+        ) : null}
 
         {!canTasks ? <Alert severity="warning">{t('workflow.unavailable')}</Alert> : null}
         {firstError ? <Alert severity="error">{workflowErrorMessage(firstError)}</Alert> : null}
@@ -174,7 +190,6 @@ export function WorkflowTasksPage() {
                   <Typography component="h2" variant="h6">{t('workflow.inbox')}</Typography>
                   <Typography color="text.secondary" variant="caption">{t('workflow.loaded', { loaded: tasks.length, total: tasksQuery.data?.totalElements ?? tasks.length })}</Typography>
                 </Box>
-                <Button onClick={() => void tasksQuery.refetch()}>{t('workflow.refresh')}</Button>
               </Box>
               {tasks.length ? (
                 <TableContainer sx={{ mt: 1 }}><Table size="small"><TableHead><TableRow><TableCell>{t('workflow.task')}</TableCell><TableCell>{t('workflow.status')}</TableCell><TableCell>{t('workflow.priority')}</TableCell><TableCell>{t('workflow.due')}</TableCell><TableCell>{t('workflow.assignee')}</TableCell><TableCell /></TableRow></TableHead><TableBody>{tasks.map((task, index) => <TaskSummary key={task.id ?? `task-${index}`} task={task} onOpen={() => { closeTask(); setSelectedTaskId(task.id ?? ''); }} />)}</TableBody></Table></TableContainer>

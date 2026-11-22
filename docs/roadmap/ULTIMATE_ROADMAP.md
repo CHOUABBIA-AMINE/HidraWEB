@@ -4690,3 +4690,45 @@ unit/component and performance, build and 900 KiB budget, release packaging,
 full Chromium, independent A1 native API/PostgreSQL W1–W4, F18 LOCAL and Docs CI.
 Synthetic browser checks are not operational/SITE acceptance. UXR-12 is next
 registered **unselected** task; G3 engineering acceptance still separate.
+
+
+### P4 / UXR-12 — shared workspace heading and toolbar (22 November 2026)
+
+**Predecessor exact-SHA acceptance:** UXR-11 commit
+`84533dfbd98e482e77f0bacfe55c69a1b59e4f54`, tree
+`0fa0723c4f4f6c461cabd1cd9701d8273ef352dc`, passed
+[Code CI #1077](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45067661912)
+and [Documentation CI #113](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45067661936)
+with all `verify`, A1 native PostgreSQL/API, F18 LOCAL and documentation
+jobs successful. The owner's `Next` selected only registered UXR-12.
+
+**Exact commit message:** `feat(workspace): add UXR-12 owner-gated heading and toolbar`.
+CREATE `src/shell/workspace/WorkspaceHeading.tsx` (semantic h1, fixed
+breadcrumbs, optional owner-sourced status, explicit permitted actions),
+`src/shell/workspace/WorkspaceToolbar.tsx` (responsive owner-composed
+second-row controls and authorized refresh), their
+`WorkspaceHeading.test.tsx` and `WorkspaceToolbar.test.tsx` (keyboard,
+semantic headings, denial, owner status, disabled refreshing), and
+`tests/e2e/workspace-heading.spec.ts` (authorized/denied Overview action,
+Workflow task breadcrumb/refresh and no extra protected call).
+UPDATE `src/app/pages/OverviewPage.tsx` (first owner-gated heading adoption),
+`src/features/workflow/WorkflowTasksPage.tsx` (same heading, trusted owner
+status when a task detail is read, move inbox refresh to second row),
+`docs/06-Navigation-Blueprint.md` and this append-only roadmap. DELETE none.
+
+**Security/ownership:** The frame never fetches protected content, computes
+business states or invents actions. A displayed status requires an explicit
+owner source and label, not a CSS status color. Header actions and toolbar
+refresh require the owning page's currently effective permission checks.
+Each page/operation continues to rely on HidraAPI for final authorization;
+Workflow task transitions retain backend-issued current versions and conflict
+handling. Existing sidebars, cross-context caching and auth lifecycle stay
+unchanged. Component availability does not establish migration of all 19
+workspace routes, full WCAG certification, deployment, live OT or SITE
+acceptance.
+
+**Pending acceptance:** exact-SHA Code CI OpenAPI/generation, lint, TS,
+unit/component and performance, build and 900 KiB budget, release verification,
+full Chromium, A1 native PostgreSQL/API W1–W4, F18 LOCAL and Documentation CI.
+No skipped gates or weakened existing tests. Next registered task UXR-13
+remains **unselected**; G4 stays open pending remaining work and acceptance.

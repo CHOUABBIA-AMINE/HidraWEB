@@ -293,3 +293,30 @@ with no previous search/detail shown while requests are pending. Unselected
 administrative map behavior stays under its existing distinct permissions.
 No new backend APIs, cross-domain search, realtime/OT integration, hydraulic
 solver or qualified industrial calculation are claimed.
+
+
+## P4 / UXR-12 — shared workspace heading and toolbar (22 November 2026)
+
+`src/shell/workspace/WorkspaceHeading.tsx` presents a single semantic `h1`,
+explicit owner-supplied breadcrumbs, a subtitle and optional provenance-tagged
+status. It never generates a business state from a URL or local badge. Only
+primary actions with `permitted: true` supplied by the owning workspace render;
+this is a UX gate, not an authorization boundary. Breadcrumb destinations must
+be known safe application routes admitted by their owning pages. The optional
+second row `WorkspaceToolbar` composes owner-specific filters, tabs or search
+controls, with an explicitly permitted, disabled-while-busy refresh action.
+It uses an accessible labelled group without pretending to implement an ARIA
+roving-focus toolbar. Both components are responsive and use existing MUI
+focus-visible treatments.
+
+The initial adoption is bounded to `/overview` and `/work/tasks`. Overview
+keeps its existing effective `modules:resources:read` workbench navigation
+gate; Work Tasks keeps its existing backend-owned assigned inbox/read/action
+flow, now exposing the inbox refresh in the toolbar. A task owner status is
+shown only if the authorized task detail has been successfully returned; its
+value is taken unchanged from HidraAPI Workflow, with no locally inferred
+eligibility or freshness. Existing workflow mutation/optimistic-concurrency,
+owner error handling, scope-switch and direct-route guards remain unchanged.
+Other workspaces will adopt the shared frame only when separately selected;
+no blanket 19-workspace migration, status aggregation or new REST API is
+implied by UXR-12.
