@@ -4488,3 +4488,12 @@ The second test in `src/shell/context/ContextDrawerProvider.scope.test.tsx` foun
 **Dependencies and boundaries:** C1 Identity and security use the existing login, refresh, logout, current-principal and configured OIDC contracts. This stage adds zero REST endpoints. Environment state comes from frontend configuration. Native OIDC with a deployed IdP remains provider-dependent. Operational-context rebinding is UXR-09.
 
 **Acceptance pending:** Fresh exact-SHA Code CI and Documentation Validation, including the standard unit/component, performance, 900 KiB, Playwright, A1/W1–W4 and F18 LOCAL gates. G3 includes the remaining P3 tasks. The next registered task is UXR-09.
+
+
+### P3 / UXR-08 — Code CI #1070 login-test lint repair (22 November 2026)
+
+[Code CI #1070](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45052716196) attempt 1 failed at Lint on `2351883aea92c4d03368b73626427c7351a94c83`, tree `090626e3b496853b2fa99fb79c96557738cc34e7`. The single blocking error was `@typescript-eslint/consistent-type-imports` in `src/app/pages/LoginPage.test.tsx`. The remaining seven lint findings were warnings. The main verify job stopped before type checking, tests, build and full Chromium. The A1 native PostgreSQL/browser and F18 LOCAL jobs and [Documentation Validation #106](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45052716124) passed on that SHA.
+
+**Repair:** Use a type-only import for the Vitest partial mock type, retaining the original runtime config and OIDC test assertions. The repair changes the login test and appends this evidence entry. **Exact commit message:** `test(auth): fix UXR-08 login test type import`.
+
+**Acceptance:** UXR-08 awaits fresh exact-SHA Code CI and Documentation Validation. UXR-09 remains the next registered task.

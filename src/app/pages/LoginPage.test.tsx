@@ -2,13 +2,15 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { MemoryRouter } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { runtimeConfig } from '@/app/bootstrap/runtimeConfig';
+
 const authentication = vi.hoisted(() => ({
   authenticateCredentials: vi.fn(),
   beginOidcSignIn: vi.fn(),
 }));
 const configuration = vi.hoisted(() => ({ oidcConfigured: true }));
 vi.mock('@/app/bootstrap/runtimeConfig', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/app/bootstrap/runtimeConfig')>();
+  const actual = await importOriginal<{ runtimeConfig: typeof runtimeConfig }>();
   return { ...actual, runtimeConfig: { ...actual.runtimeConfig, get oidcConfigured() { return configuration.oidcConfigured; } } };
 });
 vi.mock('@/app/auth/useAuth', () => ({
