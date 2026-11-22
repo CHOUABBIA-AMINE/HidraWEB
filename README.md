@@ -4,6 +4,10 @@ Hydrocarbon Intelligence for Data, Risk, and Analytics — Web Application.
 
 HidraWEB is the operational enterprise frontend for HidraAPI.
 
+## Active delivery roadmap
+
+[HidraWEB layout and backend delivery](docs/roadmap/ULTIMATE_ROADMAP.md#active-roadmap--hidraweb-layout-and-backend-delivery) is the sole active roadmap for future task prioritization, sequencing, admission and status. Earlier roadmap content is retained as historical evidence.
+
 ## Canonical architecture
 
 The implementation is governed by:
