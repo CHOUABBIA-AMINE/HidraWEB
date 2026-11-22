@@ -4612,3 +4612,42 @@ append-only roadmap. CREATE/DELETE none. Exact message:
 **Acceptance:** fresh exact-SHA full Code CI and Documentation Validation still
 required; downstream gates cannot be predicted from the prior truncated run.
 UXR-10 is the next registered **unselected** task; G3 remains open.
+
+
+### P3 / UXR-10 — authorized navbar shortcuts and WEB connectivity (22 November 2026)
+
+**Predecessor accepted:** UXR-09 on WEB main `6ff9afe1524a015f1613fad1cf53651a5c5a46dd`
+(tree `e6b94a779ad901fc7f55a3b87cae391e1c4b886b`):
+[Code CI #1075](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45059275402)
+PASS and [Documentation #111](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45059275528)
+PASS at the exact same SHA. Owner's `Next` selected **one** whole registered
+UXR-10 stage, not all P3 tasks. Root AGENTS.md remains absent; repository
+README/canonical architecture plus project WEB_AGENTS guidance were read.
+
+**Exact commit message:** `feat(shell): qualify UXR-10 shortcuts and web connectivity`.
+UPDATE: `src/shell/navbar/HidraNavbar.tsx` (authorized navigation controls,
+no header badges), `src/shared/i18n/resources.ts` (EN/FR/AR status copy),
+`docs/06-Navigation-Blueprint.md` (ownership/limitation), this roadmap.
+CREATE: `src/shell/navbar/headerShortcutAccess.ts` (pure published-route
+and effective-permission gate), `src/shell/navbar/headerShortcutAccess.test.ts`
+(positive/negative registration regression),
+`src/features/connectivity/useWebOriginConnectivity.ts` (bounded same-origin
+WEB reachability only), `src/features/connectivity/useWebOriginConnectivity.test.ts`
+(transport/non-2xx failure behavior), `tests/e2e/header-shortcuts.spec.ts`
+(keyboard link, denial, offline/recovery browser). DELETE: none.
+
+**Bounded behavior:** open the already implemented Workflow assigned-task
+workspace only with a currently published/granted `workflow:tasks:read` GET.
+Open existing **evidence-only** Notification route only when its separate
+T27 `notification:inbox:read` GET and workbench GET evidence-read permission
+are published and granted; the header never infers an exact facility, reads
+unknown protected inbox data, or supplies a global unread count. Since no
+server-issued facility is available from this navbar, a facility-specific
+T27 inbox is deliberately **not** opened. Realtime provider remains
+unconnected; browser WEB-origin HEAD status is not an API/OT/live-event claim.
+
+**Acceptance pending:** exact-SHA Code CI openapi/generation, strict lint/TS,
+unit+performance, production bundle budget, release artifact, full Chromium
+(including explicit UXR-10 synthetic shortcut/denial/reconnect scenarios),
+A1 native PostgreSQL W1–W4, F18 LOCAL, Documentation CI. No mock is SITE
+or production acceptance. Next registered task UXR-11 remains unselected.

@@ -3,6 +3,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import SearchIcon from '@mui/icons-material/Search';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
+import WifiIcon from '@mui/icons-material/Wifi';
 import WifiOffIcon from '@mui/icons-material/WifiOff';
 import { AppBar, Avatar, Box, Chip, IconButton, InputAdornment, Link, ListSubheader, Menu, MenuItem, Select, TextField, Toolbar, Tooltip, Typography } from '@mui/material';
 import { useId, useState, type MouseEvent } from 'react';
@@ -12,7 +13,9 @@ import { Link as RouterLink } from 'react-router';
 import { useAuth } from '@/app/auth/useAuth';
 import { runtimeConfig } from '@/app/bootstrap/runtimeConfig';
 import { OperationalContextSelector } from '@/features/context/components/OperationalContextSelector';
-import { useRealtimeStatus } from '@/features/realtime/useRealtimeStatus';
+import { useWebOriginConnectivity } from '@/features/connectivity/useWebOriginConnectivity';
+import { usePermissions } from '@/features/permissions/usePermissions';
+import { resolveHeaderShortcuts } from '@/shell/navbar/headerShortcutAccess';
 
 interface HidraNavbarProps {
   sidebarCollapsed: boolean;
@@ -22,7 +25,9 @@ interface HidraNavbarProps {
 export function HidraNavbar({ sidebarCollapsed, onToggleSidebar }: HidraNavbarProps) {
   const { t, i18n } = useTranslation();
   const auth = useAuth();
-  const realtime = useRealtimeStatus();
+  const permissions = usePermissions();
+  const shortcuts = resolveHeaderShortcuts(permissions);
+  const connectivity = useWebOriginConnectivity();
   const profileMenuId = useId();
   const profileButtonId = useId();
   const [profileAnchor, setProfileAnchor] = useState<HTMLElement | null>(null);
@@ -74,11 +79,30 @@ export function HidraNavbar({ sidebarCollapsed, onToggleSidebar }: HidraNavbarPr
           slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment> } }}
           sx={{ display: { xs: 'none', md: 'block' }, marginInlineStart: 'auto', width: { md: 190, xl: 280 } }}
         />
-        <Tooltip title={t('shell.realtimeUnavailable')}>
-          <Chip icon={<WifiOffIcon />} label={realtime === 'not-connected' ? t('shell.realtimeOffline') : realtime} size="small" sx={{ maxWidth: { xs: 100, sm: 'none' }, '& .MuiChip-label': { overflow: 'hidden', textOverflow: 'ellipsis' } }} variant="outlined" />
+        <Tooltip title={t('shell.webConnectivity.help')}>
+          <Chip
+            aria-label={t('shell.webConnectivity.' + connectivity)}
+            aria-live="polite"
+            icon={connectivity === 'reachable' ? <WifiIcon /> : <WifiOffIcon />}
+            label={t('shell.webConnectivity.' + connectivity)}
+            role="status"
+            size="small"
+            sx={{ maxWidth: { xs: 120, sm: 'none' }, '& .MuiChip-label': { overflow: 'hidden', textOverflow: 'ellipsis' } }}
+            variant="outlined"
+          />
         </Tooltip>
-        <Tooltip title={t('nav.tasks')}><span><IconButton aria-label={t('nav.tasks')} disabled sx={{ display: { xs: 'none', md: 'inline-flex' } }}><TaskAltIcon /></IconButton></span></Tooltip>
-        <Tooltip title={t('nav.notifications')}><span><IconButton aria-label={t('nav.notifications')} disabled sx={{ display: { xs: 'none', md: 'inline-flex' } }}><NotificationsNoneIcon /></IconButton></span></Tooltip>
+        <Tooltip title={t('nav.tasks')}>
+          <span>{shortcuts.tasks
+            ? <IconButton aria-label={t('nav.tasks')} component={RouterLink} sx={{ display: { xs: 'none', md: 'inline-flex' } }} to="/work/tasks"><TaskAltIcon /></IconButton>
+            : <IconButton aria-label={t('nav.tasks')} disabled sx={{ display: { xs: 'none', md: 'inline-flex' } }}><TaskAltIcon /></IconButton>}
+          </span>
+        </Tooltip>
+        <Tooltip title={t('nav.notifications')}>
+          <span>{shortcuts.notifications
+            ? <IconButton aria-label={t('nav.notifications')} component={RouterLink} sx={{ display: { xs: 'none', md: 'inline-flex' } }} to="/work/notifications"><NotificationsNoneIcon /></IconButton>
+            : <IconButton aria-label={t('nav.notifications')} disabled sx={{ display: { xs: 'none', md: 'inline-flex' } }}><NotificationsNoneIcon /></IconButton>}
+          </span>
+        </Tooltip>
         <Select
           aria-label={t('shell.language')}
           onChange={(event) => { void i18n.changeLanguage(String(event.target.value)); }}

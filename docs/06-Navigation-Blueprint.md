@@ -251,3 +251,24 @@ required. No live industrial access, company directory or control is asserted.
 UXR-09 race and sign-out safeguard: async rebind runs before the keyed shell
 is changed, discards late answers after unmount or identity transition, and
 AuthProvider removes the selected scope synchronously with session revocation.
+
+
+## P3 / UXR-10 — header shortcuts and WEB reachability (22 November 2026)
+
+My Tasks uses the existing assigned inbox at `/work/tasks` and a published,
+currently permitted Workflow `GET /api/v1/workflow/tasks`. Notifications
+links only to the existing **evidence-only** `/work/notifications` route
+when the actor can read the published T27 notification inbox route **and**
+the workbench evidence list route; the navbar does not select a facility,
+request notification data or fabricate a global unread count. T27 facility
+inbox reads remain exclusively behind server-established exact facility and
+company selection, and no browser acknowledgement is added here. A disabled
+shortcut has no anchor destination. These are UI affordances, never new
+resource authorization.
+
+The header now shows a **WEB-origin connectivity probe** with browser
+`online/offline` events and a bounded uncached same-origin `HEAD /` check.
+Only the ability to reach the WEB origin is asserted; it does not establish
+HidraAPI health, SSE/STOMP events, telemetry freshness, OT control/network
+availability or SITE acceptance. The existing conservative disconnected
+RealtimeProvider remains unchanged; it does not subscribe to domain topics.
