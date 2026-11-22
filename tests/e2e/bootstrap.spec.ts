@@ -171,6 +171,33 @@ test('HWEB-002 renders the authenticated 404 state inside the shell', async ({ p
   await expect(page.getByText('Hidra', { exact: true })).toBeVisible();
 });
 
+test('UXR-08 exposes configured environment, the principal menu, and keyboard navigation home', async ({ page }) => {
+  await mockPermissions(page);
+  await signIn(page);
+
+  const header = page.getByRole('banner', { name: 'En-tête Hidra' });
+  await expect(header.getByText(/^Environnement : \S/)).toBeVisible();
+  const profile = header.getByRole('button', { name: 'Profil', exact: true });
+  await expect(profile).toHaveAttribute('aria-expanded', 'false');
+  await profile.press('Enter');
+  const menu = page.getByRole('menu', { name: 'Profil', exact: true });
+  await expect(menu.getByText('Playwright User')).toBeVisible();
+  await expect(menu.getByText('Fournisseur d’identité : LOCAL')).toBeVisible();
+  await expect(menu.getByRole('menuitem', { name: 'Se déconnecter' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(profile).toBeFocused();
+  await expect(profile).toHaveAttribute('aria-expanded', 'false');
+
+  await page.evaluate(() => {
+    window.history.pushState({}, '', '/unknown-hidra-route');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  });
+  await expect(page.getByRole('heading', { name: 'Page introuvable' })).toBeVisible();
+  await header.getByRole('link', { name: 'Accueil Hidra', exact: true }).press('Enter');
+  await expect(page).toHaveURL(/\/overview$/);
+  await expect(page.getByRole('heading', { name: 'Vue d’ensemble' })).toBeVisible();
+});
+
 test('HWEB-003 discovers, lists, searches and inspects a generic resource', async ({ page }) => {
   await mockPermissions(page);
   await mockWorkbench(page);

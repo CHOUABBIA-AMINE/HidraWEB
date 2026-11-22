@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Navigate, createBrowserRouter } from 'react-router';
 
 import { RequireAuthentication } from '@/app/auth/RequireAuthentication';
+import { runtimeConfig } from '@/app/bootstrap/runtimeConfig';
 import { PermissionBootstrapBoundary } from '@/features/permissions/PermissionBootstrapBoundary';
 import { ShellLoadingFallback } from '@/shell/ShellLoadingFallback';
 import { ShellRouteError } from '@/shell/ShellRouteError';
@@ -13,10 +14,10 @@ export const router = createBrowserRouter([
     path: '/login',
     lazy: async () => ({ Component: (await import('@/app/pages/LoginPage')).LoginPage }),
   },
-  {
+  ...(runtimeConfig.oidcConfigured ? [{
     path: '/auth/callback',
     lazy: async () => ({ Component: (await import('@/app/pages/OidcCallbackPage')).OidcCallbackPage }),
-  },
+  }] : []),
   {
     path: '/',
     element: (

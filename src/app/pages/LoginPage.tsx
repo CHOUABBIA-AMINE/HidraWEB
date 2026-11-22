@@ -20,7 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { Navigate, useLocation } from 'react-router';
 
 import { useAuth } from '@/app/auth/useAuth';
-import type { HidraCredentialProvider } from '@/app/bootstrap/runtimeConfig';
+import { runtimeConfig, type HidraCredentialProvider } from '@/app/bootstrap/runtimeConfig';
 
 interface LoginLocationState {
   from?: string;
@@ -96,8 +96,7 @@ export function LoginPage() {
   const credentialProviders = auth.mode === 'multi'
     ? auth.enabledAuthProviders.filter(isCredentialProvider)
     : auth.mode === 'basic' ? [auth.credentialProvider] : [];
-  const oidcEnabled = auth.mode === 'jwt' ||
-    (auth.mode === 'multi' && auth.enabledAuthProviders.includes('OIDC'));
+  const oidcEnabled = runtimeConfig.oidcConfigured;
   const [selectedProvider, setSelectedProvider] = useState<HidraCredentialProvider>(
     credentialProviders[0] ?? auth.credentialProvider,
   );
@@ -254,6 +253,9 @@ export function LoginPage() {
             ) : null}
 
             {error ? <Alert severity="error" role="alert" sx={{ mt: 3, borderRadius: 2 }}>{error}</Alert> : null}
+            {!credentialProviders.length && !oidcEnabled ? (
+              <Alert severity="error" sx={{ mt: 3, borderRadius: 2 }}>{t('oidcCallback.unavailable')}</Alert>
+            ) : null}
 
             {credentialProviders.length > 0 ? (
               <Box

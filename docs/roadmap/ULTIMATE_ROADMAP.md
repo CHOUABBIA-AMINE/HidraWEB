@@ -4468,3 +4468,23 @@ The second test in `src/shell/context/ContextDrawerProvider.scope.test.tsx` foun
 **Repair scope:** the scoped drawer test and this append-only evidence entry. **Commit:** `test(shell): isolate UXR-07 contextual drawer tests`.
 
 **Acceptance:** UXR-07 and G2 remain open pending fresh exact-SHA Code CI and Documentation Validation, including unit and performance checks, the 900 KiB budget, full Playwright, native A1/W1–W4 and F18 LOCAL. The next registered task is P3 / UXR-08.
+
+
+### P2 / UXR-07 and G2 — exact-SHA CI acceptance (22 November 2026)
+
+[Code CI #1069](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45051430546) and [Documentation Validation #105](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45051430504) passed on `c888cf2e9f1c026f35910bbcd4312e0944de82d7`, tree `6298a4b40970ab3c02fa665adcfd677a3ac00f5f`. Code CI passed 194 unit/component tests, six performance tests, the 728.9 / 900 KiB startup budget and Chromium Playwright (91 passed, 15 pre-existing configured skips). Both native jobs passed, including A1/W1–W4 with the mandatory W4 decision and denial journeys and F18 LOCAL. **UXR-07 is CI-passed and G2 is satisfied for the registered frontend delivery scope.** Deployment and operational acceptance are outside that evidence.
+
+### P3 / UXR-08 — header identity, controls and session entry (22 November 2026)
+
+**Selection:** Owner “Next” selects one whole UXR-08 task after G2. The verified UXR-07 commit is the expected parent. **Exact implementation message:** `feat(shell): complete UXR-08 header and session entry`.
+
+| Path | Scope and verification |
+|---|---|
+| `src/shell/navbar/HidraNavbar.tsx`, `src/shared/i18n/resources.ts` | Link the HIDRA product identity to protected Overview, label the configured environment as configuration, and present the authenticated principal and actual provider in an accessible profile menu. Keep the existing sidebar toggle, FR/EN/AR picker and sign-out action. |
+| `src/app/bootstrap/runtimeConfig.ts`, `src/app/router/router.tsx`, `src/app/pages/LoginPage.tsx`, `src/app/pages/OidcCallbackPage.tsx` | Use one deployed OIDC configuration decision for enterprise sign-in and callback registration. Preserve LOCAL entry and the current HidraAPI session lifecycle. Present localized progress and recovery on callback failure. |
+| `src/app/pages/LoginPage.test.tsx`, new `src/app/router/router.test.ts`, `tests/e2e/bootstrap.spec.ts` | Exercise credential entry when OIDC is unavailable, configured and unavailable callback registration, and keyboard operation of the principal menu and Overview link. Existing native F18 retains renewal, expiry and logout coverage. |
+| `docs/roadmap/ULTIMATE_ROADMAP.md` | Append the predecessor acceptance, scope and gate. |
+
+**Dependencies and boundaries:** C1 Identity and security use the existing login, refresh, logout, current-principal and configured OIDC contracts. This stage adds zero REST endpoints. Environment state comes from frontend configuration. Native OIDC with a deployed IdP remains provider-dependent. Operational-context rebinding is UXR-09.
+
+**Acceptance pending:** Fresh exact-SHA Code CI and Documentation Validation, including the standard unit/component, performance, 900 KiB, Playwright, A1/W1–W4 and F18 LOCAL gates. G3 includes the remaining P3 tasks. The next registered task is UXR-09.

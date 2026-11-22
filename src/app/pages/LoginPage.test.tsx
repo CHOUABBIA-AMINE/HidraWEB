@@ -6,6 +6,11 @@ const authentication = vi.hoisted(() => ({
   authenticateCredentials: vi.fn(),
   beginOidcSignIn: vi.fn(),
 }));
+const configuration = vi.hoisted(() => ({ oidcConfigured: true }));
+vi.mock('@/app/bootstrap/runtimeConfig', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/app/bootstrap/runtimeConfig')>();
+  return { ...actual, runtimeConfig: { ...actual.runtimeConfig, get oidcConfigured() { return configuration.oidcConfigured; } } };
+});
 vi.mock('@/app/auth/useAuth', () => ({
   useAuth: () => ({
     mode: 'multi',
@@ -22,6 +27,7 @@ import { i18n } from '@/shared/i18n/i18n';
 describe('HidraWEB multi-provider login selection', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('en');
+    configuration.oidcConfigured = true;
     authentication.authenticateCredentials.mockReset().mockResolvedValue(undefined);
     authentication.beginOidcSignIn.mockReset().mockResolvedValue(undefined);
   });
@@ -114,5 +120,12 @@ describe('HidraWEB multi-provider login selection', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Sign in with enterprise identity' }));
     await waitFor(() => expect(authentication.beginOidcSignIn).toHaveBeenCalledWith('/overview'));
     expect(authentication.authenticateCredentials).not.toHaveBeenCalled();
+  });
+
+  it('keeps credential sign-in available when enterprise sign-in is unconfigured', () => {
+    configuration.oidcConfigured = false;
+    render(<MemoryRouter initialEntries={['/login']}><LoginPage /></MemoryRouter>);
+    expect(screen.getByRole('textbox', { name: /^Username/ })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Sign in with enterprise identity' })).not.toBeInTheDocument();
   });
 });

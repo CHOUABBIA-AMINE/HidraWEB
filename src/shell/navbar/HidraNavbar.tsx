@@ -4,9 +4,10 @@ import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import SearchIcon from '@mui/icons-material/Search';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import WifiOffIcon from '@mui/icons-material/WifiOff';
-import { AppBar, Avatar, Box, Chip, Divider, IconButton, InputAdornment, Menu, MenuItem, Select, TextField, Toolbar, Tooltip, Typography } from '@mui/material';
-import { useState, type MouseEvent } from 'react';
+import { AppBar, Avatar, Box, Chip, IconButton, InputAdornment, Link, ListSubheader, Menu, MenuItem, Select, TextField, Toolbar, Tooltip, Typography } from '@mui/material';
+import { useId, useState, type MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link as RouterLink } from 'react-router';
 
 import { useAuth } from '@/app/auth/useAuth';
 import { runtimeConfig } from '@/app/bootstrap/runtimeConfig';
@@ -22,6 +23,8 @@ export function HidraNavbar({ sidebarCollapsed, onToggleSidebar }: HidraNavbarPr
   const { t, i18n } = useTranslation();
   const auth = useAuth();
   const realtime = useRealtimeStatus();
+  const profileMenuId = useId();
+  const profileButtonId = useId();
   const [profileAnchor, setProfileAnchor] = useState<HTMLElement | null>(null);
   const currentLanguage = (i18n.resolvedLanguage ?? i18n.language ?? 'fr').split('-')[0];
 
@@ -43,12 +46,26 @@ export function HidraNavbar({ sidebarCollapsed, onToggleSidebar }: HidraNavbarPr
           </IconButton>
         </Tooltip>
         <Box sx={{ flexGrow: { xs: 1, md: 0 }, minWidth: { xs: 45, md: 220 } }}>
-          <Typography color="primary" sx={{ fontWeight: 800, lineHeight: 1.1 }} variant="h6">Hidra</Typography>
+          <Link
+            aria-label={t('shell.productHome')}
+            component={RouterLink}
+            sx={{ fontWeight: 800, lineHeight: 1.1 }}
+            to="/overview"
+            underline="hover"
+            variant="h6"
+          >
+            Hidra
+          </Link>
           <Typography color="text.secondary" noWrap sx={{ display: { xs: 'none', md: 'block' } }} variant="caption">
             Hydrocarbon Intelligence for Data, Risk, and Analytics
           </Typography>
         </Box>
-        <Chip label={runtimeConfig.environment.toUpperCase()} size="small" sx={{ display: { xs: 'none', sm: 'inline-flex' } }} variant="outlined" />
+        <Chip
+          label={t('shell.configuredEnvironment', { environment: runtimeConfig.environment.toUpperCase() })}
+          size="small"
+          sx={{ display: { xs: 'none', sm: 'inline-flex' } }}
+          variant="outlined"
+        />
         <OperationalContextSelector />
         <TextField
           disabled
@@ -73,17 +90,31 @@ export function HidraNavbar({ sidebarCollapsed, onToggleSidebar }: HidraNavbarPr
           <MenuItem value="ar">AR</MenuItem>
         </Select>
         <Tooltip title={t('shell.profile')}>
-          <IconButton aria-label={t('shell.profile')} onClick={openProfile}>
+          <IconButton
+            aria-controls={profileAnchor ? profileMenuId : undefined}
+            aria-expanded={Boolean(profileAnchor)}
+            aria-haspopup="menu"
+            aria-label={t('shell.profile')}
+            id={profileButtonId}
+            onClick={openProfile}
+          >
             <Avatar sx={{ height: 32, width: 32 }}><AccountCircleIcon fontSize="small" /></Avatar>
           </IconButton>
         </Tooltip>
-        <Menu anchorEl={profileAnchor} onClose={closeProfile} open={Boolean(profileAnchor)}>
-          <Box sx={{ minWidth: 240, px: 2, py: 1 }}>
-            <Typography sx={{ fontWeight: 600 }}>{auth.session?.principalLabel ?? t('shell.unknownPrincipal')}</Typography>
-            <Typography color="text.secondary" variant="caption">{t('shell.authMode', { mode: auth.mode })}</Typography>
-          </Box>
-          <Divider />
-          <MenuItem disabled>{t('shell.profileUnavailable')}</MenuItem>
+        <Menu
+          anchorEl={profileAnchor}
+          onClose={closeProfile}
+          open={Boolean(profileAnchor)}
+          slotProps={{ list: { 'aria-labelledby': profileButtonId, id: profileMenuId } }}
+        >
+          <ListSubheader sx={{ lineHeight: 1.5, minWidth: 240, py: 1 }}>
+            <Typography color="text.primary" sx={{ fontWeight: 600 }}>{auth.session?.principalLabel ?? t('shell.unknownPrincipal')}</Typography>
+            {auth.session?.authenticationType ? (
+              <Typography color="text.secondary" variant="caption">
+                {t('shell.authenticationProvider', { provider: auth.session.authenticationType })}
+              </Typography>
+            ) : null}
+          </ListSubheader>
           {auth.mode !== 'disabled' ? <MenuItem onClick={() => { closeProfile(); auth.signOut(); }}>{t('shell.signOut')}</MenuItem> : null}
         </Menu>
       </Toolbar>

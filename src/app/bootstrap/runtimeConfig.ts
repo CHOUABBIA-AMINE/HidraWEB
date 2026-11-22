@@ -62,12 +62,15 @@ const parsedConfig = runtimeConfigSchema.parse({
   oidcRedirectUri: import.meta.env.VITE_HIDRA_OIDC_REDIRECT_URI,
 });
 
+const enabledAuthProviders = resolveEnabledAuthProviders(
+  parsedConfig.authMode,
+  parsedConfig.credentialProvider,
+  import.meta.env.VITE_HIDRA_ENABLED_AUTH_PROVIDERS,
+  parsedConfig.oidcRedirectUri,
+);
+
 export const runtimeConfig = {
   ...parsedConfig,
-  enabledAuthProviders: resolveEnabledAuthProviders(
-    parsedConfig.authMode,
-    parsedConfig.credentialProvider,
-    import.meta.env.VITE_HIDRA_ENABLED_AUTH_PROVIDERS,
-    parsedConfig.oidcRedirectUri,
-  ),
+  enabledAuthProviders,
+  oidcConfigured: enabledAuthProviders.includes('OIDC') && Boolean(parsedConfig.oidcRedirectUri),
 };
