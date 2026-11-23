@@ -46,7 +46,7 @@ describe('UXR-15 source-bound evidence presentation', () => {
       { source: 'Workflow instance', title: 'APPROVE', occurredAt: '2026-11-20T11:00:00Z',
         actor: 'Reviewer', correlationId: 'corr-1', revision: '2' },
     ] }} />));
-    const heading = screen.getByRole('heading', { name: 'Timeline', exact: true });
+    const heading = screen.getByRole('heading', { name: 'Timeline' });
     const table = heading.parentElement?.querySelector('table');
     expect(table).toBeInTheDocument();
     expect(table).toHaveTextContent('APPROVE');

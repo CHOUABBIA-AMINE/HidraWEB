@@ -5001,3 +5001,30 @@ bundle/release artifact, full Chromium including UXR-15 lazy history,
 A1 native W1–W4 and F18 LOCAL, and Documentation Validation. Only exact-SHA
 success changes UXR-15 from implemented to CI-passed. UXR-16 is the next
 registered **unselected** task.
+
+
+### P4 / UXR-15 — Typecheck repair after Code CI #1085 (23 November 2026)
+
+**Exact-SHA failure:** UXR-15 implementation `4b4812a73016277b4dfc5664c42bd4664fc4e089`
+(tree `523d750dc3438ea0b8f2cc685fe8eaa4ec091ded`) yielded
+[Code CI #1085](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45135209962)
+FAILURE. Its `verify` job passed prior OpenAPI generation and lint, then
+failed TypeScript `TS2769` at
+`src/shell/evidence/EvidencePresentation.test.tsx:49:69` because
+Testing Library `getByRole('heading', { name: 'Timeline', exact: true })`
+uses an unsupported `exact` property in `ByRoleOptions`.
+`name: 'Timeline'` already identifies the exact accessible name without
+that option. This is a test compilation failure, not evidence of a runtime
+provenance or permission defect. All unit/component, performance, build,
+release artifact and Chromium checks were skipped downstream; no pass is
+claimed. Native A1 PostgreSQL/API and F18 LOCAL passed independently, and
+[Documentation Validation #121](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45135210022)
+succeeded.
+
+**Bounded repair message:** `fix(workspace): correct UXR-15 evidence heading test query`.
+UPDATE only `src/shell/evidence/EvidencePresentation.test.tsx` to remove the
+unsupported option while preserving the heading, table and all provenance,
+denied/failed-content isolation and missing-field assertions. Append this
+roadmap entry; no production TSX, access gate, REST contract, test coverage or
+CI rule changes. Acceptance remains exact-SHA full Code CI and Documentation
+Validation. UXR-16 stays registered and unselected.
