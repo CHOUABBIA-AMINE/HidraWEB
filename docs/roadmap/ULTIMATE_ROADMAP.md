@@ -5337,3 +5337,52 @@ PostgreSQL/API W1–W4, F18 LOCAL and Documentation Validation.
 Source-derived owner-action permission does not authorize a different
 module's business command. UXR-18 is IMPLEMENTED / CI PENDING; UXR-19
 remains the next registered unselected stage.
+
+
+### P5 / UXR-18 — Code CI #1092 browser regression repair (23 November 2026)
+
+**Failed implementation source:** `acab00327c838951be8749c58b50cc030904c7f4`
+(tree `d726cd6a2992e12153faa33286fab29fb6ceae89`).
+[Code CI #1092](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45149350879)
+FAILED in two independent browser jobs:
+`verify` → Full Playwright regression suite
+(108 passed, 15 skipped, one failed after two retries) at
+`tests/e2e/critical-operational-journeys.spec.ts:225`, and
+A1 six-module native API/PostgreSQL browser qualification → W4 native
+review and denial (one passed, one failed) at
+`tests/e2e/foundation-workflow-live.spec.ts:32`.
+Both attempted to click a disabled `Action: APPROVE` submit button
+without checking the **required, explicitly user-selected UXR-18
+confirmation**. All source-pinned OpenAPI, lint, TypeScript,
+unit/component, performance, production build and release checks in
+`verify`, native W1–W3 and F18 LOCAL passed.
+[Documentation Validation #128](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45149351021)
+passed on the same commit.
+
+**Root cause:** UXR-18 intentionally requires a confirmed typed form,
+but two pre-existing browser consumers were not updated at the original
+implementation SHA. The critical-journey mocked task detail also
+retained its old version/status after the POST, preventing the new
+independent durable readback from establishing successful persistence.
+This is a test integration/fixture gap, not evidence that an unauthorized
+transition was accepted or that PostgreSQL persistence failed.
+
+**Bounded repair message:** `fix(workspace): exercise UXR-18 confirmation in native and operator journeys`.
+UPDATE only `tests/e2e/foundation-workflow-live.spec.ts` to explicitly
+confirm decisions for **both APPROVE and REJECT** after entering the
+backend-required fields, and assert submit is disabled beforehand and
+enabled afterwards. Preserve actual native API/PostgreSQL authority,
+independent reviewer, generated Workflow command/expected revision,
+reload persistence, stale replay 409, denied 403/404 and decision count.
+UPDATE `tests/e2e/critical-operational-journeys.spec.ts` to follow
+the same explicit French-language confirmation and make its synthetic
+owner task detail reflect the POST's persisted status and changed
+updatedAt token. Preserve the monitoring→alarm→workflow journey and
+request-body assertion. Append this reconciliation only to the
+canonical roadmap; no application code, security gates, OpenAPI pins,
+CI workflows, database migrations, or production values changed.
+
+**Remaining acceptance:** exact repair-SHA Code CI `verify` including
+complete Playwright, A1 native PostgreSQL/API W1–W4, F18 LOCAL,
+Documentation Validation. UXR-18 remains IMPLEMENTED / CI PENDING
+until every required gate passes. UXR-19 remains unselected.

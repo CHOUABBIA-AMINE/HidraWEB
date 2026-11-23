@@ -114,8 +114,10 @@ async function mockAlarm(page: Page) {
 }
 
 async function mockWorkflow(page: Page) {
+  // Simulate the owner's persisted read-after-write, not only a POST acknowledgement.
+  const currentTask = { ...task };
   await page.route('**/api/v1/workflow/tasks?**', (route) => route.fulfill({
-    json: { content: [task], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false },
+    json: { content: [currentTask], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false },
   }));
   await page.route('**/api/v1/workflow/tasks/task-1/available-actions', (route) => route.fulfill({ json: [
     {
@@ -129,7 +131,7 @@ async function mockWorkflow(page: Page) {
       permitted: true,
     },
   ] }));
-  await page.route('**/api/v1/workflow/tasks/task-1', (route) => route.fulfill({ json: task }));
+  await page.route('**/api/v1/workflow/tasks/task-1', (route) => route.fulfill({ json: currentTask }));
   await page.route('**/api/v1/workflow/instances/instance-1/timeline', (route) => route.fulfill({
     json: [{ id: 'tl-1', instanceId: 'instance-1', taskId: 'task-1', actionType: 'ASSIGN', actorDisplayName: 'Supervisor', sequence: 1, occurredAt: '2026-09-11T10:00:00Z' }],
   }));
@@ -141,6 +143,9 @@ async function mockWorkflow(page: Page) {
       expectedTaskUpdatedAt: '2026-09-11T10:30:00Z',
       commentText: 'Validated against operating evidence.',
     });
+    // A verified command changes the server-owned task and its concurrency token.
+    currentTask.status = 'APPROVED';
+    currentTask.updatedAt = '2026-09-11T10:31:00Z';
     await route.fulfill({
       json: {
         actionId: 'act-1',
@@ -222,6 +227,10 @@ test('HWEB-015-09 protects the monitor-to-response-to-workflow operator journey'
   await expect(page.getByText('Pressure deviation DEV-1')).toBeVisible();
   await page.getByRole('button', { name: 'APPROVE' }).click();
   await page.getByLabel('comment *').fill('Validated against operating evidence.');
-  await page.getByRole('button', { name: 'Action: APPROVE' }).click();
+  const executeButton = page.getByRole('button', { name: 'Action: APPROVE' });
+  await expect(executeButton).toBeDisabled();
+  await page.getByRole('checkbox', { name: 'Je confirme cette décision après avoir vérifié la tâche actuelle.', exact: true }).check();
+  await expect(executeButton).toBeEnabled();
+  await executeButton.click();
   await expect(page.getByText('APPROVE · APPROVED')).toBeVisible();
 });

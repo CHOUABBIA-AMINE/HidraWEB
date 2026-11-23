@@ -28,8 +28,13 @@ test('W4 native discovered process and independent human APPROVE/REJECT persist 
   await expect(page.getByRole('button',{name:decision,exact:true})).toBeVisible();await page.getByRole('button',{name:decision,exact:true}).click();
   if(decision==='APPROVE')await page.getByLabel('comment *',{exact:true}).fill('Synthetic independent native review');
   else await page.getByLabel('reasonId *',{exact:true}).fill(reason);
+  // UXR-18 requires affirmative confirmation even for an authorized native reviewer.
+  const executeButton=page.getByRole('button',{name:`Action: ${decision}`,exact:true});
+  await expect(executeButton).toBeDisabled();
+  await page.getByRole('checkbox',{name:'I confirm this decision after reviewing the current task.',exact:true}).check();
+  await expect(executeButton).toBeEnabled();
   const refreshedTimeline=response(page,`/instances/${instance}/timeline`,'GET');
-  const executed=page.waitForResponse(r=>new URL(r.url()).pathname.includes(`/tasks/${task}/transitions/`)&&r.request().method()==='POST');await page.getByRole('button',{name:`Action: ${decision}`,exact:true}).click();const result=await executed;expect(result.status()).toBe(200);expect((await result.json()).decision).toBe(decision);expect((await refreshedTimeline).status()).toBe(200);
+  const executed=page.waitForResponse(r=>new URL(r.url()).pathname.includes(`/tasks/${task}/transitions/`)&&r.request().method()==='POST');await executeButton.click();const result=await executed;expect(result.status()).toBe(200);expect((await result.json()).decision).toBe(decision);expect((await refreshedTimeline).status()).toBe(200);
   await expect(page.getByText(`${decision} · ${decision==='APPROVE'?'APPROVED':'REJECTED'}`,{exact:true})).toBeVisible();
   // Wait for the refreshed native task state before issuing a deliberate stale command.
   await expect(page.getByRole('button',{name:decision,exact:true})).toHaveCount(0);
