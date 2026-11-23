@@ -685,3 +685,46 @@ private appointment history pagination and each additional protected
 authoring workflow remain outside this package and require their own
 scope and acceptance. No backend OpenAPI pin, database, deployment,
 live OT value or credential flow is modified.
+
+## P6 / UXR-21/B — Identity & Access WS-14 authorization and directory (23 November 2026)
+
+This package extends the existing `/administration/users` experience.
+`IdentityAccessWorkspace` now pages through the existing
+HidraAPI Identity user, role and permission lists (50 records per
+server page). It renders owner-issued totals only from a successful,
+current and authorized list query; 403, failed revalidation, tab,
+search, page, operational context or effective-grant changes hide
+stale rows, selected user identity details and protected counts.
+A selected user can be inspected only while its ID still belongs
+to the exact currently authorized backend page. The optional
+`employeeReferenceId` remains a neutral Organization reference, not
+proof of an authenticated employee identity.
+
+The role, permission and grant authoring panel requires an exact
+published route/method/permission plus effective caller permission
+for every write. Required backend DTO fields are checked before
+submission and human-assigned grants require an explicit reason;
+scope identifiers must be supplied with any nonempty scope type.
+Changing grant kind clears stale input IDs and previous result.
+An uncertain POST outcome requires a manual owner review and
+explicit refresh before another frontend submission. Generic error
+messages replace raw backend exception text; no denial details,
+authorization counts or credential secrets are inferred.
+
+The existing Identity user creation, permission evaluation, user
+lifecycle and LOCAL credential/revocation panels are retained.
+The permission evaluation UI now requires a user and permission,
+does not reuse a stale response after form changes and suppresses
+the backend's unstructured reason message. User creation requires
+a nonempty username and an uncertain outcome blocks immediate
+resubmission until current user records are refreshed. The existing
+LOCAL password-clearing and concurrency-token requirements are not
+weakened or replaced. This is a frontend UX safety layer;
+HidraAPI remains the final authorization and persistence boundary.
+
+Synthetic regression coverage exercises typed owner paging, permission
+withdrawal, server 403 revalidation concealment, tab/page selection
+isolation, exact command admission, missing required grant fields,
+and unknown write outcomes. No new backend endpoint, credential
+generator, user-to-employee inference, live OT connection or
+autonomous access grant is introduced.

@@ -28,7 +28,10 @@ export function IdentityCommandPanel() {
     userId: '', permissionCode: '', resourceType: '', resourceReferenceId: '',
     scopeType: 'GLOBAL', scopeReferenceId: '', scopeCodeSnapshot: '',
   });
-
+  const canCreate = permissions.status === 'ready' && permissions.can(IDENTITY_ORGANIZATION_PERMISSIONS.createUser);
+  const canEvaluate = permissions.status === 'ready' && permissions.can(IDENTITY_ORGANIZATION_PERMISSIONS.evaluatePermission);
+  const evaluationComplete = Boolean(evaluation.userId.trim() && evaluation.permissionCode.trim()) &&
+    (evaluation.scopeType === 'GLOBAL' || Boolean(evaluation.scopeReferenceId.trim()));
   const createMutation = useMutation({
     mutationFn: () => {
       const request: CreateUserRequest = {
@@ -64,12 +67,17 @@ export function IdentityCommandPanel() {
     },
   });
 
+  const changeEvaluation = (field: keyof typeof evaluation, value: string) => {
+    evaluateMutation.reset();
+    setEvaluation((current) => ({ ...current, [field]: value }));
+  };
+
   return (
     <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' } }}>
       <Paper variant="outlined" sx={{ p: 2 }}>
         <Typography component="h2" variant="h6">{t('context.identity.createUser')}</Typography>
         <Typography color="text.secondary" sx={{ mb: 2 }} variant="body2">{t('context.identity.credentialsNotice')}</Typography>
-        {!permissions.can(IDENTITY_ORGANIZATION_PERMISSIONS.createUser) ? (
+        {!canCreate ? (
           <Alert severity="warning" sx={{ mb: 2 }}>{t('context.commandUnavailable')}</Alert>
         ) : null}
         <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' } }}>
@@ -82,15 +90,21 @@ export function IdentityCommandPanel() {
           <TextField label={t('context.fields.employeeReferenceId')} onChange={(event) => setUser({ ...user, employeeReferenceId: event.target.value })} size="small" value={user.employeeReferenceId} />
         </Box>
         <Button
-          disabled={!permissions.can(IDENTITY_ORGANIZATION_PERMISSIONS.createUser) || createMutation.isPending}
+          disabled={!canCreate || !user.username.trim() || createMutation.isPending || createMutation.isError}
           onClick={() => createMutation.mutate()}
           sx={{ mt: 2 }}
           variant="contained"
         >
           {t('context.identity.createUser')}
         </Button>
-        {createMutation.error ? <Alert severity="error" sx={{ mt: 2 }}>{String(createMutation.error)}</Alert> : null}
-        {createMutation.data ? (
+        {createMutation.isError ? <Alert severity="error" sx={{ mt: 2 }}>
+            User creation may have committed. Review current Identity users before another attempt.
+            <Button size="small" onClick={() => {
+              void queryClient.invalidateQueries({ queryKey: ['hidra', 'identity-admin'] });
+              createMutation.reset();
+            }}>Refresh for review</Button>
+          </Alert> : null}
+        {createMutation.data && canCreate ? (
           <Alert severity="success" sx={{ mt: 2 }}>{t('context.identity.userCreated', { id: createMutation.data.id ?? '—' })}</Alert>
         ) : null}
       </Paper>
@@ -98,38 +112,38 @@ export function IdentityCommandPanel() {
       <Paper variant="outlined" sx={{ p: 2 }}>
         <Typography component="h2" variant="h6">{t('context.identity.evaluatePermission')}</Typography>
         <Typography color="text.secondary" sx={{ mb: 2 }} variant="body2">{t('context.identity.evaluationNotice')}</Typography>
-        {!permissions.can(IDENTITY_ORGANIZATION_PERMISSIONS.evaluatePermission) ? (
+        {!canEvaluate ? (
           <Alert severity="warning" sx={{ mb: 2 }}>{t('context.commandUnavailable')}</Alert>
         ) : null}
         <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' } }}>
-          <TextField label={t('context.fields.userId')} onChange={(event) => setEvaluation({ ...evaluation, userId: event.target.value })} size="small" value={evaluation.userId} />
-          <TextField label={t('context.fields.permissionCode')} onChange={(event) => setEvaluation({ ...evaluation, permissionCode: event.target.value })} size="small" value={evaluation.permissionCode} />
-          <TextField label={t('context.fields.resourceType')} onChange={(event) => setEvaluation({ ...evaluation, resourceType: event.target.value })} size="small" value={evaluation.resourceType} />
-          <TextField label={t('context.fields.resourceReferenceId')} onChange={(event) => setEvaluation({ ...evaluation, resourceReferenceId: event.target.value })} size="small" value={evaluation.resourceReferenceId} />
-          <TextField label={t('context.fields.scopeType')} onChange={(event) => setEvaluation({ ...evaluation, scopeType: event.target.value })} select size="small" value={evaluation.scopeType}>
+          <TextField label={t('context.fields.userId')} disabled={evaluateMutation.isPending} onChange={(event) => changeEvaluation('userId', event.target.value)} size="small" value={evaluation.userId} />
+          <TextField label={t('context.fields.permissionCode')} disabled={evaluateMutation.isPending} onChange={(event) => changeEvaluation('permissionCode', event.target.value)} size="small" value={evaluation.permissionCode} />
+          <TextField label={t('context.fields.resourceType')} disabled={evaluateMutation.isPending} onChange={(event) => changeEvaluation('resourceType', event.target.value)} size="small" value={evaluation.resourceType} />
+          <TextField label={t('context.fields.resourceReferenceId')} disabled={evaluateMutation.isPending} onChange={(event) => changeEvaluation('resourceReferenceId', event.target.value)} size="small" value={evaluation.resourceReferenceId} />
+          <TextField label={t('context.fields.scopeType')} disabled={evaluateMutation.isPending} onChange={(event) => changeEvaluation('scopeType', event.target.value)} select size="small" value={evaluation.scopeType}>
             {SCOPE_TYPES.map((value) => <MenuItem key={value} value={value}>{value}</MenuItem>)}
           </TextField>
           {evaluation.scopeType !== 'GLOBAL' ? (
             <>
-              <TextField label={t('context.fields.scopeReferenceId')} onChange={(event) => setEvaluation({ ...evaluation, scopeReferenceId: event.target.value })} size="small" value={evaluation.scopeReferenceId} />
-              <TextField label={t('context.fields.scopeCodeSnapshot')} onChange={(event) => setEvaluation({ ...evaluation, scopeCodeSnapshot: event.target.value })} size="small" value={evaluation.scopeCodeSnapshot} />
+              <TextField label={t('context.fields.scopeReferenceId')} disabled={evaluateMutation.isPending} onChange={(event) => changeEvaluation('scopeReferenceId', event.target.value)} size="small" value={evaluation.scopeReferenceId} />
+              <TextField label={t('context.fields.scopeCodeSnapshot')} disabled={evaluateMutation.isPending} onChange={(event) => changeEvaluation('scopeCodeSnapshot', event.target.value)} size="small" value={evaluation.scopeCodeSnapshot} />
             </>
           ) : null}
         </Box>
         <Button
-          disabled={!permissions.can(IDENTITY_ORGANIZATION_PERMISSIONS.evaluatePermission) || evaluateMutation.isPending}
+          disabled={!canEvaluate || !evaluationComplete || evaluateMutation.isPending}
           onClick={() => evaluateMutation.mutate()}
           sx={{ mt: 2 }}
           variant="outlined"
         >
           {t('context.identity.evaluatePermission')}
         </Button>
-        {evaluateMutation.error ? <Alert severity="error" sx={{ mt: 2 }}>{String(evaluateMutation.error)}</Alert> : null}
-        {evaluateMutation.data ? (
+        {evaluateMutation.isError ? <Alert severity="error" sx={{ mt: 2 }}>HidraAPI refused or could not complete the authorization evaluation.</Alert> : null}
+        {evaluateMutation.data && canEvaluate ? (
           <Alert severity={evaluateMutation.data.permitted ? 'success' : 'warning'} sx={{ mt: 2 }}>
             {t('context.identity.permissionDecision', {
               decision: evaluateMutation.data.decision ?? (evaluateMutation.data.permitted ? 'PERMIT' : 'DENY'),
-              reason: evaluateMutation.data.reasonMessage ?? evaluateMutation.data.reasonCode ?? '—',
+              reason: evaluateMutation.data.reasonCode ?? '—',
             })}
           </Alert>
         ) : null}

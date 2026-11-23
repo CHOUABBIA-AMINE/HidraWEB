@@ -5715,3 +5715,76 @@ budget modifications.
 Typecheck failure is corrected in source but the complete acceptance
 gate remains to be demonstrated by exact-SHA CI. UXR-21/B is
 not selected. No operational SITE acceptance is claimed.
+
+### P6 / UXR-21/A accepted; UXR-21/B selected and implemented (23 November 2026)
+
+**Parent progress and entry gate:** UXR-21/A source repair
+`6d4bae110c89dcbf37cd1578f8ad6830ba39dcc2`
+(tree `41cd8e5a00e025c4ff004dccae05d0c2d4cef187`)
+passed [HidraWEB Code CI #1099](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45163926323)
+(`verify`, native A1 PostgreSQL/API and F18 LOCAL) and
+[Documentation Validation #135](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45163926309)
+on the exact SHA. Thus UXR-21/A is CI-PASSED for synthetic
+development; no deployment, qualified industrial test or SITE
+acceptance is inferred. Owner `Next` selects only the registered
+**P6 / UXR-21/B · Identity & Access WS-14** package under the same
+UXR-21 parent.
+
+**Exact commit message:** `feat(identity): deliver UXR-21/B authorized access workspace and grants`.
+
+**Exact file envelope:**
+UPDATE `src/features/context/components/IdentityAccessWorkspace.tsx`
+— read-only server pagination, authorized-only results and totals,
+selected user detail admitted only from the current owner page at
+the same search/page/resource/context coordinates, safe loading,
+empty, denial and stale revalidation states.
+UPDATE `src/features/context/components/IdentityAccessCommandPanel.tsx`
+— exact backend POST route-permission admission for role, permission
+and three grant kinds; required inputs, explicit reason for user
+grants, safe reset on kind changes, generic errors and manual
+refresh/review after unknown write outcome.
+UPDATE `src/features/context/components/IdentityCommandPanel.tsx`
+— require user identity for creation and user/permission for
+evaluation, avoid exposing raw mutation errors or unstructured
+reason, suppress unauthorized result and reset stale evaluation
+when the input changes; block immediate repeat of uncertain
+user creation until manual refresh.
+CREATE `src/features/context/model/identityCommandAdmission.ts`
+— pure frontend route/method/grant completeness checks.
+CREATE `src/features/context/model/identityCommandAdmission.test.ts`
+— permission route/method and grants completeness proof.
+CREATE `src/features/context/components/IdentityReadWorkspace.test.tsx`
+— synthetic permission withdrawal, stale revalidation,
+paging and resource selection proof.
+CREATE `src/features/context/components/IdentityAccessCommandPanel.test.tsx`
+— grant route admission, missing-reason denial, protected
+unknown outcome and no raw backend exception proof.
+APPEND `docs/06-Navigation-Blueprint.md` and this canonical
+roadmap. DELETE none.
+
+**Scope and preserved evidence:** This stage reuses only
+source-pinned Identity list/detail, grants, user creation and
+permission-evaluation APIs. Existing
+`src/features/context/components/FoundationIdentityPanel.tsx`
+owns separate privileged user lifecycle, LOCAL credential state,
+password clearing and grants revocation and is preserved unchanged.
+The existing foundation unit/native tests remain acceptance evidence
+for that retained behavior; this package does not claim newly
+written or SITE-qualified credential handling. No backend/Orval
+snapshot pin, JWT/OIDC, security policy, role checks inside domain,
+schema, migration, workflow, performance budget, CI workflow,
+release or OT action modification. Frontend metadata gates the UX;
+HidraAPI is the authority for every read and command.
+
+**Status after implementation:** UXR-21/B IMPLEMENTED / CI PENDING
+on the new implementation SHA; UXR-21 parent remains IN PROGRESS
+until this package passes the exact-SHA gates. UXR-22 remains
+the next registered, unselected stage.
+
+**Acceptance gate:** Complete pinned OpenAPI and regenerated
+client check, lint, TypeScript, unit/component/Node including
+identity, full Chromium including credential/logout and
+administration, production bundle and performance checks,
+native JWT/PostgreSQL A1 W1–W4, F18 LOCAL and Documentation
+Validation on the exact new SHA. A green development CI is
+not engineering/operational acceptance.
