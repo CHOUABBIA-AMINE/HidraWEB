@@ -55,7 +55,7 @@ test('UXR-17 workbench authorizes pages, exact filters, totals and fail-closed d
   await expect(register.getByRole('button', { name: 'Inspecter' })).toBeVisible();
   await expect(page.getByRole('button', { name: /export/i })).toHaveCount(0);
 
-  await page.getByRole('textbox', { name: 'Recherche' }).fill('denied');
+  await page.getByRole('textbox', { name: 'Recherche', exact: true }).fill('denied');
   await page.getByRole('button', { name: 'Rechercher', exact: true }).click();
   await expect(register.getByRole('alert')).toBeVisible();
   await expect(register.getByRole('table')).toHaveCount(0);

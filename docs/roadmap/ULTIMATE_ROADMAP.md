@@ -5262,3 +5262,37 @@ test requirement. DELETE none.
 performance, production build, artifact verification and Chromium; native
 A1 and F18; Documentation Validation. UXR-17 is still **not CI-passed**
 until the new source SHA satisfies these gates. UXR-18 remains unselected.
+
+### P5 / UXR-17 — Code CI #1090 Chromium locator repair (23 November 2026)
+
+**Observed exact-SHA failure:** HidraWEB `main`
+`62e7f1e1553e2565c2db28169f31d58aa9b5d19e` (tree
+`b5e24ec5cddb316baa788b1abb3c77518de55da6`) produced
+[Code CI #1090](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45145153867).
+The `verify` job failed at `Full Playwright regression suite` with one
+failing UXR-17 browser test (108 passed, 15 skipped). OpenAPI compatibility,
+lint, typecheck, unit/component, performance, build and release artifact
+verification passed; native A1 PostgreSQL/API W1–W4 and F18 LOCAL passed.
+[Documentation Validation #126](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45145153897)
+passed on the same SHA.
+
+**Confirmed cause:** In `tests/e2e/authorized-register.spec.ts:58`,
+`getByRole('textbox', { name: 'Recherche' })` matched both the disabled
+shell-wide search named `Recherche globale — à venir` and the Workbench
+textbox whose accessible name is exactly `Recherche`. Playwright strict
+mode rejected the ambiguous locator on the initial run and both retries.
+The failure occurred before the denied-response check and does not prove
+a backend authorization or paging regression.
+
+**Bounded repair message:** `fix(workspace): select exact UXR-17 workbench search field`.
+UPDATE only `tests/e2e/authorized-register.spec.ts` to add `exact: true`
+to the Workbench search textbox locator; retain the original synthetic
+owner paging, authorization, inspect, no-export, 403, redaction and
+request-count assertions. Append this reconciliation in the canonical
+roadmap. No application behavior, security policy, backend/OpenAPI contract,
+CI workflow, release budget or unrelated tests are changed. DELETE none.
+
+**Pending repair-SHA acceptance:** complete Code CI verification (including
+the formerly failing Chromium scenario), A1 native qualification, F18 LOCAL
+and Documentation Validation. UXR-17 remains implemented but not CI-passed
+until those checks pass. UXR-18 remains the next registered unselected stage.
