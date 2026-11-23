@@ -306,3 +306,56 @@ test('UXR-23 uses the exact selected company and separates design from pipeline 
   await expect(page.getByText('Limite qualifiée de la section · CONFLICT')).toBeVisible();
   await expect(page.getByText(/999 bar/)).toHaveCount(0);
 });
+
+test('UXR-24 reads trusted telemetry from the selected regional station without a legacy fallback', async ({ page }) => {
+  const points = '/api/v1/telemetry/assets/{assetType}/{assetId}/points';
+  const latest = points + '/{pointId}/trusted-readings/latest';
+  const scoped = [points, latest].map(route => ({
+    route, methods: ['GET'], module: 'telemetry', resource: 'assets', action: 'read',
+    permission: 'telemetry:assets:read', enforcementStatus: 'backend-enforced',
+  }));
+  const stationList = {
+    route: '/api/v1/topology/regional-map/layers/{layerId}/features',
+    methods: ['GET'], module: 'topology', resource: 'regional-map', action: 'read',
+    permission: 'topology:regional-map:read', enforcementStatus: 'backend-enforced',
+  };
+  await page.route('**/api/v1/topology/regional-map/layers/facilities/features?**', route => {
+    expect(new URL(route.request().url()).searchParams.get('companyPartyId')).toBe('company');
+    return route.fulfill({ json: { hasNext: false, features: [{
+      id: 'facilities:station-a', properties: { layer: 'facilities', entityId: 'station-a', code: 'GZ2 Station' },
+    }] } });
+  });
+  await page.route('**/api/v1/telemetry/assets/FACILITY/station-a/points?**', route => {
+    expect(new URL(route.request().url()).searchParams.get('companyPartyId')).toBe('company');
+    return route.fulfill({ json: { at: '2026-01-01T12:00:00Z',
+      points: [{ pointId: 'pressure-1', binding: { id: 'binding-a' } }] } });
+  });
+  await page.route('**/api/v1/telemetry/assets/FACILITY/station-a/points/pressure-1/trusted-readings/latest?**', route => {
+    const query = new URL(route.request().url()).searchParams;
+    expect(query.get('companyPartyId')).toBe('company');
+    expect(query.get('maxAgeSeconds')).toBe('120');
+    return route.fulfill({ json: {
+      status: 'STALE', maxAgeSeconds: 120, evaluatedAt: '2026-01-01T12:00:00Z',
+      observation: { numericValue: 42, unitId: 'bar', observedAt: '2026-01-01T11:57:30Z',
+        freshness: 'STALE', ageSeconds: 150, binding: { id: 'binding-a' } },
+    } });
+  });
+  const legacy: string[] = [];
+  await page.route('**/api/v1/telemetry/points/**', route => {
+    legacy.push(route.request().url());
+    return route.fulfill({ status: 403 });
+  });
+  await enterSelectedScope(page, [...scoped, stationList], ['telemetry:assets:read']);
+  await page.getByRole('navigation', { name: 'Navigation principale' })
+    .getByRole('button', { name: 'Opérations', exact: true }).click();
+  const panel = page.getByRole('region', { name: 'Télémétrie qualifiée par actif' });
+  await panel.getByRole('combobox', { name: 'Station régionale' }).click();
+  await page.getByRole('option', { name: 'GZ2 Station' }).click();
+  await panel.getByRole('combobox', { name: 'Point mis en service' }).click();
+  await page.getByRole('option', { name: 'pressure-1' }).click();
+  await panel.getByRole('spinbutton', { name: 'Âge maximal (secondes)' }).fill('120');
+  await panel.getByRole('button', { name: 'Appliquer le seuil' }).click();
+  await expect(panel.getByText(/42 bar.*STALE.*150 s.*binding-a/)).toBeVisible();
+  await expect(panel.getByText(/Aperçu de station sans placement de signaux/)).toBeVisible();
+  expect(legacy).toEqual([]);
+});

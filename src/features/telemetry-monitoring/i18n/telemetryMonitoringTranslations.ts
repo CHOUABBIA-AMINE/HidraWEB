@@ -1,5 +1,6 @@
 export const telemetryMonitoringTranslations = {
   fr: {
+    trusted: { title: "Télémétrie qualifiée par actif", scope: "Sélectionnez un contexte opérationnel autorisé.", station: "Station régionale", point: "Point mis en service", previous: "Page précédente", next: "Page suivante", empty: "Aucun point mis en service dans cette page.", maxAge: "Âge maximal (secondes)", apply: "Appliquer le seuil", binding: "Liaison", synoptic: "Aperçu de station sans placement de signaux. Les liaisons au synoptique restent à qualifier.", graphRevision: "Révision publiée du graphe" },
     title: 'Opérations · télémétrie & surveillance',
     subtitle: 'Lectures, tendances, règles et écarts issus des contrats HidraAPI.',
     pointId: 'Identifiant du point de télémétrie', applyPoint: 'Charger le point', noPoint: 'Saisissez un pointId connu pour charger la télémétrie.',
@@ -11,12 +12,14 @@ export const telemetryMonitoringTranslations = {
     error403: 'HidraAPI a refusé cette requête (403).', genericError: 'Impossible de charger les données depuis HidraAPI.', loaded: '{{loaded}} chargés sur {{total}}',
   },
   en: {
+    trusted: { title: "Trusted asset telemetry", scope: "Select an authorized operational context.", station: "Regional station", point: "Commissioned point", previous: "Previous page", next: "Next page", empty: "No commissioned points on this page.", maxAge: "Maximum age (seconds)", apply: "Apply threshold", binding: "Binding", synoptic: "Station preview without signal overlays. Synoptic bindings require qualification.", graphRevision: "Published graph revision" },
     title: 'Operations · telemetry & monitoring', subtitle: 'Readings, trends, rules and deviations from HidraAPI contracts.',
     pointId: 'Telemetry point ID', applyPoint: 'Load point', noPoint: 'Enter a known pointId to load telemetry.', latest: 'Latest reading', history: 'History', trend: 'Trend', state: 'State', quality: 'Quality', timestamp: 'Timestamp', value: 'Value', unit: 'Unit',
     from: 'From', to: 'To', refresh: 'Refresh', telemetryUnavailable: 'Telemetry access is unavailable for this user.', referenceUnavailable: 'Reference catalogs are unavailable.', noReading: 'No reading was returned for this point.', noTrend: 'No numeric trend is available in this window.', realtimeNotice: 'Query/polling mode is active. Business realtime events are not yet verified.',
     monitoring: 'Monitoring', rules: 'Monitoring rules', deviations: 'Deviations', status: 'Status', severity: 'Severity', asset: 'Topology asset', ruleType: 'Rule type', detectedAt: 'Detected at', reason: 'Reason', monitoringUnavailable: 'No monitoring rule/deviation read grant is available.', emptyRules: 'No rules returned.', emptyDeviations: 'No deviations returned.', inspect: 'Inspect', backendOwned: 'Values and relationships are displayed exactly as returned by HidraAPI; the frontend does not infer business semantics.', error403: 'HidraAPI refused this request (403).', genericError: 'Unable to load data from HidraAPI.', loaded: '{{loaded}} loaded of {{total}}',
   },
   ar: {
+    trusted: { title: "القياسات الموثوقة حسب الأصل", scope: "اختر سياق تشغيل مصرحًا به.", station: "المحطة الإقليمية", point: "نقطة قياس قيد الخدمة", previous: "الصفحة السابقة", next: "الصفحة التالية", empty: "لا توجد نقاط قياس قيد الخدمة في هذه الصفحة.", maxAge: "الحد الأقصى للعمر (ثانية)", apply: "تطبيق الحد", binding: "الربط", synoptic: "معاينة المحطة دون عرض الإشارات. يتطلب ربط الإشارات بالمخطط التأهيل.", graphRevision: "المراجعة المنشورة للمخطط" },
     title: 'العمليات · القياس والمراقبة', subtitle: 'القراءات والاتجاهات والقواعد والانحرافات من عقود HidraAPI.',
     pointId: 'معرّف نقطة القياس', applyPoint: 'تحميل النقطة', noPoint: 'أدخل pointId معروفاً لتحميل القياسات.', latest: 'آخر قراءة', history: 'السجل', trend: 'الاتجاه', state: 'الحالة', quality: 'الجودة', timestamp: 'الوقت', value: 'القيمة', unit: 'الوحدة',
     from: 'من', to: 'إلى', refresh: 'تحديث', telemetryUnavailable: 'صلاحية قراءة القياسات غير متاحة لهذا المستخدم.', referenceUnavailable: 'كتالوجات المراجع غير متاحة.', noReading: 'لا توجد قراءة لهذه النقطة.', noTrend: 'لا يوجد اتجاه رقمي في هذه الفترة.', realtimeNotice: 'وضع الاستعلام/التحديث الدوري فعال. أحداث الزمن الحقيقي للأعمال غير موثقة بعد.',

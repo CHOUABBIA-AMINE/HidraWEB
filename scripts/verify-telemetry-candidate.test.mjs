@@ -7,22 +7,46 @@ import { fileURLToPath } from 'node:url';
 import { compareContractSlice } from './audit-openapi-drift.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const sourceName = 'hidra-telemetry-monitoring-da4ce33ead7db40776049c861027947b61b96270.json';
+const previousName = 'hidra-telemetry-monitoring-da4ce33ead7db40776049c861027947b61b96270.json';
+const sourceName = 'hidra-telemetry-monitoring-uxr24.json';
 const candidatePath = path.join(root, 'openapi/candidates', sourceName);
 const oldPath = path.join(root, 'openapi/hidra-telemetry-monitoring-63f3f60974ce57eb8cd5e42910397615195624fb.json');
 const raw = fs.readFileSync(candidatePath);
 const candidate = JSON.parse(raw.toString('utf8'));
 const previous = JSON.parse(fs.readFileSync(oldPath, 'utf8'));
 
-test('Telemetry/Monitoring slice exactly matches the verified full backend artifact', () => {
+test('UXR-24 pins the three T39 Telemetry reads and preserves the prior slice', () => {
   assert.equal(crypto.createHash('sha256').update(raw).digest('hex'),
-    '55f5ea67d7dfecb6c2b5a88bd6619a58081d653d92d44518aacbdace03b792f3');
+    '3aaeaa63f18b5f30dfa3ccb841e29fa85ab00af6615ad87a37bb04cf004dd95d');
   assert.equal(candidate.openapi, '3.1.0');
-  assert.equal(Object.keys(candidate.paths).length, 17);
-  assert.equal(Object.keys(candidate.components.schemas).length, 16);
+  assert.equal(Object.keys(candidate.paths).length, 20);
+  assert.equal(Object.keys(candidate.components.schemas).length, 24);
+  const previousBytes = fs.readFileSync(path.join(root, 'openapi/candidates', previousName));
+  assert.equal(crypto.createHash('sha256').update(previousBytes).digest('hex'),
+    '55f5ea67d7dfecb6c2b5a88bd6619a58081d653d92d44518aacbdace03b792f3');
+  const prior = JSON.parse(previousBytes);
+  for (const [route, operation] of Object.entries(prior.paths)) assert.deepEqual(candidate.paths[route], operation);
+  for (const [name, schema] of Object.entries(prior.components.schemas)) assert.deepEqual(candidate.components.schemas[name], schema);
   assert.equal(candidate.servers, undefined);
   assert.ok(Object.keys(candidate.paths).every((route) =>
     route.startsWith('/api/v1/telemetry/') || route.startsWith('/api/v1/monitoring/')));
+});
+
+test('asset-scoped telemetry transports retain required company and cursor coordinates', () => {
+  const root = '/api/v1/telemetry/assets/{assetType}/{assetId}/points';
+  for (const [suffix, names, response] of [
+    ['', ['at', 'afterPointId'], 'CommissionedPointsView'],
+    ['/{pointId}/trusted-readings/latest', ['maxAgeSeconds'], 'LatestObservationView'],
+    ['/{pointId}/trusted-readings/history', ['from', 'until', 'afterObservedAt', 'afterTrustedId', 'maxAgeSeconds'], 'ObservationHistoryView'],
+  ]) {
+    const operations = candidate.paths[root + suffix];
+    assert.deepEqual(Object.keys(operations), ['get']);
+    const operation = operations.get;
+    assert.deepEqual(operation.security, [{ hidraBearerJwt: [] }]);
+    assert.ok(operation.parameters.some(param => param.in === 'query' && param.name === 'companyPartyId' && param.required));
+    for (const name of names) assert.ok(operation.parameters.some(param => param.in === 'query' && param.name === name));
+    assert.equal(operation.responses['200'].content['*/*'].schema.$ref, `#/components/schemas/${response}`);
+  }
 });
 
 test('newly published telemetry source and point contracts stay typed and secured', () => {

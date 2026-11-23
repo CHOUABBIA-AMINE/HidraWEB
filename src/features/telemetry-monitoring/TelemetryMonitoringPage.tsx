@@ -35,6 +35,7 @@ import {
 } from '@/features/telemetry-monitoring/api/telemetryMonitoringApi';
 import { TELEMETRY_MONITORING_PERMISSIONS } from '@/features/telemetry-monitoring/api/telemetryMonitoringPermissions';
 import { BackendObjectInspector } from '@/features/telemetry-monitoring/components/BackendObjectInspector';
+import { TrustedAssetMonitoring } from '@/features/telemetry-monitoring/components/TrustedAssetMonitoring';
 import { TrendQualityPanel } from '@/features/telemetry-monitoring/components/TrendQualityPanel';
 import { legacyReadingStatus, legacyReadingTimeline } from '@/features/telemetry-monitoring/model/telemetryEvidence';
 import { EvidenceTimeline } from '@/shell/evidence/EvidenceTimeline';
@@ -175,6 +176,7 @@ export function TelemetryMonitoringPage() {
         </Box>
 
         <Alert severity="info">{t('telemetryMonitoring.realtimeNotice')}</Alert>
+        <TrustedAssetMonitoring />
 
         <Paper variant="outlined" sx={{ p: 2 }}>
           <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: 'minmax(240px, 1fr) 210px 210px 180px auto' } }}>

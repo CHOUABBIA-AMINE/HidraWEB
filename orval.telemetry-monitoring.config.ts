@@ -3,7 +3,7 @@ import { defineConfig } from 'orval';
 export default defineConfig({
   telemetryMonitoring: {
     input: {
-      target: './openapi/candidates/hidra-telemetry-monitoring-da4ce33ead7db40776049c861027947b61b96270.json',
+      target: './openapi/candidates/hidra-telemetry-monitoring-uxr24.json',
     },
     output: {
       mode: 'single',
