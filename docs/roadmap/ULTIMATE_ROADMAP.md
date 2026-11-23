@@ -4949,3 +4949,55 @@ Playwright assertions including return-to-invoker focus. Append this
 roadmap entry, do not weaken tests or change owner authorization/REST calls.
 Full Code CI and Documentation CI on the repaired SHA remain mandatory;
 UXR-15 stays unselected.
+
+
+### P4 / UXR-15 — source-bound StatusWithProvenance and EvidenceTimeline (23 November 2026)
+
+**Admission evidence:** UXR-14 repair
+`be7efb295dcd521c04a7506ff402a4e874d0ac49` (tree
+`c48a30aba377a325d3c9710f97e5f41278e25055`) passed
+[Code CI #1084](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45133014232),
+including verify, Chromium, A1 native PostgreSQL/API and F18 LOCAL, plus
+[Documentation Validation #120](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45133014333).
+The owner selected exactly UXR-15 with Next; UXR-16 remains unselected.
+
+**Implementation message:** `feat(workspace): add UXR-15 source-bound contextual evidence`.
+CREATE `src/shell/evidence/evidenceTypes.ts` (discriminated owner-data
+states and optional provenance), `evidenceTranslations.ts` (FR/EN/AR
+labels), `EvidenceStateNotice.tsx` (non-ready fail-closed states),
+`StatusWithProvenance.tsx` (source/quality/unit/time/version/effectivity),
+`EvidenceTimeline.tsx` (explicit owner entries),
+`EvidencePresentation.test.tsx` (including cached data suppression),
+`src/features/workflow/model/workflowEvidence.ts` and its test (pinned
+Workflow instance/timeline projection),
+`src/features/telemetry-monitoring/model/telemetryEvidence.ts` and its
+test (legacy point reading, exact-point filter). UPDATE
+`src/shared/i18n/i18n.ts` (merge the evidence labels),
+`src/features/workflow/WorkflowTasksPage.tsx` (owner instance status and
+source-timeline display, preserving automatic W4 reload/read),
+`src/features/telemetry-monitoring/TelemetryMonitoringPage.tsx` (latest
+summary and on-demand history/trend using existing published legacy GETs),
+`tests/e2e/operations.spec.ts` (progressive read and provenance browser
+fixture), `docs/06-Navigation-Blueprint.md` and this append-only roadmap.
+DELETE none. No existing tests removed, no CI, OpenAPI candidate, backend,
+Workflow command/retry or access rules modified.
+
+**Contract boundary:** the pinned Workflow candidate
+`openapi/candidates/hidra-workflow-5817406923e53761577ac41bbc3f318b517c3977.json`
+provides `InstanceView` and `TimelineEntry`; the pinned legacy Telemetry
+candidate `openapi/candidates/hidra-telemetry-monitoring-da4ce33ead7db40776049c861027947b61b96270.json`
+provides `ReadingView`. The pinned Topology candidate
+`openapi/candidates/hidra-topology-f1fdc206c916a5266f609810c045c6b5688bfd49.json`
+does not contain T39 restriction evidence or pipeline dossier endpoints, and
+the pinned legacy telemetry candidate does not supply asset-scoped trusted
+latest/history paths. That limitation is **not** backend absence evidence;
+do not invent or call missing WEB contracts. No cross-owner Audit join, causal
+link, qualified engineering pressure, clock accuracy, trusted SCADA state,
+SITE acceptance or business realtime capability is claimed.
+
+**Acceptance pending on implementation SHA:** OpenAPI pin compatibility,
+lint, TypeScript, all unit/component and node contract tests, performance,
+bundle/release artifact, full Chromium including UXR-15 lazy history,
+A1 native W1–W4 and F18 LOCAL, and Documentation Validation. Only exact-SHA
+success changes UXR-15 from implemented to CI-passed. UXR-16 is the next
+registered **unselected** task.

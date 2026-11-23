@@ -411,3 +411,49 @@ Tests cover modal labels and atomic replacement, denied/incorrect workbench
 records, narrow widths, Escape and keyboard focus return, plus existing
 route/scope/remount guards. All fixtures are synthetic. Neither drawer
 presentation nor a successful local test establishes industrial acceptance.
+
+
+## P4 / UXR-15 — source-bound evidence and progressive history (23 November 2026)
+
+`StatusWithProvenance` and `EvidenceTimeline` in `src/shell/evidence/`
+are display-only primitives. They accept **typed, owner-issued** facts or an
+explicit loading, denied, unavailable, failed or ready state. All non-ready
+states suppress protected content, including cached values and event rows.
+The components never request APIs, infer quality/trust, assign units, fill
+missing revisions/effectivity, or join events by correlation ID. Optional
+source time, receiving time, unit, reported quality/state, revision/reference,
+effective interval and actor are rendered only when supplied; absence is not
+silently replaced by a fabricated measurement.
+
+Owner-specific pure adapters provide the source and payload meaning:
+`src/features/workflow/model/workflowEvidence.ts` consumes the **pinned**
+Workflow InstanceView/TimelineEntry, with definitionVersion distinctly owned
+by Workflow; no engineering revision or causal audit conclusion is implied.
+`src/features/telemetry-monitoring/model/telemetryEvidence.ts` consumes
+legacy point ReadingView. This is explicitly **not** the accepted
+asset-scoped trusted-reading feed. Point ID matching excludes unrelated
+records, and sourceTimestamp/receivedAt and reported quality/state remain
+separate. No freshness threshold, SCADA connection or binding is inferred.
+
+`/work/tasks` retains its native W4 instance/timeline GETs, backend
+permissions, decision replay/fences and exact-instance table. It adopts the
+new Workflow status and timeline evidence presentation without changing
+transition orchestration or the timeline's automatic retrieval required for
+native approval/reload checks. `/operations` preserves its known-point-ID
+legacy reads; the latest selected point is the summary. The operator must
+select History or Trend to initiate the corresponding owner GET, and
+refresh only refetches the currently selected authorized evidence. Changing
+the point resets the detail view. Existing monitoring rules and deviations
+remain independent. All stale query results are hidden on owner failures,
+fetching and denied scope, and history entries for unrelated point IDs are
+excluded.
+
+The registered T39 Topology restriction-evidence endpoint and new
+asset-scoped trusted-reading endpoints are not in the currently pinned WEB
+Orval candidates inspected for this stage. They are **not** guessed or
+silently represented by legacy readings. Their owner-specific adapters and
+admission belong to subsequent source-pinning/owner-specific work. Likewise
+Audit correlation is an identifier, not verified causality; no universal
+evidence join or evidence quality certificate is claimed. This stage adds
+presentation and supported owner adapters only, not production/site
+qualification or a new permission surface.

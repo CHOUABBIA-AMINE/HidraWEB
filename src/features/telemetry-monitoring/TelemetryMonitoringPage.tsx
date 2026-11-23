@@ -21,7 +21,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
-import type { DeviationView, MonitoringRuleView, ReadingView } from '@/api/generated/telemetry-monitoring/model';
+import type { DeviationView, MonitoringRuleView } from '@/api/generated/telemetry-monitoring/model';
 import { usePermissions } from '@/features/permissions/usePermissions';
 import {
   fetchDeviations,
@@ -35,7 +35,11 @@ import {
 } from '@/features/telemetry-monitoring/api/telemetryMonitoringApi';
 import { TELEMETRY_MONITORING_PERMISSIONS } from '@/features/telemetry-monitoring/api/telemetryMonitoringPermissions';
 import { BackendObjectInspector } from '@/features/telemetry-monitoring/components/BackendObjectInspector';
-import { numericTrendPath, readingTimestamp, readingValue } from '@/features/telemetry-monitoring/model/telemetryPresentation';
+import { legacyReadingStatus, legacyReadingTimeline } from '@/features/telemetry-monitoring/model/telemetryEvidence';
+import { numericTrendPath } from '@/features/telemetry-monitoring/model/telemetryPresentation';
+import { EvidenceTimeline } from '@/shell/evidence/EvidenceTimeline';
+import { StatusWithProvenance } from '@/shell/evidence/StatusWithProvenance';
+import type { EvidenceEvent, EvidenceState, StatusEvidence } from '@/shell/evidence/evidenceTypes';
 import { useContextDrawer } from '@/shell/context/useContextDrawer';
 
 const HISTORY_SIZE = 50;
@@ -52,18 +56,6 @@ function dateTimeLocalToIso(value: string): string | undefined {
   return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
 }
 
-function ReadingRow({ reading }: { reading: ReadingView }) {
-  return (
-    <TableRow>
-      <TableCell>{readingTimestamp(reading)}</TableCell>
-      <TableCell>{readingValue(reading)}</TableCell>
-      <TableCell>{reading.unitId ?? '—'}</TableCell>
-      <TableCell>{reading.state ?? '—'}</TableCell>
-      <TableCell>{reading.qualityCodeId ?? '—'}</TableCell>
-    </TableRow>
-  );
-}
-
 export function TelemetryMonitoringPage() {
   const { t } = useTranslation();
   const permissions = usePermissions();
@@ -73,6 +65,7 @@ export function TelemetryMonitoringPage() {
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [state, setState] = useState('');
+  const [detailMode, setDetailMode] = useState<'summary' | 'history' | 'trend'>('summary');
 
   const canTelemetry = permissions.can(TELEMETRY_MONITORING_PERMISSIONS.telemetryRead);
   const canReference = permissions.can(TELEMETRY_MONITORING_PERMISSIONS.telemetryReferenceRead);
@@ -111,12 +104,20 @@ export function TelemetryMonitoringPage() {
   const historyQuery = useQuery({
     queryKey: telemetryMonitoringQueryKeys.readings(historyParams),
     queryFn: () => fetchReadings(historyParams),
-    enabled: canTelemetry && Boolean(pointId),
+    enabled: canTelemetry && Boolean(pointId) && detailMode === 'history',
+    retry: false,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnWindowFocus: true,
   });
   const trendQuery = useQuery({
     queryKey: telemetryMonitoringQueryKeys.trend(trendParams),
     queryFn: () => fetchTrend(trendParams),
-    enabled: canTelemetry && Boolean(pointId),
+    enabled: canTelemetry && Boolean(pointId) && detailMode === 'trend',
+    retry: false,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnWindowFocus: true,
   });
   const rulesQuery = useQuery({
     queryKey: telemetryMonitoringQueryKeys.rules({ page: 0, size: MONITORING_SIZE }),
@@ -129,13 +130,26 @@ export function TelemetryMonitoringPage() {
     enabled: canDeviations,
   });
 
-  const path = useMemo(() => numericTrendPath(trendQuery.data ?? []), [trendQuery.data]);
-  const history = historyQuery.data?.content ?? [];
+  const path = useMemo(() => numericTrendPath((trendQuery.data ?? []).filter(reading => reading.pointId === pointId)), [trendQuery.data, pointId]);
+  const latestState: EvidenceState<StatusEvidence> = !canTelemetry
+    ? { kind: 'denied' }
+    : latestQuery.isError ? { kind: 'failed' }
+      : latestQuery.isFetching || !latestQuery.isSuccess ? { kind: 'loading' }
+        : latestQuery.data?.pointId !== pointId ? { kind: 'unavailable' }
+          : { kind: 'ready', value: legacyReadingStatus(latestQuery.data) };
+  const historyState: EvidenceState<readonly EvidenceEvent[]> = !canTelemetry
+    ? { kind: 'denied' }
+    : historyQuery.isError ? { kind: 'failed' }
+      : historyQuery.isFetching || !historyQuery.isSuccess ? { kind: 'loading' }
+        : { kind: 'ready', value: legacyReadingTimeline(historyQuery.data?.content ?? [], pointId) };
   const rules = rulesQuery.data?.content ?? [];
   const deviations = deviationsQuery.data?.content ?? [];
 
   const refreshTelemetry = () => {
-    void Promise.all([latestQuery.refetch(), historyQuery.refetch(), trendQuery.refetch()]);
+    if (!canTelemetry || !pointId) return;
+    void latestQuery.refetch();
+    if (detailMode === 'history') void historyQuery.refetch();
+    if (detailMode === 'trend') void trendQuery.refetch();
   };
 
   const inspectRule = (rule: MonitoringRuleView) => {
@@ -168,7 +182,7 @@ export function TelemetryMonitoringPage() {
               <MenuItem value="">—</MenuItem>
               {(readingStatesQuery.data ?? []).map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
             </TextField>
-            <Button disabled={!canTelemetry || !pointInput.trim()} onClick={() => setPointId(pointInput.trim())} variant="contained">{t('telemetryMonitoring.applyPoint')}</Button>
+            <Button disabled={!canTelemetry || !pointInput.trim()} onClick={() => { setPointId(pointInput.trim()); setDetailMode('summary'); }} variant="contained">{t('telemetryMonitoring.applyPoint')}</Button>
           </Box>
         </Paper>
 
@@ -179,39 +193,40 @@ export function TelemetryMonitoringPage() {
         {canTelemetry && pointId ? (
           <>
             <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}><Button onClick={refreshTelemetry}>{t('telemetryMonitoring.refresh')}</Button></Box>
-            {(latestQuery.error || historyQuery.error || trendQuery.error) ? <Alert severity="error">{errorMessage(latestQuery.error ?? historyQuery.error ?? trendQuery.error, t)}</Alert> : null}
-            <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', lg: '320px minmax(0, 1fr)' } }}>
-              <Paper variant="outlined" sx={{ p: 2 }}>
-                <Typography component="h2" variant="h6">{t('telemetryMonitoring.latest')}</Typography>
-                {latestQuery.data ? (
-                  <Stack spacing={1} sx={{ mt: 2 }}>
-                    <Typography variant="h4">{readingValue(latestQuery.data)}</Typography>
-                    <Typography>{t('telemetryMonitoring.unit')}: {latestQuery.data.unitId ?? '—'}</Typography>
-                    <Typography>{t('telemetryMonitoring.state')}: {latestQuery.data.state ?? '—'}</Typography>
-                    <Typography>{t('telemetryMonitoring.quality')}: {latestQuery.data.qualityCodeId ?? '—'}</Typography>
-                    <Typography color="text.secondary" variant="body2">{readingTimestamp(latestQuery.data)}</Typography>
-                  </Stack>
-                ) : latestQuery.isLoading ? <Typography sx={{ mt: 2 }}>…</Typography> : <Alert severity="info" sx={{ mt: 2 }}>{t('telemetryMonitoring.noReading')}</Alert>}
-              </Paper>
-
-              <Paper variant="outlined" sx={{ p: 2 }}>
-                <Typography component="h2" variant="h6">{t('telemetryMonitoring.trend')}</Typography>
-                {path ? (
-                  <Box component="svg" aria-label={t('telemetryMonitoring.trend')} viewBox="0 0 480 120" sx={{ display: 'block', height: 180, mt: 2, width: '100%' }}>
-                    <Box component="path" d={path} fill="none" stroke="currentColor" strokeWidth="3" />
-                  </Box>
-                ) : <Alert severity="info" sx={{ mt: 2 }}>{t('telemetryMonitoring.noTrend')}</Alert>}
-              </Paper>
-            </Box>
-
+            {(latestQuery.error || (detailMode === 'history' ? historyQuery.error : null) || (detailMode === 'trend' ? trendQuery.error : null)) ? (
+              <Alert severity="error">{errorMessage(latestQuery.error ?? (detailMode === 'history' ? historyQuery.error : trendQuery.error), t)}</Alert>
+            ) : null}
+            <StatusWithProvenance label={t('telemetryMonitoring.latest')} state={latestState} />
             <Paper variant="outlined" sx={{ p: 2 }}>
-              <Typography component="h2" variant="h6">{t('telemetryMonitoring.history')}</Typography>
-              {history.length ? (
-                <>
-                  <Typography color="text.secondary" variant="caption">{t('telemetryMonitoring.loaded', { loaded: history.length, total: historyQuery.data?.totalElements ?? history.length })}</Typography>
-                  <TableContainer sx={{ mt: 1 }}><Table size="small"><TableHead><TableRow><TableCell>{t('telemetryMonitoring.timestamp')}</TableCell><TableCell>{t('telemetryMonitoring.value')}</TableCell><TableCell>{t('telemetryMonitoring.unit')}</TableCell><TableCell>{t('telemetryMonitoring.state')}</TableCell><TableCell>{t('telemetryMonitoring.quality')}</TableCell></TableRow></TableHead><TableBody>{history.map((reading, index) => <ReadingRow key={reading.id ?? `${readingTimestamp(reading)}-${index}`} reading={reading} />)}</TableBody></Table></TableContainer>
-                </>
-              ) : !historyQuery.isLoading && !historyQuery.error ? <Alert severity="info" sx={{ mt: 2 }}>{t('telemetryMonitoring.noReading')}</Alert> : null}
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
+                <Button variant={detailMode === 'summary' ? 'contained' : 'outlined'} onClick={() => setDetailMode('summary')}>{t('telemetryMonitoring.latest')}</Button>
+                <Button variant={detailMode === 'history' ? 'contained' : 'outlined'} onClick={() => setDetailMode('history')}>{t('telemetryMonitoring.history')}</Button>
+                <Button variant={detailMode === 'trend' ? 'contained' : 'outlined'} onClick={() => setDetailMode('trend')}>{t('telemetryMonitoring.trend')}</Button>
+              </Stack>
+              {detailMode === 'history' ? (
+                <Box sx={{ mt: 2 }}>
+                  <EvidenceTimeline label={t('telemetryMonitoring.history')} state={historyState} />
+                  {historyState.kind === 'ready' ? (
+                    <Typography color="text.secondary" variant="caption">
+                      {t('telemetryMonitoring.loaded', { loaded: historyState.value.length, total: historyQuery.data?.totalElements ?? historyState.value.length })}
+                    </Typography>
+                  ) : null}
+                </Box>
+              ) : null}
+              {detailMode === 'trend' ? (
+                <Box sx={{ mt: 2 }}>
+                  <Typography component="h3" variant="subtitle1">{t('telemetryMonitoring.trend')}</Typography>
+                  <Typography color="text.secondary" variant="caption">{t('evidence.legacy')}</Typography>
+                  {trendQuery.isError ? <Alert severity="warning">{t('telemetryMonitoring.genericError')}</Alert> :
+                    trendQuery.isFetching || !trendQuery.isSuccess ? <Alert role="status" severity="info">{t('evidence.loading')}</Alert> :
+                      path ? (
+                        <Box component="svg" aria-label={t('telemetryMonitoring.trend')} viewBox="0 0 480 120"
+                          sx={{ display: 'block', height: 180, mt: 2, width: '100%' }}>
+                          <Box component="path" d={path} fill="none" stroke="currentColor" strokeWidth="3" />
+                        </Box>
+                      ) : <Alert severity="info">{t('telemetryMonitoring.noTrend')}</Alert>}
+                </Box>
+              ) : null}
             </Paper>
           </>
         ) : null}

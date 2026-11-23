@@ -22,7 +22,7 @@ import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
 
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
-import type { AvailableActionView, TaskView, TimelineEntry } from '@/api/generated/workflow/model';
+import type { AvailableActionView, TaskView } from '@/api/generated/workflow/model';
 import { usePermissions } from '@/features/permissions/usePermissions';
 import {
   executeWorkflowTransition,
@@ -35,6 +35,10 @@ import {
 } from '@/features/workflow/api/workflowApi';
 import { WorkflowStartPanel } from './components/WorkflowStartPanel';
 import { WORKFLOW_PERMISSIONS } from '@/features/workflow/api/workflowPermissions';
+import { workflowInstanceEvidence, workflowTimelineEvidence } from '@/features/workflow/model/workflowEvidence';
+import { EvidenceTimeline } from '@/shell/evidence/EvidenceTimeline';
+import { StatusWithProvenance } from '@/shell/evidence/StatusWithProvenance';
+import type { EvidenceEvent, EvidenceState, StatusEvidence } from '@/shell/evidence/evidenceTypes';
 import { formatDisplayInstant } from '@/shared/i18n/localePresentation';
 import { WorkspaceHeading } from '@/shell/workspace/WorkspaceHeading';
 import { WorkspaceToolbar } from '@/shell/workspace/WorkspaceToolbar';
@@ -59,19 +63,6 @@ function TaskSummary({ task, onOpen }: { task: TaskView; onOpen: () => void }) {
       <TableCell>{formatDisplayInstant(task.dueAt, i18n.language, 'UTC')}</TableCell>
       <TableCell>{task.assignedActorDisplayName ?? task.assignedActorUsername ?? task.assignedRoleCode ?? '—'}</TableCell>
       <TableCell><Button onClick={onOpen} size="small">Open</Button></TableCell>
-    </TableRow>
-  );
-}
-
-function TimelineRow({ entry }: { entry: TimelineEntry }) {
-  const { i18n } = useTranslation();
-  return (
-    <TableRow>
-      <TableCell>{entry.sequence ?? '—'}</TableCell>
-      <TableCell>{formatDisplayInstant(entry.occurredAt, i18n.language, 'UTC')}</TableCell>
-      <TableCell>{entry.actionType ?? entry.decision ?? '—'}</TableCell>
-      <TableCell>{entry.actorDisplayName ?? entry.actorId ?? '—'}</TableCell>
-      <TableCell>{entry.commentText ?? entry.decisionNote ?? '—'}</TableCell>
     </TableRow>
   );
 }
@@ -127,7 +118,16 @@ export function WorkflowTasksPage() {
 
   const tasks = tasksQuery.data?.content ?? [];
   const actions = actionsQuery.data ?? [];
-  const timeline = timelineQuery.data ?? [];
+  const timelineState: EvidenceState<readonly EvidenceEvent[]> = !canInstances
+    ? { kind: 'denied' }
+    : timelineQuery.isError ? { kind: 'failed' }
+      : timelineQuery.isFetching || !timelineQuery.isSuccess ? { kind: 'loading' }
+        : { kind: 'ready', value: workflowTimelineEvidence(timelineQuery.data ?? []) };
+  const instanceEvidenceState: EvidenceState<StatusEvidence> = !canInstances
+    ? { kind: 'denied' }
+    : instanceQuery.isError ? { kind: 'failed' }
+      : instanceQuery.isFetching || !instanceQuery.isSuccess ? { kind: 'loading' }
+        : { kind: 'ready', value: workflowInstanceEvidence(instanceQuery.data) };
   // The register canvas presents the inbox request failure; other owner errors remain independent.
   const firstError = taskQuery.error ?? actionsQuery.error ?? instanceQuery.error ?? timelineQuery.error;
   const inboxCanvasState: WorkspaceCanvasState = !canTasks
@@ -186,7 +186,7 @@ export function WorkflowTasksPage() {
               <Typography color="text.secondary" variant="overline">Cross-surface context</Typography>
               <Typography component="h2" variant="h6">Workflow instance {linkedInstanceId}</Typography>
               {instanceQuery.data ? <><Typography>{instanceQuery.data.targetLabel ?? instanceQuery.data.targetCode ?? instanceQuery.data.targetId ?? '—'}</Typography><Typography>{t('workflow.status')}: {instanceQuery.data.status ?? '—'}</Typography><Typography>{t('workflow.step')}: {instanceQuery.data.currentStepId ?? '—'}</Typography></> : null}
-              {timeline.length ? <Typography color="text.secondary" variant="body2">{timeline.length} timeline entries loaded from HidraAPI.</Typography> : null}
+              {timelineState.kind === "ready" ? <Typography color="text.secondary" variant="body2">{timelineState.value.length} timeline entries loaded from HidraAPI.</Typography> : null}
             </Stack>
           </Paper>
         ) : null}
@@ -245,7 +245,14 @@ export function WorkflowTasksPage() {
                       }) : !actionsQuery.isLoading && !actionsQuery.error ? <Typography color="text.secondary">{t('workflow.noActions')}</Typography> : null}
                     </Stack>
                   </Box>
-                  {canInstances && instanceId ? <><Divider /><Box><Typography component="h3" variant="subtitle1">{t('workflow.instance')}</Typography>{instanceQuery.data ? <Stack spacing={0.5} sx={{ mt: 1 }}><Typography>{instanceQuery.data.targetLabel ?? instanceQuery.data.targetCode ?? instanceQuery.data.targetId ?? '—'}</Typography><Typography>{t('workflow.status')}: {instanceQuery.data.status ?? '—'}</Typography><Typography>{t('workflow.step')}: {instanceQuery.data.currentStepId ?? '—'}</Typography></Stack> : null}</Box><Box><Typography component="h3" variant="subtitle1">{t('workflow.timeline')}</Typography>{timeline.length ? <TableContainer sx={{ mt: 1 }}><Table size="small"><TableHead><TableRow><TableCell>#</TableCell><TableCell>{t('workflow.when')}</TableCell><TableCell>{t('workflow.action')}</TableCell><TableCell>{t('workflow.actor')}</TableCell><TableCell>{t('workflow.note')}</TableCell></TableRow></TableHead><TableBody>{timeline.map((entry, index) => <TimelineRow entry={entry} key={entry.id ?? `timeline-${index}`} />)}</TableBody></Table></TableContainer> : !timelineQuery.isLoading && !timelineQuery.error ? <Typography color="text.secondary" sx={{ mt: 1 }}>{t('workflow.noTimeline')}</Typography> : null}</Box></> : null}
+                  {canInstances && instanceId ? <>
+                    <Divider />
+                    <Box>
+                      {instanceQuery.isSuccess && !instanceQuery.isFetching ? <Typography variant="body2">{instanceQuery.data.targetLabel ?? instanceQuery.data.targetCode ?? instanceQuery.data.targetId ?? '—'}</Typography> : null}
+                      <StatusWithProvenance label={t('workflow.instance')} state={instanceEvidenceState} />
+                    </Box>
+                    <EvidenceTimeline label={t('workflow.timeline')} state={timelineState} />
+                  </> : null}
                 </Stack>
               </Paper>
             ) : null}

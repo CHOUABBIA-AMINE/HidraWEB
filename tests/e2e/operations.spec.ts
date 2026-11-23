@@ -89,3 +89,45 @@ test('HWEB-006 hides telemetry controls when only monitoring grants are availabl
   await expect(page.getByText('Accès télémétrie indisponible pour cet utilisateur.')).toBeVisible();
   await expect(page.getByText('PRESSURE-HIGH')).toBeVisible();
 });
+
+test('UXR-15 loads legacy evidence and trend on demand with owner provenance', async ({ page }) => {
+  await mockPermissions(page);
+  await mockOperations(page);
+  let historyReads = 0;
+  let trendReads = 0;
+  await page.route('**/api/v1/telemetry/points/PT-1/readings?**', route => {
+    historyReads += 1;
+    return route.fulfill({ json: {
+      content: [reading], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false,
+    } });
+  });
+  await page.route('**/api/v1/telemetry/points/PT-1/trend?**', route => {
+    trendReads += 1;
+    return route.fulfill({ json: [
+      reading, { ...reading, id: 'reading-2', numericValue: 43.1, sourceTimestamp: '2026-09-11T12:02:00Z' },
+    ] });
+  });
+  await signIn(page);
+  await page.getByRole('navigation', { name: 'Navigation principale' })
+    .getByRole('button', { name: 'Opérations', exact: true }).click();
+  await page.getByLabel('Identifiant du point de télémétrie').fill('PT-1');
+  await page.getByRole('button', { name: 'Charger le point' }).click();
+  const summary = page.getByRole('region', { name: 'Dernière lecture' });
+  await expect(summary).toContainText('42.5');
+  await expect(summary).toContainText('HidraAPI Telemetry / point readings (legacy)');
+  await expect(summary).toContainText('GOOD');
+  expect(historyReads).toBe(0);
+  expect(trendReads).toBe(0);
+
+  await page.getByRole('button', { name: 'Historique' }).click();
+  const timeline = page.getByRole('table', { name: 'Historique' });
+  await expect(timeline).toContainText('42.5');
+  await expect(timeline).toContainText('GOOD');
+  await expect.poll(() => historyReads).toBe(1);
+  expect(trendReads).toBe(0);
+
+  await page.getByRole('button', { name: 'Tendance' }).click();
+  await expect(page.getByText('Données du contrat de lectures historiques, non qualifiées comme flux de confiance.')).toBeVisible();
+  await expect(page.locator('svg[aria-label="Tendance"]')).toBeVisible();
+  await expect.poll(() => trendReads).toBe(1);
+});
