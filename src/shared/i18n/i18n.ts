@@ -8,13 +8,14 @@ import { telemetryMonitoringTranslations } from '@/features/telemetry-monitoring
 import { topologyTranslations } from '@/features/topology/i18n/topologyTranslations';
 import { workbenchTranslations } from '@/features/workbench/i18n/workbenchTranslations';
 import { evidenceTranslations } from '@/shell/evidence/evidenceTranslations';
+import { contextLinkTranslations } from '@/shell/navigation/contextLinkTranslations';
 import { resources } from '@/shared/i18n/resources';
 import { resolveDisplayLocale } from '@/shared/i18n/localePresentation';
 
 const mergedResources = {
-  fr: { translation: { ...resources.fr.translation, alarm: alarmTranslations.fr, context: contextTranslations.fr, telemetryMonitoring: telemetryMonitoringTranslations.fr, topology: topologyTranslations.fr, workbench: workbenchTranslations.fr, evidence: evidenceTranslations.fr } },
-  en: { translation: { ...resources.en.translation, alarm: alarmTranslations.en, context: contextTranslations.en, telemetryMonitoring: telemetryMonitoringTranslations.en, topology: topologyTranslations.en, workbench: workbenchTranslations.en, evidence: evidenceTranslations.en } },
-  ar: { translation: { ...resources.ar.translation, alarm: alarmTranslations.ar, context: contextTranslations.ar, telemetryMonitoring: telemetryMonitoringTranslations.ar, topology: topologyTranslations.ar, workbench: workbenchTranslations.ar, evidence: evidenceTranslations.ar } },
+  fr: { translation: { ...resources.fr.translation, alarm: alarmTranslations.fr, context: contextTranslations.fr, telemetryMonitoring: telemetryMonitoringTranslations.fr, topology: topologyTranslations.fr, workbench: workbenchTranslations.fr, evidence: evidenceTranslations.fr, contextLink: contextLinkTranslations.fr } },
+  en: { translation: { ...resources.en.translation, alarm: alarmTranslations.en, context: contextTranslations.en, telemetryMonitoring: telemetryMonitoringTranslations.en, topology: topologyTranslations.en, workbench: workbenchTranslations.en, evidence: evidenceTranslations.en, contextLink: contextLinkTranslations.en } },
+  ar: { translation: { ...resources.ar.translation, alarm: alarmTranslations.ar, context: contextTranslations.ar, telemetryMonitoring: telemetryMonitoringTranslations.ar, topology: topologyTranslations.ar, workbench: workbenchTranslations.ar, evidence: evidenceTranslations.ar, contextLink: contextLinkTranslations.ar } },
 };
 
 export const i18n = i18next.createInstance();

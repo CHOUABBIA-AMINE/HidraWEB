@@ -78,6 +78,14 @@ test('UXR-11 selected company searches T34, navigates canonical exact feature, n
   await page.getByRole('button', { name: 'GZ2-P' }).click();
   await expect(page).toHaveURL(/regionalLayer=pipelines&regionalEntityId=p-1/);
   await expect(page.getByRole('heading', { name: 'GZ2-P', level: 3 })).toBeVisible();
+  const handoff = page.getByRole('link', { name: 'Ouvrir la fiche de carte' });
+  await expect(handoff).toHaveAttribute('href', '/network?regionalLayer=pipelines&regionalEntityId=p-1');
+  await handoff.click();
+  const returnLink = page.getByRole('link', { name: "Retour à l’espace d’origine" });
+  await expect(returnLink).toHaveAttribute('href', '/network');
+  await returnLink.click();
+  await expect(page).toHaveURL(/\/network$/);
+  await expect(page.getByText('1 résultat(s) autorisé(s)')).toBeVisible();
   expect(searches.length).toBeGreaterThan(0);
   expect(searches.every(url => url.searchParams.get('companyPartyId') === 'company' &&
     url.searchParams.get('q') === 'GZ2')).toBe(true);

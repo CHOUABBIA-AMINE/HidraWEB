@@ -25,5 +25,17 @@ describe('UXR-15 Workflow source provenance', () => {
     expect(result[0].status).toBeUndefined();
     expect(result[0].correlationId).toBeUndefined();
     expect(result[0].revision).toBeUndefined();
+    expect(result[0].workflowTaskId).toBeUndefined();
+  });
+});
+
+
+describe('UXR-16 exact Workflow timeline task reference', () => {
+  it('links only the task ID explicitly supplied by the instance timeline', () => {
+    const entry: TimelineEntry = { id: 'e1', instanceId: 'instance-1', taskId: 'task-1',
+      actionType: 'ASSIGN', occurredAt: '2026-11-20T10:00:00Z' };
+    const mapped = workflowTimelineEvidence([entry]);
+    expect(mapped[0].workflowTaskId).toBe('task-1');
+    expect(mapped[0].correlationId).toBeUndefined();
   });
 });

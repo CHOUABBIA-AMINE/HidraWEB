@@ -5028,3 +5028,86 @@ denied/failed-content isolation and missing-field assertions. Append this
 roadmap entry; no production TSX, access gate, REST contract, test coverage or
 CI rule changes. Acceptance remains exact-SHA full Code CI and Documentation
 Validation. UXR-16 stays registered and unselected.
+
+
+### P4 / UXR-15 — final acceptance of repair on Code CI #1086, attempt 2 (23 November 2026)
+
+The exact source `13ef2242ca412b6c04d63a15b22e668f9c8a2dfa`, tree
+`fbb035c3f889e7def4a4572f90ca533df769d4b6`, passed
+[Code CI #1086, attempt 2](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45136122635)
+with `verify`, F18 LOCAL and the previously failed A1 native W1–W4
+PostgreSQL/API/browser qualification all successful. The first attempt's
+W4 reload/timeline assertion failed during observed PostgreSQL `NOWAIT`
+lock-contention errors; the *unchanged same-SHA* failed-job rerun passed.
+This is evidence of exact-SHA CI success, not proof that industrial or
+concurrent runtime behavior is globally qualified. [Documentation Validation
+#122](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45136122666)
+passed on that same SHA. UXR-15 is CI-passed, with the previously recorded
+legacy telemetry and missing pinned advanced owner-contract limitations.
+
+### P4 / UXR-16 — typed ContextLink and guarded owner handoffs (23 November 2026)
+
+**Selection:** Owner requested `Next` after UXR-15 exact-SHA success. This
+stage implements *supported source-to-target* navigation only. The full
+registered task spans Topology, Identity, Workflow and Documents; acceptance
+for unsupported owner joins must **not** be inferred from the common link.
+
+**Exact implementation message:** `feat(navigation): add UXR-16 owner-issued contextual handoffs`.
+CREATE `src/shell/navigation/contextLinkModel.ts` (typed known destination
+coordinates and strict IDs, safe return-state validation bound to the current
+principal and operational-scope fingerprint), `ContextLink.tsx` (owner-admitted
+and source-issued in-app link, no backend calls), `ContextReturnLink.tsx`
+(known route-only return, no copied protected IDs),
+`contextLinkTranslations.ts` (FR/EN/AR) and `contextLinkModel.test.ts`
+plus `ContextLink.test.tsx` (forged targets, grants/source gating,
+principal/scope revocation, route-only return).
+
+UPDATE `src/shared/i18n/i18n.ts` to register translations;
+`src/features/topology/components/RegionalTopologySearch.tsx` to offer a
+canonical link only when T34 owner search returned a validated
+`properties.layer`+`properties.entityId` feature and current admission
+includes the exact published GET and effective company/principal scope.
+The existing Inspect button, source query and exact owner detail GET remain.
+UPDATE `src/features/workflow/WorkflowTasksPage.tsx` to offer task links
+from owner-issued assigned-inbox IDs, instance links only from the exact
+current owner task GET, and a principal/scope-safe return. URL `taskId`
+is the selection coordinate; transitions remain tied to the current task,
+history entry and owner-issued optimistic concurrency token. Owner-controlled
+W4 transition and action-retry behavior remains unchanged. UPDATE
+`src/shell/evidence/evidenceTypes.ts`, `EvidenceTimeline.tsx` and
+`src/features/workflow/model/workflowEvidence.ts` to offer a Workflow
+task handoff only from the timeline's explicit `taskId` with the owning
+workspace's task-read grant. UPDATE its mapper tests and
+`tests/e2e/regional-topology-search.spec.ts` / `tests/e2e/workflow.spec.ts`
+for exact target GET, safe return and preserved legacy journey. Append the
+scope and limits in `docs/06-Navigation-Blueprint.md` and here. DELETE none.
+
+**Authorization and data limits:** no link grants access. Destination
+`/network?regionalLayer=...&regionalEntityId=...` rechecks a current
+selected company/principal scope, published T34 GET read permission, an
+uncached exact owner feature and matching ID. Destination
+`/work/tasks?taskId=...` or `?instanceId=...` rechecks its Workflow
+GET capability and retrieves exactly that owner resource; no link contains
+company tokens, access grants or OT provenance. The return state stores only
+`/network` or `/work/tasks`, bound to same principal/scope, never a
+query-string resource ID or unvalidated external URL. Correlation IDs and
+local labels do not establish an owner join or share access rights.
+
+**Remaining bounded owner coverage:** the older pinned WEB Topology OpenAPI
+slice does not establish generalized pipeline dossier or T39 restriction
+request handoff. A source-issued Documents link and document company/facility
+access decision, Identity responsibilities handoff, and additional section/
+request routes need exact destination-page owner GETs and authorization proof
+before adopting this primitive. No generic multi-module join or universal
+resource navigation is claimed, and UXR-16 acceptance must retain these
+explicit integration gaps rather than silently counting them as implemented.
+No backend, permission catalog, OpenAPI pin, CI gate, simulation, OT control,
+production-data, approval or engineering-calibration behavior is changed.
+
+**Pending exact-SHA acceptance:** source-pinned OpenAPI compatibility, lint,
+TypeScript, all unit/component and Node contract tests, performance, build,
+release artifact verification, full Chromium (including new typed handoffs
+and retained W4), A1 native W1–W4 fresh PostgreSQL, F18 LOCAL and
+Documentation Validation. Scope gaps remain recorded after green CI; do
+not call all intended owner handoffs complete without separate evidence.
+UXR-17 remains the next registered unselected stage.

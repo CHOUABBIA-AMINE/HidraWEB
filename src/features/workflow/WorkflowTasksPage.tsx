@@ -19,7 +19,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router';
+import { useLocation, useSearchParams } from 'react-router';
 
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
 import type { AvailableActionView, TaskView } from '@/api/generated/workflow/model';
@@ -40,6 +40,8 @@ import { EvidenceTimeline } from '@/shell/evidence/EvidenceTimeline';
 import { StatusWithProvenance } from '@/shell/evidence/StatusWithProvenance';
 import type { EvidenceEvent, EvidenceState, StatusEvidence } from '@/shell/evidence/evidenceTypes';
 import { formatDisplayInstant } from '@/shared/i18n/localePresentation';
+import { ContextLink } from '@/shell/navigation/ContextLink';
+import { ContextReturnLink } from '@/shell/navigation/ContextReturnLink';
 import { WorkspaceHeading } from '@/shell/workspace/WorkspaceHeading';
 import { WorkspaceToolbar } from '@/shell/workspace/WorkspaceToolbar';
 import { WorkspaceCanvas, type WorkspaceCanvasState } from '@/shell/workspace/WorkspaceCanvas';
@@ -53,8 +55,8 @@ export function workflowErrorMessage(error: unknown): string {
   return normalized.message || 'Workflow data could not be loaded.';
 }
 
-function TaskSummary({ task, onOpen }: { task: TaskView; onOpen: () => void }) {
-  const { i18n } = useTranslation();
+function TaskSummary({ task, onOpen, onHandoff }: { task: TaskView; onOpen: () => void; onHandoff: () => void }) {
+  const { i18n, t } = useTranslation();
   return (
     <TableRow hover>
       <TableCell>{task.taskLabel ?? task.id ?? '—'}</TableCell>
@@ -62,7 +64,13 @@ function TaskSummary({ task, onOpen }: { task: TaskView; onOpen: () => void }) {
       <TableCell>{task.priorityId ?? '—'}</TableCell>
       <TableCell>{formatDisplayInstant(task.dueAt, i18n.language, 'UTC')}</TableCell>
       <TableCell>{task.assignedActorDisplayName ?? task.assignedActorUsername ?? task.assignedRoleCode ?? '—'}</TableCell>
-      <TableCell><Button onClick={onOpen} size="small">Open</Button></TableCell>
+      <TableCell>
+        <Stack direction="row" useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+          <Button onClick={onOpen} size="small">Open</Button>
+          {task.id ? <ContextLink target={{ kind: 'workflow-task', taskId: task.id }}
+            admitted ownerIssued onNavigate={onHandoff} label={t('contextLink.openTask')} /> : null}
+        </Stack>
+      </TableCell>
     </TableRow>
   );
 }
@@ -71,9 +79,15 @@ export function WorkflowTasksPage() {
   const { t } = useTranslation();
   const permissions = usePermissions();
   const queryClient = useQueryClient();
-  const [searchParams] = useSearchParams();
-  const [selectedTaskId, setSelectedTaskId] = useState(searchParams.get('taskId') ?? '');
-  const [selectedTransitionId, setSelectedTransitionId] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+  // The URL is the selection coordinate, not a privilege or an owner record.
+  // Reading it on every navigation makes Back/Forward and hard reload consistent.
+  const selectedTaskId = searchParams.get('taskId')?.trim() ?? '';
+  const [actionSelection, setActionSelection] = useState<{ taskId: string; historyKey: string; transitionId: string } | null>(null);
+  // A URL/history selection must never inherit an earlier task's selected action.
+  const selectedTransitionId = actionSelection?.taskId === selectedTaskId && actionSelection.historyKey === location.key
+    ? actionSelection.transitionId : '';
   const [reasonId, setReasonId] = useState('');
   const [commentText, setCommentText] = useState('');
   const [decisionNote, setDecisionNote] = useState('');
@@ -84,17 +98,24 @@ export function WorkflowTasksPage() {
 
   const tasksQuery = useQuery({ queryKey: workflowQueryKeys.tasks(inboxParams), queryFn: () => fetchTasks(inboxParams), enabled: canTasks });
   const taskQuery = useQuery({ queryKey: workflowQueryKeys.task(selectedTaskId), queryFn: () => fetchTask(selectedTaskId), enabled: canTasks && Boolean(selectedTaskId) });
-  const actionsQuery = useQuery({ queryKey: workflowQueryKeys.actions(selectedTaskId), queryFn: () => fetchAvailableActions(selectedTaskId), enabled: canTasks && Boolean(selectedTaskId) });
+  // Never disclose another task or its actions through an untrusted deep-link ID.
+  const taskMatchesSelection = canTasks && taskQuery.isSuccess && !taskQuery.isFetching &&
+    taskQuery.data?.id === selectedTaskId;
+  const currentTask = taskMatchesSelection ? taskQuery.data : undefined;
+  const actionsQuery = useQuery({ queryKey: workflowQueryKeys.actions(selectedTaskId),
+    queryFn: () => fetchAvailableActions(selectedTaskId), enabled: taskMatchesSelection && Boolean(selectedTaskId) });
   const linkedInstanceId = searchParams.get('instanceId')?.trim() ?? '';
-  const instanceId = taskQuery.data?.instanceId ?? linkedInstanceId;
+  const instanceId = selectedTaskId
+    ? (taskQuery.isSuccess && taskQuery.data?.id === selectedTaskId ? taskQuery.data.instanceId ?? '' : '')
+    : linkedInstanceId;
   const instanceQuery = useQuery({ queryKey: workflowQueryKeys.instance(instanceId), queryFn: () => fetchInstance(instanceId), enabled: canInstances && Boolean(instanceId) });
   const timelineQuery = useQuery({ queryKey: workflowQueryKeys.timeline(instanceId), queryFn: () => fetchTimeline(instanceId), enabled: canInstances && Boolean(instanceId) });
 
   const transitionMutation = useMutation({
     mutationFn: async (action: AvailableActionView) => {
-      if (!selectedTaskId || !action.transitionId || !taskQuery.data?.updatedAt) throw new Error('Current task version is unavailable.');
+      if (!currentTask?.updatedAt || !selectedTaskId || !action.transitionId) throw new Error('Current task version is unavailable.');
       return executeWorkflowTransition(selectedTaskId, action.transitionId, {
-        expectedTaskUpdatedAt: taskQuery.data.updatedAt,
+        expectedTaskUpdatedAt: currentTask.updatedAt,
         reasonId: reasonId.trim() || undefined,
         commentText: commentText.trim() || undefined,
         decisionNote: decisionNote.trim() || undefined,
@@ -102,7 +123,7 @@ export function WorkflowTasksPage() {
     },
     onSuccess: async (result) => {
       setSuccessMessage(`${result.decision ?? ''} · ${result.taskStatus ?? ''}`);
-      setSelectedTransitionId('');
+      setActionSelection(null);
       setReasonId('');
       setCommentText('');
       setDecisionNote('');
@@ -117,7 +138,8 @@ export function WorkflowTasksPage() {
   });
 
   const tasks = tasksQuery.data?.content ?? [];
-  const actions = actionsQuery.data ?? [];
+  const actions = taskMatchesSelection && actionsQuery.isSuccess && !actionsQuery.isFetching
+    ? actionsQuery.data ?? [] : [];
   const timelineState: EvidenceState<readonly EvidenceEvent[]> = !canInstances
     ? { kind: 'denied' }
     : timelineQuery.isError ? { kind: 'failed' }
@@ -140,15 +162,25 @@ export function WorkflowTasksPage() {
           ? { kind: 'empty', message: t('workflow.empty') }
           : { kind: 'ready' };
 
-  const closeTask = () => {
-    setSelectedTaskId('');
-    setSelectedTransitionId('');
+  const resetTaskControls = () => {
+    setActionSelection(null);
     setReasonId('');
     setCommentText('');
     setDecisionNote('');
     setSuccessMessage('');
     transitionMutation.reset();
   };
+  const selectTask = (id: string, preserveIssuedInstance = false) => {
+    resetTaskControls();
+    const next = new URLSearchParams(searchParams);
+    if (id) {
+      next.set('taskId', id);
+      // A new task must derive its instance only from the fresh owner task GET.
+      if (!preserveIssuedInstance) next.delete('instanceId');
+    } else next.delete('taskId');
+    setSearchParams(next);
+  };
+  const closeTask = () => selectTask('');
 
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
@@ -160,10 +192,11 @@ export function WorkflowTasksPage() {
           title={t('workflow.title')}
           description={t('workflow.subtitle')}
           accessory={<Chip label="BACKEND-AUTHORITATIVE" variant="outlined" />}
-          ownerStatus={canTasks && taskQuery.isSuccess && taskQuery.data?.status
-            ? { label: `${t('workflow.status')}: ${taskQuery.data.status}`, source: 'HidraAPI Workflow' }
+          ownerStatus={currentTask?.status
+            ? { label: `${t('workflow.status')}: ${currentTask.status}`, source: 'HidraAPI Workflow' }
             : undefined}
         />
+        <ContextReturnLink />
         {canTasks ? (
           <WorkspaceToolbar
             label={t('workflow.inbox')}
@@ -191,24 +224,24 @@ export function WorkflowTasksPage() {
           </Paper>
         ) : null}
 
-        {permissions.can(WORKFLOW_PERMISSIONS.instancesCreate) && permissions.can(WORKFLOW_PERMISSIONS.tasksCreate) && canInstances ? <WorkflowStartPanel onTaskCreated={id => { closeTask(); setSelectedTaskId(id); void tasksQuery.refetch(); }} /> : null}
+        {permissions.can(WORKFLOW_PERMISSIONS.instancesCreate) && permissions.can(WORKFLOW_PERMISSIONS.tasksCreate) && canInstances ? <WorkflowStartPanel onTaskCreated={id => { selectTask(id, true); void tasksQuery.refetch(); }} /> : null}
 
         {canTasks ? (
           <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', lg: selectedTaskId ? 'minmax(0, 1fr) minmax(360px, 0.8fr)' : '1fr' } }}>
             <WorkspaceCanvas label={t('workflow.inbox')} title={t('workflow.inbox')} variant="register" state={inboxCanvasState}>
               <Typography color="text.secondary" variant="caption">{t('workflow.loaded', { loaded: tasks.length, total: tasksQuery.data?.totalElements ?? tasks.length })}</Typography>
-              <TableContainer sx={{ mt: 1 }}><Table size="small"><TableHead><TableRow><TableCell>{t('workflow.task')}</TableCell><TableCell>{t('workflow.status')}</TableCell><TableCell>{t('workflow.priority')}</TableCell><TableCell>{t('workflow.due')}</TableCell><TableCell>{t('workflow.assignee')}</TableCell><TableCell /></TableRow></TableHead><TableBody>{tasks.map((task, index) => <TaskSummary key={task.id ?? `task-${index}`} task={task} onOpen={() => { closeTask(); setSelectedTaskId(task.id ?? ''); }} />)}</TableBody></Table></TableContainer>
+              <TableContainer sx={{ mt: 1 }}><Table size="small"><TableHead><TableRow><TableCell>{t('workflow.task')}</TableCell><TableCell>{t('workflow.status')}</TableCell><TableCell>{t('workflow.priority')}</TableCell><TableCell>{t('workflow.due')}</TableCell><TableCell>{t('workflow.assignee')}</TableCell><TableCell /></TableRow></TableHead><TableBody>{tasks.map((task, index) => <TaskSummary key={task.id ?? `task-${index}`} task={task} onOpen={() => selectTask(task.id ?? '')} onHandoff={resetTaskControls} />)}</TableBody></Table></TableContainer>
             </WorkspaceCanvas>
 
             {selectedTaskId ? (
               <Paper variant="outlined" sx={{ p: 2 }}>
                 <Stack spacing={2}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
-                    <Typography component="h2" variant="h6">{taskQuery.data?.taskLabel ?? selectedTaskId}</Typography>
+                    <Typography component="h2" variant="h6">{currentTask?.taskLabel ?? selectedTaskId}</Typography>
                     <Button disabled={transitionMutation.isPending} onClick={closeTask} size="small">{t('workflow.close')}</Button>
                   </Box>
-                  {taskQuery.data ? <Stack spacing={0.5}><Typography>{t('workflow.status')}: {taskQuery.data.status ?? '—'}</Typography><Typography>{t('workflow.step')}: {taskQuery.data.stepId ?? '—'}</Typography><Typography>{t('workflow.sla')}: {taskQuery.data.slaStatus ?? '—'}</Typography><Typography>{t('workflow.due')}: {taskQuery.data.dueAt ?? '—'}</Typography></Stack> : null}
-                  <Button disabled={transitionMutation.isPending} onClick={async () => { const refreshed = await Promise.all([taskQuery.refetch(), actionsQuery.refetch()]); if (refreshed.every(r => r.status === 'success')) { setSelectedTransitionId(''); transitionMutation.reset(); } }}>{t('workflow.refresh')}</Button>
+                  {currentTask ? <Stack spacing={0.5}><Typography>{t('workflow.status')}: {currentTask.status ?? '—'}</Typography><Typography>{t('workflow.step')}: {currentTask.stepId ?? '—'}</Typography><Typography>{t('workflow.sla')}: {currentTask.slaStatus ?? '—'}</Typography><Typography>{t('workflow.due')}: {currentTask.dueAt ?? '—'}</Typography></Stack> : null}
+                  <Button disabled={transitionMutation.isPending} onClick={async () => { const refreshed = await Promise.all([taskQuery.refetch(), actionsQuery.refetch()]); if (refreshed.every(r => r.status === 'success')) { setActionSelection(null); transitionMutation.reset(); } }}>{t('workflow.refresh')}</Button>
                   <Divider />
                   <Box>
                     <Typography component="h3" variant="subtitle1">{t('workflow.availableActions')}</Typography>
@@ -226,7 +259,7 @@ export function WorkflowTasksPage() {
                                 {action.commentRequired ? <Chip label="comment" size="small" variant="outlined" /> : null}
                               </Stack>
                               {action.requiredPermissionCode ? <Typography color="text.secondary" variant="caption">{action.requiredPermissionCode}</Typography> : null}
-                              {permitted ? <Button disabled={transitionMutation.isPending} onClick={() => { setSelectedTransitionId(action.transitionId ?? ''); setReasonId(''); setCommentText(''); setDecisionNote(''); }} size="small" variant={selected ? 'contained' : 'outlined'}>{action.decision ?? t('workflow.action')}</Button> : null}
+                              {permitted ? <Button disabled={transitionMutation.isPending} onClick={() => { setActionSelection({ taskId: selectedTaskId, historyKey: location.key, transitionId: action.transitionId ?? '' }); setReasonId(''); setCommentText(''); setDecisionNote(''); }} size="small" variant={selected ? 'contained' : 'outlined'}>{action.decision ?? t('workflow.action')}</Button> : null}
                               {selected ? (
                                 <Stack spacing={1}>
                                   {action.reasonRequired ? <TextField label="reasonId" onChange={(event) => setReasonId(event.target.value)} required size="small" value={reasonId} /> : null}
@@ -242,16 +275,21 @@ export function WorkflowTasksPage() {
                             </Stack>
                           </Paper>
                         );
-                      }) : !actionsQuery.isLoading && !actionsQuery.error ? <Typography color="text.secondary">{t('workflow.noActions')}</Typography> : null}
+                      }) : taskMatchesSelection && !actionsQuery.isLoading && !actionsQuery.error ? <Typography color="text.secondary">{t('workflow.noActions')}</Typography> : null}
                     </Stack>
                   </Box>
                   {canInstances && instanceId ? <>
                     <Divider />
+                    {selectedTaskId && currentTask ? (
+                      <ContextLink target={{ kind: 'workflow-instance', instanceId }}
+                        admitted ownerIssued onNavigate={resetTaskControls} label={t('contextLink.openInstance')} />
+                    ) : null}
                     <Box>
                       {instanceQuery.isSuccess && !instanceQuery.isFetching ? <Typography variant="body2">{instanceQuery.data.targetLabel ?? instanceQuery.data.targetCode ?? instanceQuery.data.targetId ?? '—'}</Typography> : null}
                       <StatusWithProvenance label={t('workflow.instance')} state={instanceEvidenceState} />
                     </Box>
-                    <EvidenceTimeline label={t('workflow.timeline')} state={timelineState} />
+                    <EvidenceTimeline label={t('workflow.timeline')} state={timelineState}
+                      workflowTasksAdmitted={canTasks} onWorkflowTaskNavigate={resetTaskControls} />
                   </> : null}
                 </Stack>
               </Paper>

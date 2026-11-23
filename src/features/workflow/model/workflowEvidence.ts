@@ -22,5 +22,6 @@ export function workflowTimelineEvidence(entries: readonly TimelineEntry[]): Evi
     actor: entry.actorDisplayName ?? entry.actorId,
     note: entry.commentText ?? entry.decisionNote,
     status: entry.decision,
+    workflowTaskId: entry.taskId,
   }));
 }

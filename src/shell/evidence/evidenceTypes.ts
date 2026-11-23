@@ -32,4 +32,6 @@ export interface EvidenceEvent {
   effectiveFrom?: string;
   effectiveTo?: string;
   correlationId?: string;
+  /** Exact Workflow task ID returned by the owning timeline, never inferred. */
+  workflowTaskId?: string;
 }

@@ -457,3 +457,54 @@ Audit correlation is an identifier, not verified causality; no universal
 evidence join or evidence quality certificate is claimed. This stage adds
 presentation and supported owner adapters only, not production/site
 qualification or a new permission surface.
+
+
+## P4 / UXR-16 — contextual handoffs with target reauthorization (23 November 2026)
+
+`src/shell/navigation/ContextLink.tsx` is a **presentation-only** in-app
+link. Its typed `ContextTarget` model supports exact T34 regional feature
+identifiers and Workflow task/instance identifiers; it rejects invalid IDs,
+unsupported regional layers, unsafe URLs, missing current owner admission and
+unverified source-issued coordinates. It neither queries the backend nor
+converts route visibility into access authority. Links never contain company
+identifiers, credentials or a copied authorization decision.
+
+The Topology regional search adopts shareable
+`/network?regionalLayer=...&regionalEntityId=...` links only from
+`regionalFeatureReference(feature)`, which checks backend-issued
+`properties.layer`, `properties.entityId` and the namespaced outer ID.
+The T34 page continues to require the current authenticated principal,
+selected company scope, published owner read route/effective grant and exact
+refetched feature identity. Source admission is re-evaluated on every render;
+denial or missing selected scope cannot fall back to the administrator map.
+The original Inspect button and close action remain supported.
+
+The Workflow inbox provides direct `/work/tasks?taskId=...` links from its
+own fetched task rows; the native timeline may link only an explicit
+`TimelineEntry.taskId` when its owner permits task reading. The selected
+task is derived from the URL so hard reload and Back/Forward re-read the
+same exact owner task rather than keeping a different local selection.
+Selected action state is bound to that task and browser history entry;
+current task version, server-permitted transitions and no blind command
+retries remain unchanged. An owner-verified current task may link to its
+`instanceId` under `/work/tasks?instanceId=...`, which rechecks the
+Workflow instance GET. Unknown or denied records never become valid through
+a link. The W4 PostgreSQL native approval and stale-replay checks remain
+mandatory acceptance gates.
+
+`ContextReturnLink` uses only a route-only React Router history-state
+hint: the source workspace is `/network` or `/work/tasks` without protected
+query arguments. It is shown only for the same authenticated principal and
+the same operational-context fingerprint, including company and selected
+scope. Return navigation leads to the known workspace, whose ordinary
+permission/owner checks run again. No external redirects, guessed joins or
+cached protected selections are restored.
+
+Other requested owner types (Documents, generalized pipeline dossier,
+restriction request, cross-owner facility/section handoffs) are not implied
+to work by the generic component. Their owner-issued IDs, accepted
+source-specific GETs and access decisions must be confirmed and wired in
+separately; there is no fabricated document/asset link. Browser tests verify
+the actual supported targets, and unit/component tests verify malicious
+IDs, missing admission and return-context invalidation. This is
+development qualification only, not production or OT acceptance.

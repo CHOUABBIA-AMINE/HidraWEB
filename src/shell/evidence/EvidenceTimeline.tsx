@@ -2,14 +2,18 @@ import { Alert, Box, Stack, Table, TableBody, TableCell, TableContainer, TableHe
 import { useTranslation } from 'react-i18next';
 
 import { EvidenceStateNotice } from '@/shell/evidence/EvidenceStateNotice';
+import { ContextLink } from '@/shell/navigation/ContextLink';
 import type { EvidenceEvent, EvidenceState } from '@/shell/evidence/evidenceTypes';
 
 interface EvidenceTimelineProps {
   label: string;
   state: EvidenceState<readonly EvidenceEvent[]>;
+  /** Only the owning workspace may enable links to its protected task GET. */
+  workflowTasksAdmitted?: boolean;
+  onWorkflowTaskNavigate?: () => void;
 }
 
-export function EvidenceTimeline({ label, state }: EvidenceTimelineProps) {
+export function EvidenceTimeline({ label, state, workflowTasksAdmitted = false, onWorkflowTaskNavigate }: EvidenceTimelineProps) {
   const { t } = useTranslation();
   return (
     <Box component="section" aria-label={label} sx={{ minWidth: 0 }}>
@@ -40,6 +44,11 @@ export function EvidenceTimeline({ label, state }: EvidenceTimelineProps) {
                     <TableCell>
                       <Stack spacing={0.5}>
                         {event.note ? <Typography variant="body2">{event.note}</Typography> : null}
+                        {event.workflowTaskId && workflowTasksAdmitted ? (
+                          <ContextLink target={{ kind: 'workflow-task', taskId: event.workflowTaskId }}
+                            admitted ownerIssued onNavigate={onWorkflowTaskNavigate}
+                            label={t('contextLink.openTask')} />
+                        ) : null}
                         {([
                           ['quality', event.quality], ['unit', event.unit],
                           ['revision', event.revision],

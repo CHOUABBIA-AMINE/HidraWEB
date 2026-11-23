@@ -84,3 +84,37 @@ test('HWEB-P11 opens a backend-published workflow instance from shareable route 
   await expect(page.getByText('Pressure deviation DEV-1')).toBeVisible();
   await expect(page.getByText(/1 timeline entries loaded from HidraAPI/)).toBeVisible();
 });
+
+
+test('UXR-16 source-issued Workflow task and instance links reauthorize the target and return safely', async ({ page }) => {
+  await mockWorkflow(page);
+  let taskDetailReads = 0;
+  await page.route('**/api/v1/workflow/tasks/task-1', route => {
+    taskDetailReads += 1;
+    return route.fulfill({ json: task });
+  });
+  await signIn(page);
+  const taskNavigation = page.getByRole('button', { name: 'Mes tâches' }).filter({ visible: true });
+  for (let index = 0; index < await taskNavigation.count(); index += 1) {
+    const candidate = taskNavigation.nth(index);
+    if (await candidate.isEnabled()) { await candidate.click(); break; }
+  }
+  await expect(page.getByRole('heading', { name: 'Mes tâches' })).toBeVisible();
+  const taskLink = page.getByRole('link', { name: 'Lien vers la tâche' });
+  await expect(taskLink).toHaveAttribute('href', '/work/tasks?taskId=task-1');
+  await taskLink.click();
+  await expect(page).toHaveURL(/\/work\/tasks\?taskId=task-1$/);
+  await expect(page.getByText('Pressure deviation DEV-1')).toBeVisible();
+  await expect.poll(() => taskDetailReads).toBeGreaterThan(0);
+
+  const instanceLink = page.getByRole('link', { name: 'Voir l’instance Workflow' });
+  await expect(instanceLink).toHaveAttribute('href', '/work/tasks?instanceId=instance-1');
+  await instanceLink.click();
+  await expect(page).toHaveURL(/\/work\/tasks\?instanceId=instance-1$/);
+  await expect(page.getByRole('heading', { name: 'Workflow instance instance-1' })).toBeVisible();
+  await expect(page.getByText(/1 timeline entries loaded from HidraAPI/)).toBeVisible();
+  const returnLink = page.getByRole('link', { name: 'Retour à l’espace d’origine' });
+  await expect(returnLink).toHaveAttribute('href', '/work/tasks');
+  await returnLink.click();
+  await expect(page).toHaveURL(/\/work\/tasks$/);
+});

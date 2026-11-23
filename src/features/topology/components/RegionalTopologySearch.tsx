@@ -12,6 +12,8 @@ import { TopologyInspector } from '@/features/topology/components/TopologyInspec
 import { exactRegionalFeature, parseRegionalReference, regionalFeatureReference, regionalSearchAdmission, validRegionalQuery } from '@/features/topology/model/regionalTopologySearch';
 import { topologyFeatureLabel } from '@/features/topology/model/topologyPresentation';
 import { useShellUiStore } from '@/shell/model/useShellUiStore';
+import { ContextLink } from '@/shell/navigation/ContextLink';
+import { ContextReturnLink } from '@/shell/navigation/ContextReturnLink';
 
 const PAGE_SIZE = 25;
 
@@ -102,11 +104,16 @@ export function RegionalTopologySearch() {
               {(search.data.features ?? []).map((feature, index) => {
                 const reference = regionalFeatureReference(feature);
                 return reference ? (
-                  <Button key={feature.id ?? index} disabled={!admission.detail}
-                    onClick={() => openDetail(reference.layer, reference.entityId)}
-                    size="small" variant="outlined" sx={{ alignSelf: 'flex-start' }}>
-                    {topologyFeatureLabel(feature)}
-                  </Button>
+                  <Stack direction="row" key={feature.id ?? index} spacing={1}
+                    useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
+                    <Button disabled={!admission.detail}
+                      onClick={() => openDetail(reference.layer, reference.entityId)}
+                      size="small" variant="outlined" sx={{ alignSelf: 'flex-start' }}>
+                      {topologyFeatureLabel(feature)}
+                    </Button>
+                    <ContextLink target={{ kind: 'regional-feature', layer: reference.layer, entityId: reference.entityId }}
+                      admitted={admission.detail} ownerIssued label={t('contextLink.openFeature')} />
+                  </Stack>
                 ) : null;
               })}
               <Stack direction="row" spacing={1}>
@@ -126,6 +133,7 @@ export function RegionalTopologySearch() {
               <Button onClick={closeDetail} sx={{ alignSelf: 'flex-start' }} variant="outlined">
                 {t('topology.regional.close')}
               </Button>
+              <ContextReturnLink />
               {!ref || !admission.detail ? <Alert severity="warning">{t('topology.regional.unavailable')}</Alert> : null}
               {ref && admission.detail && detail.isFetching ? <CircularProgress size={22} /> : null}
               {ref && admission.detail && detail.isError ? (
