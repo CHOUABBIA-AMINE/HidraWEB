@@ -5188,3 +5188,39 @@ production bundle/release verification, Chromium including new denied
 register scenario, native A1 PostgreSQL/API W1–W4, F18 LOCAL, and
 Documentation Validation. UXR-17 remains *implemented, not CI-passed* until
 these exact-SHA checks pass. Next registered stage is P5 UXR-18, unselected.
+
+
+### P5 / UXR-17 — Code CI #1088 typecheck repair (23 November 2026)
+
+**Failed exact source:** `5e06df5cb2eb0b818fb170c6a199d99db7e216cc`
+(tree `f6a2bafb17c1b92fe36498e9d3bbbec30a9007d4`).
+[Code CI #1088](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45142644838)
+`verify` failed at Typecheck with `TS2322`: in
+`src/features/context/components/FixedResourceWorkspace.tsx:121`, the
+pre-existing Identity/Organization consumer still supplied `page` to
+`WorkbenchDataGrid`, while UXR-17 replaced that prop with fail-closed
+`state`. OpenAPI compatibility and lint completed before the failure;
+unit/component, performance, build, packaging and Chromium were skipped.
+The independent [Documentation Validation #124](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45142644895)
+passed. Native A1/F18 jobs were still running when the typecheck failure
+was assessed; do not infer their final result without exact-run evidence.
+
+**Repair message:** `fix(workspace): adopt UXR-17 register in fixed resources`.
+UPDATE only `src/features/context/components/FixedResourceWorkspace.tsx`
+to adapt the old consumer to `authorizedRegisterState`, preserving its
+fixed Identity/Organization resource, owner list/detail GET, page/size,
+search and drawer. Hide retained protected rows, page counts and Inspect
+actions whenever resources are revalidated, list data is pending/denied or
+fails. Scope workbench query identity to authenticated principal, selected
+operational context and effective grants. Maintain fresh owner record
+identity and current detail-read admission before opening the drawer.
+CREATE `src/features/context/components/FixedResourceWorkspace.test.tsx`
+with synthetic ready, denied-on-refetch and missing-grant cases, with no
+weakening or deletion of existing tests. Append a matching navigation
+blueprint note and this reconciliation; no backend, OpenAPI, security rule,
+workflow transition, CI, migration, or unrelated file modification.
+
+**Acceptance pending on repair SHA:** Typecheck, all unit/component and
+browser regressions, native A1 W1–W4, F18 LOCAL, source-pinned OpenAPI,
+release validation and Documentation CI. The UXR-17 CI gate remains open
+until the repair SHA passes; UXR-18 remains unselected.

@@ -545,3 +545,23 @@ adopt the reusable component only after their own owner-read and permission
 mapping is verified. The added synthetic tests and denied-response browser
 regression are necessary but not sufficient for native role/company masking
 or industrial acceptance.
+
+
+### P5 / UXR-17 — FixedResourceWorkspace consumer correction (23 November 2026)
+
+The registered Identity/Organization fixed-resource workspace is another
+consumer of `WorkbenchDataGrid` in addition to `/workbench`. The UXR-17
+interface change must be adopted there as well; the prior `page` prop
+cannot substitute for a guarded `AuthorizedRegisterState`. Fixed resources
+continue using backend-published Identity/Organization descriptors and
+canonical Workbench list/detail GETs. The workspace now supplies the same
+fail-closed state and query isolation as the secondary workbench, checking
+current principal, grants, selected scope, owner module/resource identity,
+server-issued paging and the exact record for inspection. Cached counts,
+rows or Inspect actions are not retained during owner refresh, refusal or
+error. No new permission or export/cursor endpoint is assumed.
+
+Synthetic component checks cover successful owner data, 403 after a
+previously ready response and a missing grant. Native browser/role checks
+remain necessary; this interface correction alone is not CI or industrial
+acceptance.
