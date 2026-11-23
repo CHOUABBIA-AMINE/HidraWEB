@@ -5981,3 +5981,67 @@ plus Documentation Validation on exact new main SHA.
 The independent P6 / UXR-28 complete signed C1 browser
 journey remains registered later and is not waived here.
 Next registered UXR-23 remains UNSELECTED.
+
+### P6 / UXR-22 — Code CI #1102 failure and bounded parse repair (23 November 2026)
+
+**Exact failed implementation SHA:** `315e46224d6298111299c31f9e2b1bd487c8de5a`
+(tree `14b2e55558c331c2e1e3e1ddaf1c187c85e8929f`,
+parent `f533c8f5efe608807aa3c1419c4bc0df8d81d977`).
+[HidraWEB Code CI #1102](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45175152653)
+attempt 1 completed **FAILURE**. Its `verify` job failed at **Lint**:
+`src/features/topology/i18n/topologyTranslations.ts:4:4`,
+`Parsing error: ',' expected`. In the UXR-22 additive
+regional-map locale object, the comma separator before
+`preview` was omitted in FR, EN and AR. Code CI stopped
+before Typecheck, unit/component, performance, build or
+full Playwright checks.
+
+The native A1 PostgreSQL/browser and F18 LOCAL jobs also
+failed on the same source SHA: Vite reported the same
+`[PARSE_ERROR] Expected ',' or '}'` during frontend
+dependency scan; browser journeys subsequently timed out
+waiting for the login field. The logs substantiate a common
+frontend parse blocker, **not** a database/JPA, native
+authorization or LOCAL session-domain failure.
+[Documentation Validation #139](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45175152822)
+was **SUCCESS** on the failed implementation SHA.
+
+**Bounded repair message:** `fix(topology): repair UXR-22 locale syntax and map test selector`.
+
+**Exact repair scope:**
+- UPDATE only `src/features/topology/i18n/topologyTranslations.ts`:
+  restore the missing `,` following each FR/EN/AR regional
+  translation object, preserving all approved keys and values.
+- UPDATE `src/features/topology/components/RegionalTopologySearch.tsx`:
+  preserve selected `companyPartyId` for read-only regional map
+  permission even without the separate regional search grant;
+  use exact regional-detail read authority rather than
+  search permission for protected feature inspection.
+- UPDATE `tests/e2e/regional-topology-search.spec.ts`:
+  disambiguate the existing nested same-labelled map regions
+  using the first matching region and add a read-only,
+  no-search-grant browser proof of correctly scoped GeoJSON
+  and canonical detail requests. Preserve existing scoped
+  map, exact entity-ID, paging, backend 404 and
+  legacy-fallback denial assertions.
+- APPEND only this canonical roadmap as evidence of
+  the failure, repair, CI gate and owner direction.
+  CREATE none; DELETE none; preserve application permissions,
+  existing security boundaries, credentials, API pin,
+  backend source, database migration, workflows and
+  visual design. The read-only map correction is within
+  previously registered UXR-22 admission scope.
+
+**Owner design-alignment direction:** Complete the
+**registered implementation roadmap first**. The previously
+published UI design-alignment assessment is a reference
+baseline only; do not execute independent visual-alignment
+remediation or reorder accepted tasks until the roadmap is
+finished and the owner chooses to revisit alignment. Per-task
+registered UI scope and safety/acceptance obligations remain
+in force; this is not a waiver of security or tests.
+
+**Status:** UXR-22 IMPLEMENTED / **CI REPAIR PENDING
+NEW EXACT-SHA CODE CI**. No claim of CI pass or successful
+native qualification on this repair is made before CI
+concludes. P6 / UXR-23 remains **NOT SELECTED**.

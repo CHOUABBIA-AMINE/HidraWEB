@@ -19,14 +19,14 @@ const feature = {
     code: 'GZ2-P', nameFr: 'Gazoduc GZ2', status: 'ACTIVE' },
 };
 
-async function enterSelectedScope(page: Page, extraRoutes: typeof permissions = [], extraGrants: string[] = []) {
+async function enterSelectedScope(page: Page, extraRoutes: typeof permissions = [], extraGrants: string[] = [], allowRegionalSearch = true) {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.route('**/api/v1/security/permissions/routes', route => route.fulfill({ json: [...permissions, ...extraRoutes] }));
   await page.route('**/api/v1/security/permissions/catalog', route => route.fulfill({
     json: { strategy: 'derived-route-permission-catalog', enforcement: 'backend-enforced',
       permissionFormat: '<module>:<resource>:<action>', routes: [...permissions, ...extraRoutes] },
   }));
-  await page.route('**/api/v1/identity/me/permissions', route => route.fulfill({ json: [...grants, ...extraGrants] }));
+  await page.route('**/api/v1/identity/me/permissions', route => route.fulfill({ json: [...grants.filter(permission => allowRegionalSearch || permission !== 'topology:regional-map:search'), ...extraGrants] }));
   await page.route('**/api/v1/organization/responsibilities?**', route => route.fulfill({
     json: [{ id: 'r1', scopeId: 7, status: 'ACTIVE',
       scope: { id: 7, type: 'PIPELINE_SYSTEM', targetId: 'gz2', name: 'GZ2' } }],
@@ -173,7 +173,7 @@ test('UXR-22 selected regional map renders only owner-paged layers and exact ent
   await enterSelectedScope(page, regionalMapRoutes, [mapReadPermission]);
 
   await expect(page.getByRole('heading', { name: 'Carte régionale autorisée' })).toBeVisible();
-  await expect(page.getByRole('region', { name: 'Carte régionale autorisée' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Carte régionale autorisée' }).first()).toBeVisible();
   await expect(page.getByText('Page 1 / 2')).toBeVisible();
   await expect(page.getByText('GZ2-P').first()).toBeVisible();
   await page.getByRole('button', { name: 'Inspecter' }).first().click();
@@ -210,5 +210,43 @@ test('UXR-22 regional map opaque 404 clears geometry, totals and feature list', 
   await expect(page.getByText('Carte régionale indisponible ou non autorisée.').first()).toBeVisible();
   await expect(page.getByText('Page 1 / 1')).toHaveCount(0);
   await expect(page.getByText('GZ2-P')).toHaveCount(0);
+  expect(legacy).toHaveLength(0);
+});
+
+test('UXR-22 read-only regional map keeps company scope and canonical detail without search grant', async ({ page }) => {
+  const legacy: string[] = [];
+  const geoJsonRequests: URL[] = [];
+  const detailRequests: URL[] = [];
+  await page.route('**/api/v1/topology/map/**', route => {
+    legacy.push(route.request().url());
+    return route.fulfill({ status: 403 });
+  });
+  await page.route('**/api/v1/topology/regional-map/layers?**', route =>
+    route.fulfill({ json: [regionalLayers[0]] }));
+  await page.route('**/api/v1/topology/regional-map/layers/pipelines?**', route =>
+    route.fulfill({ json: regionalLayers[0] }));
+  await page.route('**/api/v1/topology/regional-map/layers/pipelines/features?**', route =>
+    route.fulfill({ json: { type: 'FeatureCollection', layer: 'pipelines', page: 0, size: 25,
+      totalFeatures: 1, totalPages: 1, hasNext: false, features: [feature] } }));
+  await page.route('**/api/v1/topology/regional-map/geojson?**', route => {
+    geoJsonRequests.push(new URL(route.request().url()));
+    return route.fulfill({ json: { type: 'FeatureCollection', name: 'hidra-regional-topology',
+      page: 0, size: 100, totalFeatures: 1, totalPages: 1, hasNext: false,
+      layers: ['pipelines'], features: [feature] } });
+  });
+  await page.route('**/api/v1/topology/regional-map/layers/pipelines/features/p-1?**', route => {
+    detailRequests.push(new URL(route.request().url()));
+    return route.fulfill({ json: feature });
+  });
+  await enterSelectedScope(page, regionalMapRoutes, [], false);
+  await expect(page.getByRole('textbox', { name: 'Recherche régionale' })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Carte régionale autorisée' })).toBeVisible();
+  await expect(page.getByText('GZ2-P').first()).toBeVisible();
+  await page.getByRole('button', { name: 'Inspecter' }).first().click();
+  await expect(page.getByRole('heading', { name: 'GZ2-P', level: 3 })).toBeVisible();
+  expect(geoJsonRequests.length).toBeGreaterThan(0);
+  expect(detailRequests.length).toBeGreaterThan(0);
+  expect(geoJsonRequests.every(url => url.searchParams.get('companyPartyId') === 'company')).toBe(true);
+  expect(detailRequests.every(url => url.searchParams.get('companyPartyId') === 'company')).toBe(true);
   expect(legacy).toHaveLength(0);
 });

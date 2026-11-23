@@ -45,7 +45,7 @@ export function RegionalTopologySearch() {
   const [hiddenLayerIds, setHiddenLayerIds] = useState<Set<string>>(() => new Set());
   const principalId = auth.status === 'authenticated' ? auth.session?.principal?.userId : undefined;
   const admission = regionalMapAdmission(permissions, principalId, selected);
-  const company = admission.search ? selected!.companyPartyId : '';
+  const company = selected && (admission.search || admission.layers || admission.detail) ? selected.companyPartyId : '';
   const ref = parseRegionalReference(params);
   const detailRequested = params.has('regionalLayer') || params.has('regionalEntityId');
 
@@ -114,7 +114,7 @@ export function RegionalTopologySearch() {
   const detail = useQuery({
     queryKey: ['hidra', 'topology', 'regional-map', principalId, company, selected?.scopeId, selected?.type, selected?.targetId, 'feature', ref?.layer, ref?.entityId],
     queryFn: () => fetchRegionalTopologyFeature(company, ref!),
-    enabled: admission.search && admission.detail && Boolean(ref),
+    enabled: admission.detail && Boolean(ref),
     retry: false, staleTime: 0, gcTime: 0, refetchOnMount: 'always', refetchOnWindowFocus: true,
   });
 
