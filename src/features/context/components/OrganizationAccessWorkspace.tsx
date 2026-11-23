@@ -121,7 +121,7 @@ export function OrganizationAccessWorkspace({ resource }: { resource: Resource }
               );
             })}</TableBody>
           </Table>
-          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 2 }}>
+          <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mt: 2 }}>
             <Typography variant="caption">
               Page {page + 1} · {rows.length} loaded / {total ?? '—'} returned by HidraAPI
             </Typography>

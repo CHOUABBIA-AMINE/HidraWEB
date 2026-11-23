@@ -5680,3 +5680,38 @@ lint/typecheck, organization unit/component and API tests, all
 historic Node/Chromium, performance, release, A1 native
 PostgreSQL/API W1–W4, F18 LOCAL and Documentation Validation.
 After the CI gate, only the next registered package may be selected.
+
+### P6 / UXR-21/A — exact-SHA Typecheck repair (23 November 2026)
+
+**Failure evidence:** UXR-21/A implementation
+`6c7d893f03a51ebcd750de1ac5b58e5750e59dcf`
+(tree `6cebdd754ce914911a6201b356c18826ffbf1b03`)
+failed [HidraWEB Code CI #1098](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45162716740)
+in `verify` at `npm run typecheck` with `TS2769` in
+`src/features/context/components/OrganizationAccessWorkspace.tsx:124`.
+The installed MUI `Stack` type does not accept the direct
+`alignItems` and `justifyContent` props there.
+Source OpenAPI checks and lint passed; the remaining `verify`
+checks did **not** run after Typecheck failed. A1 native
+PostgreSQL/API and F18 LOCAL qualification passed.
+[Documentation Validation #134](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45162716578)
+passed on the same source SHA.
+
+**Bounded correction message:**
+`fix(organization): correct UXR-21/A MUI Stack layout typing`.
+
+**Scope:** UPDATE only
+`src/features/context/components/OrganizationAccessWorkspace.tsx`
+to move existing pagination alignment properties into MUI's
+supported `sx` object while keeping the same row layout and
+owner-paging behavior. APPEND this exact failure and correction
+evidence to `docs/roadmap/ULTIMATE_ROADMAP.md`.
+DELETE none; preserve all component/API/security tests and
+all registered UXR-21/A scope. No backend/OpenAPI, security,
+database, CI workflow, version, native qualification or release
+budget modifications.
+
+**Status:** UXR-21/A IMPLEMENTED / CI PENDING repair SHA; the
+Typecheck failure is corrected in source but the complete acceptance
+gate remains to be demonstrated by exact-SHA CI. UXR-21/B is
+not selected. No operational SITE acceptance is claimed.
