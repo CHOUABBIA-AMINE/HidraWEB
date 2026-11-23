@@ -565,3 +565,21 @@ Synthetic component checks cover successful owner data, 403 after a
 previously ready response and a missing grant. Native browser/role checks
 remain necessary; this interface correction alone is not CI or industrial
 acceptance.
+
+## P5 / UXR-18 — TypedForm and AuthorizedActionPanel (23 November 2026)
+
+A typed presentation form accepts a request built by its owning adapter;
+it cannot invent backend DTOs, grant permissions or dispatch on its own.
+Submission needs the owner's validated fields, current permitted state,
+explicit human confirmation, and no pending/conflict condition.
+AuthorizedActionPanel renders only currently admitted owner actions;
+refresh/denial/error states conceal previous action controls and editors.
+
+The initial actual consumer is the Workflow task. The current exact task
+and available actions are re-read before posting the generated transition
+request with expectedTaskUpdatedAt. The backend still enforces version,
+permission and any conflict. After submission, fresh exact-task GET must
+confirm changed version and expected task status before success is shown;
+unknown outcomes request refresh and never automatically replay commands.
+Other domain commands remain subject to separate owner contract admission.
+Synthetic fixtures do not provide production/SITE acceptance.

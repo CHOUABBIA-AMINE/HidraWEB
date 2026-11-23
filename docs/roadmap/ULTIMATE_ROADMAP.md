@@ -5296,3 +5296,44 @@ CI workflow, release budget or unrelated tests are changed. DELETE none.
 the formerly failing Chromium scenario), A1 native qualification, F18 LOCAL
 and Documentation Validation. UXR-17 remains implemented but not CI-passed
 until those checks pass. UXR-18 remains the next registered unselected stage.
+
+### P5 / UXR-17 — exact-SHA CI acceptance and UXR-18 selection (23 November 2026)
+
+UXR-17 repair fbcbc04e5f0c4b150d47722542426ac5ab3c8fa9
+(tree 041dbdad107de9d6ea13df0f7366cda42ef54a27)
+passed [Code CI #1091](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45146928126)
+including verify, A1 native PostgreSQL/API W1–W4 and F18 LOCAL.
+[Documentation Validation #127](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45146928212)
+passed on the same source. UXR-17 is CI-PASSED within synthetic development
+evidence; neither deployment nor industrial SITE acceptance is inferred.
+
+Owner Next selects P5 UXR-18: TypedForm and AuthorizedActionPanel.
+
+**Registered exact message:** feat(workspace): add UXR-18 typed actions and durable Workflow decision gate.
+
+**Bounded scope:** CREATE src/shell/actions/TypedForm.tsx and
+src/shell/actions/AuthorizedActionPanel.tsx: generic presentation-only typed
+request and current owner-action rendering, with explicit confirmation,
+validation, pending and denied/failure gates. CREATE
+src/shell/actions/ActionComponents.test.tsx for no stale privileged content,
+denied selection and type-safe submit gating. UPDATE
+src/features/workflow/WorkflowTasksPage.tsx to wire these primitives to the
+accepted Workflow TaskView/AvailableActionView and generated
+ExecuteWorkflowTransitionRequest. Re-read the exact task and current owner
+actions before executing; keep expectedTaskUpdatedAt. Verify the saved
+task's identity, new status and version through a fresh exact-owner GET;
+if readback fails, do not display success or automatically replay.
+UPDATE src/features/workflow/WorkflowTasksPage.test.tsx and
+tests/e2e/workflow.spec.ts for explicit confirmation and durable readback.
+UPDATE src/shared/i18n/resources.ts for French, English and Arabic action
+messages. Append this reconciliation and docs/06-Navigation-Blueprint.md.
+DELETE none. Do not change OpenAPI pins, backend, permission catalog,
+CI workflows, migrations, operational data or other modules' commands.
+
+**Remaining implementation-SHA acceptance:** pinned OpenAPI compatibility,
+lint, TypeScript, unit/component/contract, performance, release build and
+artifact verification, Chromium including workflow confirmation, A1 native
+PostgreSQL/API W1–W4, F18 LOCAL and Documentation Validation.
+Source-derived owner-action permission does not authorize a different
+module's business command. UXR-18 is IMPLEMENTED / CI PENDING; UXR-19
+remains the next registered unselected stage.

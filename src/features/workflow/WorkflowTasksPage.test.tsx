@@ -31,7 +31,7 @@ vi.mock('@/api/client/hidraHttpClient', () => ({
     if (config.url === '/api/v1/workflow/instances/instance-1') return { id: 'instance-1', status: 'STARTED', currentStepId: 'review', targetId: 'DEV-1', targetLabel: 'Pressure deviation DEV-1' };
     if (config.url === '/api/v1/workflow/instances/instance-1/timeline') return [{ id: 'tl-1', instanceId: 'instance-1', taskId: 'task-1', actionType: 'ASSIGN', actorDisplayName: 'Supervisor', sequence: 1, occurredAt: '2026-09-11T10:00:00Z' }];
     if (config.method === 'POST' && config.url === '/api/v1/workflow/tasks/task-1/transitions/tr-1/execute' && fixtures.rejectNextTransition) { fixtures.rejectNextTransition = false; fixtures.task.updatedAt = '2026-09-11T10:30:01Z'; throw new HidraApiError('Changed', { status: 409 }); }
-    if (config.method === 'POST' && config.url === '/api/v1/workflow/tasks/task-1/transitions/tr-1/execute') return { actionId: 'act-1', taskId: 'task-1', taskStatus: 'APPROVED', instanceId: 'instance-1', instanceStatus: 'COMPLETED', transitionId: 'tr-1', decision: 'APPROVE', currentStepId: 'approved', executedAt: '2026-09-11T10:31:00Z' };
+    if (config.method === 'POST' && config.url === '/api/v1/workflow/tasks/task-1/transitions/tr-1/execute') { fixtures.task.status = 'APPROVED'; fixtures.task.updatedAt = '2026-09-11T10:31:00Z'; return { actionId: 'act-1', taskId: 'task-1', taskStatus: 'APPROVED', instanceId: 'instance-1', instanceStatus: 'COMPLETED', transitionId: 'tr-1', decision: 'APPROVE', currentStepId: 'approved', executedAt: '2026-09-11T10:31:00Z' }; }
     throw new Error(`Unexpected request ${config.method ?? 'GET'} ${config.url}`);
   }),
 }));
@@ -59,6 +59,8 @@ describe('HWEB-007 workflow task workspace', () => {
 
     fireEvent.click(await screen.findByRole('button', { name: 'APPROVE' }));
     fireEvent.change(screen.getByLabelText('comment *'), { target: { value: 'Validated against operating evidence.' } });
+    expect(screen.getByRole('button', { name: 'Action: APPROVE' })).toBeDisabled();
+    fireEvent.click(screen.getByRole('checkbox', { name: /Je confirme cette décision/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Action: APPROVE' }));
 
     expect(await screen.findByText('The task changed. Refresh the task and available actions before retrying.')).toBeInTheDocument();
@@ -69,6 +71,7 @@ describe('HWEB-007 workflow task workspace', () => {
     await waitFor(() => expect(screen.queryByText('The task changed. Refresh the task and available actions before retrying.')).not.toBeInTheDocument());
     fireEvent.click(screen.getByRole('button', { name: 'APPROVE' }));
     fireEvent.change(screen.getByLabelText('comment *'), { target: { value: 'Validated against operating evidence.' } });
+    fireEvent.click(screen.getByRole('checkbox', { name: /Je confirme cette décision/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Action: APPROVE' }));
 
     await waitFor(() => expect(vi.mocked(hidraHttpClient)).toHaveBeenCalledWith(expect.objectContaining({
