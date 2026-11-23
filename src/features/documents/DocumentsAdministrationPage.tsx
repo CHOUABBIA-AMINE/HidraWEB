@@ -27,6 +27,7 @@ import type {
   UploadDocumentBinaryVersionRequest,
 } from '@/api/generated/documents/model';
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
+import { FileEvidencePanel } from '@/components/feedback/FileEvidencePanel';
 import { usePermissions } from '@/features/permissions/usePermissions';
 import {
   fetchWorkbenchRecords,
@@ -92,13 +93,13 @@ function EvidenceTable({
                     <TableCell><Box component="pre" sx={{ m: 0, whiteSpace: 'pre-wrap' }}>{JSON.stringify(item.attributes, null, 2)}</Box></TableCell>
                     {onDownload ? (
                       <TableCell>
-                        <Button
-                          size="small"
-                          disabled={!downloadEnabled || !id || downloadingVersionId === id}
-                          onClick={() => onDownload(id)}
-                        >
-                          Download
-                        </Button>
+                        <FileEvidencePanel
+                          versionId={id}
+                          attributes={item.attributes}
+                          downloadPermitted={Boolean(downloadEnabled)}
+                          downloading={downloadingVersionId === id}
+                          onDownload={onDownload}
+                        />
                       </TableCell>
                     ) : null}
                   </TableRow>

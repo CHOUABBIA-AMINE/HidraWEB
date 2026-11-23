@@ -612,3 +612,37 @@ expectedTaskUpdatedAt and independent persisted status/revision
 readback. The already implemented ContextInspector remains the separate
 temporary drawer, with retained RTL, Escape, focus trap and return-focus
 behavior. All examples remain synthetic development fixtures.
+
+## UXR-20 — Map, chart, diagram and file evidence primitives (23 November 2026)
+
+The reusable `MapLayerExplorer` reads the existing owner-issued Topology
+layer registry and controls current on-page visibility and focus. It does
+not discover unauthorized layers, derive geographic geometry or issue an
+additional API call; the existing MapLegend/HidraMap remain intact.
+The Telemetry `TrendQualityPanel` uses the already accepted readings
+query, filters to the exact selected point, renders raw numeric values
+and shows returned quality/state/unit/time codes as *observations* only.
+It neither infers trusted freshness nor runs a hydraulic simulator.
+Its accessible table remains available independently of the SVG path.
+
+The `StationSynopticFrame` is an explicit unqualified frame when only a
+Topology feature has been read. It cannot infer equipment or links from
+an asset ID. A ready frame would require a complete, valid owner-issued
+graph with revision and all connected node references. The read-only
+Topology inspector therefore displays its unavailable state; neither the
+synthetic F21 preview nor an uncommitted station draft is promoted to
+commissioned connectivity.
+
+The `FileEvidencePanel` presents only currently returned document
+version metadata (`originalFilename`, `mimeType`, `fileSizeBytes`,
+`checksumValue`) when fields are actually present. It makes **no**
+frontend checksum-verification or audit-signature claim. It delegates
+download to the existing permission-gated HidraAPI binary adapter,
+retaining server-selected filenames and no direct object-store URL.
+Audit/Reporting binary consumers are not claimed as integrated;
+their own owner authority and content contracts remain future work.
+
+All new components are presentation-only with synthetic component
+regressions. No external basemap provider, numerical engine, SCADA
+control, new OpenAPI route, schema, migration or synthetic production
+record is introduced.

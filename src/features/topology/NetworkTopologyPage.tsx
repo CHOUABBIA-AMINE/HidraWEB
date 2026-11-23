@@ -11,6 +11,7 @@ import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
 import { HidraMap } from '@/components/map/HidraMap';
 import { buildLayerRegistry } from '@/components/map/LayerRegistry';
 import { MapLegend } from '@/components/map/MapLegend';
+import { MapLayerExplorer } from '@/components/map/MapLayerExplorer';
 import type { HidraMapSelection } from '@/components/map/mapTypes';
 import { usePermissions } from '@/features/permissions/usePermissions';
 import {
@@ -24,7 +25,6 @@ import {
 import { TOPOLOGY_PERMISSIONS } from '@/features/topology/api/topologyPermissions';
 import { TopologyFeatureList } from '@/features/topology/components/TopologyFeatureList';
 import { TopologyInspector } from '@/features/topology/components/TopologyInspector';
-import { TopologyLayerTree } from '@/features/topology/components/TopologyLayerTree';
 import {
   findTopologyFeature,
   toHidraMapFeatureCollection,
@@ -288,10 +288,12 @@ function OperationalTopology({ authoring, onToggleAuthoring }: { authoring: bool
 
       <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', lg: '300px minmax(0, 1fr)' }, mt: 2 }}>
         <Paper variant="outlined" sx={{ p: 2 }}>
-          <TopologyLayerTree
+          <MapLayerExplorer
             focusedLayerId={effectiveFocusedLayerId}
             hiddenLayerIds={hiddenLayerIds}
-            layers={layers}
+            layers={registry}
+            title={t('topology.layers')}
+            inspectLabel={t('topology.inspectLayer')}
             onFocus={setFocusedLayerId}
             onToggle={toggleLayer}
           />

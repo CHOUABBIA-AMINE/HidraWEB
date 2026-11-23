@@ -5545,3 +5545,66 @@ release/package, full Chromium without flakes, native A1 W1–W4,
 F18 LOCAL, and Documentation Validation gates. UXR-19 remains
 IMPLEMENTED / CI PENDING until exact-SHA success; UXR-20 remains
 unselected.
+
+### P5 / UXR-20 — owner Next, implementation scope and acceptance (23 November 2026)
+
+**Entry evidence:** UXR-19 repair SHA
+`2c176355ee0fd92aa99922e4cd4cee4bdf1d0f10`
+(tree `25f223ffd9133571c18f40f08909c1a82bc4a764`)
+passed [Code CI #1096](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45157935383)
+(all `verify`, native A1 PostgreSQL/API and F18 LOCAL jobs) and
+[Documentation Validation #132](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45157934875).
+The owner then selected the next registered **P5 / UXR-20** stage
+via `Next`. UXR-19 is CI-PASSED in synthetic development evidence.
+
+**Exact message:** `feat(workspace): add UXR-20 map, trend, synoptic and file evidence primitives`.
+
+**Bounded source files:**
+CREATE `src/components/map/MapLayerExplorer.tsx` (authorized
+owner-layer visibility/focus; reuse existing MapLegend).
+CREATE `src/features/telemetry-monitoring/components/TrendQualityPanel.tsx`
+(raw trend and explicit quality/state evidence for the selected point).
+CREATE `src/components/diagram/StationSynopticFrame.tsx`
+(complete owner-revision/node/edge gated read-only schematic frame;
+unavailable without a qualified graph).
+CREATE `src/components/feedback/FileEvidencePanel.tsx`
+(owner-supplied filename/type/byte-size/digest and permitted download
+action). CREATE `src/components/visualization/UXR20Components.test.tsx`
+(test layer toggle/focus, point-scope isolation, unavailable/invalid
+station graph, authorized file retrieval affordance).
+UPDATE `src/features/topology/NetworkTopologyPage.tsx` to use
+the shared layer explorer without changing map queries.
+UPDATE `src/features/topology/components/TopologyInspector.tsx`
+to show an explicit synoptic-unavailable frame for facility/station
+features until accepted owner graph evidence is accessible.
+UPDATE `src/features/telemetry-monitoring/TelemetryMonitoringPage.tsx`
+to render the query-first telemetry trend with quality evidence.
+UPDATE `src/features/documents/DocumentsAdministrationPage.tsx`
+to use FileEvidencePanel inside existing workbench version evidence;
+retain current route-permission checks and native binary adapter.
+APPEND `docs/06-Navigation-Blueprint.md` and this roadmap.
+DELETE none. Historical TopologyLayerTree remains preserved until
+a separate authorized cleanup.
+
+**Scope boundaries:** These are frontend-local display contracts.
+No inference of owner graph connectivity, calibrated pressure or
+numeric simulation; no backend-written measurement, audit seal,
+checksum qualification or privileged document link derived in UI.
+Never render a protected selection or file metadata after owner read
+authorization is missing. Keep exact URL/permission checks for
+document downloads; preserve existing map total/window restrictions,
+Telemetry disabled/denied states, scoped owner queries, performance,
+bundle and no-flaky checks. No change to current OpenAPI pins,
+HidraAPI, security policy, migration, release, native qualifications,
+historical specs or OT controls. Regional map, trusted-reading,
+Audit/Reporting binaries and fully authored station synoptic require
+independent future endpoint and witness admission; this milestone
+does not assert their acceptance.
+
+**Status:** IMPLEMENTED / CI PENDING on the resulting UXR-20 SHA.
+**Acceptance gate:** all source-pinned OpenAPI, lint, TypeScript,
+unit/component and Node, performance, production bundle and release
+artifact checks, full Chromium including map/Telemetry/Documents,
+A1 native JWT/PostgreSQL W1–W4, F18 LOCAL and Documentation Validation
+on the exact implementation SHA. P6/UXR-21 is the next registered
+unselected stage, not automatically executed.

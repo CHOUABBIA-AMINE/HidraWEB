@@ -1,5 +1,6 @@
 import { Box, Divider, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { StationSynopticFrame } from '@/components/diagram/StationSynopticFrame';
 
 import type { Feature } from '@/api/generated/topology/model';
 import { topologyFeatureLabel } from '@/features/topology/model/topologyPresentation';
@@ -32,6 +33,13 @@ export function TopologyInspector({ feature }: TopologyInspectorProps) {
         ))}
       </Box>
       <Typography color="text.secondary" variant="caption">{t('topology.inspectorBackendOwned')}</Typography>
+      {(feature.properties?.entityType === 'facility' || feature.properties?.entityType === 'station') ? (
+        <StationSynopticFrame
+          label="Station synoptic"
+          source="HidraAPI Topology · feature identity only"
+          state={{ kind: 'unavailable' }}
+        />
+      ) : null}
     </Stack>
   );
 }

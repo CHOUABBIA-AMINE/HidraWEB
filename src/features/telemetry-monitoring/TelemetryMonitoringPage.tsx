@@ -35,8 +35,8 @@ import {
 } from '@/features/telemetry-monitoring/api/telemetryMonitoringApi';
 import { TELEMETRY_MONITORING_PERMISSIONS } from '@/features/telemetry-monitoring/api/telemetryMonitoringPermissions';
 import { BackendObjectInspector } from '@/features/telemetry-monitoring/components/BackendObjectInspector';
+import { TrendQualityPanel } from '@/features/telemetry-monitoring/components/TrendQualityPanel';
 import { legacyReadingStatus, legacyReadingTimeline } from '@/features/telemetry-monitoring/model/telemetryEvidence';
-import { numericTrendPath } from '@/features/telemetry-monitoring/model/telemetryPresentation';
 import { EvidenceTimeline } from '@/shell/evidence/EvidenceTimeline';
 import { StatusWithProvenance } from '@/shell/evidence/StatusWithProvenance';
 import type { EvidenceEvent, EvidenceState, StatusEvidence } from '@/shell/evidence/evidenceTypes';
@@ -130,7 +130,10 @@ export function TelemetryMonitoringPage() {
     enabled: canDeviations,
   });
 
-  const path = useMemo(() => numericTrendPath((trendQuery.data ?? []).filter(reading => reading.pointId === pointId)), [trendQuery.data, pointId]);
+  const trendReadings = useMemo(
+    () => (trendQuery.data ?? []).filter((reading) => reading.pointId === pointId),
+    [trendQuery.data, pointId],
+  );
   const latestState: EvidenceState<StatusEvidence> = !canTelemetry
     ? { kind: 'denied' }
     : latestQuery.isError ? { kind: 'failed' }
@@ -215,16 +218,9 @@ export function TelemetryMonitoringPage() {
               ) : null}
               {detailMode === 'trend' ? (
                 <Box sx={{ mt: 2 }}>
-                  <Typography component="h3" variant="subtitle1">{t('telemetryMonitoring.trend')}</Typography>
-                  <Typography color="text.secondary" variant="caption">{t('evidence.legacy')}</Typography>
                   {trendQuery.isError ? <Alert severity="warning">{t('telemetryMonitoring.genericError')}</Alert> :
                     trendQuery.isFetching || !trendQuery.isSuccess ? <Alert role="status" severity="info">{t('evidence.loading')}</Alert> :
-                      path ? (
-                        <Box component="svg" aria-label={t('telemetryMonitoring.trend')} viewBox="0 0 480 120"
-                          sx={{ display: 'block', height: 180, mt: 2, width: '100%' }}>
-                          <Box component="path" d={path} fill="none" stroke="currentColor" strokeWidth="3" />
-                        </Box>
-                      ) : <Alert severity="info">{t('telemetryMonitoring.noTrend')}</Alert>}
+                    <TrendQualityPanel pointId={pointId} readings={trendReadings} title={t('telemetryMonitoring.trend')} />}
                 </Box>
               ) : null}
             </Paper>
