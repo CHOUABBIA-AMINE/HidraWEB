@@ -5835,3 +5835,55 @@ workflow, schema or migration changes are authorized.
 The exact-SHA full browser suite and all other registered CI
 gates are pending for the repair commit; UXR-21 parent remains
 IN PROGRESS and UXR-22 is still NOT SELECTED.
+
+### P6 / UXR-21/B exact-SHA acceptance and design-alignment audit (23 November 2026)
+
+**New evidence on prior repair:** The UXR-21/B browser-regression
+repair `a9fef03d45250ca5a145202fe3a87a65476c05c4`
+(tree `f34471fb4b007a1b2ecf7223c16e165eeb054c15`)
+passed [HidraWEB Code CI #1101](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45167847654)
+and [Documentation Validation #137](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45167847651),
+both on that exact SHA. Code CI's `verify`, native A1 signed
+API/PostgreSQL and F18 LOCAL jobs all completed **SUCCESS**.
+This resolves the two previous mocked HWEB-004 browser failures from
+[Code CI #1100](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45166161923).
+Previously, Organization package UXR-21/A passed
+[Code CI #1099](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45163926323)
+and [Documentation Validation #135](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45163926309).
+**Status reconciliation:** UXR-21/A and UXR-21/B are **CI-PASSED** for
+their respective registered development scopes. The UXR-21 parent
+has satisfied those A/B development CI gates. Neither individual page
+nor the parent is visually/industrial/SITE accepted by these CI facts.
+
+**Owner direction:** Before advancing, assess actual HidraWEB UI
+against the discussed 19–20 November design. Bounded audit only;
+no UI implementation stage has been selected here.
+
+**Documentation-only audit:** See
+[UI Design-to-Implementation Alignment Audit](../architecture/HidraWEB-UI-Design-Implementation-Alignment-Audit-2026-11-23.md).
+It traces **seven shared layout families, ten global-header elements,
+six navigation groups, all nineteen numbered business workspaces and
+two operational anchors**, identifies concrete code-to-design gaps,
+separates approved/present/partial/unverified UX and attaches relevant
+UXR task ownership. The audit identifies the existing technical
+`/overview` versus proposed operational landing page, additional
+sidebar workspace icons, remaining Organization/Identity page-layout
+composition, and Topology/Monitoring anchor gaps. It is **not** a
+new canonical roadmap, a claim of 21 visually accepted screens or
+authority to reorder remaining work.
+
+**Exact documentation commit message:**
+`docs(ui): reconcile UXR-21 CI and design alignment baseline`.
+
+**File envelope:** CREATE only
+`docs/architecture/HidraWEB-UI-Design-Implementation-Alignment-Audit-2026-11-23.md`
+as the dated supporting/source-backed assessment. APPEND only this
+canonical roadmap with verified prior exact-SHA CI status and
+audit handoff. DELETE none. No running code, API generation,
+permission/security, migrations, CI workflows or release changes.
+
+**Next selection:** The registered **P6 / UXR-22 Network & Topology**
+remains the next candidate and **NOT SELECTED**. UXR-35
+retains the scoped Overview delivery position under P7. Any
+independent UI-design correction requires explicit registered
+scope/approval; do not silently reopen earlier accepted work.
