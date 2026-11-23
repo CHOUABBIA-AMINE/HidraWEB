@@ -51,3 +51,25 @@ A change is not HWEB-015-09-safe if it:
 - relies on external services or credentials for deterministic CI acceptance.
 
 HWEB-015-10 remains the next roadmap task and owns the OpenAPI compatibility gate between HidraAPI and HidraWEB pipelines.
+
+## Post-UXR-18 full-suite acceptance correction (23 November 2026)
+
+The normal **mocked** Chromium run now emits the Playwright JSON report
+and checks final statistics through
+`scripts/check-browser-results.mjs`. A successful workflow requires
+**zero unexpected tests, zero flaky retry-passes, exactly 15 native-only
+skips, and at least 109 baseline passed tests**. The suite is not narrowed
+and two retries remain available for diagnostics; a passing retry alone
+does not grant acceptance.
+
+On failure, only mocked-browser `test-results/` and
+`playwright-report/` are retained for three days as a GitHub Actions
+artifact for authorized repository collaborators. Tests must continue
+using disposable synthetic data. Never place live credentials, actual
+operator telemetry, or OT access material in mocked fixtures or traces.
+The isolated native A1/W1-W4 and F18 jobs retain **zero-flaky, zero-skip
+acceptance**, and do not capture/upload browser traces, network-bearing
+screenshots, or native JWT evidence. Their expected-test counts remain
+independent of the mocked-suite skip baseline. If new native-only browser
+tests are registered, the expected 15-skip marker must be reviewed
+rather than silently relaxed.

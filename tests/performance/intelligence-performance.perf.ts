@@ -1,99 +1,62 @@
-import * as echarts from 'echarts';
 import { describe, expect, it } from 'vitest';
 
-type MetricRecord = {
-  metricCode: string;
-  value: number;
-};
-
-type ScenarioValue = {
-  key: string;
-  value: number;
-};
+import type { ReadingView } from '@/api/generated/telemetry-monitoring/model';
+import type { FeatureCollection } from '@/api/generated/topology/model';
+import { legacyReadingTimeline } from '@/features/telemetry-monitoring/model/telemetryEvidence';
+import { toHidraMapFeatureCollection } from '@/features/topology/model/topologyPresentation';
 
 function elapsedMs(start: number): number {
   return performance.now() - start;
 }
 
-function aggregateMetrics(records: MetricRecord[]): Map<string, { count: number; total: number }> {
-  const aggregates = new Map<string, { count: number; total: number }>();
+// These budgets intentionally exercise imported production presentation
+// adapters. Metric aggregation, scenario comparison and hydraulic simulation
+// remain HidraAPI-owned; a function defined solely in a benchmark proves
+// nothing about those backend computations.
+describe('HWEB-013 frontend operational evidence adapter budgets', () => {
+  it('projects 100,000 owner-provided telemetry readings into one point timeline within 1500 ms', () => {
+    const readings = Array.from({ length: 100_000 }, (_, index) => ({
+      id: `reading-${index}`,
+      pointId: index % 10 === 0 ? 'PT-1' : 'PT-2',
+      numericValue: index % 1000,
+      unitId: 'bar',
+      qualityCodeId: 'GOOD',
+      state: 'TRUSTED',
+      sourceTimestamp: '2026-09-11T12:00:00Z',
+    })) as ReadingView[];
 
-  for (const record of records) {
-    const current = aggregates.get(record.metricCode);
-    if (current) {
-      current.count += 1;
-      current.total += record.value;
-    } else {
-      aggregates.set(record.metricCode, { count: 1, total: record.value });
-    }
-  }
+    const start = performance.now();
+    const timeline = legacyReadingTimeline(readings, 'PT-1');
+    const duration = elapsedMs(start);
 
-  return aggregates;
-}
-
-function compareScenarios(baseline: ScenarioValue[], scenarios: ScenarioValue[][]): number[][] {
-  const baselineByKey = new Map(baseline.map((item) => [item.key, item.value]));
-
-  return scenarios.map((scenario) => scenario.map((item) => item.value - (baselineByKey.get(item.key) ?? 0)));
-}
-
-describe('HWEB-013-07 intelligence performance budgets', () => {
-  it('renders a 5,000-point ECharts series within the hosted-CI budget', () => {
-    const points = Array.from({ length: 5_000 }, (_, index) => [index, Math.sin(index / 50) * 100]);
-    const chart = echarts.init(null, undefined, {
-      renderer: 'svg',
-      ssr: true,
-      width: 1_200,
-      height: 500,
-    });
-
-    const startedAt = performance.now();
-    chart.setOption({
-      animation: false,
-      xAxis: { type: 'value' },
-      yAxis: { type: 'value' },
-      series: [{ type: 'line', showSymbol: false, data: points }],
-    });
-    const svg = chart.renderToSVGString();
-    const duration = elapsedMs(startedAt);
-    chart.dispose();
-
-    expect(svg).toContain('<svg');
-    expect(duration).toBeLessThan(3_000);
-  });
-
-  it('aggregates 100,000 analytic result records within the hosted-CI budget', () => {
-    const records = Array.from({ length: 100_000 }, (_, index) => ({
-      metricCode: `METRIC-${index % 100}`,
-      value: index % 1_000,
-    }));
-
-    const startedAt = performance.now();
-    const aggregates = aggregateMetrics(records);
-    const duration = elapsedMs(startedAt);
-
-    expect(aggregates.size).toBe(100);
-    expect(aggregates.get('METRIC-0')?.count).toBe(1_000);
+    expect(timeline).toHaveLength(10_000);
+    expect(timeline[0]).toMatchObject({ id: 'reading-0', title: '0', unit: 'bar' });
+    expect(timeline[9_999].id).toBe('reading-99990');
     expect(duration).toBeLessThan(1_500);
   });
 
-  it('compares 40 scenarios with 1,500 result values each within the hosted-CI budget', () => {
-    const baseline = Array.from({ length: 1_500 }, (_, index) => ({
-      key: `target-${index}`,
-      value: index,
+  it('converts 25,000 typed backend topology features into the map abstraction within 1500 ms', () => {
+    const features = Array.from({ length: 25_000 }, (_, index) => ({
+      type: 'Feature',
+      id: `feature-${index}`,
+      geometry: index % 2 === 0
+        ? { type: 'LineString', coordinates: [[2.1, 36.7], [2.2, 36.8]] }
+        : { type: 'Point', coordinates: [2.1, 36.7] },
+      properties: { layer: index % 2 === 0 ? 'pipeline-segments' : 'facilities', code: `F-${index}`, entityId: `asset-${index}` },
     }));
-    const scenarios = Array.from({ length: 40 }, (_, scenarioIndex) => baseline.map((item) => ({
-      key: item.key,
-      value: item.value + scenarioIndex + 1,
-    })));
+    const ownerResponse = {
+      type: 'FeatureCollection', name: 'synthetic-topology',
+      page: 0, size: features.length, totalFeatures: features.length, totalPages: 1,
+      hasNext: false, layers: ['facilities', 'pipeline-segments'], features,
+    } as unknown as FeatureCollection;
 
-    const startedAt = performance.now();
-    const comparisons = compareScenarios(baseline, scenarios);
-    const duration = elapsedMs(startedAt);
+    const start = performance.now();
+    const mapped = toHidraMapFeatureCollection(ownerResponse);
+    const duration = elapsedMs(start);
 
-    expect(comparisons).toHaveLength(40);
-    expect(comparisons[39]).toHaveLength(1_500);
-    expect(comparisons[39][1_499]).toBe(40);
+    expect(mapped.features).toHaveLength(25_000);
+    expect(mapped.features[0]).toMatchObject({ id: 'feature-0', geometry: { type: 'LineString' }, properties: { code: 'F-0' } });
+    expect(mapped.features[24_999]).toMatchObject({ id: 'feature-24999', geometry: { type: 'Point' }, properties: { code: 'F-24999' } });
     expect(duration).toBeLessThan(1_500);
   });
 });

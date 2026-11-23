@@ -57,3 +57,24 @@ A change is not HWEB-015-08-safe if it:
 - changes map/chart semantics, backend truth, permissions, or business rules as part of a performance-only workaround.
 
 HWEB-015-09 remains the next roadmap task and owns full Playwright regression coverage for critical operational journeys.
+
+## Post-UXR-18 test-quality correction (23 November 2026)
+
+The earlier HWEB-013-07 auxiliary suite timed a duplicate 5,000-point
+ECharts SSR scenario and two **test-local functions** for 100,000 metric
+aggregations and 40 scenario comparisons. Those test-local functions do
+not occur in the actual HidraWEB runtime and cannot establish Analytics
+or numerical Simulation performance. The retained HWEB-015-08
+10,000-point ECharts budget (**2,000 ms**) is strictly more demanding
+than the removed 5,000-point (**3,000 ms**) duplicate and is unchanged.
+
+`tests/performance/intelligence-performance.perf.ts` now times **actual
+imported frontend presentation adapters**: 100,000 incoming Telemetry
+readings filtered into 10,000 point-scoped timeline entries
+(**1,500 ms**), and 25,000 typed Topology features converted for the
+Hidra-owned map abstraction (**1,500 ms**). These tests do not simulate
+metric aggregation, scenario comparison, numerical solvers, calibrated
+hydraulics or production operations. The previously frozen HWEB-015-08
+200-row grid, 25,000-feature bounds and 10,000-point ECharts thresholds
+remain mandatory and unchanged. Adding or changing industrial latency
+targets requires separate measured evidence and approval.

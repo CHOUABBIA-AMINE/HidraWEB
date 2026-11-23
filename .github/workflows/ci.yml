@@ -105,7 +105,23 @@ jobs:
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
       - name: Full Playwright regression suite
-        run: npm run test:e2e
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: test-results/mock-browser-results.json
+        run: |
+          npm run test:e2e -- --reporter=list,json
+          node scripts/check-browser-results.mjs "$PLAYWRIGHT_JSON_OUTPUT_NAME"
+      # This suite uses synthetic/mocked API data only. Native JWT and PostgreSQL
+      # runs deliberately keep trace/screenshot/video disabled and are not uploaded.
+      - name: Preserve mocked-browser failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hidraweb-mocked-browser-failure-${{ github.sha }}
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
+          retention-days: 3
       - name: Upload verified release artifact
         uses: actions/upload-artifact@v4
         with:

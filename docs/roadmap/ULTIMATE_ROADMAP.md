@@ -5386,3 +5386,60 @@ CI workflows, database migrations, or production values changed.
 complete Playwright, A1 native PostgreSQL/API W1–W4, F18 LOCAL,
 Documentation Validation. UXR-18 remains IMPLEMENTED / CI PENDING
 until every required gate passes. UXR-19 remains unselected.
+
+### P5 / UXR-18 — exact-SHA acceptance and owner-approved CI test-quality corrective (23 November 2026)
+
+Implementation repair `586998ec62ad02614b321f617f70d4bb9d3f205d`
+(tree `8b7cadcf60f4b9536f381def86bcbfeec0265837`) passed
+[Code CI #1093](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45150798082)
+with all three jobs: `verify`, native A1 W1–W4 fresh PostgreSQL/API
+and F18 LOCAL session qualification. It also passed
+[Documentation Validation #129](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45150798198).
+UXR-18 is CI-PASSED **for synthetic development acceptance only**;
+no deployed production readiness or operational SITE acceptance is claimed.
+
+The owner explicitly requested corrections to the verified test-workflow
+audit before further feature work. This is a **bounded, owner-authorized
+CI-quality maintenance correction**, not selection of UXR-19 or a change
+to the active roadmap task sequence.
+
+**Exact correction message:** `test(ci): reject flaky browser results and benchmark real frontend adapters`.
+
+**Scope:** UPDATE `.github/workflows/ci.yml` to require a
+machine-checked mocked Playwright result (0 unexpected/flaky, 15
+native-only skips, at least the 109-test accepted baseline) and retain
+mock-only short-lived failure artifacts. CREATE
+`scripts/check-browser-results.mjs` and
+`scripts/check-browser-results.test.mjs`; UPDATE `package.json`
+to register guard behavior tests. UPDATE
+`tests/performance/intelligence-performance.perf.ts` to replace
+test-local metric/scenario computation benchmarks with imported,
+production-code Telemetry and Topology presentation-adapter exercises
+and remove the weaker duplicate 5,000-point ECharts SSR benchmark.
+The stronger accepted 10,000-point ECharts **2,000 ms** budget and
+the HWEB-015-08 200-row **1,500 ms** and 25,000-map bounds
+**500 ms** limits remain untouched. UPDATE
+`docs/deployment/Runtime-Performance-Budgets.md` and
+`docs/deployment/Playwright-Regression-Suite.md` to explain the
+coverage and acceptance semantics. Append this reconciliation to
+`docs/roadmap/ULTIMATE_ROADMAP.md`. DELETE none.
+No production runtime behavior, authentication, route permissions,
+backend/OpenAPI contracts, database schema, native test strength,
+operator decision semantics, CI source pins or release budgets change.
+
+**Explicitly outstanding from the broader audit:** real application
+branch coverage requires a compatible instrumenter, a measured baseline
+and reviewed thresholds; replacing supplemental historical/source-text
+contract assertions requires individually mapped behavioral cases;
+documentation governance/checker refactoring requires registered scope.
+Do not claim those corrections in this bounded package. Do not
+silently delete historic compatibility proofs or rewrite legacy
+roadmaps. UXR-19 remains unselected.
+
+**Acceptance pending on the new commit:** pinned OpenAPI checks,
+lint/typecheck, existing Vitest and all 24 historic Node contract
+scripts plus the new browser-result guard, frontend production-path
+performance budgets, release checks, full mocked Chromium with strict
+report evaluation, A1 native PostgreSQL/API W1–W4, F18 LOCAL, and
+Documentation Validation. Wait for exact-SHA CI evidence; do not
+mark this maintenance package CI-PASSED before the workflow completes.
