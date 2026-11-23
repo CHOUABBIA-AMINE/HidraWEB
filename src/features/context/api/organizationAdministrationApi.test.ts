@@ -73,4 +73,30 @@ describe('organization administration API', () => {
       data: { workflowInstanceId: 'wf-2', operationReference: 'op-2' },
     });
   });
+
+  it('reads pinned hierarchy and private appointment history with exact company and encoded ID', async () => {
+    httpClient.mockResolvedValue({});
+    const { fetchOrganizationHierarchy, fetchOrganizationAssignmentHistory } = await import(
+      '@/features/context/api/identityOrganizationApi'
+    );
+    await fetchOrganizationHierarchy();
+    await fetchOrganizationAssignmentHistory('appointment/1', 'company-1');
+    expect(httpClient).toHaveBeenNthCalledWith(1, {
+      method: 'GET',
+      url: '/api/v1/organization/hierarchy',
+    });
+    expect(httpClient).toHaveBeenNthCalledWith(2, {
+      method: 'GET',
+      url: '/api/v1/organization/assignments/appointment%2F1/history',
+      params: { companyPartyId: 'company-1', limit: 20 },
+    });
+  });
+
+  it('rejects private appointment history without exact company before HTTP', async () => {
+    const { fetchOrganizationAssignmentHistory } = await import(
+      '@/features/context/api/identityOrganizationApi'
+    );
+    await expect(fetchOrganizationAssignmentHistory('assignment-1', '')).rejects.toThrow(/company/);
+    expect(httpClient).not.toHaveBeenCalled();
+  });
 });

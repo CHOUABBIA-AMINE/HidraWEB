@@ -8,6 +8,8 @@ import type {
   CreateOrganizationUnitRequest,
   CreateUserRequest,
   EmployeeAssignmentView,
+  EmployeeAppointmentPrivateHistoryResponse,
+  OrganizationNodeView,
   EmployeeResponse,
   EmployeeView,
   EvaluatePermissionRequest,
@@ -115,6 +117,29 @@ export function grantPermissionToIdentityUser(request: GrantPermissionToUser): P
   return hidraHttpClient<string>({ method: 'POST', url: '/api/v1/identity/users/permission-grants', data: request });
 }
 
+
+/** No hierarchy inference: returns only backend-authored organization nodes. */
+export function fetchOrganizationHierarchy(): Promise<OrganizationNodeView[]> {
+  return hidraHttpClient<OrganizationNodeView[]>({
+    method: 'GET',
+    url: '/api/v1/organization/hierarchy',
+  });
+}
+
+/** Company scope is mandatory in the pinned private appointment-history contract. */
+export function fetchOrganizationAssignmentHistory(
+  assignmentId: string,
+  companyPartyId: string,
+): Promise<EmployeeAppointmentPrivateHistoryResponse> {
+  if (!assignmentId.trim() || !companyPartyId.trim()) {
+    return Promise.reject(new Error('A selected assignment and exact company are required.'));
+  }
+  return hidraHttpClient<EmployeeAppointmentPrivateHistoryResponse>({
+    method: 'GET',
+    url: `/api/v1/organization/assignments/${encodeURIComponent(assignmentId)}/history`,
+    params: { companyPartyId, limit: 20 },
+  });
+}
 
 export function fetchOrganizationUnits(q = '', page = 0, size = 50): Promise<PageOrganizationUnitView> {
   return hidraHttpClient<PageOrganizationUnitView>({

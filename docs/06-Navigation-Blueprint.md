@@ -646,3 +646,42 @@ All new components are presentation-only with synthetic component
 regressions. No external basemap provider, numerical engine, SCADA
 control, new OpenAPI route, schema, migration or synthetic production
 record is introduced.
+
+## UXR-21/A — Organization WS-13 authorized read package (23 November 2026)
+
+The existing `/administration/organization` route preserves its owner
+commands and adds fail-closed reusable read experiences. Organization
+units, employees and employee assignments are read from the dedicated
+HidraAPI APIs with server paging, explicit `validFrom`/`validTo` evidence
+where available, and request-specific detail reads. A selection is eligible
+only while it belongs to the currently successful, non-refetching owner page
+at the exact resource/search/page coordinates. A change of tab, query, page
+or read authorization suppresses stale record detail and totals; raw
+backend exceptions must not become user-visible details.
+
+`OrganizationHierarchyPanel` renders only the already published
+`GET /api/v1/organization/hierarchy` response and requires its exact
+GET route-permission metadata and current principal grant. The frontend
+does not derive a hierarchy from employee records or invent missing nodes.
+`OrganizationAssignmentHistory` uses the backend-declared private
+`GET /api/v1/organization/assignments/{id}/history` contract, whose
+`companyPartyId` query parameter is mandatory. It only requests history
+for an assignment on the current authorized page when a separately
+verified operational company context and exact route permission exist.
+It shows at most the first 20 returned events; `hasNext` is disclosed
+only from an authorized owner response. No partial or historical
+assignment is promoted to current without backend proof.
+
+Responsibility list reads now require an explicit published GET route
+permission; lacking grants denies reads and hides previous data.
+Existing unit/employee/assignment authoring commands and their
+backend-side authority remain unchanged except that command errors
+are rendered as generic review instructions rather than raw exceptions.
+Employee business records remain distinct from Identity users and
+authentication credentials.
+
+This is **package A of registered UXR-21**. Identity & Access WS-14,
+private appointment history pagination and each additional protected
+authoring workflow remain outside this package and require their own
+scope and acceptance. No backend OpenAPI pin, database, deployment,
+live OT value or credential flow is modified.

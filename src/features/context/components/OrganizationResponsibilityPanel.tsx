@@ -23,10 +23,18 @@ export function OrganizationResponsibilityPanel() {
   const [assignment, setAssignment] = useState({ responsibilityType: 'RESPONSIBLE', assigneeType: 'EMPLOYEE', assigneeId: '', scopeId: '', workflowInstanceId: '', operationReference: '', description: '' });
   const [revoke, setRevoke] = useState({ assignmentId: '', workflowInstanceId: '', operationReference: '' });
 
+  const responsibilityReadRoute = permissions.routes.find((route) =>
+    route.route === '/api/v1/organization/responsibilities' && route.methods.includes('GET'));
+  const canReadResponsibilities = permissions.status === 'ready' &&
+    Boolean(responsibilityReadRoute?.permission && permissions.can(responsibilityReadRoute.permission));
+
   const responsibilities = useQuery({
     queryKey: ['hidra', 'organization-admin', 'responsibilities', employeeId],
     queryFn: () => fetchResponsibilitiesByEmployee(employeeId),
-    enabled: Boolean(employeeId.trim()),
+    enabled: canReadResponsibilities && Boolean(employeeId.trim()),
+    retry: false,
+    staleTime: 0,
+    gcTime: 0,
   });
 
   const registerMutation = useMutation({
@@ -59,13 +67,17 @@ export function OrganizationResponsibilityPanel() {
         <Typography variant="h6">Operational responsibilities</Typography>
         <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
           <TextField fullWidth label="Employee ID" size="small" value={employeeId} onChange={(event) => setEmployeeId(event.target.value)} />
-          <Button variant="outlined" onClick={() => responsibilities.refetch()}>Load</Button>
+          <Button variant="outlined" disabled={!canReadResponsibilities || !employeeId.trim() || responsibilities.isFetching}
+            onClick={() => { void responsibilities.refetch(); }}>Load</Button>
         </Box>
-        {responsibilities.data?.map((item) => (
+        {!canReadResponsibilities ? <Alert severity="warning" sx={{ mt: 1 }}>Responsibility reads are unavailable or not authorized.</Alert> : null}
+        {canReadResponsibilities && responsibilities.isError ? <Alert severity="error" sx={{ mt: 1 }}>Unable to load current responsibilities.</Alert> : null}
+        {canReadResponsibilities && responsibilities.isFetching ? <Typography role="status">Loading responsibilities…</Typography> : null}
+        {canReadResponsibilities && responsibilities.isSuccess && !responsibilities.isFetching ? responsibilities.data.map((item) => (
           <Alert key={item.id} severity="info" sx={{ mt: 1 }}>
             {item.responsibilityType} · {item.scope?.name ?? item.scopeId} · {item.status}
           </Alert>
-        ))}
+        )) : null}
       </Paper>
 
       <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', xl: '1fr 1fr 1fr' } }}>

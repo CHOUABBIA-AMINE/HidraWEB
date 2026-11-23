@@ -5608,3 +5608,75 @@ artifact checks, full Chromium including map/Telemetry/Documents,
 A1 native JWT/PostgreSQL W1–W4, F18 LOCAL and Documentation Validation
 on the exact implementation SHA. P6/UXR-21 is the next registered
 unselected stage, not automatically executed.
+
+### P5 / UXR-20 exact-SHA acceptance and P6 / UXR-21/A selection (23 November 2026)
+
+**Prior gate:** UXR-20 SHA
+`f8bd8ce4f26d8911d93aca0914eacbc237ca5d79`
+(tree `b0fee56b99278a9680223c3b4ee286387e90783d`)
+passed [Code CI #1097](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45160179198)
+(including `verify`, A1 native fresh PostgreSQL/API and F18 LOCAL)
+and [Documentation Validation #133](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45160179143).
+UXR-20 is CI-PASSED for synthetic development; no operational SITE
+or deployed-production acceptance is implied.
+
+Owner `Next` now selects P6 / UXR-21, the registered Circle 1
+Organization + Identity & Access stage. Because the parent contains
+two independently owned workspaces and security contracts, this
+implementation is registered as the bounded **UXR-21/A · Organization
+WS-13 authorized reads, hierarchy and private assignment history**.
+The complementary **UXR-21/B · Identity & Access WS-14** remains
+registered under the same parent but unselected, pending A's exact
+CI acceptance. This A/B split does not change the parent task ID,
+phase sequence or the historical roadmap table.
+
+**Exact commit message:** `feat(organization): deliver UXR-21/A authorized directory and history`.
+
+**Package A file envelope and roles:**
+UPDATE `src/features/context/api/identityOrganizationApi.ts`
+to expose the existing pinned owner
+`GET /api/v1/organization/hierarchy` and scoped
+`GET /api/v1/organization/assignments/{id}/history` (with mandatory
+`companyPartyId`, limit 20, encoded ID) through typed transports.
+CREATE `src/features/context/components/OrganizationHierarchyPanel.tsx`
+to render only accepted owner graph nodes when exact GET route
+permission and effective principal authorization are present.
+CREATE `src/features/context/components/OrganizationAssignmentHistory.tsx`
+to require selected assignment, verified operational company and
+GET route permission before any private history request, with safe
+loading/denial/error/empty states.
+UPDATE `src/features/context/components/OrganizationAccessWorkspace.tsx`
+to show server-owned page/total/effective period, guarded lookup,
+current-page-only detail, pagination and stale selection suppression.
+UPDATE `src/features/context/components/OrganizationResponsibilityPanel.tsx`
+to deny unauthorized reads of responsibility records/existence.
+UPDATE `src/features/context/components/OrganizationCommandPanel.tsx`
+to suppress raw backend mutation error strings without weakening
+existing permission checks, review steps or authoring contracts.
+CREATE `src/features/context/components/OrganizationReadWorkspace.test.tsx`
+for denied hierarchy, company-bound history, resource switching and
+denied total/detail redaction.
+UPDATE `src/features/context/api/organizationAdministrationApi.test.ts`
+for exact typed route, mandatory scope and URL encoding.
+APPEND `docs/06-Navigation-Blueprint.md` and this roadmap.
+DELETE none. Keep existing pages, commands, route IDs, Orval pins,
+Identity & Access and native qualifications unchanged.
+
+**Invariants:** Authoritative HidraAPI permission checks precede
+protected reads; permission metadata is only UX admission. No inferred
+employee↔user identity relationship; no default company, synthetic
+production employee records, fake hierarchy or invented history.
+A private assignment-history request never fires without explicit
+companyPartyId and current route admission. No list count or detail
+survives denied/switching resources. Do not reinterpret status,
+effective intervals or operational scopes locally. No backend schema,
+permission catalog, migration, CI workflow, deployment, SCADA or solver
+work. Existing write commands continue to require server authority.
+
+**Status:** UXR-21/A IMPLEMENTED / CI PENDING on the new commit.
+UXR-21 parent IN PROGRESS; UXR-21/B NOT SELECTED.
+**Remaining gate:** exact-SHA source OpenAPI regeneration,
+lint/typecheck, organization unit/component and API tests, all
+historic Node/Chromium, performance, release, A1 native
+PostgreSQL/API W1–W4, F18 LOCAL and Documentation Validation.
+After the CI gate, only the next registered package may be selected.

@@ -144,7 +144,7 @@ export function OrganizationCommandPanel() {
           <TextField required error={unit.validFrom.length > 0 && !unitValidFrom} slotProps={{ inputLabel: { shrink: true } }} label={t('context.fields.validFrom')} onChange={(event) => setUnit({ ...unit, validFrom: event.target.value })} size="small" type="datetime-local" value={unit.validFrom} />
         </Box>
         <Button disabled={!permissions.can(IDENTITY_ORGANIZATION_PERMISSIONS.createOrganizationUnit) || !unitValidFrom || createUnitMutation.isPending} onClick={() => createUnitMutation.mutate()} sx={{ mt: 2 }} variant="contained">{t('context.organization.createUnit')}</Button>
-        {createUnitMutation.error ? <Alert severity="error" sx={{ mt: 2 }}>{String(createUnitMutation.error)}</Alert> : null}
+        {createUnitMutation.error ? <Alert severity="error" sx={{ mt: 2 }}>{t('context.foundation.rejected')}</Alert> : null}
         {createUnitMutation.data ? <Alert severity="success" sx={{ mt: 2 }}>{t('context.organization.unitCreated', { id: createUnitMutation.data.id ?? '—' })}</Alert> : null}
       </Paper>
 
@@ -168,7 +168,7 @@ export function OrganizationCommandPanel() {
           </TextField>
         </Box>
         <Button disabled={!employeeCommandAvailable || registerEmployeeMutation.isPending} onClick={() => registerEmployeeMutation.mutate()} sx={{ mt: 2 }} variant="contained">{t('context.organization.registerEmployee')}</Button>
-        {registerEmployeeMutation.error ? <Alert severity="error" sx={{ mt: 2 }}>{String(registerEmployeeMutation.error)}</Alert> : null}
+        {registerEmployeeMutation.error ? <Alert severity="error" sx={{ mt: 2 }}>{t('context.foundation.rejected')}</Alert> : null}
         {registerEmployeeMutation.data ? <Alert severity="success" sx={{ mt: 2 }}>{t('context.organization.employeeRegistered', { id: registerEmployeeMutation.data.id ?? '—' })}</Alert> : null}
       </Paper>
 
@@ -195,7 +195,7 @@ export function OrganizationCommandPanel() {
           <TextField slotProps={{ inputLabel: { shrink: true } }} label={t('context.fields.validTo')} onChange={(event) => setAssignment({ ...assignment, validTo: event.target.value })} size="small" type="datetime-local" value={assignment.validTo} />
         </Box>
         <Button disabled={!employeeCommandAvailable || assignEmployeeMutation.isPending} onClick={() => assignEmployeeMutation.mutate()} sx={{ mt: 2 }} variant="outlined">{t('context.organization.assignEmployee')}</Button>
-        {assignEmployeeMutation.error ? <Alert severity="error" sx={{ mt: 2 }}>{String(assignEmployeeMutation.error)}</Alert> : null}
+        {assignEmployeeMutation.error ? <Alert severity="error" sx={{ mt: 2 }}>{t('context.foundation.rejected')}</Alert> : null}
         {assignEmployeeMutation.data ? <Alert severity="success" sx={{ mt: 2 }}>{t('context.organization.employeeAssigned', { id: assignEmployeeMutation.data })}</Alert> : null}
       </Paper>
     </Box>
