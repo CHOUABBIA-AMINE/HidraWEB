@@ -123,4 +123,34 @@ describe('workbench API adapter', () => {
     });
     expect(search.items).toEqual([]);
   });
+  it('fails closed on a page issued for another resource, without rendering its counts', async () => {
+    httpClient.mockResolvedValueOnce({
+      module: 'security', resource: 'users',
+      page: 0, size: 50, totalElements: 4, totalPages: 1,
+      items: [{ id: 'private', attributes: { email: 'private@example.invalid' } }],
+    });
+    await expect(fetchWorkbenchRecords({ module: 'alarm', resource: 'alarm-events', page: 0, size: 50 }))
+      .rejects.toThrow(/does not match the requested resource/);
+  });
+
+  it('fails closed when an item inside an otherwise matching page belongs to another owner', async () => {
+    httpClient.mockResolvedValueOnce({
+      module: 'alarm', resource: 'alarm-events',
+      page: 0, size: 50, totalElements: 1, totalPages: 1,
+      items: [{ module: 'identity', resource: 'accounts', id: 'other',
+        attributes: { secret: 'wrong-owner' } }],
+    });
+    await expect(fetchWorkbenchRecords({ module: 'alarm', resource: 'alarm-events', page: 0, size: 50 }))
+      .rejects.toThrow(/does not match the requested resource/);
+  });
+
+  it('excludes descriptors issued for a different module', async () => {
+    httpClient.mockResolvedValueOnce([
+      { module: 'identity', resource: 'users', idField: 'id', searchableFields: ['secret'] },
+      { module: 'alarm', resource: 'alarm-events', idField: 'id', searchableFields: ['message'] },
+    ]);
+    const resources = await fetchWorkbenchResources('alarm');
+    expect(resources.map(item => item.resource)).toEqual(['alarm-events']);
+  });
+
 });

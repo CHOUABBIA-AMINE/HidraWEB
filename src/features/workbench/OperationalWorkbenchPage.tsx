@@ -1,5 +1,6 @@
 import { Alert, Box, Chip, Container, Paper, Typography } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/app/auth/useAuth';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -18,6 +19,8 @@ import { WorkbenchDetailPanel } from '@/features/workbench/components/WorkbenchD
 import { WorkbenchEmptyState, WorkbenchErrorState, WorkbenchLoadingState } from '@/features/workbench/components/WorkbenchState';
 import { WorkbenchToolbar, type AdvancedSearchDraft } from '@/features/workbench/components/WorkbenchToolbar';
 import { useContextDrawer } from '@/shell/context/useContextDrawer';
+import { useShellUiStore } from '@/shell/model/useShellUiStore';
+import { authorizedRegisterState } from '@/shell/register/authorizedRegisterState';
 
 const DEFAULT_SIZE = 50;
 const emptyAdvanced: AdvancedSearchDraft = { filterField: '', filterValue: '', sortBy: '', sortDirection: 'asc' };
@@ -25,6 +28,15 @@ const emptyAdvanced: AdvancedSearchDraft = { filterField: '', filterValue: '', s
 export function OperationalWorkbenchPage() {
   const { t } = useTranslation();
   const permissions = usePermissions();
+  const auth = useAuth();
+  const scope = useShellUiStore(state => state.operationalContext);
+  const principalId = auth.status === 'authenticated' ? auth.session?.principal?.userId : undefined;
+  // In-memory request identity, not an authorization token or backend query parameter.
+  const viewerKey = JSON.stringify([principalId ?? null, scope?.companyPartyId ?? null,
+    scope?.scopeId ?? null, scope?.principalId ?? null, [...permissions.permissions].sort()]);
+  const canModules = permissions.status === 'ready' && Boolean(principalId)
+    && permissions.can(WORKBENCH_PERMISSIONS.modulesRead);
+  const canResources = canModules && permissions.can(WORKBENCH_PERMISSIONS.resourcesRead);
   const drawer = useContextDrawer();
   const [selectedModule, setSelectedModule] = useState('');
   const [selectedResource, setSelectedResource] = useState('');
@@ -36,50 +48,58 @@ export function OperationalWorkbenchPage() {
   const [size, setSize] = useState(DEFAULT_SIZE);
 
   const modulesQuery = useQuery({
-    queryKey: workbenchQueryKeys.modules,
+    queryKey: ['owner-workbench', viewerKey, ...workbenchQueryKeys.modules],
     queryFn: fetchWorkbenchModules,
+    enabled: canModules, retry: false, staleTime: 0, gcTime: 0, refetchOnWindowFocus: true,
   });
 
-  const effectiveModule = selectedModule && modulesQuery.data?.includes(selectedModule)
+  const admittedModules = canModules && modulesQuery.isSuccess && !modulesQuery.isFetching
+    ? modulesQuery.data ?? [] : [];
+  const effectiveModule = selectedModule && admittedModules.includes(selectedModule)
     ? selectedModule
-    : modulesQuery.data?.[0] ?? '';
+    : admittedModules[0] ?? '';
 
   const resourcesQuery = useQuery({
-    queryKey: workbenchQueryKeys.resources(effectiveModule),
+    queryKey: ['owner-workbench', viewerKey, ...workbenchQueryKeys.resources(effectiveModule)],
     queryFn: () => fetchWorkbenchResources(effectiveModule),
-    enabled: Boolean(effectiveModule && permissions.can(WORKBENCH_PERMISSIONS.resourcesRead)),
+    enabled: canResources && Boolean(effectiveModule),
+    retry: false, staleTime: 0, gcTime: 0, refetchOnWindowFocus: true,
   });
 
-  const effectiveResource = selectedResource && resourcesQuery.data?.some((item) => item.resource === selectedResource)
-    ? selectedResource
-    : resourcesQuery.data?.[0]?.resource ?? '';
-  const descriptor = resourcesQuery.data?.find((item) => item.resource === effectiveResource);
+  const admittedResources = canResources && resourcesQuery.isSuccess && !resourcesQuery.isFetching
+    ? resourcesQuery.data ?? [] : [];
+  const effectiveResource = selectedResource && admittedResources.some(item => item.resource === selectedResource)
+    ? selectedResource : admittedResources[0]?.resource ?? '';
+  const descriptor = admittedResources.find(item => item.resource === effectiveResource);
   const effectiveAdvancedRequest = advancedRequest ? { ...advancedRequest, page, size } : null;
   const recordsEnabled = Boolean(
-    effectiveModule
-    && effectiveResource
+    canResources && descriptor
+    && effectiveModule && effectiveResource
     && permissions.can(effectiveAdvancedRequest ? WORKBENCH_PERMISSIONS.search : WORKBENCH_PERMISSIONS.listRead),
   );
 
   const recordsQuery = useQuery({
-    queryKey: effectiveAdvancedRequest
+    queryKey: ['owner-workbench', viewerKey, ...(effectiveAdvancedRequest
       ? workbenchQueryKeys.search(effectiveModule, effectiveResource, effectiveAdvancedRequest)
-      : workbenchQueryKeys.list(effectiveModule, effectiveResource, page, size, committedQuery),
+      : workbenchQueryKeys.list(effectiveModule, effectiveResource, page, size, committedQuery))],
     queryFn: () => effectiveAdvancedRequest
       ? searchWorkbenchRecords(effectiveModule, effectiveResource, effectiveAdvancedRequest)
       : fetchWorkbenchRecords({ module: effectiveModule, resource: effectiveResource, page, size, query: committedQuery }),
     enabled: recordsEnabled,
+    retry: false, staleTime: 0, gcTime: 0, refetchOnWindowFocus: true,
   });
 
   const fieldCandidates = useMemo(() => {
-    const fields = new Set<string>();
-    if (descriptor) {
-      fields.add(descriptor.idField);
-      descriptor.searchableFields.forEach((field) => fields.add(field));
-    }
-    recordsQuery.data?.items.forEach((item) => Object.keys(item.attributes ?? {}).forEach((field) => fields.add(field)));
-    return Array.from(fields).sort();
-  }, [descriptor, recordsQuery.data]);
+    if (!descriptor) return [];
+    // Only backend-published searchable fields; never derive allowed filters from row data.
+    return [...new Set([descriptor.idField, ...descriptor.searchableFields])].sort();
+  }, [descriptor]);
+  const registerState = authorizedRegisterState(recordsEnabled, recordsQuery, { page, size }, {
+    loading: t('workbench.loadingRecords'),
+    empty: t('workbench.emptyRecords'),
+    denied: t('workbench.capabilityUnavailable'),
+    failed: t('workbench.errors.generic'),
+  });
 
   const selectModule = (module: string) => {
     drawer.closeDrawer();
@@ -110,9 +130,12 @@ export function OperationalWorkbenchPage() {
   };
 
   const applyAdvanced = () => {
+    if (!descriptor || !permissions.can(WORKBENCH_PERMISSIONS.search) ||
+      (advanced.filterField && !fieldCandidates.includes(advanced.filterField)) ||
+      (advanced.sortBy && !fieldCandidates.includes(advanced.sortBy))) return;
     drawer.closeDrawer();
-    const filters = advanced.filterField && advanced.filterValue
-      ? { [advanced.filterField]: advanced.filterValue }
+    const filters = advanced.filterField && advanced.filterValue.trim()
+      ? { [advanced.filterField]: advanced.filterValue.trim() }
       : {};
     setPage(0);
     setCommittedQuery(queryInput.trim());
@@ -135,7 +158,7 @@ export function OperationalWorkbenchPage() {
     setAdvancedRequest(null);
   };
 
-  if (!permissions.can(WORKBENCH_PERMISSIONS.modulesRead)) {
+  if (!canModules) {
     return (
       <Container maxWidth="xl" sx={{ py: 4 }}>
         <Alert severity="warning">{t('workbench.capabilityUnavailable')}</Alert>
@@ -143,7 +166,7 @@ export function OperationalWorkbenchPage() {
     );
   }
 
-  if (modulesQuery.isLoading) {
+  if (modulesQuery.isPending || modulesQuery.isFetching) {
     return <WorkbenchLoadingState label={t('workbench.loadingModules')} />;
   }
   if (modulesQuery.error) {
@@ -167,15 +190,15 @@ export function OperationalWorkbenchPage() {
       <Alert severity="info" sx={{ mt: 2 }}>{t('workbench.secondaryNotice')}</Alert>
 
       <Paper variant="outlined" sx={{ mt: 2, p: 2 }}>
-        {!permissions.can(WORKBENCH_PERMISSIONS.resourcesRead) ? <Alert severity="warning">{t('workbench.capabilityUnavailable')}</Alert> : null}
-        {resourcesQuery.isLoading ? <WorkbenchLoadingState label={t('workbench.loadingResources')} /> : null}
-        {resourcesQuery.error ? <WorkbenchErrorState error={resourcesQuery.error} onRetry={() => { void resourcesQuery.refetch(); }} /> : null}
-        {resourcesQuery.data && resourcesQuery.data.length === 0 ? <WorkbenchEmptyState message={t('workbench.emptyResources')} /> : null}
-        {resourcesQuery.data?.length ? (
+        {!canResources ? <Alert severity="warning">{t('workbench.capabilityUnavailable')}</Alert> : null}
+        {canResources && (resourcesQuery.isPending || resourcesQuery.isFetching) ? <WorkbenchLoadingState label={t('workbench.loadingResources')} /> : null}
+        {canResources && resourcesQuery.error ? <WorkbenchErrorState error={resourcesQuery.error} onRetry={() => { void resourcesQuery.refetch(); }} /> : null}
+        {canResources && resourcesQuery.isSuccess && !resourcesQuery.isFetching && admittedResources.length === 0 ? <WorkbenchEmptyState message={t('workbench.emptyResources')} /> : null}
+        {admittedResources.length > 0 ? (
           <WorkbenchToolbar
             advanced={advanced}
             fieldCandidates={fieldCandidates}
-            modules={modulesQuery.data}
+            modules={admittedModules}
             onAdvancedChange={setAdvanced}
             onAdvancedSearch={applyAdvanced}
             onBasicSearch={basicSearch}
@@ -184,8 +207,8 @@ export function OperationalWorkbenchPage() {
             onReset={resetSearch}
             onResourceChange={selectResource}
             query={queryInput}
-            resources={resourcesQuery.data}
-            searchEnabled={permissions.can(WORKBENCH_PERMISSIONS.search)}
+            resources={admittedResources}
+            searchEnabled={canResources && permissions.can(WORKBENCH_PERMISSIONS.search)}
             selectedModule={effectiveModule}
             selectedResource={effectiveResource}
           />
@@ -201,14 +224,12 @@ export function OperationalWorkbenchPage() {
       ) : null}
 
       <Box sx={{ mt: 2 }}>
-        {effectiveResource && !recordsEnabled ? <Alert severity="warning">{t('workbench.capabilityUnavailable')}</Alert> : null}
-        {recordsQuery.isLoading && effectiveResource ? <WorkbenchLoadingState label={t('workbench.loadingRecords')} /> : null}
-        {recordsQuery.error ? <WorkbenchErrorState error={recordsQuery.error} onRetry={() => { void recordsQuery.refetch(); }} /> : null}
-        {recordsQuery.data && recordsQuery.data.items.length === 0 ? <WorkbenchEmptyState message={t('workbench.emptyRecords')} /> : null}
-        {descriptor && recordsQuery.data && recordsQuery.data.items.length > 0 ? (
+        {descriptor ? (
           <WorkbenchDataGrid
             descriptor={descriptor}
-            detailEnabled={permissions.can(WORKBENCH_PERMISSIONS.detailRead) && recordsQuery.isSuccess && !recordsQuery.isFetching}
+            state={registerState}
+            detailEnabled={permissions.can(WORKBENCH_PERMISSIONS.detailRead) && recordsEnabled &&
+              registerState.kind === 'ready'}
             onInspect={(record) => {
               if (!recordsEnabled || !permissions.can(WORKBENCH_PERMISSIONS.detailRead)
                 || recordsQuery.isFetching || !recordsQuery.isSuccess
@@ -222,7 +243,6 @@ export function OperationalWorkbenchPage() {
             }}
             onPageChange={(nextPage) => { drawer.closeDrawer(); setPage(nextPage); }}
             onPageSizeChange={(nextSize) => { drawer.closeDrawer(); setSize(nextSize); setPage(0); }}
-            page={recordsQuery.data}
           />
         ) : null}
       </Box>

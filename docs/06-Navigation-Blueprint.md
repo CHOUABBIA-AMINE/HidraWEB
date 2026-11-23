@@ -508,3 +508,40 @@ separately; there is no fabricated document/asset link. Browser tests verify
 the actual supported targets, and unit/component tests verify malicious
 IDs, missing admission and return-context invalidation. This is
 development qualification only, not production or OT acceptance.
+
+
+## P5 / UXR-17 — reusable authorized paginated registers (23 November 2026)
+
+`src/shell/register/AuthorizedRegister.tsx` presents a generic owner-issued
+server page with exact columns, totals, page/size controls, optional row
+selection and optional owner-permitted export. It has no HTTP integration,
+search heuristics or privilege inference. The pure
+`authorizedRegisterState` admission contract checks requested page/size
+against owner metadata, nonnegative integral counts, consistent totalPages,
+page capacity and a confirmed ready query. All non-ready states suppress
+cached rows, inferred counts, actions and export; they do not render
+protected child content during reload, error or denied capability.
+
+The secondary `/workbench` adapts this primitive to its existing
+HWEB-003 generated DTOs. Module, descriptor, list and search requests
+require current ready grants. In-memory cache identity includes principal,
+selected scope and effective permission snapshot; after scope/permission
+changes stale responses never become visible through a generic fallback.
+Descriptor fields `idField` and `searchableFields` alone determine
+filter/sort candidates, not opaque attributes found in returned records.
+The Workbench adapter rejects a page or item claiming an owner other than
+the exact requested module/resource; unknown or corrupt owner identity does
+not become a visible count or table row. Owner-provided page coordinates,
+size and totals govern paging. Selecting a row still invokes the UXR-14
+fresh exact-id GET with current permission and record-identity checks.
+
+The registered page/export goals are only implemented where sources permit:
+server offset paging and total count are available in Workbench, but
+no cursor token or export transport contract was established in the pinned
+frontend source. No export button is enabled, and no client aggregation,
+search over cached rows, inferred resource join, generic document export or
+backend permission is fabricated. Other specialist domain registers can
+adopt the reusable component only after their own owner-read and permission
+mapping is verified. The added synthetic tests and denied-response browser
+regression are necessary but not sufficient for native role/company masking
+or industrial acceptance.

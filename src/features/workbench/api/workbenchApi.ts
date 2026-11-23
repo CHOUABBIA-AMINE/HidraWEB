@@ -75,6 +75,10 @@ function normalizeRecord(
   const module = value.module ?? fallbackModule;
   const resource = value.resource ?? fallbackResource;
   if (!module || !resource) return null;
+  if ((fallbackModule && module !== fallbackModule) ||
+      (fallbackResource && resource !== fallbackResource)) {
+    throw new Error('Owner workbench record does not match the requested resource.');
+  }
   return {
     module,
     resource,
@@ -84,9 +88,12 @@ function normalizeRecord(
 }
 
 function normalizePage(value: OperationalPageResponse, module: string, resource: string): WorkbenchPage {
+  if ((value.module && value.module !== module) || (value.resource && value.resource !== resource)) {
+    throw new Error('Owner workbench page does not match the requested resource.');
+  }
   return {
-    module: value.module ?? module,
-    resource: value.resource ?? resource,
+    module,
+    resource,
     page: value.page ?? 0,
     size: value.size ?? 0,
     totalElements: value.totalElements ?? 0,
@@ -106,7 +113,8 @@ export async function fetchWorkbenchResources(module: string): Promise<Workbench
     method: 'GET',
     url: `/api/v1/workbench/${segment(module)}/resources`,
   });
-  return response.map(normalizeDescriptor).filter((item): item is WorkbenchResourceDescriptor => item !== null);
+  return response.map(normalizeDescriptor).filter((item): item is WorkbenchResourceDescriptor =>
+    item !== null && item.module === module);
 }
 
 export interface WorkbenchListRequest {

@@ -5111,3 +5111,80 @@ and retained W4), A1 native W1–W4 fresh PostgreSQL, F18 LOCAL and
 Documentation Validation. Scope gaps remain recorded after green CI; do
 not call all intended owner handoffs complete without separate evidence.
 UXR-17 remains the next registered unselected stage.
+
+
+### P4 / UXR-16 — exact-SHA CI acceptance (23 November 2026)
+
+HidraWEB `main` commit `2c9a16ba85b90e97cf3b3c8213352157e51f3440`
+(tree `fb10bb7fb22df4e6bf41ba4b47ebcf3d725ac5e2`) passed
+[Code CI #1087](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45140475454)
+with full `verify`, A1 native PostgreSQL/API W1–W4 and F18 LOCAL, and
+[Documentation Validation #123](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45140475436).
+UXR-16 is **CI-passed for implemented Topology/Workflow handoffs**; this is
+not engineering, production or SITE/OT acceptance. The previously recorded
+Documents, dossier, restriction request and cross-owner integration gaps
+remain open and are not silently accepted.
+
+### P5 / UXR-17 — AuthorizedRegister and owner filters (23 November 2026)
+
+**Stage selection and envelope:** Owner selected UXR-17 by `Next` after
+UXR-16 exact-SHA success. Registered intent is a reusable register with
+owner paging/totals, typed searchable filters, current-row selection and
+loading/empty/denied/failure/export gates, adopted in the secondary
+`/workbench` support route. Source-pinned HWEB-003 Workbench offers:
+`GET /api/v1/workbench/modules`,
+`GET /api/v1/workbench/{module}/resources`,
+`GET /api/v1/workbench/{module}/{resource}`,
+`GET /api/v1/workbench/{module}/{resource}/{id}` and
+`POST /api/v1/workbench/{module}/{resource}/search`.
+Its resource descriptor supplies searchable fields and ID column; page
+responses supply page, size, totalElements, totalPages and records.
+No general cursor, export operation or extra backend query contract was
+verified for this stage. Do not invent or enable these abilities.
+
+**Implementation message:** `feat(workspace): add UXR-17 admitted paginated register`.
+CREATE `src/shell/register/authorizedRegisterState.ts` (generic owner-issued
+page and discriminated admission states), `AuthorizedRegister.tsx` (MUI
+accessible table, server page/size controls, owner-permitted selection and
+optional explicitly permitted export affordance), and their respective unit
+and component tests. UPDATE
+`src/features/workbench/components/WorkbenchDataGrid.tsx` to adopt the
+reusable register and source-only columns; UPDATE
+`src/features/workbench/OperationalWorkbenchPage.tsx` to gate modules,
+resource descriptors and records by ready effective grants, isolate queries
+by viewer/principal and operational scope, hide cached rows/counts during
+revalidation, bind page and size to response metadata, restrict advanced
+filter and sort candidates to owner-published descriptor fields, and retain
+fresh exact-ID inspection through UXR-14. UPDATE
+`src/features/workbench/api/workbenchApi.ts` and
+`workbenchApi.test.ts` to reject cross-owner page/record identities and
+unrelated module descriptors, preserving existing generated DTO mappings.
+CREATE `tests/e2e/authorized-register.spec.ts` to check page coordinates,
+source rows, Inspect capability, no invented export and no stale rows after
+403. UPDATE `docs/06-Navigation-Blueprint.md` and this append-only
+canonical roadmap. DELETE none. No backend, pinned OpenAPI, permissions,
+CI workflows, migrations, production data or simulation assets change.
+
+**Boundary and limitations:** `AuthorizedRegister` is a rendering contract,
+not a source of authorization, joins or totals. Its `ready` payload must
+contain numeric page/size/count data matching the requested owner
+coordinates; malformed pages fail closed. Empty, permission-denied,
+loading and failed states render no previous rows, counts, select buttons or
+export action. The generic workbench keeps backend-authoritative
+allowlisted resource access. Search filters/sort fields are drawn only from
+`idField` and `searchableFields`; POST body retains owner-defined types.
+The only row selection implemented is its existing exact fresh owner GET in
+the contextual drawer. `/workbench` remains secondary rather than
+replacing domain-specific screens. Cursor paging and export are not claimed
+because their owner contracts/permissions are not established. Qualifying
+cross-module specialized registers, masked counts for each native role,
+company/resource scope and high-volume paging require their own exact
+backend-owner evidence. Synthetic component and browser fixtures do not
+establish native-role, production or SITE acceptance.
+
+**Acceptance pending on implementation SHA:** pinned OpenAPI compatibility,
+lint, TypeScript, complete unit/component/contract tests, performance,
+production bundle/release verification, Chromium including new denied
+register scenario, native A1 PostgreSQL/API W1–W4, F18 LOCAL, and
+Documentation Validation. UXR-17 remains *implemented, not CI-passed* until
+these exact-SHA checks pass. Next registered stage is P5 UXR-18, unselected.
