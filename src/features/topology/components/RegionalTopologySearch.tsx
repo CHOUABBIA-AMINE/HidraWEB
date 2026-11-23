@@ -271,10 +271,9 @@ export function RegionalTopologySearch() {
                       ariaLabel={t('topology.regional.mapTitle')}
                       data={mapData}
                       onFeatureSelect={onMapSelect}
-                      selectedFeatureId={mapFeatures.find(feature => {
-                        const current = regionalFeatureReference(feature);
-                        return current?.layer === ref?.layer && current.entityId === ref?.entityId;
-                      })?.id}
+                      selectedFeatureId={ref
+                        ? mapFeatures.find(feature => exactRegionalFeature(feature, ref))?.id
+                        : undefined}
                     />
                   </WorkspaceCanvas>
                   {mapState.kind === 'ready' && mapResponse ? (

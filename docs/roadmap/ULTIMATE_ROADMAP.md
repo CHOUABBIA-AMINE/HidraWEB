@@ -6045,3 +6045,10 @@ in force; this is not a waiver of security or tests.
 NEW EXACT-SHA CODE CI**. No claim of CI pass or successful
 native qualification on this repair is made before CI
 concludes. P6 / UXR-23 remains **NOT SELECTED**.
+
+
+### P6 / UXR-22 — Code CI #1103 TypeScript repair (23 November 2026)
+
+[Code CI #1103](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45177911401) on `9c7b454c4fd8a40e3f72f5dbb690ca5f7bbae758` failed Typecheck with TS18048 in `RegionalTopologySearch.tsx`. Comparing two optional layers could evaluate true when both references were absent, leaving the next property access unsafe. Lint, both native qualification jobs, and [Documentation Validation #140](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45177911145) passed. The main job stopped before unit, build and full browser verification.
+
+Update only `src/features/topology/components/RegionalTopologySearch.tsx` and append this record. Require a parsed selection before highlighting a map feature and reuse the existing exact owner-layer and entity match. Exact commit message: `fix(topology): guard UXR-22 map feature selection`. UXR-22 acceptance requires fresh exact-SHA Code CI and Documentation Validation. UXR-23 remains next.
