@@ -583,3 +583,32 @@ confirm changed version and expected task status before success is shown;
 unknown outcomes request refresh and never automatically replay commands.
 Other domain commands remain subject to separate owner contract admission.
 Synthetic fixtures do not provide production/SITE acceptance.
+
+## UXR-19 — accessible review dialog and safe owner feedback (23 November 2026)
+
+`src/shell/overlay/ReviewDialog.tsx` reuses MUI modal focus trapping,
+Escape/backdrop dismissal and focus return with an accessible heading and
+description, typed confirmation, inline mismatch feedback, pending
+protection and immediate removal of the confirmation input when current
+owner admission is revoked. The existing destructive-administration
+dialog delegates to this reusable presentation boundary, preserving the
+previous warning, exact confirmation phrase and owner-provided audit
+reference. Displaying a modal never confers permission or proves an
+audit record.
+
+`src/shell/feedback/OwnerFeedbackBanner.tsx` renders accessible owner
+errors, verified-success and readback-unverified messages. Its classifier
+makes 403 and masked 404 indistinguishable; does not display raw backend
+error content; and displays only constrained opaque diagnostic references
+for permitted troubleshooting contexts. Distinguish 401, 409, 422 and
+unavailable conditions without disclosing protected existence. A 409
+or an unknown durable-readback outcome offers only an explicit owner
+refresh. It never automatically replays a mutation or announces success
+on command acknowledgement alone.
+
+The Workflow task workspace adopts this feedback primitive while
+preserving current task-and-action eligibility revalidation,
+expectedTaskUpdatedAt and independent persisted status/revision
+readback. The already implemented ContextInspector remains the separate
+temporary drawer, with retained RTL, Escape, focus trap and return-focus
+behavior. All examples remain synthetic development fixtures.

@@ -21,7 +21,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useSearchParams } from 'react-router';
 
-import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
 import type { AvailableActionView, ExecuteWorkflowTransitionRequest, TaskView } from '@/api/generated/workflow/model';
 import { usePermissions } from '@/features/permissions/usePermissions';
 import {
@@ -44,6 +43,8 @@ import { ContextLink } from '@/shell/navigation/ContextLink';
 import { ContextReturnLink } from '@/shell/navigation/ContextReturnLink';
 import { AuthorizedActionPanel, type AuthorizedActionPanelState } from '@/shell/actions/AuthorizedActionPanel';
 import { TypedForm } from '@/shell/actions/TypedForm';
+import { OwnerFeedbackBanner } from '@/shell/feedback/OwnerFeedbackBanner';
+import { classifyOwnerError } from '@/shell/feedback/ownerFeedback';
 import { WorkspaceHeading } from '@/shell/workspace/WorkspaceHeading';
 import { WorkspaceToolbar } from '@/shell/workspace/WorkspaceToolbar';
 import { WorkspaceCanvas, type WorkspaceCanvasState } from '@/shell/workspace/WorkspaceCanvas';
@@ -51,10 +52,12 @@ import { WorkspaceCanvas, type WorkspaceCanvasState } from '@/shell/workspace/Wo
 const INBOX_SIZE = 50;
 
 export function workflowErrorMessage(error: unknown): string {
-  const normalized = normalizeHidraApiError(error);
-  if (normalized.status === 403) return 'HidraAPI refused workflow access.';
-  if (normalized.status === 409) return 'The task changed. Refresh the task and available actions before retrying.';
-  return normalized.message || 'Workflow data could not be loaded.';
+  const kind = classifyOwnerError(error).kind;
+  if (kind === 'denied') return 'HidraAPI refused workflow access.';
+  if (kind === 'conflict') return 'The task changed. Refresh the task and available actions before retrying.';
+  if (kind === 'authentication') return 'Authentication required. Sign in again before accessing workflow data.';
+  if (kind === 'validation') return 'The workflow request was rejected. Review the supplied fields.';
+  return 'Workflow data could not be loaded.';
 }
 
 function TaskSummary({ task, onOpen, onHandoff }: { task: TaskView; onOpen: () => void; onHandoff: () => void }) {
@@ -220,6 +223,16 @@ export function WorkflowTasksPage() {
     setSearchParams(next);
   };
   const closeTask = () => selectTask('');
+  const refreshSelectedTask = async () => {
+    if (!canTasks || !selectedTaskId || transitionMutation.isPending) return;
+    const refreshed = await Promise.all([taskQuery.refetch(), actionsQuery.refetch()]);
+    if (refreshed.every(result => result.status === 'success')) {
+      setActionSelection(null);
+      setConfirmed(false);
+      setReadbackNotice('');
+      transitionMutation.reset();
+    }
+  };
 
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
@@ -249,10 +262,17 @@ export function WorkflowTasksPage() {
         ) : null}
 
         {!canTasks ? <Alert severity="warning">{t('workflow.unavailable')}</Alert> : null}
-        {firstError ? <Alert severity="error">{workflowErrorMessage(firstError)}</Alert> : null}
-        {transitionMutation.error ? <Alert severity="error">{workflowErrorMessage(transitionMutation.error)}</Alert> : null}
-        {successMessage ? <Alert severity="success">{successMessage}</Alert> : null}
-        {readbackNotice ? <Alert severity="warning">{readbackNotice}</Alert> : null}
+        {firstError ? <OwnerFeedbackBanner kind="error" error={firstError} message={workflowErrorMessage(firstError)} /> : null}
+        {transitionMutation.error ? (
+          <OwnerFeedbackBanner kind="error" error={transitionMutation.error}
+            message={workflowErrorMessage(transitionMutation.error)}
+            onReview={() => { void refreshSelectedTask(); }} />
+        ) : null}
+        {successMessage ? <OwnerFeedbackBanner kind="success" message={successMessage} /> : null}
+        {readbackNotice ? (
+          <OwnerFeedbackBanner kind="unverified" message={readbackNotice}
+            onReview={() => { void refreshSelectedTask(); }} />
+        ) : null}
         {canInstances && linkedInstanceId && !selectedTaskId ? (
           <Paper variant="outlined" sx={{ p: 2 }}>
             <Stack spacing={1}>
@@ -281,7 +301,7 @@ export function WorkflowTasksPage() {
                     <Button disabled={transitionMutation.isPending} onClick={closeTask} size="small">{t('workflow.close')}</Button>
                   </Box>
                   {currentTask ? <Stack spacing={0.5}><Typography>{t('workflow.status')}: {currentTask.status ?? '—'}</Typography><Typography>{t('workflow.step')}: {currentTask.stepId ?? '—'}</Typography><Typography>{t('workflow.sla')}: {currentTask.slaStatus ?? '—'}</Typography><Typography>{t('workflow.due')}: {currentTask.dueAt ?? '—'}</Typography></Stack> : null}
-                  <Button disabled={transitionMutation.isPending} onClick={async () => { const refreshed = await Promise.all([taskQuery.refetch(), actionsQuery.refetch()]); if (refreshed.every(r => r.status === 'success')) { setActionSelection(null); setConfirmed(false); setReadbackNotice(''); transitionMutation.reset(); } }}>{t('workflow.refresh')}</Button>
+                  <Button disabled={transitionMutation.isPending} onClick={() => { void refreshSelectedTask(); }}>{t('workflow.refresh')}</Button>
                   <Divider />
                   <AuthorizedActionPanel<AvailableActionView>
                     label={t('workflow.availableActions')} state={actionState}

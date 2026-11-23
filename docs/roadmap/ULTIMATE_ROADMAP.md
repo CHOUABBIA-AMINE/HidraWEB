@@ -5443,3 +5443,59 @@ performance budgets, release checks, full mocked Chromium with strict
 report evaluation, A1 native PostgreSQL/API W1–W4, F18 LOCAL, and
 Documentation Validation. Wait for exact-SHA CI evidence; do not
 mark this maintenance package CI-PASSED before the workflow completes.
+
+
+### P5 / UXR-19 — owner Next, admission and bounded source change (23 November 2026)
+
+**Previous gate:** The CI-quality corrective at
+`bb1d6c757ada2fe377b5741f198ed22b50628bab` (tree
+`61dbc39befafca02e469d319b6e6582644e338f9`) passed
+[Code CI #1094](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45154061098)
+and [Documentation Validation #130](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45154061083)
+on that exact SHA, with general, A1 native JWT/PostgreSQL W1–W4 and
+F18 LOCAL gates. The owner then issued `Next`, selecting only the
+registered P5 / UXR-19 frontend-local overlay/dialog/feedback stage.
+UXR-20 remains unselected.
+
+**Exact commit message:**
+`feat(workspace): add UXR-19 accessible review and owner feedback`.
+
+**Scope and ownership:** CREATE
+`src/shell/overlay/ReviewDialog.tsx` and its
+`ReviewDialog.test.tsx`, reusable accessible MUI modal framing with
+exact phrase, inline validation, pending guard and current-admission
+unmount. UPDATE
+`src/features/administration/DestructiveActionConfirmationDialog.tsx`
+to delegate to that primitive, retaining the historical confirmation
+and owner-reference presentation. CREATE
+`src/shell/feedback/ownerFeedback.ts`,
+`src/shell/feedback/OwnerFeedbackBanner.tsx` and
+`src/shell/feedback/OwnerFeedbackBanner.test.tsx` for safe 401,
+403/masked 404, 409, 422 and unavailable presentation, accessible
+success/unknown-outcome feedback and manually initiated review.
+UPDATE `src/features/workflow/WorkflowTasksPage.tsx` and
+`WorkflowTasksPage.error.test.ts` to use non-disclosing messages and
+manual re-read after stale or unknown command outcomes; retain existing
+action authorization and independent durable status/version readback.
+UPDATE `src/shared/i18n/resources.ts` with French, English and
+Arabic messages. APPEND `docs/06-Navigation-Blueprint.md` and this
+canonical roadmap with rationale and evidence. **DELETE none.**
+
+**Safety and scope invariants:** No dialog, toast or client-side
+permission decision is an authorization authority. Both protected
+resource denial (403) and masked non-existence (404) render the same
+non-disclosing feedback. No command replay is performed after unknown
+outcomes; no success is claimed before fresh owner readback confirms
+identity, status and changed revision. Only syntactically constrained
+diagnostic references may be displayed; no raw ProblemDetail.
+Preserve six shell groups, native ContextInspector focus/RTL behavior,
+existing routes, current backend OpenAPI pins, PostgreSQL tests,
+performance and release limits. No OT/SCADA integration, operational
+data or unapproved backend/migration changes.
+
+**Status:** IMPLEMENTED / CI PENDING on the new UXR-19 SHA.
+**Exact-SHA acceptance remaining:** Source OpenAPI integrity, lint and
+TypeScript, existing and new Vitest and Node contract tests, performance
+and production/release checks, complete Chromium with verified no-flaky
+gate, A1 native JWT/PostgreSQL W1–W4, F18 LOCAL and Documentation
+Validation. Product, security and SITE acceptance are not inferred.
