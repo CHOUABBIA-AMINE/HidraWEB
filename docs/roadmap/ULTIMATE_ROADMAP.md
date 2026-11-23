@@ -5499,3 +5499,49 @@ TypeScript, existing and new Vitest and Node contract tests, performance
 and production/release checks, complete Chromium with verified no-flaky
 gate, A1 native JWT/PostgreSQL W1–W4, F18 LOCAL and Documentation
 Validation. Product, security and SITE acceptance are not inferred.
+
+### P5 / UXR-19 — Code CI #1095 unit localization repair (23 November 2026)
+
+**Failed exact-source evidence:** Implementation
+`1fd01537d358b8abf55d241815504848bfd2e481`
+(tree `752fc1f3ee0de4ca3e03c14cae6f9109c28088b7`) produced
+[Code CI #1095](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45155951388),
+**failure in `verify` → `Unit and component tests`**: 91 Vitest
+files and 267 tests passed; one new UXR-19 feedback test failed at
+`src/shell/feedback/OwnerFeedbackBanner.test.tsx:38`.
+The test rendered without the application's `I18nextProvider`,
+therefore `t('ownerFeedback.reference', { id: 'corr-123' })`
+produced the literal `ownerFeedback.reference` rather than
+interpolated support text; the `corr-123` assertion was not found.
+The new modal test similarly did not verify real translated keys.
+Source-pinned OpenAPI, lint and typecheck passed; the independent
+A1 native PostgreSQL/API W1-W4 and F18 LOCAL jobs passed.
+Performance, build, release and mocked Chromium were skipped after
+the unit-test failure.
+[Documentation Validation #131](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45155951495)
+passed on the implementation SHA.
+
+**Bounded repair message:**
+`test(workspace): provide app i18n to UXR-19 component tests`.
+
+**Scope:** UPDATE only
+`src/shell/feedback/OwnerFeedbackBanner.test.tsx` and
+`src/shell/overlay/ReviewDialog.test.tsx` to wrap rendered and
+rerendered components with the existing application
+`I18nextProvider/i18n`, matching
+`src/shell/evidence/EvidencePresentation.test.tsx`. Retain the
+original strict 403/masked-404, 401/409/422/5xx, safe reference,
+unknown-outcome, exact phrase, loss-of-admission and pending-control
+assertions; additionally assert genuine localized support-reference
+interpolation and mismatch feedback rather than untranslated keys.
+Append this evidence in the canonical roadmap. DELETE none.
+No production runtime component, auth rule, mutation/retry contract,
+OpenAPI/backend pin, migration, native test, CI workflow or budget
+changes are authorized in this repair.
+
+**Acceptance pending on repair SHA:** All previously required
+source contract, lint/typecheck, full unit/Node, performance,
+release/package, full Chromium without flakes, native A1 W1–W4,
+F18 LOCAL, and Documentation Validation gates. UXR-19 remains
+IMPLEMENTED / CI PENDING until exact-SHA success; UXR-20 remains
+unselected.
