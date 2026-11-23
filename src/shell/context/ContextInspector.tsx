@@ -1,6 +1,6 @@
 import CloseIcon from '@mui/icons-material/Close';
 import { Box, Divider, Drawer, IconButton, Typography } from '@mui/material';
-import { useId, type ReactNode } from 'react';
+import { useId, useRef, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface ContextInspectorProps {
@@ -19,6 +19,7 @@ interface ContextInspectorProps {
 export function ContextInspector({ open, title, children, onClose }: ContextInspectorProps) {
   const { t, i18n } = useTranslation();
   const titleId = useId();
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   return (
     <Drawer
@@ -27,6 +28,12 @@ export function ContextInspector({ open, title, children, onClose }: ContextInsp
       open={open}
       variant="temporary"
       slotProps={{
+        // MUI's modal focus trap initially focuses the drawer container.
+        // Once its slide transition has entered, move focus to the explicit
+        // Close action without disabling focus containment or restoration.
+        transition: {
+          onEntered: () => closeButtonRef.current?.focus(),
+        },
         paper: {
           role: 'dialog',
           'aria-modal': true,
@@ -44,7 +51,7 @@ export function ContextInspector({ open, title, children, onClose }: ContextInsp
         <Typography component="h2" id={titleId} sx={{ minWidth: 0, overflowWrap: 'anywhere' }} variant="h6">
           {title ?? t('shell.contextDrawer')}
         </Typography>
-        <IconButton aria-label={t('shell.closeDrawer')} autoFocus onClick={onClose}>
+        <IconButton aria-label={t('shell.closeDrawer')} onClick={onClose} ref={closeButtonRef}>
           <CloseIcon />
         </IconButton>
       </Box>

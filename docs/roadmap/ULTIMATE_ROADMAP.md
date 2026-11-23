@@ -4917,3 +4917,35 @@ current exact-record identity and successful authorized read. No production
 component, backend calls, permissions, tests, migrations, OpenAPI pins or CI
 thresholds removed or weakened. The pending acceptance is new exact-SHA full
 Code CI plus Documentation CI; UXR-15 remains unselected.
+
+
+### P4 / UXR-14 — Code CI #1083 Chromium initial-focus repair (23 November 2026)
+
+**Exact-SHA evidence:** `b797b1f02a9c31d7dcd972740daf74211731d127`, tree
+`2e146f5e3d900027232d8463f94557db8942798b`. [Code CI #1083](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45076304158)
+completed FAILURE only in the `verify` job's full Playwright regression
+(105 passed, 15 skipped, one failed, including two repeat failures of the
+same assertion). OpenAPI compatibility, lint, TypeScript, 229 unit/component
+tests, 99 node contract tests, six performance tests, build, and release
+artifact verification succeeded before that failure. The isolated failing
+browser assertion at `tests/e2e/context-inspector.spec.ts:56` requires the
+context drawer's Close button to receive initial keyboard focus. Chromium
+found the authorized feature and the labelled dialog, but the Close control
+remained `inactive` throughout the 5-second assertion despite its React
+`autoFocus` prop. MUI's modal focus trap may focus the container after
+child-mount autofocus; this ordering is the targeted cause, not a reason to
+remove the focus assertion. Independent A1 native PostgreSQL/API, F18 LOCAL
+and [Documentation CI #119](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45076304048)
+succeeded. The remaining keyboard-dismissal/mobile assertions were not
+reached and are not yet proven.
+
+**Repair message:** `fix(workspace): focus UXR-14 close action after drawer entry`.
+UPDATE only `src/shell/context/ContextInspector.tsx`: attach an explicit
+Close-button ref; on MUI Slide `onEntered` focus the button after modal
+initialization/entry, rather than relying solely on child `autoFocus`.
+Retain MUI temporary modal focus trap, Escape/backdrop handling and focus
+restoration, aria-labelled dialog, narrow and RTL layouts, and all existing
+Playwright assertions including return-to-invoker focus. Append this
+roadmap entry, do not weaken tests or change owner authorization/REST calls.
+Full Code CI and Documentation CI on the repaired SHA remain mandatory;
+UXR-15 stays unselected.
