@@ -108,7 +108,8 @@ describe('HWEB-015-08 production performance budgets', () => {
       { i18n },
       createElement(WorkbenchDataGrid, {
         descriptor,
-        page,
+        // UXR-17 requires an admitted owner page; do not bypass the fail-closed register.
+        state: { kind: 'ready' as const, page },
         detailEnabled: true,
         onInspect: () => undefined,
         onPageChange: () => undefined,

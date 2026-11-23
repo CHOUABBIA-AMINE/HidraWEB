@@ -5224,3 +5224,41 @@ workflow transition, CI, migration, or unrelated file modification.
 browser regressions, native A1 W1–W4, F18 LOCAL, source-pinned OpenAPI,
 release validation and Documentation CI. The UXR-17 CI gate remains open
 until the repair SHA passes; UXR-18 remains unselected.
+
+
+### P5 / UXR-17 — Code CI #1089 performance fixture repair (23 November 2026)
+
+**Observed exact-SHA result:** Repair commit
+`fba0478ba6815ae375716ec9a94dc71a666fc929` (tree
+`203c8b07d52051afe7cef2dc8d26813cc2f9eac8`) produced
+[Code CI #1089](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45143612502),
+**failure** in `verify` at `Performance tests`. OpenAPI compatibility,
+lint, TypeScript, unit/component tests and Node contract checks passed.
+The A1 native PostgreSQL/API browser qualification and F18 LOCAL jobs passed.
+[Documentation Validation #125](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45143612655)
+passed. The `verify` production build, release packaging and Chromium suite
+were skipped after the performance test failed.
+
+**Confirmed root cause:** `tests/performance/production-hardening-performance.perf.ts`
+retained the removed `page` prop on `WorkbenchDataGrid`. The UXR-17
+component now requires the discriminated `state` prop, so rendering
+the 200-row benchmark failed with `TypeError: Cannot read properties
+of undefined (reading 'kind')` at
+`src/features/workbench/components/WorkbenchDataGrid.tsx:33`.
+This was a stale test call site, not evidence of a measured performance
+budget regression or a failed owner-data authorization rule.
+
+**Bounded repair:** `fix(workspace): align UXR-17 performance fixture with admitted page`.
+UPDATE only the affected performance test to pass
+`state: { kind: 'ready', page }` using its existing synthetic
+owner-issued Workbench fixture. Preserve the full **200-row** page,
+**1,500 ms** hosted-CI budget, both previous row/cell assertions, and
+the separate topology and ECharts budgets. Append this truthful CI
+finding without modifying any application code, production performance
+threshold, backend contract, permission, source OpenAPI pin or existing
+test requirement. DELETE none.
+
+**Remaining exact-SHA acceptance:** Full Code CI `verify` including
+performance, production build, artifact verification and Chromium; native
+A1 and F18; Documentation Validation. UXR-17 is still **not CI-passed**
+until the new source SHA satisfies these gates. UXR-18 remains unselected.
