@@ -10,7 +10,7 @@ import {
   registerMaintainableAsset,
   updateMaintainableAsset,
 } from '@/features/assets/api/assetsApi';
-import { createIntegrityAssessment } from '@/features/integrity/api/integrityApi';
+import { createIntegrityAssessment, fetchIntegrityMaintenanceReceipt } from '@/features/integrity/api/integrityApi';
 
 describe('engineering typed API adapters', () => {
   beforeEach(() => httpClient.mockReset());
@@ -34,4 +34,26 @@ describe('engineering typed API adapters', () => {
     await createIntegrityAssessment(request);
     expect(httpClient).toHaveBeenCalledWith({ method: 'POST', url: '/api/v1/integrity/assessments', data: request });
   });
+  it('reads the exact approved finding receipt through the generated client', async () => {
+    const receipt = { findingId: 'finding/1', approvalId: 'approval/1', workOrderId: 'order-1' };
+    const { signal } = new AbortController();
+    httpClient.mockResolvedValueOnce(receipt);
+
+    await expect(fetchIntegrityMaintenanceReceipt(receipt.findingId, receipt.approvalId, signal)).resolves.toEqual(receipt);
+    expect(httpClient).toHaveBeenCalledWith({
+      method: 'GET',
+      url: '/api/v1/integrity/findings/finding%2F1/maintenance-handoffs/approval%2F1',
+      signal,
+    });
+  });
+
+  it.each([
+    { findingId: 'foreign-finding', approvalId: 'approval-1' },
+    { findingId: 'finding-1', approvalId: 'other-approval' },
+    {},
+  ])('rejects unbound receipt %j', async receipt => {
+    httpClient.mockResolvedValueOnce(receipt);
+    await expect(fetchIntegrityMaintenanceReceipt('finding-1', 'approval-1')).rejects.toThrow('does not match');
+  });
+
 });

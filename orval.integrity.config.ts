@@ -2,7 +2,7 @@ import { defineConfig } from 'orval';
 
 export default defineConfig({
   integrity: {
-    input: { target: './openapi/candidates/hidra-integrity-76b14cda4520f1eff242bd474c02ce4db317d385.json' },
+    input: { target: './openapi/candidates/hidra-integrity-uxr25.json' },
     output: {
       mode: 'single',
       target: './src/api/generated/integrity/integrity.ts',

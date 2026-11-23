@@ -7,21 +7,36 @@ import { fileURLToPath } from 'node:url';
 import { compareContractSlice } from './audit-openapi-drift.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const candidateName = 'hidra-integrity-76b14cda4520f1eff242bd474c02ce4db317d385.json';
+const candidateName = 'hidra-integrity-uxr25.json';
 const candidateFile = path.join(root, 'openapi/candidates', candidateName);
 const legacyFile = path.join(root, 'openapi/hidra-integrity-63f3f60974ce57eb8cd5e42910397615195624fb.json');
 const bytes = fs.readFileSync(candidateFile);
 const current = JSON.parse(bytes.toString('utf8'));
 const legacy = JSON.parse(fs.readFileSync(legacyFile, 'utf8'));
 
-test('Integrity contract is the exact verified backend source slice', () => {
+test('Integrity preserves the verified slice and adds one T18 handoff read', () => {
   assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),
-    '67e7cedbd59587b1f3af15ec83c3f9718f7c783dc40bc01597b0aef0ae3ebd79');
+    '045d153f219e3ac98cdd45be3eafb4636524c72773f25e01e4151bfb7ab95d45');
   assert.equal(current.openapi, '3.1.0');
-  assert.equal(Object.keys(current.paths).length, 7);
-  assert.equal(Object.keys(current.components.schemas).length, 6);
+  assert.equal(Object.keys(current.paths).length, 8);
+  assert.equal(Object.keys(current.components.schemas).length, 7);
   assert.equal(current.servers, undefined);
   assert.ok(Object.keys(current.paths).every((route) => route.startsWith('/api/v1/integrity/')));
+});
+
+test('typed handoff reads retain exact findings and approval identifiers', () => {
+  const priorBytes = fs.readFileSync(path.join(root, 'openapi/candidates', 'hidra-integrity-76b14cda4520f1eff242bd474c02ce4db317d385.json'));
+  assert.equal(crypto.createHash('sha256').update(priorBytes).digest('hex'), '67e7cedbd59587b1f3af15ec83c3f9718f7c783dc40bc01597b0aef0ae3ebd79');
+  const prior = JSON.parse(priorBytes);
+  for (const [route, methods] of Object.entries(prior.paths)) assert.deepEqual(current.paths[route], methods);
+  for (const [name, schema] of Object.entries(prior.components.schemas)) assert.deepEqual(current.components.schemas[name], schema);
+  const operations = current.paths['/api/v1/integrity/findings/{findingId}/maintenance-handoffs/{approvalId}'];
+  assert.deepEqual(Object.keys(operations), ['get']);
+  const read = operations.get;
+  assert.deepEqual(read.security, [{ hidraBearerJwt: [] }]);
+  assert.deepEqual(read.parameters.map(parameter => [parameter.name, parameter.required]),
+    [['findingId', true], ['approvalId', true]]);
+  assert.equal(read.responses['200'].content['*/*'].schema.$ref, '#/components/schemas/IntegrityMaintenanceApprovalResponse');
 });
 
 test('Integrity assessment, program and case requests preserve typed backend fields', () => {

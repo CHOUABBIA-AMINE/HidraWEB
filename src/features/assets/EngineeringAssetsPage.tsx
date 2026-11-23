@@ -18,6 +18,7 @@ import {
   type RegisterMaintainableAssetRequest,
 } from '@/features/assets/api/assetsApi';
 import { usePermissions } from '@/features/permissions/usePermissions';
+import { EngineeringRecordFields, EngineeringRegisterSummary } from '@/features/workbench/components/EngineeringRecordFields';
 import {
   fetchWorkbenchRecord,
   fetchWorkbenchRecords,
@@ -122,6 +123,8 @@ export function EngineeringAssetsPage({ renderSelectedContext }: EngineeringAsse
     () => resourcesQuery.data?.find((item) => item.resource === effectiveResource),
     [effectiveResource, resourcesQuery.data],
   );
+  const selectedRecord = detailQuery.isSuccess &&
+    String(detailQuery.data?.id ?? '') === selectedId ? detailQuery.data : undefined;
   const lifecycleResource = useMemo(
     () => resourcesQuery.data?.find((item) => item.javaType.endsWith('AssetLifecycleEventJpaEntity')),
     [resourcesQuery.data],
@@ -205,8 +208,8 @@ export function EngineeringAssetsPage({ renderSelectedContext }: EngineeringAsse
         <Box>
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ alignItems: { md: 'center' }, justifyContent: 'space-between' }}>
             <Box>
-              <Typography variant="h4">Integrity &amp; Maintenance</Typography>
-              <Typography color="text.secondary">HWEB-011 maintainable asset and work-order workspace.</Typography>
+              <Typography component="h1" variant="h4">Integrity &amp; Maintenance</Typography>
+              <Typography color="text.secondary">Browse maintainable assets, condition records and work orders.</Typography>
             </Box>
             <Button component={RouterLink} to="/engineering" variant="outlined">Integrity assessments</Button>
           </Stack>
@@ -240,13 +243,13 @@ export function EngineeringAssetsPage({ renderSelectedContext }: EngineeringAsse
         {listQuery.isError && <Alert severity="error">{errorMessage(listQuery.error, 'assets records')}</Alert>}
         <TableContainer component={Paper}>
           <Table size="small">
-            <TableHead><TableRow><TableCell>ID</TableCell><TableCell>Backend attributes</TableCell></TableRow></TableHead>
+            <TableHead><TableRow><TableCell>ID</TableCell><TableCell>Record summary</TableCell></TableRow></TableHead>
             <TableBody>
               {(listQuery.data?.items ?? []).map((item, index) => {
                 const id = item.id === undefined || item.id === null ? '' : String(item.id);
                 return (
-                  <TableRow key={id || index} hover selected={Boolean(id && id === selectedId)} onClick={() => id && setSelectedId(id)} sx={{ cursor: id ? 'pointer' : 'default' }}>
-                    <TableCell>{id || '—'}</TableCell><TableCell>{JSON.stringify(item.attributes)}</TableCell>
+                  <TableRow key={id || index} hover selected={Boolean(id && id === selectedId)}>
+                    <TableCell>{id ? <Button size="small" onClick={() => setSelectedId(id)}>{id}</Button> : '—'}</TableCell><TableCell><EngineeringRegisterSummary javaType={selectedDescriptor?.javaType} attributes={item.attributes} /></TableCell>
                   </TableRow>
                 );
               })}
@@ -260,20 +263,21 @@ export function EngineeringAssetsPage({ renderSelectedContext }: EngineeringAsse
         </Stack>
         {selectedId && (
           <>
-            <Paper sx={{ p: 2 }}>
-              <Typography variant="h6">Selected asset record</Typography>
+            <Paper component="section" aria-label="Selected asset record" sx={{ p: 2 }}>
+              <Typography component="h2" variant="h6">Selected asset record</Typography>
               {detailQuery.isError ? <Alert severity="error">{errorMessage(detailQuery.error, 'asset record')}</Alert> : (
-                <Box component="pre" sx={{ whiteSpace: 'pre-wrap', overflowX: 'auto', m: 0 }}>{detailQuery.data ? JSON.stringify(detailQuery.data.attributes, null, 2) : 'Loading…'}</Box>
+                selectedRecord ? <EngineeringRecordFields attributes={selectedRecord.attributes} /> :
+                  <Typography role="status">{detailQuery.isFetching || detailQuery.isPending ? 'Loading…' : 'Record unavailable.'}</Typography>
               )}
             </Paper>
-            {selectedIsMaintainableAsset && detailQuery.data && (
+            {selectedIsMaintainableAsset && selectedRecord && (
               <AssetConcurrencyPanel
                 assetId={selectedId}
                 resource={effectiveResource}
-                attributes={detailQuery.data.attributes}
+                attributes={selectedRecord.attributes}
               />
             )}
-            {selectedIsMaintainableAsset && (
+            {selectedIsMaintainableAsset && selectedRecord && (
               <AssetHistoryTimeline
                 maintainableAssetId={selectedId}
                 lifecycleResource={lifecycleResource}
@@ -281,7 +285,7 @@ export function EngineeringAssetsPage({ renderSelectedContext }: EngineeringAsse
                 allowed={canSearchHistory}
               />
             )}
-            {renderSelectedContext?.(detailQuery.data?.attributes)}
+            {selectedRecord && renderSelectedContext?.(selectedRecord.attributes)}
           </>
         )}
 

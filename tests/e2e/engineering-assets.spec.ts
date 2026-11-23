@@ -164,7 +164,7 @@ test('HWEB-011-03 reads assets from workbench and uses backend-owned create cont
   await expect(page.getByText(/MA-001/)).toBeVisible();
 
   await page.getByText('asset-1', { exact: true }).click();
-  await expect(page.locator('pre').filter({ hasText: 'topology-pump-1' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Selected asset record' }).getByText('topology-pump-1', { exact: true })).toBeVisible();
   await expect(page.getByText('Topology: PUMP · topology-pump-1')).toBeVisible();
 
   await page.getByRole('textbox', { name: 'assetNumber', exact: true }).fill('MA-002');

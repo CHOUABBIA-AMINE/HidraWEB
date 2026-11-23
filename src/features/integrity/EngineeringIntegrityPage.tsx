@@ -24,6 +24,8 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { normalizeHidraApiError } from '@/api/errors/HidraApiError';
 import { createIntegrityAssessment } from '@/features/integrity/api/integrityApi';
 import { usePermissions } from '@/features/permissions/usePermissions';
+import { EngineeringRecordFields, EngineeringRegisterSummary } from '@/features/workbench/components/EngineeringRecordFields';
+import { IntegrityMaintenanceReceipt } from '@/features/integrity/components/IntegrityMaintenanceReceipt';
 import {
   fetchWorkbenchRecord,
   fetchWorkbenchRecords,
@@ -100,6 +102,9 @@ export function EngineeringIntegrityPage({ renderSelectedContext }: EngineeringI
     enabled: canRead && Boolean(effectiveResource && selectedId),
   });
 
+  const selectedRecord = !detailQuery.isFetching && detailQuery.isSuccess &&
+    String(detailQuery.data?.id ?? '') === selectedId ? detailQuery.data : undefined;
+
   const assessmentMutation = useMutation({
     mutationFn: createIntegrityAssessment,
     onSuccess: async () => {
@@ -128,9 +133,9 @@ export function EngineeringIntegrityPage({ renderSelectedContext }: EngineeringI
     <Container maxWidth="xl" sx={{ py: 3 }}>
       <Stack spacing={3}>
         <Box>
-          <Typography variant="h4">Integrity &amp; Maintenance</Typography>
+          <Typography component="h1" variant="h4">Integrity &amp; Maintenance</Typography>
           <Typography color="text.secondary">
-            HWEB-011 integrity assessment workspace. Resources and records are discovered from HidraAPI at runtime.
+            Browse assessment, finding and evidence records.
           </Typography>
         </Box>
 
@@ -176,7 +181,7 @@ export function EngineeringIntegrityPage({ renderSelectedContext }: EngineeringI
 
         <TableContainer component={Paper}>
           <Table size="small">
-            <TableHead><TableRow><TableCell>ID</TableCell><TableCell>Backend attributes</TableCell></TableRow></TableHead>
+            <TableHead><TableRow><TableCell>ID</TableCell><TableCell>Record summary</TableCell></TableRow></TableHead>
             <TableBody>
               {(listQuery.data?.items ?? []).map((item, index) => {
                 const id = item.id === undefined || item.id === null ? '' : String(item.id);
@@ -185,11 +190,9 @@ export function EngineeringIntegrityPage({ renderSelectedContext }: EngineeringI
                     hover
                     key={id || index}
                     selected={Boolean(id && id === selectedId)}
-                    onClick={() => id && setSelectedId(id)}
-                    sx={{ cursor: id ? 'pointer' : 'default' }}
                   >
-                    <TableCell>{id || '—'}</TableCell>
-                    <TableCell>{JSON.stringify(item.attributes)}</TableCell>
+                    <TableCell>{id ? <Button size="small" onClick={() => setSelectedId(id)}>{id}</Button> : '—'}</TableCell>
+                    <TableCell><EngineeringRegisterSummary javaType={selectedDescriptor?.javaType} attributes={item.attributes} /></TableCell>
                   </TableRow>
                 );
               })}
@@ -205,17 +208,18 @@ export function EngineeringIntegrityPage({ renderSelectedContext }: EngineeringI
 
         {selectedId && (
           <>
-            <Paper sx={{ p: 2 }}>
-              <Typography variant="h6">Selected record</Typography>
+            <Paper component="section" aria-label="Selected record" sx={{ p: 2 }}>
+              <Typography component="h2" variant="h6">Selected record</Typography>
               {detailQuery.isError ? (
                 <Alert severity="error">{errorMessage(detailQuery.error, 'integrity record')}</Alert>
               ) : (
-                <Box component="pre" sx={{ whiteSpace: 'pre-wrap', overflowX: 'auto', m: 0 }}>
-                  {detailQuery.data ? JSON.stringify(detailQuery.data.attributes, null, 2) : 'Loading…'}
-                </Box>
+                selectedRecord ? <EngineeringRecordFields attributes={selectedRecord.attributes} /> :
+                  <Typography role="status">{detailQuery.isFetching || detailQuery.isPending ? 'Loading…' : 'Record unavailable.'}</Typography>
               )}
             </Paper>
-            {renderSelectedContext?.(detailQuery.data?.attributes)}
+            {selectedRecord && selectedDescriptor?.javaType.split('.').pop() === 'InspectionFindingJpaEntity' &&
+              <IntegrityMaintenanceReceipt findingId={selectedId} />}
+            {selectedRecord && renderSelectedContext?.(selectedRecord.attributes)}
           </>
         )}
 

@@ -116,7 +116,7 @@ test('HWEB-011-02 discovers integrity resources, reads backend records, and crea
   await expect(page.getByText(/IA-2026-001/)).toBeVisible();
 
   await page.getByText('assessment-1', { exact: true }).click();
-  await expect(page.locator('pre').filter({ hasText: 'North line integrity assessment' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Selected record' }).getByText('North line integrity assessment', { exact: true })).toBeVisible();
   await expect(page.getByText(/does not publish a topology, document, risk, or incident relationship/)).toBeVisible();
 
   await page.getByLabel('programId').fill('program-1');
@@ -126,4 +126,62 @@ test('HWEB-011-02 discovers integrity resources, reads backend records, and crea
   await page.getByRole('button', { name: 'Create assessment' }).click();
 
   await expect(page.getByText(/Assessment created/)).toBeVisible();
+});
+
+test('UXR-25 reads a typed approval receipt only for the selected Integrity finding', async ({ page }) => {
+  await mockEngineering(page);
+  const handoffRoute = {
+    route: '/api/v1/integrity/findings/{findingId}/maintenance-handoffs/{approvalId}',
+    methods: ['GET'], module: 'integrity', resource: 'findings', action: 'read',
+    permission: 'integrity:findings:read', enforcementStatus: 'backend-enforced',
+  };
+  const admittedRoutes = [...routes, handoffRoute];
+  await page.route('**/api/v1/security/permissions/routes', route => route.fulfill({ json: admittedRoutes }));
+  await page.route('**/api/v1/security/permissions/catalog', route => route.fulfill({ json: {
+    strategy: 'derived-route-permission-catalog', enforcement: 'backend-enforced',
+    permissionFormat: '<module>:<resource>:<action>', routes: admittedRoutes,
+  } }));
+  await page.route('**/api/v1/identity/me/permissions', route => route.fulfill({
+    json: [...effectivePermissions, handoffRoute.permission],
+  }));
+  await page.route('**/api/v1/workbench/integrity/resources', route => route.fulfill({ json: [{
+    module: 'integrity', resource: 'inspection-finding', entityName: 'Inspection finding',
+    javaType: 'InspectionFindingJpaEntity', idField: 'id',
+  }] }));
+  const findings = ['finding-a', 'finding-b'].map((id, index) => ({
+    module: 'integrity', resource: 'inspection-finding', id,
+    attributes: { findingNumber: 'F-' + (index + 1), severity: 'HIGH' },
+  }));
+  await page.route('**/api/v1/workbench/integrity/inspection-finding?**', route => route.fulfill({
+    json: { page: 0, size: 25, totalElements: 2, totalPages: 1, items: findings },
+  }));
+  for (const finding of findings) {
+    await page.route('**/api/v1/workbench/integrity/inspection-finding/' + finding.id, route =>
+      route.fulfill({ json: finding }));
+  }
+  await page.route('**/api/v1/integrity/findings/finding-a/maintenance-handoffs/approval-a', route => {
+    expect(route.request().method()).toBe('GET');
+    return route.fulfill({ json: {
+      approvalId: 'approval-a', findingId: 'finding-a', workOrderId: 'work-order-a', verificationStatus: 'ACCEPTED',
+    } });
+  });
+  await page.route('**/api/v1/integrity/findings/finding-b/maintenance-handoffs/approval-a', route =>
+    route.fulfill({ json: { approvalId: 'approval-a', findingId: 'finding-a', workOrderId: 'work-order-a' } }));
+
+  await signIn(page);
+  await page.getByRole('button', { name: 'Intégrité & maintenance' }).click();
+  await page.getByRole('button', { name: 'finding-a' }).click();
+  const receipt = page.getByRole('region', { name: 'Integrity maintenance receipt' });
+  await receipt.getByLabel('Approval ID').fill('approval-a');
+  await receipt.getByRole('button', { name: 'Read approval receipt' }).click();
+  await expect(receipt.getByText('Work order work-order-a')).toBeVisible();
+  await expect(receipt.getByText('Verification ACCEPTED')).toBeVisible();
+
+  await page.getByRole('button', { name: 'finding-b' }).click();
+  await expect(receipt.getByLabel('Approval ID')).toHaveValue('');
+  await expect(receipt.getByText('Work order work-order-a')).toHaveCount(0);
+  await receipt.getByLabel('Approval ID').fill('approval-a');
+  await receipt.getByRole('button', { name: 'Read approval receipt' }).click();
+  await expect(receipt.getByText('Approval receipt unavailable.')).toBeVisible();
+  await expect(receipt.getByText('Work order work-order-a')).toHaveCount(0);
 });
