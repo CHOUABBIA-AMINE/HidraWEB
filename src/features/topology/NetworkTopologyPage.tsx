@@ -82,7 +82,7 @@ export function NetworkTopologyPage() {
         <Suspense fallback={<Box sx={{ p: 3 }}><Typography role="status">{t('topology.preview.loading')}</Typography></Box>}>
           <NetworkPreviewPage />
         </Suspense>
-      ) : selected ? <RegionalTopologySearch />
+      ) : selected ? <RegionalTopologySearch key={[selected.principalId, selected.companyPartyId, selected.scopeId, selected.type, selected.targetId].join(':')} />
         : <OperationalTopology authoring={authoring} onToggleAuthoring={() => setAuthoring((current) => !current)} />}
     </>
   );

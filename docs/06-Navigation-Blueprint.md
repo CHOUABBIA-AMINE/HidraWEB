@@ -728,3 +728,41 @@ isolation, exact command admission, missing required grant fields,
 and unknown write outcomes. No new backend endpoint, credential
 generator, user-to-employee inference, live OT connection or
 autonomous access grant is introduced.
+
+## P6 / UXR-22 — regional Network & Topology map in the authenticated workspace (23 November 2026)
+
+The existing `/network` route remains one route with a single main
+workspace. When a selected, eligible current-actor operational context exists,
+`NetworkTopologyPage` mounts `RegionalTopologySearch` keyed by current
+principal/company/scope/resource. The selected-context branch is an
+authorized regional map, not an administrator map fallback. Existing
+no-context legacy topology authoring, the separate clearly synthetic preview
+and their prior tests remain unchanged.
+
+The regional workspace now composes the source-qualified layer explorer,
+selected layer description, bounded per-layer feature counts, a MapLibre
+geometry canvas with legend and keyboard feature list, exact detail/inspector
+and paging, alongside the existing T34 scoped search. Every owner call
+specifies `companyPartyId`. Each read is gated by the exact published
+`GET` route metadata and effective `topology:regional-map:read` or
+`topology:regional-map:search` permission as appropriate, with current
+principal and selected regional scope. Distinct scopes produce distinct
+query keys and remount the local map UI.
+
+The owner controls filtered layers, page, size, geographic features and
+counts. The map renders the **current 100-feature server page only** and
+states the page/total/hasNext boundary; it never claims network-wide
+geometry completeness from a single page. The selected detail request
+uses exact `features[].properties.entityId` plus its approved
+`properties.layer`, never the namespaced GeoJSON `id`.
+Denied/missing/revalidating owner reads hide the previous geometry,
+counts and detail instead of falling back to an unscoped resource.
+No feature source, business connection or flow direction is inferred
+from intersections.
+
+A provider-backed Standard/Satellite basemap, full published
+connectivity/dossier and station synoptic are **not** implemented by this
+stage. They require their own admitted provider or registered UXR-23/24
+owner-evidence scope. This delivery is software/source and synthetic browser
+qualification only; no live OT, survey completeness, hydraulic result,
+production deployment or SITE acceptance is asserted.

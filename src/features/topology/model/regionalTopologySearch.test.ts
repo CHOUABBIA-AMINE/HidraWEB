@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Feature } from '@/api/generated/topology/model';
-import { exactRegionalFeature, parseRegionalReference, regionalFeatureReference, regionalSearchAdmission, validRegionalQuery } from '@/features/topology/model/regionalTopologySearch';
+import { exactRegionalFeature, parseRegionalReference, regionalFeatureReference, regionalMapAdmission, regionalSearchAdmission, validRegionalQuery } from '@/features/topology/model/regionalTopologySearch';
 
 const routes = [
   { route: '/api/v1/topology/regional-map/search', methods: ['GET'], module: 'topology', resource: 'regional-map', action: 'search', permission: 'topology:regional-map:search', enforcementStatus: 'backend-enforced' },
@@ -33,5 +33,45 @@ describe('UXR-11 regional search admission and IDs', () => {
     expect(validRegionalQuery(' GZ2 ')).toBe('GZ2');
     expect(validRegionalQuery(' ')).toBeUndefined();
     expect(validRegionalQuery('a'.repeat(121))).toBeUndefined();
+  });
+});
+
+describe('UXR-22 exact regional map admission', () => {
+  const mapRoutes = [
+    '/api/v1/topology/regional-map/layers',
+    '/api/v1/topology/regional-map/layers/{layerId}',
+    '/api/v1/topology/regional-map/layers/{layerId}/features',
+    '/api/v1/topology/regional-map/geojson',
+  ].map(route => ({
+    route, methods: ['GET'], module: 'topology', resource: 'regional-map',
+    action: 'read', permission: 'topology:regional-map:read',
+    enforcementStatus: 'backend-enforced',
+  }));
+  const fullRoutes = [...routes, ...mapRoutes];
+  const allowed = new Set(['topology:regional-map:read', 'topology:regional-map:search']);
+  const access = { status: 'ready' as const, routes: fullRoutes, can: (permission: string) => allowed.has(permission) };
+
+  it('admits all six exact methods only with current actor, regional scope, and grants', () => {
+    expect(regionalMapAdmission(access, 'actor', scope)).toEqual({
+      layers: true, layer: true, features: true, geoJson: true, search: true, detail: true,
+    });
+    expect(Object.values(regionalMapAdmission(access, 'other', scope)).every(value => !value)).toBe(true);
+    expect(Object.values(regionalMapAdmission(access, 'actor', {
+      ...scope, companyPartyId: 'company with spaces',
+    })).every(value => !value)).toBe(true);
+  });
+
+  it('never uses a legacy map route or search grant as regional read authority', () => {
+    const searchOnly = { ...access, routes: routes,
+      can: (permission: string) => permission === 'topology:regional-map:search' };
+    expect(regionalMapAdmission(searchOnly, 'actor', scope)).toEqual({
+      layers: false, layer: false, features: false, geoJson: false, search: true, detail: false,
+    });
+    const invalidMethod = { ...access, routes: fullRoutes.map(route =>
+      route.route.endsWith('/geojson') ? { ...route, methods: ['POST'] } : route) };
+    expect(regionalMapAdmission(invalidMethod, 'actor', scope).geoJson).toBe(false);
+    const revoked = { ...access, can: (permission: string) => permission === 'topology:regional-map:search' };
+    expect(regionalMapAdmission(revoked, 'actor', scope).geoJson).toBe(false);
+    expect(regionalMapAdmission(revoked, 'actor', scope).search).toBe(true);
   });
 });

@@ -5887,3 +5887,97 @@ remains the next candidate and **NOT SELECTED**. UXR-35
 retains the scoped Overview delivery position under P7. Any
 independent UI-design correction requires explicit registered
 scope/approval; do not silently reopen earlier accepted work.
+
+### P6 / UXR-22 — scoped regional Network & Topology map implementation (23 November 2026)
+
+**Selection/entry:** The owner's `Next` after the UI alignment
+checkpoint selects only the already registered
+**P6 / UXR-22 — Network & Topology anchor `/network`**.
+Prior documentation-only commit
+`f533c8f5efe608807aa3c1419c4bc0df8d81d977`
+(tree `a943fa399a4e5628e012430e6c52ea9fa1e06020`)
+passed [Documentation Validation #138](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45172676417)
+on that exact SHA; it did not require Code CI for the
+documentation-only baseline. UXR-21/A and UXR-21/B development
+CI passed at the previously recorded exact SHAs.
+
+**Backend/source boundary:** The source-qualified HidraAPI T34
+`RegionalTopologyMapController` at separately inspected API
+main SHA `6d2e0cb4f9bc47ee198e61ff87b2bcc790c02014`
+exposes company-bound `GET` for regional layer descriptors,
+layer descriptors, layer feature pages, bounded GeoJSON,
+search and exact feature read. The registered T39
+`doc/api/CIRCLE_1_CONSUMER_HANDOFF.md` requires
+`companyPartyId`, zero-based owner paging, post-scope
+totals and selection via `properties.entityId`
+(not namespaced outer `id`). This is source inspection and
+existing API handoff evidence, **not** a new API pin,
+full backend test rerun or signed WEB runtime proof.
+
+**Exact message:** `feat(topology): implement UXR-22 authorized regional map workspace`.
+
+**Exact bounded file envelope:**
+- UPDATE `src/features/topology/NetworkTopologyPage.tsx` —
+  remount the regional reader on principal/company/scope change;
+  preserve existing legacy no-context map, authoring and separate
+  synthetic preview boundaries.
+- UPDATE `src/features/topology/components/RegionalTopologySearch.tsx` —
+  compose T34 authorized layer explorer, optional layer detail,
+  bounded owner layer/GeoJSON pages, MapLibre + legend,
+  server totals, current 100-row geometry window, canonical
+  selected feature detail, search, keyboard list, loading/empty
+  and fail-closed denied/revalidation states.
+- UPDATE `src/features/topology/api/regionalTopologyApi.ts` —
+  company-bound GET layer, layer page and GeoJSON adapters
+  using existing generated `LayerDescriptor` and
+  `FeatureCollection` transport shapes. No unscoped fallback.
+- UPDATE `src/features/topology/model/regionalTopologySearch.ts` —
+  pure exact-route+GET admission for regional catalog, layer,
+  features, GeoJSON, search and detail, preserving T34
+  canonical entity reference validation and current actor/scope.
+- UPDATE `src/features/topology/i18n/topologyTranslations.ts` —
+  additive FR/EN/AR regional map, page, partial and denied copy.
+- UPDATE `src/features/topology/api/regionalTopologyApi.test.ts`
+  and `src/features/topology/model/regionalTopologySearch.test.ts` —
+  synthetic request contract, exact authority and denied cases.
+- UPDATE `tests/e2e/regional-topology-search.spec.ts` —
+  scoped map, multi-page owner inventory, canonical detail,
+  layer filter, opaque 404 and no unscoped map fallback.
+- APPEND `docs/06-Navigation-Blueprint.md` and
+  this canonical roadmap as bounded design/status receipts.
+  CREATE/DELETE none.
+
+**Dependencies, exclusions and invariants:**
+The frontend consumes published backend-owned regional map
+geometry rather than inventing topology or plant state.
+Every owner read requires the correct published GET permission
+and effective grant; selection context only narrows UI and
+does not replace current backend authorization. Owner-paged
+total/features/geometry never silently become global totals.
+Feature inspector fetches only the canonical current layer/entityId.
+Preserve independent security, company context, temporal
+authority and synthetic/dev-only constraints.
+
+**Not selected:** UXR-23 pipeline dossiers/qualified pressure,
+UXR-24 monitored synoptic and live/qualified commissioning.
+The optional Standard/Satellite tile provider is not approved
+or configured by this task; no public tiles, guessing of facility
+positions, synthetic-as-real geometry or numerical solver are
+introduced. No backend, Flyway, Orval/pinned OpenAPI, CI
+workflow, deployment, release or global shell modifications.
+
+**Status on implementation publication:** UXR-22 IMPLEMENTED /
+EXACT-SHA CODE AND DOCUMENTATION CI PENDING. Do not call
+UXR-22 CI-PASSED until required CI conclusion is actually
+verified on its implementation SHA. Synthetic UI tests
+are not a signed C1 native browser handoff or engineering
+SITE acceptance.
+
+**Acceptance:** preserved pre-existing TypeScript/lint/unit
+and Playwright, new regional adapter/model unit tests,
+scoped/denial/browser tests, budget and bundle checks,
+native A1 signed API/PostgreSQL and F18 LOCAL jobs,
+plus Documentation Validation on exact new main SHA.
+The independent P6 / UXR-28 complete signed C1 browser
+journey remains registered later and is not waived here.
+Next registered UXR-23 remains UNSELECTED.

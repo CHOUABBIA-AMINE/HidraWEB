@@ -20,22 +20,40 @@ export function validRegionalQuery(input: string): string | undefined {
   return value.length > 0 && value.length <= 120 ? value : undefined;
 }
 
+/** Route-by-route admission; never infer a regional read grant from a legacy map,
+ * a different method or the existence of a valid-looking selected scope.
+ */
+export function regionalMapAdmission(
+  access: Pick<PermissionContextValue, 'status' | 'routes' | 'can'>,
+  principalId: string | undefined,
+  scope: OperationalContextSelection | undefined,
+): { layers: boolean; layer: boolean; features: boolean; geoJson: boolean; search: boolean; detail: boolean } {
+  const denied = { layers: false, layer: false, features: false, geoJson: false, search: false, detail: false };
+  if (access.status !== 'ready' || !principalId || !scope ||
+      scope.principalId !== principalId || !ID.test(scope.companyPartyId) ||
+      !supportsRegionalAccess(scope)) return denied;
+  const admitted = (route: string, permission: string) => access.routes.some(item =>
+    item.route === route && item.module === 'topology' &&
+    item.methods.includes('GET') && item.permission === permission &&
+    access.can(permission));
+  const read = 'topology:regional-map:read';
+  return {
+    layers: admitted('/api/v1/topology/regional-map/layers', read),
+    layer: admitted('/api/v1/topology/regional-map/layers/{layerId}', read),
+    features: admitted('/api/v1/topology/regional-map/layers/{layerId}/features', read),
+    geoJson: admitted('/api/v1/topology/regional-map/geojson', read),
+    search: admitted(SEARCH, 'topology:regional-map:search'),
+    detail: admitted(DETAIL, read),
+  };
+}
+
 export function regionalSearchAdmission(
   access: Pick<PermissionContextValue, 'status' | 'routes' | 'can'>,
   principalId: string | undefined,
   scope: OperationalContextSelection | undefined,
 ): { search: boolean; detail: boolean } {
-  if (access.status !== 'ready' || !principalId || !scope ||
-      scope.principalId !== principalId || !ID.test(scope.companyPartyId) ||
-      !supportsRegionalAccess(scope)) return { search: false, detail: false };
-  const admitted = (route: string, permission: string) => access.routes.some(item =>
-    item.route === route && item.module === 'topology' &&
-    item.methods.includes('GET') && item.permission === permission &&
-    access.can(permission));
-  return {
-    search: admitted(SEARCH, 'topology:regional-map:search'),
-    detail: admitted(DETAIL, 'topology:regional-map:read'),
-  };
+  const { search, detail } = regionalMapAdmission(access, principalId, scope);
+  return { search, detail };
 }
 
 export function parseRegionalReference(params: URLSearchParams): RegionalFeatureReference | undefined {
