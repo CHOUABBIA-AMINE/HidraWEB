@@ -236,7 +236,11 @@ test('HWEB-004 exposes backend-supported identity and organization context works
   await expect(page).toHaveURL(/\/administration\/users$/);
   await expect(page.getByRole('heading', { name: 'Identité & accès' })).toBeVisible();
   await expect(page.getByText('Abir Operator')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Créer un utilisateur' })).toBeEnabled();
+  const createUser = page.getByRole('button', { name: 'Créer un utilisateur' });
+  // UXR-21/B: no identity user can be created from an empty username.
+  await expect(createUser).toBeDisabled();
+  await page.getByLabel('Nom d’utilisateur').fill('synthetic-new-operator');
+  await expect(createUser).toBeEnabled();
 
   await page.getByRole('button', { name: 'Organisation' }).click();
   await expect(page).toHaveURL(/\/administration\/organization$/);
@@ -249,7 +253,7 @@ test('HWEB-004 exposes backend-supported identity and organization context works
   await expect(createUnit).toBeEnabled();
 });
 
-test('HWEB-004 surfaces backend 403 when an identity mutation is refused', async ({ page }) => {
+test('HWEB-004 verifies backend 403 and safe identity creation feedback', async ({ page }) => {
   await mockPermissions(page);
   await mockIdentityOrganization(page);
   await page.route('**/api/v1/identity/users', (route) => {
@@ -265,8 +269,20 @@ test('HWEB-004 surfaces backend 403 when an identity mutation is refused', async
   await page.getByRole('button', { name: 'ADMINISTRATION' }).click();
   await page.getByRole('button', { name: 'Identité & accès' }).click();
   await page.getByLabel('Nom d’utilisateur').fill('new-operator');
-  await page.getByRole('button', { name: 'Créer un utilisateur' }).click();
-  await expect(page.getByText(/Forbidden/)).toBeVisible();
+  const createUser = page.getByRole('button', { name: 'Créer un utilisateur' });
+  await expect(createUser).toBeEnabled();
+
+  const deniedResponse = page.waitForResponse((response) =>
+    new URL(response.url()).pathname === '/api/v1/identity/users'
+      && response.request().method() === 'POST');
+  await createUser.click();
+  expect((await deniedResponse).status()).toBe(403);
+
+  // The HTTP refusal is verified without rendering backend exception details.
+  await expect(page.getByText(/User creation may have committed/)).toBeVisible();
+  await expect(page.getByText(/Forbidden/)).toHaveCount(0);
+  await expect(createUser).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Refresh for review' })).toBeVisible();
 });
 
 test('Hidra login floats Arabic field labels on the right in RTL mode', async ({ page }) => {

@@ -5788,3 +5788,50 @@ administration, production bundle and performance checks,
 native JWT/PostgreSQL A1 W1–W4, F18 LOCAL and Documentation
 Validation on the exact new SHA. A green development CI is
 not engineering/operational acceptance.
+
+### P6 / UXR-21/B — exact-SHA mocked browser regression repair (23 November 2026)
+
+**Failure evidence:** UXR-21/B implementation SHA
+`bb28ee44c6babecfd9927b9e3b5b62a4a7872da6`
+(tree `b4a60ebd948b61559f308fe717ba3edb36bed16f`)
+failed [HidraWEB Code CI #1100](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45166161923)
+at `Full Playwright regression suite` after successful static
+checks, TypeScript, unit/component and Node checks. Browser summary:
+107 passed, 2 failed and 15 skipped. Both failures were
+`tests/e2e/bootstrap.spec.ts` HWEB-004 assertions retained
+from the older Identity creation behavior:
+
+1. The previous test expected an enabled `Create user` action
+   without a username. UXR-21/B correctly requires a nonblank
+   username before submission.
+2. The previous test asserted that a backend HTTP 403 exposed
+   the literal raw exception title `Forbidden`. UXR-21/B
+   instead deliberately presents generic unknown-outcome
+   guidance and preserves a review-required lock.
+
+Independent native A1 PostgreSQL/API and F18 LOCAL jobs passed,
+as did [Documentation Validation #136](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45166161917)
+on the exact failed Code CI source SHA. Neither CI result implies
+production, engineering or SITE acceptance.
+
+**Bounded repair commit message:**
+`test(identity): align UXR-21/B browser creation and denial evidence`.
+
+**Repair envelope:** UPDATE only
+`tests/e2e/bootstrap.spec.ts` to require disabled identity creation
+before a username, then prove enabled creation after supplying
+the required synthetic username. For the denied creation journey,
+keep an actual intercepted POST that returns HTTP 403 and explicitly
+assert its response status; assert that generic backend-review
+guidance appears, raw `Forbidden` is never shown, the command
+remains disabled after an unknown write outcome, and the
+manual review/refresh action is visible. APPEND this record
+to the canonical roadmap. DELETE none; no production TypeScript
+behavior, permission metadata, endpoint/API pin, security
+policy, credential flow, native qualification, release/CI
+workflow, schema or migration changes are authorized.
+
+**Status:** UXR-21/B IMPLEMENTED / CI PENDING repair SHA.
+The exact-SHA full browser suite and all other registered CI
+gates are pending for the repair commit; UXR-21 parent remains
+IN PROGRESS and UXR-22 is still NOT SELECTED.
