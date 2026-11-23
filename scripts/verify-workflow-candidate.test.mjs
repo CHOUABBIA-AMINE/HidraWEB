@@ -59,7 +59,7 @@ test('existing task inbox, available actions and optimistic transition contract 
 
 test('active Workflow Orval pin requires source digest and retains historical compatibility checks', () => {
   const config = fs.readFileSync(path.join(root, 'orval.workflow.config.ts'), 'utf8');
-  assert.ok(config.includes(`./openapi/candidates/${artifactName}`));
+  assert.ok(config.includes('./openapi/candidates/hidra-workflow-uxr26.json'));
   assert.ok(!config.includes('hidra-workflow-63f3f60974ce57eb8cd5e42910397615195624fb.json'));
   const checker = fs.readFileSync(path.join(root, 'scripts/check-openapi-compatibility.mjs'), 'utf8');
   assert.ok(checker.includes('WORKFLOW_CURRENT_PROOF'));
@@ -77,4 +77,22 @@ test('W4 discovery/target addressing are source-stamped and expose no browser en
   assert.ok(current.components.schemas.Definition.properties.assignmentChoices);
   assert.ok(current.components.schemas.TargetHandoff.properties.targetLocator);
   assert.equal(current.paths['/api/v1/workflow/definitions'].get.parameters.length, 5);
+});
+
+test('UXR-26 adds only the pressure candidate handoff and preserves prior Workflow contracts', () => {
+  const active = JSON.parse(fs.readFileSync(path.join(root, 'openapi/candidates/hidra-workflow-uxr26.json')));
+  assert.equal(active['x-hidra-uxr26-source-sha'], '4dcb9e092a715d9942a2b19ad86b3dea9f6bd96f');
+  for (const [route, value] of Object.entries(current.paths)) assert.deepEqual(active.paths[route], value);
+  for (const [name, value] of Object.entries(current.components.schemas)) {
+    assert.deepEqual(active.components.schemas[name], value);
+  }
+  const route = '/api/v1/workflow/definitions/pressure-restriction-target';
+  const schema = 'PressureRestrictionWorkflowTargetHandoff';
+  assert.deepEqual(Object.keys(active.paths).filter(key => !(key in current.paths)), [route]);
+  assert.deepEqual(Object.keys(active.components.schemas).filter(key => !(key in current.components.schemas)), [schema]);
+  const operation = active.paths[route].get;
+  assert.deepEqual(operation.security, [{ hidraBearerJwt: [] }]);
+  assert.deepEqual(operation.parameters.filter(param => param.required).map(param => param.name).sort(),
+    ['targetId', 'targetLocator']);
+  assert.equal(operation.responses['200'].content['*/*'].schema.$ref, `#/components/schemas/${schema}`);
 });

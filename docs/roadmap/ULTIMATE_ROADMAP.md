@@ -6134,3 +6134,17 @@ Update only `src/features/topology/components/RegionalTopologySearch.tsx` and ap
 **Proposed prerequisite.** Add a typed Topology read for one immutable candidate, scoped to its current independent reviewer and exact owner locator. Return the exact resource and condition, proposed change and effective time, pressure value/unit/basis when applicable, predecessor when applicable, and baseline provenance. Prove exact binding, redaction or opaque denial for wrong candidate, unauthorized or revoked actors, and positive reads for replacement and withdrawal alongside the existing signed journey. Consume the verified operation in the review panel before enabling candidate decisions. No HidraAPI implementation is selected by this HidraWEB disposition.
 
 **Selected stage.** Append only this roadmap using `docs(roadmap): record UXR-26 reviewer evidence blocker`. UXR-26 remains BLOCKED at independent review. UXR-27 remains unselected.
+
+### P6 / UXR-26 accepted pressure restriction contract pin — 23 November 2026
+
+**Backend prerequisite cleared.** HidraAPI `4dcb9e092a715d9942a2b19ad86b3dea9f6bd96f` passed [CI #1367](https://github.com/CHOUABBIA-AMINE/HidraAPI/actions/runs/45259016300) including the signed PostgreSQL author, assigned reviewer and separate publisher journey. The [runtime OpenAPI artifact](https://github.com/CHOUABBIA-AMINE/HidraAPI/actions/runs/45259016300/artifacts/14860210574) has raw JSON SHA-256 `c5ccc56154b1147ad1ac2d215a7ba442fdbd5e1c15e9426df30c9483d857733c`. [T60 closeout documentation](https://github.com/CHOUABBIA-AMINE/HidraAPI/actions/runs/45268811467) and the preceding [HidraWEB documentation run](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45238358911) passed.
+
+**Selected stage.** Pin the seven Topology restriction request, stream, review, publication and evidence operations and the one Workflow candidate addressing operation in the generated clients. Owner modules are Topology and Workflow. Each added operation and referenced schema is copied from the accepted runtime artifact. Existing candidate files, paths, schemas and unrelated module pins are preserved. Use `feat(contract): pin accepted UXR-26 pressure restriction inputs` on the existing main branch with the expected-head guard.
+
+| Change | Exact file scope |
+|---|---|
+| Create | `openapi/candidates/hidra-topology-uxr26.json`, `openapi/candidates/hidra-workflow-uxr26.json` |
+| Update | `orval.topology.config.ts`, `orval.workflow.config.ts`, `scripts/check-openapi-compatibility.mjs`, `scripts/verify-topology-candidate.test.mjs`, `scripts/verify-workflow-candidate.test.mjs` |
+| Append | `docs/roadmap/ULTIMATE_ROADMAP.md` |
+
+**Acceptance.** Verify exact source and slice digests, prior operation and schema preservation, bearer protection, both client generations, typechecking and focused contract tests. Require exact-commit Code CI and Documentation Validation. UXR-26 moves from blocked on backend evidence to in progress at contract integration. The product stage still needs an exact-scope browser flow for submission, assigned review, explicit owner publication and qualified readback. Exercise denial and stale-version conflict and verify the independent signed synthetic PostgreSQL browser journey. UXR-27 remains unselected.

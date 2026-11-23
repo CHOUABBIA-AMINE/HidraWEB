@@ -57,7 +57,7 @@ test('map reads remain published and the current source is additive', () => {
 
 test('topology Orval input is activated without replacing historic source evidence', () => {
   const config = fs.readFileSync(path.join(root, 'orval.topology.config.ts'), 'utf8');
-  assert.ok(config.includes('./openapi/candidates/hidra-topology-uxr23.json'));
+  assert.ok(config.includes('./openapi/candidates/hidra-topology-uxr26.json'));
   assert.ok(!config.includes('hidra-topology-63f3f60974ce57eb8cd5e42910397615195624fb.json'));
   const gate = fs.readFileSync(path.join(root, 'scripts/check-openapi-compatibility.mjs'), 'utf8');
   assert.ok(gate.includes('TOPOLOGY_CURRENT_PROOF'));
@@ -94,4 +94,38 @@ test('UXR-23 adds eight read operations while preserving every admitted Topology
   }
   const section = active.paths['/api/v1/topology/pipeline-dossiers/{pipelineId}/sections/{sectionId}'];
   assert.equal(section.get.responses['200']?.content, undefined);
+});
+
+test('UXR-26 adds only the signed pressure restriction operations and their typed contracts', () => {
+  const before = JSON.parse(fs.readFileSync(path.join(root, 'openapi/candidates/hidra-topology-uxr23.json')));
+  const active = JSON.parse(fs.readFileSync(path.join(root, 'openapi/candidates/hidra-topology-uxr26.json')));
+  assert.equal(active['x-hidra-uxr26-source-sha'], '4dcb9e092a715d9942a2b19ad86b3dea9f6bd96f');
+  for (const [key, value] of Object.entries(before.paths)) assert.deepEqual(active.paths[key], value);
+  for (const [key, value] of Object.entries(before.components.schemas)) {
+    assert.deepEqual(active.components.schemas[key], value);
+  }
+  const rootPath = '/api/v1/topology/operating-constraints';
+  const requests = `${rootPath}/pipelines/{pipelineId}/restriction-requests`;
+  const request = `${requests}/{requestId}`;
+  const expected = {
+    [requests]: ['post', 'PressureRestrictionRequest'],
+    [`${requests}/stream`]: ['get', 'PressureRestrictionStreamVersion'],
+    [request]: ['get', 'PressureRestrictionRequest'],
+    [`${request}/evidence`]: ['get', 'PressureRestrictionDecisionEvidence'],
+    [`${request}/publication`]: ['post', 'PressureRestrictionPublicationReceipt'],
+    [`${request}/publication-inputs`]: ['get', 'PressureRestrictionPublicationInputs'],
+    [`${rootPath}/pressure-restriction-review-proposals/{candidateId}`]: ['get', 'PressureRestrictionReviewProposal'],
+  };
+  assert.deepEqual(Object.keys(active.paths).filter(key => !(key in before.paths)).sort(), Object.keys(expected).sort());
+  for (const [route, [method, schema]] of Object.entries(expected)) {
+    const item = active.paths[route];
+    assert.deepEqual(Object.keys(item), [method]);
+    assert.deepEqual(item[method].security, [{ hidraBearerJwt: [] }]);
+    assert.equal(item[method].responses['200'].content['*/*'].schema.$ref, `#/components/schemas/${schema}`);
+  }
+  const schemas = active.components.schemas;
+  assert.equal(schemas.PressureRestrictionStreamVersion.properties.expectedVersion.format, 'int64');
+  assert.ok(schemas.PressureRestrictionReviewProposal.properties.baselineReceiptId);
+  assert.equal(schemas.PressureRestrictionPublicationInputs.properties.decisions.items.$ref,
+    '#/components/schemas/PressureRestrictionPublicationDecisionReference');
 });

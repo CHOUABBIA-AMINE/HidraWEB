@@ -18,10 +18,10 @@ const RISK_CURRENT_PROOF = {
 };
 const TOPOLOGY_CURRENT_PROOF = {
   config: 'orval.topology.config.ts',
-  path: 'openapi/candidates/hidra-topology-uxr23.json',
-  sha256: 'sha256:3b8d5a56a3a91a5cf90c92be9d9662e1165d633409ed03bdad7ac06daf6df0c0',
-  paths: 66,
-  schemas: 126,
+  path: 'openapi/candidates/hidra-topology-uxr26.json',
+  sha256: 'sha256:10ccf1fdd9b8996fdb85f0e9ede8cad73deef2732bbdaf421d4e01f63c627f4c',
+  paths: 73,
+  schemas: 143,
 };
 const TELEMETRY_CURRENT_PROOF = {
   config: 'orval.telemetry-monitoring.config.ts',
@@ -32,10 +32,10 @@ const TELEMETRY_CURRENT_PROOF = {
 };
 const WORKFLOW_CURRENT_PROOF = {
   config: 'orval.workflow.config.ts',
-  path: 'openapi/candidates/hidra-workflow-5817406923e53761577ac41bbc3f318b517c3977.json',
-  sha256: 'sha256:44bd9f9f21b6a3f757a44ec5fc36ddf2228fb8047244bc38d65f6e00ee6ca28e',
-  paths: 14,
-  schemas: 17,
+  path: 'openapi/candidates/hidra-workflow-uxr26.json',
+  sha256: 'sha256:4b668884bdec01dc6dfb6e1a11c6a165be61706c70e76c21110a094fedf94fb8',
+  paths: 15,
+  schemas: 18,
 };
 const INCIDENT_CURRENT_PROOF = {
   config: 'orval.incident.config.ts',
@@ -453,7 +453,7 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exit(1);
 }
-console.log(`\nOpenAPI compatibility gate passed for ${configs.length} contracts: Risk from verified HidraAPI 81d46bcb8bc8821f67eafbb26cd1279f6d091457; Topology with additive UXR-23 source evidence and Configuration from verified HidraAPI f1fdc206c916a5266f609810c045c6b5688bfd49; Workflow from verified HidraAPI 5817406923e53761577ac41bbc3f318b517c3977; Telemetry/Monitoring with additive UXR-24 source evidence, and Incident, Custody, Leak Detection and HSE from verified HidraAPI da4ce33ead7db40776049c861027947b61b96270; Integrity with additive UXR-25 source evidence; Assets, Audit, Documents, Reporting, Analytics, Simulation and Alarm from verified HidraAPI 76b14cda4520f1eff242bd474c02ce4db317d385; Workbench from verified HidraAPI 016d972725ac9a02a46f08ec024e0a4b0f95bda6; Planning from verified HidraAPI d14c44fc527ea1115ad87baafa21a3264bf6950c; Identity/Organization from verified HidraAPI 720e9222b30fa45b7423ede9c9f141ab87298024; Party from verified HidraAPI 18e7a7596aea1b26e958130996c8811ae7fe27e4; all feature source pins SHA-256 verified against HidraAPI ${manifest.backendCommit}.`);
+console.log(`\nOpenAPI compatibility gate passed for ${configs.length} contracts: Risk from verified HidraAPI 81d46bcb8bc8821f67eafbb26cd1279f6d091457; Topology with additive UXR-23 and UXR-26 source evidence and Configuration from verified HidraAPI f1fdc206c916a5266f609810c045c6b5688bfd49; Workflow with additive UXR-26 evidence over verified HidraAPI 5817406923e53761577ac41bbc3f318b517c3977; Telemetry/Monitoring with additive UXR-24 source evidence, and Incident, Custody, Leak Detection and HSE from verified HidraAPI da4ce33ead7db40776049c861027947b61b96270; Integrity with additive UXR-25 source evidence; Assets, Audit, Documents, Reporting, Analytics, Simulation and Alarm from verified HidraAPI 76b14cda4520f1eff242bd474c02ce4db317d385; Workbench from verified HidraAPI 016d972725ac9a02a46f08ec024e0a4b0f95bda6; Planning from verified HidraAPI d14c44fc527ea1115ad87baafa21a3264bf6950c; Identity/Organization from verified HidraAPI 720e9222b30fa45b7423ede9c9f141ab87298024; Party from verified HidraAPI 18e7a7596aea1b26e958130996c8811ae7fe27e4; all feature source pins SHA-256 verified against HidraAPI ${manifest.backendCommit}.`);
 
 function checkEvidence() {
   const required = ['repository', 'backendCommit', 'workflowRunId', 'artifactId', 'artifactName', 'artifactDigest', 'fullSpecSha256', 'fullContractGzipBase64Parts', 'fullContractGzipSha256', 'expectedOrvalContracts'];
