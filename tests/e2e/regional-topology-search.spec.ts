@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page, type Route } from '@playwright/test';
 
 const permissions = [
   { route: '/api/v1/topology/map/layers', methods: ['GET'], module: 'topology',
@@ -249,4 +249,60 @@ test('UXR-22 read-only regional map keeps company scope and canonical detail wit
   expect(geoJsonRequests.every(url => url.searchParams.get('companyPartyId') === 'company')).toBe(true);
   expect(detailRequests.every(url => url.searchParams.get('companyPartyId') === 'company')).toBe(true);
   expect(legacy).toHaveLength(0);
+});
+
+test('UXR-23 uses the exact selected company and separates design from pipeline and section limits', async ({ page }) => {
+  const dossier = '/api/v1/topology/pipeline-dossiers/{pipelineId}';
+  const pressure = '/api/v1/topology/operating-constraints/pipelines/{pipelineId}';
+  const dossierPermission = 'topology:pipeline-dossiers:read';
+  const pressurePermission = 'topology:operating-constraints:read';
+  const dossierRoutes = [
+    ...[dossier, dossier + '/sections', dossier + '/sections/{sectionId}'].map(route => ({
+      route, resource: 'pipeline-dossiers', permission: dossierPermission,
+    })),
+    ...[pressure, pressure + '/sections/{sectionId}'].map(route => ({
+      route, resource: 'operating-constraints', permission: pressurePermission,
+    })),
+  ].map(entry => ({ ...entry, methods: ['GET'], module: 'topology', action: 'read', enforcementStatus: 'backend-enforced' }));
+  const scoped = (value: unknown) => async (route: Route) => {
+    expect(new URL(route.request().url()).searchParams.get('companyPartyId')).toBe('company');
+    await route.fulfill({ json: value });
+  };
+  await page.route('**/api/v1/topology/regional-map/layers?**', route => route.fulfill({ json: [] }));
+  await page.route('**/api/v1/topology/regional-map/search?**', route => route.fulfill({
+    json: { totalFeatures: 1, page: 0, size: 25, totalPages: 1, hasNext: false, features: [feature] },
+  }));
+  await page.route('**/api/v1/topology/regional-map/layers/pipelines/features/p-1?**', scoped(feature));
+  const selectedSection = { id: 'section-1', code: 'Section 1' };
+  await page.route('**/api/v1/topology/pipeline-dossiers/p-1?**', scoped({
+    id: 'p-1', code: 'GZ2-P', designPressure: { availability: 'AVAILABLE', value: 70, unit: 'bar', basis: 'GAUGE' },
+  }));
+  await page.route('**/api/v1/topology/pipeline-dossiers/p-1/sections?**', scoped({
+    items: [selectedSection], page: 0, hasNext: false,
+  }));
+  await page.route('**/api/v1/topology/pipeline-dossiers/p-1/sections/section-1?**', scoped(selectedSection));
+  await page.route('**/api/v1/topology/operating-constraints/pipelines/p-1?**', scoped({
+    status: 'QUALIFIED', restrictionClass: 'UPPER_OPERATING_PRESSURE', scopeType: 'PIPELINE',
+    pipelineId: 'p-1', conditionCode: 'NORMAL', upperPressure: 55, pressureUnit: 'bar',
+    pressureBasis: 'GAUGE', effectiveFrom: '2026-11-01T00:00:00Z', revisionId: 'r1',
+    engineeringSourceRevision: 'er1', sourceBaselineReceiptId: 'receipt-1',
+  }));
+  await page.route('**/api/v1/topology/operating-constraints/pipelines/p-1/sections/section-1?**',
+    scoped({ status: 'CONFLICT', upperPressure: 999 }));
+  await enterSelectedScope(page, [...regionalMapRoutes, ...dossierRoutes], [
+    dossierPermission, pressurePermission, 'topology:regional-resource:read',
+  ]);
+  await page.getByRole('textbox', { name: 'Recherche régionale' }).fill('GZ2');
+  await page.getByRole('button', { name: 'Rechercher dans le périmètre' }).click();
+  await page.getByRole('button', { name: 'GZ2-P', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Dossier de la conduite' })).toBeVisible();
+  await expect(page.getByText(/Pression de conception · 70 bar/)).toBeVisible();
+  await page.getByRole('button', { name: 'Section 1', exact: true }).click();
+  await expect(page.getByText(/Détail de la section · Section 1/)).toBeVisible();
+  await page.getByLabel('Code de condition').fill('NORMAL');
+  await page.getByLabel('Instant effectif (UTC, ISO 8601)').fill('2026-11-23T12:00:00Z');
+  await page.getByRole('button', { name: 'Consulter les limites' }).click();
+  await expect(page.getByText(/Limite qualifiée de la conduite · 55 bar/)).toBeVisible();
+  await expect(page.getByText('Limite qualifiée de la section · CONFLICT')).toBeVisible();
+  await expect(page.getByText(/999 bar/)).toHaveCount(0);
 });

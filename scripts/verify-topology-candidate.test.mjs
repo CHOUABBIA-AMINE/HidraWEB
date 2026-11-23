@@ -57,7 +57,7 @@ test('map reads remain published and the current source is additive', () => {
 
 test('topology Orval input is activated without replacing historic source evidence', () => {
   const config = fs.readFileSync(path.join(root, 'orval.topology.config.ts'), 'utf8');
-  assert.ok(config.includes('./openapi/candidates/hidra-topology-f1fdc206c916a5266f609810c045c6b5688bfd49.json'));
+  assert.ok(config.includes('./openapi/candidates/hidra-topology-uxr23.json'));
   assert.ok(!config.includes('hidra-topology-63f3f60974ce57eb8cd5e42910397615195624fb.json'));
   const gate = fs.readFileSync(path.join(root, 'scripts/check-openapi-compatibility.mjs'), 'utf8');
   assert.ok(gate.includes('TOPOLOGY_CURRENT_PROOF'));
@@ -75,4 +75,23 @@ test('W2 runtime contract retains historical operations and closes all component
   for (const match of bytes.toString().matchAll(/"\$ref": "#\/components\/schemas\/([^"]+)"/g)) assert.ok(current.components.schemas[match[1]]);
   assert.ok(current.paths['/api/v1/topology/foundation/facilities'].post);
   assert.ok(current.paths['/api/v1/topology/engineering-networks/{draftId}/authored-topology'].put);
+});
+
+test('UXR-23 adds eight read operations while preserving every admitted Topology path and schema', () => {
+  const prior = JSON.parse(fs.readFileSync(path.join(root, 'openapi/candidates/hidra-topology-f1fdc206c916a5266f609810c045c6b5688bfd49.json')));
+  const active = JSON.parse(fs.readFileSync(path.join(root, 'openapi/candidates/hidra-topology-uxr23.json')));
+  for (const collection of ['paths', 'schemas']) {
+    const before = collection === 'paths' ? prior.paths : prior.components.schemas;
+    const after = collection === 'paths' ? active.paths : active.components.schemas;
+    for (const [name, value] of Object.entries(before)) assert.deepEqual(after[name], value);
+  }
+  const added = Object.entries(active.paths).filter(([route]) => !(route in prior.paths));
+  assert.equal(added.length, 8);
+  for (const [, operations] of added) {
+    assert.deepEqual(Object.keys(operations), ['get']);
+    assert.deepEqual(operations.get.security, [{ hidraBearerJwt: [] }]);
+    assert.ok(operations.get.parameters.some(param => param.name === 'companyPartyId' && param.required));
+  }
+  const section = active.paths['/api/v1/topology/pipeline-dossiers/{pipelineId}/sections/{sectionId}'];
+  assert.equal(section.get.responses['200']?.content, undefined);
 });

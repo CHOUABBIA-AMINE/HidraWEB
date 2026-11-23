@@ -6052,3 +6052,19 @@ concludes. P6 / UXR-23 remains **NOT SELECTED**.
 [Code CI #1103](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45177911401) on `9c7b454c4fd8a40e3f72f5dbb690ca5f7bbae758` failed Typecheck with TS18048 in `RegionalTopologySearch.tsx`. Comparing two optional layers could evaluate true when both references were absent, leaving the next property access unsafe. Lint, both native qualification jobs, and [Documentation Validation #140](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45177911145) passed. The main job stopped before unit, build and full browser verification.
 
 Update only `src/features/topology/components/RegionalTopologySearch.tsx` and append this record. Require a parsed selection before highlighting a map feature and reuse the existing exact owner-layer and entity match. Exact commit message: `fix(topology): guard UXR-22 map feature selection`. UXR-22 acceptance requires fresh exact-SHA Code CI and Documentation Validation. UXR-23 remains next.
+
+### P6 / UXR-22 acceptance and UXR-23 pipeline evidence (23 November 2026)
+
+[Code CI #1104](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45179203374) and [Documentation Validation #141](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45179203560) passed on `f50c1896ddb0ae95ffef797bbdba93769d1a20ec`. All three code jobs passed, including the native A1 PostgreSQL/browser and F18 LOCAL qualifications. UXR-22 is CI-passed.
+
+**Selected:** P6 / UXR-23, one read-only Circle 1 task. **Commit:** `feat(topology): deliver UXR-23 pipeline dossier and pressure evidence`.
+
+| Files | Scope |
+|---|---|
+| `openapi/candidates/hidra-topology-uxr23.json`, `orval.topology.config.ts`, `scripts/check-openapi-compatibility.mjs`, `scripts/verify-topology-candidate.test.mjs` | Add only the eight registered reads and their schema dependencies to the active Topology input. Preserve the previous proof and verify every prior path and schema. |
+| `src/features/topology/components/PipelineDossier.tsx`, `RegionalTopologySearch.tsx`, `src/features/topology/i18n/topologyTranslations.ts` | Attach the read-only dossier to the exact authorized pipeline feature. Read owner-paged sections, connections and equipment, and the separately admitted baseline receipt. Display design facts separately from qualified limits. Bind pressure reads to the requested condition and UTC instant. |
+| `src/features/topology/model/pipelineDossier.ts`, `pipelineDossier.test.ts`, `tests/e2e/regional-topology-search.spec.ts` | Decode the section-detail response, check its exact ID, suppress nonqualified numeric pressure and cover separate pipeline/section limits and scope propagation. |
+
+**Contract evidence:** The addition uses the checked-in HidraAPI `doc/api/openapi.yaml` at T39 commit `f0310330ae8eb58f8bf00400b29afeb5baccb869`, embedded source `1de513cc02c2ddaeb4c162ede2b8c32c96bd8571`, SHA-256 `9d54ae7601a6425adac6ab86da4769c81b5dff7d115cd24048aced22fcdf3231`. The two controller and response families match that source and current HidraAPI `6d2e0cb4f9bc47ee198e61ff87b2bcc790c02014`. The T39 runtime ZIP download was unavailable for this turn. The section-detail 200 schema remains undeclared in the input and the consumer decodes the displayed fields at runtime. Protected reads use the existing authenticated client and backend authority.
+
+**Acceptance pending:** fresh exact-SHA Code CI and Documentation Validation, including the regional Playwright journey and existing native qualification jobs. The new dossier browser journey uses synthetic responses. Existing T39 backend evidence applies to native API authorization and pressure resolution. UXR-24 is next.

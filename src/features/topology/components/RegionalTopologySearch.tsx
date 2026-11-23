@@ -19,6 +19,7 @@ import {
   fetchRegionalTopologyFeature, fetchRegionalTopologyGeoJson, fetchRegionalTopologyLayer,
   fetchRegionalTopologyLayerFeatures, fetchRegionalTopologyLayers, searchRegionalTopology,
 } from '@/features/topology/api/regionalTopologyApi';
+import { PipelineDossier } from '@/features/topology/components/PipelineDossier';
 import { TopologyInspector } from '@/features/topology/components/TopologyInspector';
 import { REGIONAL_LAYERS, exactRegionalFeature, parseRegionalReference, regionalFeatureReference, regionalMapAdmission, validRegionalQuery } from '@/features/topology/model/regionalTopologySearch';
 import { topologyFeatureLabel } from '@/features/topology/model/topologyPresentation';
@@ -316,7 +317,17 @@ export function RegionalTopologySearch() {
               ) : null}
               {ref && admission.detail && detail.isSuccess && !detail.isFetching ?
                 exactRegionalFeature(detail.data, ref)
-                  ? <TopologyInspector feature={detail.data} />
+                  ? <>
+                    <TopologyInspector feature={detail.data} />
+                    {ref.layer === 'pipelines' && selected && principalId ? (
+                      <PipelineDossier
+                        key={ref.entityId}
+                        companyPartyId={company}
+                        contextKey={JSON.stringify([principalId, selected.scopeId, selected.type, selected.targetId])}
+                        pipelineId={ref.entityId}
+                      />
+                    ) : null}
+                  </>
                   : <Alert severity="warning">{t('topology.regional.unavailable')}</Alert>
                 : null}
             </Stack>
