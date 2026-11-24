@@ -276,7 +276,7 @@ function LegacyAuditWorkspace({ contextKey, actorId, displayName }: { contextKey
               </Table>
             </TableContainer>
 
-            {eventsQuery.isSuccess && !eventsQuery.isFetching ? <Stack direction="row" spacing={1} alignItems="center">
+            {eventsQuery.isSuccess && !eventsQuery.isFetching ? <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
               <Button disabled={page === 0} onClick={() => { setSelectedId(''); setPage(p => p - 1); }}>Previous audit page</Button>
               <Typography variant="body2">Page {page + 1} · {eventsQuery.data.items.length} loaded</Typography>
               <Button disabled={page + 1 >= eventsQuery.data.totalPages} onClick={() => { setSelectedId(''); setPage(p => p + 1); }}>Next audit page</Button>
