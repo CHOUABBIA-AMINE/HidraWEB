@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { PermissionContextValue } from '@/features/permissions/permissionContext';
-import { instantKey, riskEvent, riskFormat, riskPurpose, scopedAuditAdmission, scopedAuditRoute,
+import { exactId, instantKey, riskEvent, riskFormat, riskPurpose, scopedAuditAdmission, scopedAuditRoute,
   validatedEventPage, validatedManifest, validatedPressureEvidence, validWindow } from './auditEvidence';
 
 const scope = { companyId: 'company-a', facilityId: 'facility-a' };
@@ -14,6 +14,22 @@ const witness = { candidateId: 'candidate', actionId: 'action', taskId: 'task', 
   reviewerId: 'reviewer', auditEventId: 'audit-event', decidedAt: window.to };
 
 describe('UXR-27 owner evidence validation', () => {
+  it('rejects every C0 and DEL control character while preserving exact identifier rules', () => {
+    for (let code = 0; code < 32; code++) {
+      expect(exactId('a' + String.fromCharCode(code) + 'b')).toBe(false);
+    }
+    expect(exactId('a' + String.fromCharCode(127) + 'b')).toBe(false);
+    for (const value of ['', '.', '..', ' leading', 'trailing ', 'x'.repeat(121), null, 123]) {
+      expect(exactId(value)).toBe(false);
+    }
+    expect(exactId('company-a')).toBe(true);
+    expect(exactId('facility 1')).toBe(true);
+    expect(exactId('a' + String.fromCharCode(128) + 'b')).toBe(true);
+    expect(exactId('x'.repeat(120))).toBe(true);
+    expect(exactId('abcd', 3)).toBe(false);
+    expect(exactId('abcd', 4)).toBe(true);
+  });
+
   it('uses exact microsecond windows and rejects invalid dates and oversized windows', () => {
     expect(validWindow(scope, window)).toBe(true);
     expect(instantKey(window.to)! - instantKey(window.from)!).toBe(1n);

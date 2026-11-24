@@ -12,7 +12,11 @@ export const uuid = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i;
 
 export function exactId(value: unknown, max = 120): value is string {
   return typeof value === 'string' && value.length > 0 && value.length <= max &&
-    value === value.trim() && !/[\u0000-\u001f\u007f]/.test(value) && value !== '.' && value !== '..';
+    value === value.trim() && value !== '.' && value !== '..' &&
+    Array.from(value).every(character => {
+      const code = character.charCodeAt(0);
+      return code >= 32 && code !== 127;
+    });
 }
 
 export function admittedRoute(p: PermissionContextValue, route: string, method: 'GET' | 'POST') {
