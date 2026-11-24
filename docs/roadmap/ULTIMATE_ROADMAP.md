@@ -6148,3 +6148,19 @@ Update only `src/features/topology/components/RegionalTopologySearch.tsx` and ap
 | Append | `docs/roadmap/ULTIMATE_ROADMAP.md` |
 
 **Acceptance.** Verify exact source and slice digests, prior operation and schema preservation, bearer protection, both client generations, typechecking and focused contract tests. Require exact-commit Code CI and Documentation Validation. UXR-26 moves from blocked on backend evidence to in progress at contract integration. The product stage still needs an exact-scope browser flow for submission, assigned review, explicit owner publication and qualified readback. Exercise denial and stale-version conflict and verify the independent signed synthetic PostgreSQL browser journey. UXR-27 remains unselected.
+
+### P6 / UXR-26 independent restriction review and publication — 24 November 2026
+
+UXR-26 is one delivery. The earlier standalone contract commit `43451099401392d2c3698e0fbe13cfc41fb51def` separated work without owner authorization. Its [Code CI #1108](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45270384079) and [Documentation Validation #148](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45270383972) passed. The remaining submission, independent review, publication, readback and qualification test are delivered together in `feat(topology): deliver UXR-26 restriction review and publication`. HidraAPI T60 `4dcb9e092a715d9942a2b19ad86b3dea9f6bd96f` is the accepted backend pin.
+
+| Scope | Files |
+|---|---|
+| Pipeline and exact section submission, review assignment, owner publication and receipt/Audit readback | `src/features/topology/components/PipelineDossier.tsx`, `src/features/topology/components/PressureRestrictionWorkflow.tsx` |
+| Current assigned task and immutable proposal before Workflow decisions | `src/features/workflow/WorkflowTasksPage.tsx` |
+| Publication and conflict checks, browser decision denial and recovery | `src/features/topology/components/PressureRestrictionWorkflow.test.tsx`, `tests/e2e/workflow.spec.ts` |
+| Signed Chromium replay against accepted HidraAPI and fresh PostgreSQL | `scripts/run-uxr26-native.sh`, `playwright.uxr26.config.ts`, `tests/e2e/uxr26-native.spec.ts`, `vite.config.ts` |
+| Record scope and acceptance | Append this roadmap |
+
+The reviewer obtains the exact target from the owner-authorized Workflow instance read. Task detail alone supplies the instance ID without its target. Browser decision controls therefore wait for current instance access, and for a pressure restriction they also wait for the assigned task's exact Topology proposal. The separate publisher obtains the submitted version and eligible approval references through Topology and must explicitly confirm publication. Submission and publication keep their owner version checks. The dossier refreshes the qualified limit, and request IDs allow explicit owner readback of publication and Audit evidence.
+
+OpenAPI compatibility, typechecking, 13 contract tests, six focused component and Workflow tests, and the production build with bundle checks passed locally. Playwright discovered the signed journey. Local Chromium startup was blocked by the executor socket restriction, and the native runner stopped before provisioning because Docker is unavailable. The signed replay remains an acceptance gate. Run `bash scripts/run-uxr26-native.sh /path/to/HidraAPI` in a local POSIX development environment with Java 21, Maven dependencies, Docker and Playwright Chromium. It uses a disposable detached checkout at the backend pin and adds only the browser read grants inside the private replay fixture. The test uses separate signed author, reviewer and publisher contexts, checks two replacement decisions, verifies receipt and qualified limit across browser sessions, and checks stale submission and masked evidence denial. Require exact-commit Code CI, Documentation Validation and signed browser evidence before closing UXR-26. UXR-27 remains unselected.

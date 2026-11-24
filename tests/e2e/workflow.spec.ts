@@ -123,3 +123,41 @@ test('UXR-16 source-issued Workflow task and instance links reauthorize the targ
   await returnLink.click();
   await expect(page).toHaveURL(/\/work\/tasks$/);
 });
+
+test('UXR-26 hides decisions until the exact assigned pressure proposal is readable', async ({ page }) => {
+  await mockWorkflow(page);
+  const candidateId = 'a021e8b0-2de0-4272-87cb-74357a27ef96';
+  const locator = `t36-v1:${candidateId}`;
+  await page.route('**/api/v1/workflow/instances/instance-1', route => route.fulfill({
+    json: { id: 'instance-1', targetId: candidateId, targetModule: 'topology', targetCode: locator },
+  }));
+  let denied = true;
+  let decisionRequests = 0;
+  await page.route('**/api/v1/workflow/tasks/task-1/transitions/**', route => {
+    decisionRequests += 1;
+    return route.fulfill({ status: 404 });
+  });
+  await page.route(`**/pressure-restriction-review-proposals/${candidateId}?**`, route => {
+    expect(new URL(route.request().url()).searchParams.get('targetLocator')).toBe(locator);
+    expect(new URL(route.request().url()).searchParams.get('taskId')).toBe('task-1');
+    return denied ? route.fulfill({ status: 404 }) : route.fulfill({
+      json: { requestId: 'restriction-request', candidateId, kind: 'REVISION', companyPartyId: 'company',
+        pipelineId: 'pipeline', conditionCode: 'NOMINAL', upperPressure: 53, pressureUnit: 'bar',
+        pressureBasis: 'GAUGE', effectiveFrom: '2026-11-24T00:00:00Z', baselineReceiptId: 'baseline',
+        baselineDigest: 'digest', engineeringSourceRevision: 'source-revision' },
+    });
+  });
+  await signIn(page);
+  await page.evaluate(() => {
+    window.history.pushState({}, '', '/work/tasks?taskId=task-1');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  });
+  await expect(page.getByText('The exact pressure restriction proposal is unavailable.')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'APPROVE', exact: true })).toHaveCount(0);
+  expect(decisionRequests).toBe(0);
+  denied = false;
+  await page.getByRole('button', { name: 'Actualiser', exact: true }).last().click();
+  await expect(page.getByText('Proposed upper pressure · 53 bar · GAUGE')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'APPROVE', exact: true })).toBeEnabled();
+  expect(decisionRequests).toBe(0);
+});

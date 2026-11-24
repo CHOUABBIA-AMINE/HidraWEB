@@ -9,6 +9,7 @@ import {
   section, section1 as readSectionLimit, sections,
 } from '@/api/generated/topology/topology';
 import { usePermissions } from '@/features/permissions/usePermissions';
+import { PressureRestrictionWorkflow } from './PressureRestrictionWorkflow';
 import { qualifiedPressure, readSectionDetail } from '@/features/topology/model/pipelineDossier';
 
 const dossierRoute = '/api/v1/topology/pipeline-dossiers/{pipelineId}';
@@ -169,6 +170,16 @@ export function PipelineDossier({ companyPartyId, pipelineId, contextKey }: Pipe
                 sectionPressure.isFetching, sectionPressure.isSuccess ? sectionPressure.data : undefined, sectionId) : null}
             </> : null}
           </> : null}
+          {!sectionId || sectionFacts ? <PressureRestrictionWorkflow
+            key={JSON.stringify([contextKey, companyPartyId, pipelineId, sectionFacts?.id])}
+            companyPartyId={companyPartyId} pipelineId={pipelineId} sectionId={sectionFacts?.id}
+            baselineReceiptId={receiptData?.availability === 'AVAILABLE' && receiptData.pipelineSystemId === pipelineFacts.pipelineSystemId
+              ? receiptData.receiptId : undefined}
+            onPublished={() => {
+              if (evaluation && pressureAllowed) void pressure.refetch();
+              if (evaluation && sectionPressureAllowed) void sectionPressure.refetch();
+            }}
+          /> : null}
         </> : <Alert severity="info">{facts.isFetching ? t('topology.dossier.loading') : 'UNAVAILABLE'}</Alert>}
       </Stack>
     </Paper>

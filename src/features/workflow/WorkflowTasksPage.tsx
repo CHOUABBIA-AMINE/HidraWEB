@@ -21,6 +21,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useSearchParams } from 'react-router';
 
+import { readPressureRestrictionReviewProposal } from '@/api/generated/topology/topology';
 import type { AvailableActionView, ExecuteWorkflowTransitionRequest, TaskView } from '@/api/generated/workflow/model';
 import { usePermissions } from '@/features/permissions/usePermissions';
 import {
@@ -118,6 +119,22 @@ export function WorkflowTasksPage() {
   const instanceQuery = useQuery({ queryKey: workflowQueryKeys.instance(instanceId), queryFn: () => fetchInstance(instanceId), enabled: canInstances && Boolean(instanceId) });
   const timelineQuery = useQuery({ queryKey: workflowQueryKeys.timeline(instanceId), queryFn: () => fetchTimeline(instanceId), enabled: canInstances && Boolean(instanceId) });
 
+  const instance = instanceQuery.isSuccess && !instanceQuery.isFetching && instanceQuery.data?.id === instanceId
+    ? instanceQuery.data : undefined;
+  const pressureCandidate = instance?.targetModule === 'topology' && instance.targetId &&
+    instance.targetCode === `t36-v1:${instance.targetId}` ? instance.targetId : undefined;
+  const proposalQuery = useQuery({
+    queryKey: ['hidra', 'topology', 'restriction-review', selectedTaskId, pressureCandidate, instance?.targetCode],
+    enabled: Boolean(currentTask && pressureCandidate),
+    retry: false, staleTime: 0, gcTime: 0,
+    queryFn: ({ signal }) => readPressureRestrictionReviewProposal(encodeURIComponent(pressureCandidate ?? ''),
+      { targetLocator: instance?.targetCode ?? '', taskId: selectedTaskId }, signal),
+  });
+  const proposal = proposalQuery.isSuccess && !proposalQuery.isFetching &&
+    proposalQuery.data?.candidateId === pressureCandidate ? proposalQuery.data : undefined;
+  const awaitingProposal = Boolean(pressureCandidate && !proposal) ||
+    Boolean(currentTask && !instance);
+
   const transitionMutation = useMutation({
     retry: false,
     mutationFn: async ({ taskId, action, request }: {
@@ -139,6 +156,17 @@ export function WorkflowTasksPage() {
         (liveAction.reasonRequired === true && !request.reasonId?.trim()) ||
         (liveAction.commentRequired === true && !request.commentText?.trim())) {
         throw new Error(t('workflow.actionReview'));
+      }
+      if (awaitingProposal || !liveTask.instanceId || liveTask.instanceId !== instance?.id) {
+        throw new Error(t('workflow.actionReview'));
+      }
+      if (pressureCandidate) {
+        const liveProposal = await readPressureRestrictionReviewProposal(encodeURIComponent(pressureCandidate),
+          { targetLocator: instance?.targetCode ?? '', taskId });
+        if (liveProposal.candidateId !== pressureCandidate || !liveProposal.requestId ||
+          liveProposal.requestId !== proposal?.requestId || liveProposal.baselineDigest !== proposal?.baselineDigest) {
+          throw new Error(t('workflow.actionReview'));
+        }
       }
       return executeWorkflowTransition(taskId, action.transitionId, request);
     },
@@ -225,7 +253,9 @@ export function WorkflowTasksPage() {
   const closeTask = () => selectTask('');
   const refreshSelectedTask = async () => {
     if (!canTasks || !selectedTaskId || transitionMutation.isPending) return;
-    const refreshed = await Promise.all([taskQuery.refetch(), actionsQuery.refetch()]);
+    const refreshed = await Promise.all([taskQuery.refetch(), actionsQuery.refetch(),
+      ...(canInstances && instanceId ? [instanceQuery.refetch()] : []),
+      ...(pressureCandidate ? [proposalQuery.refetch()] : [])]);
     if (refreshed.every(result => result.status === 'success')) {
       setActionSelection(null);
       setConfirmed(false);
@@ -302,13 +332,29 @@ export function WorkflowTasksPage() {
                   </Box>
                   {currentTask ? <Stack spacing={0.5}><Typography>{t('workflow.status')}: {currentTask.status ?? '—'}</Typography><Typography>{t('workflow.step')}: {currentTask.stepId ?? '—'}</Typography><Typography>{t('workflow.sla')}: {currentTask.slaStatus ?? '—'}</Typography><Typography>{t('workflow.due')}: {currentTask.dueAt ?? '—'}</Typography></Stack> : null}
                   <Button disabled={transitionMutation.isPending} onClick={() => { void refreshSelectedTask(); }}>{t('workflow.refresh')}</Button>
+                  {currentTask && !canInstances ? <Alert severity="info">Workflow instance access is required to verify the review target before deciding.</Alert> : null}
+                  {pressureCandidate ? proposal ? <Paper variant="outlined" sx={{ p: 2 }}>
+                    <Stack spacing={1}>
+                      <Typography component="h3" variant="subtitle1">Exact pressure restriction proposal</Typography>
+                      <Typography>Change · {proposal.kind} · {proposal.conditionCode}</Typography>
+                      <Typography>Scope · {proposal.companyPartyId} · {proposal.pipelineId} {proposal.sectionId}</Typography>
+                      {proposal.upperPressure != null ? <Typography>Proposed upper pressure · {proposal.upperPressure} {proposal.pressureUnit} · {proposal.pressureBasis}</Typography> : null}
+                      <Typography>Effective from · {proposal.effectiveFrom}</Typography>
+                      {proposal.effectiveUntil ? <Typography>Effective until · {proposal.effectiveUntil}</Typography> : null}
+                      {proposal.predecessorId ? <Typography>Predecessor · {proposal.predecessorId}</Typography> : null}
+                      {proposal.successorId ? <Typography>Successor · {proposal.successorId}</Typography> : null}
+                      <Typography>Baseline · {proposal.baselineReceiptId} · {proposal.baselineDigest}</Typography>
+                      <Typography>Engineering revision · {proposal.engineeringSourceRevision}</Typography>
+                      <Typography>Request · {proposal.requestId}</Typography>
+                    </Stack>
+                  </Paper> : <Alert severity="info">{proposalQuery.isFetching ? t('shell.loadingWorkspace') : 'The exact pressure restriction proposal is unavailable.'}</Alert> : null}
                   <Divider />
                   <AuthorizedActionPanel<AvailableActionView>
                     label={t('workflow.availableActions')} state={actionState}
                     selectedId={selectedTransitionId} emptyMessage={t('workflow.noActions')}
                     pending={transitionMutation.isPending}
                     getId={action => action.transitionId}
-                    isPermitted={action => action.permitted === true}
+                    isPermitted={action => action.permitted === true && !awaitingProposal}
                     actionLabel={action => action.decision ?? t('workflow.action')}
                     onSelect={action => {
                       setActionSelection({ taskId: selectedTaskId, historyKey: location.key, transitionId: action.transitionId ?? '' });
@@ -340,8 +386,9 @@ export function WorkflowTasksPage() {
                           reasonId: reasonId.trim() || undefined,
                           commentText: commentText.trim() || undefined,
                           decisionNote: decisionNote.trim() || undefined,
+                          ...(pressureCandidate && instance?.correlationId ? { correlationId: instance.correlationId } : {}),
                         }}
-                        permitted={canTasks && taskMatchesSelection && action.permitted === true}
+                        permitted={canTasks && taskMatchesSelection && action.permitted === true && !awaitingProposal}
                         valid={Boolean(currentTask?.updatedAt) &&
                           (!action.reasonRequired || Boolean(reasonId.trim())) &&
                           (!action.commentRequired || Boolean(commentText.trim()))}
