@@ -172,12 +172,23 @@ test('UXR-27 exact trace uses the published correlation filter, opens matching d
   await signIn(page); await openAuditWorkspace(page);
   await page.getByLabel('Exact correlation ID').fill('corr-1');
   await page.getByRole('button', { name: 'Find exact trace' }).click();
-  await expect(page.getByText('EXACT TRACE')).toBeVisible();
-  await page.getByRole('button', { name: 'Open', exact: true }).click();
+  const traceCell = page.getByRole('cell', { name: 'EXACT TRACE', exact: true });
+  const traceRow = page.getByRole('row').filter({ has: traceCell });
+  await expect(traceCell).toBeVisible();
+  await expect(traceRow).toHaveCount(1);
+  await traceRow.getByRole('button', { name: 'Open', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Audit event detail' })).toBeVisible();
-  await expect(page.getByText(/"correlationId": "corr-1"/)).toBeVisible();
+  const detail = page.locator('pre').filter({ hasText: /"correlationId": "corr-1"/ });
+  await expect(detail).toBeVisible();
+  await expect(detail).toHaveText(JSON.stringify({
+    actionCode: 'APPROVE', sourceModule: 'workflow', targetId: 'reading-42', correlationId: 'corr-1',
+  }, null, 2));
   await page.getByRole('button', { name: 'Clear', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Audit event detail' })).toHaveCount(0);
+  await expect(detail).toHaveCount(0);
+  await expect(page.getByLabel('Exact correlation ID')).toHaveValue('');
+  await expect(traceCell).toHaveCount(0);
+  await expect(page.getByRole('cell', { name: 'Operator A', exact: true })).toBeVisible();
 });
 
 const auditId = 'a021e8b0-2de0-4272-87cb-74357a27ef96';

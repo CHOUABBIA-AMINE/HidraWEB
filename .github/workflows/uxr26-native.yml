@@ -9,6 +9,7 @@ on:
       - scripts/run-uxr26-native.sh
       - playwright.uxr26.config.ts
       - tests/e2e/uxr26-native.spec.ts
+      - tests/e2e/audit-workspace.spec.ts
       - src/features/context/components/OperationalContextSelector.tsx
       - src/features/context/api/identityOrganizationApi.ts
       - src/features/context/model/operationalContextModel.ts
