@@ -1,5 +1,10 @@
 import { expect, test, type Page } from '@playwright/test';
-import type { PressureRestrictionRequest, PressureRestrictionSubmission } from '../../src/api/generated/topology/model';
+import type {
+  PressureRestrictionPublicationDecisionReference,
+  PressureRestrictionPublicationInputs,
+  PressureRestrictionRequest,
+  PressureRestrictionSubmission,
+} from '../../src/api/generated/topology/model';
 import type { TaskView, WorkflowTransitionExecutionResponse, ExecuteWorkflowTransitionRequest } from '../../src/api/generated/workflow/model';
 
 interface Fixture {
@@ -199,6 +204,7 @@ test('UXR-26 verifies separate signed author, reviewer and publisher in Chromium
     const proposal: PressureRestrictionRequest = await submitted.json();
     expect(proposal.candidates).toHaveLength(2);
     const requestId = proposal.requestId!;
+    const approvals = new Map<string, PressureRestrictionPublicationDecisionReference>();
     for (const [index, candidate] of proposal.candidates!.entries()) {
       const reviewer = reviewers[index];
       stage(`REVIEW_${index + 1}_SELECT_CANDIDATE`);
@@ -275,6 +281,9 @@ test('UXR-26 verifies separate signed author, reviewer and publisher in Chromium
         decision.instanceStatus === 'COMPLETED' && Boolean(decision.actionId);
       check('COMMAND_MATCH', commandMatch);
       expect(commandMatch).toBe(true);
+      approvals.set(candidate.candidateId!, {
+        candidateId: candidate.candidateId, instanceId: decision.instanceId, taskId, actionId: decision.actionId,
+      });
       stage(`REVIEW_${index + 1}_READBACK`);
       const { result: persistedResponse } = await readbackResult;
       expect(Boolean(persistedResponse), 'The frontend must read the task after the command').toBe(true);
@@ -313,7 +322,23 @@ test('UXR-26 verifies separate signed author, reviewer and publisher in Chromium
     await openDossier(publisher, scope.companyPartyId, scope.pipelineId, fixture.scopeRegistryId);
     stage('PUBLISHER_PUBLISH');
     await publisher.getByLabel('Restriction request ID').fill(requestId);
-    await publisher.getByRole('button', { name: 'Read publication inputs' }).click();
+    const [inputsResponse] = await Promise.all([
+      response(publisher, root + '/' + requestId + '/publication-inputs', 'GET'),
+      publisher.getByRole('button', { name: 'Read publication inputs' }).click(),
+    ]);
+    expect(inputsResponse.status()).toBe(200);
+    expect(new URL(inputsResponse.url()).searchParams.get('companyPartyId') === scope.companyPartyId).toBe(true);
+    const inputs = await inputsResponse.json() as PressureRestrictionPublicationInputs;
+    expect(inputs.requestId === requestId && inputs.expectedVersion === currentPublication.streamVersion &&
+      !inputs.publication).toBe(true);
+    const references = inputs.decisions ?? [];
+    expect(references).toHaveLength(2);
+    expect(new Set(references.map(item => item.candidateId)).size).toBe(2);
+    expect(references.every(item => {
+      const approved = approvals.get(item.candidateId!);
+      return approved !== undefined && approved.taskId === item.taskId &&
+        approved.instanceId === item.instanceId && approved.actionId === item.actionId;
+    })).toBe(true);
     await expect(publisher.getByText(/Eligible approvals · 2/)).toBeVisible();
     await expect(publisher.getByRole('button', { name: 'Publish restriction' })).toBeDisabled();
     await publisher.getByRole('checkbox', { name: 'Confirm publishing this exact restriction request' }).check();

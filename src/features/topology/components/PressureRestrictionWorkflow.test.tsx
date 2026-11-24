@@ -59,3 +59,36 @@ test('a stale publication input leaves the decision unissued', async () => {
   expect(vi.mocked(hidraHttpClient).mock.calls.every(([config]) => config.method === 'GET')).toBe(true);
   expect(published).not.toHaveBeenCalled();
 });
+
+test('publication actions wait for the dossier baseline read', async () => {
+  const http = vi.mocked(hidraHttpClient).mockReset()
+    .mockResolvedValueOnce({ requestId, expectedVersion: 8, decisions });
+  const client = new QueryClient();
+  const published = vi.fn();
+  const workflow = (baselineReadPending: boolean) => (
+    <QueryClientProvider client={client}>
+      <PressureRestrictionWorkflow companyPartyId="company" pipelineId="pipeline/one"
+        sectionId="section" baselineReadPending={baselineReadPending} onPublished={published} />
+    </QueryClientProvider>
+  );
+  const { rerender } = render(workflow(true));
+  fireEvent.change(screen.getByLabelText('Restriction request ID'), { target: { value: requestId } });
+  const inputs = screen.getByRole('button', { name: 'Read publication inputs' });
+  expect(inputs).toBeDisabled();
+  fireEvent.click(inputs);
+  expect(http).not.toHaveBeenCalled();
+
+  rerender(workflow(false));
+  expect(inputs).toBeEnabled();
+  fireEvent.click(inputs);
+  const publish = await screen.findByRole('button', { name: 'Publish restriction' });
+  fireEvent.click(screen.getByRole('checkbox', { name: 'Confirm publishing this exact restriction request' }));
+  expect(publish).toBeEnabled();
+
+  rerender(workflow(true));
+  expect(publish).toBeDisabled();
+  fireEvent.click(publish);
+  expect(http).toHaveBeenCalledOnce();
+  rerender(workflow(false));
+  expect(publish).toBeEnabled();
+});

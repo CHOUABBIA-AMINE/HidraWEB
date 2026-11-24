@@ -24,11 +24,12 @@ interface Scope {
   companyPartyId: string;
   sectionId?: string;
   baselineReceiptId?: string;
+  baselineReadPending?: boolean;
   onPublished: () => void;
 }
 
 export function PressureRestrictionWorkflow(scope: Scope) {
-  const { pipelineId, companyPartyId, sectionId, baselineReceiptId, onPublished } = scope;
+  const { pipelineId, companyPartyId, sectionId, baselineReceiptId, baselineReadPending = false, onPublished } = scope;
   const permissions = usePermissions();
   const { session } = useAuth();
   const actorId = session?.principal?.userId;
@@ -138,6 +139,9 @@ export function PressureRestrictionWorkflow(scope: Scope) {
 
   if (!read) return null;
   const busy = [version, submitted, request, discovery, start, assign, inputs, evidence, publish].some(item => item.isPending);
+  // Publication inputs also read the engineering baseline under the owner's
+  // protected lock. Wait for the dossier's in-flight baseline read to finish.
+  const publicationBusy = busy || baselineReadPending;
   const error = [version, submitted, request, discovery, start, assign, inputs, evidence, publish].find(item => item.isError)?.error;
   const code = condition.trim();
   const currentVersion = version.data?.conditionCode === code && version.data.companyPartyId === companyPartyId &&
@@ -202,7 +206,7 @@ export function PressureRestrictionWorkflow(scope: Scope) {
     }} />
     <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
       <Button disabled={busy || !uuid.test(requestId)} onClick={() => request.mutate(requestId)}>Read request</Button>
-      {execute ? <Button disabled={busy || !uuid.test(requestId)} onClick={() => {
+      {execute ? <Button disabled={publicationBusy || !uuid.test(requestId)} onClick={() => {
         setConfirm(false); publish.reset(); inputs.mutate(requestId);
       }}>Read publication inputs</Button> : null}
       <Button disabled={busy || !uuid.test(requestId)} onClick={() => evidence.mutate(requestId)}>Read decision evidence</Button>
@@ -229,7 +233,7 @@ export function PressureRestrictionWorkflow(scope: Scope) {
     {execute && eligible && !eligible.publication && publish.isIdle ? ((eligible.decisions?.length ?? 0) > 0 ? <>
       <Typography>Eligible approvals · {eligible.decisions?.length} · version {eligible.expectedVersion}</Typography>
       <FormControlLabel control={<Checkbox checked={confirm} onChange={event => setConfirm(event.target.checked)} />} label="Confirm publishing this exact restriction request" />
-      <Button disabled={busy || !confirm} variant="contained" onClick={() => publish.mutate()}>Publish restriction</Button>
+      <Button disabled={publicationBusy || !confirm} variant="contained" onClick={() => publish.mutate()}>Publish restriction</Button>
     </> : <Typography>Awaiting eligible approvals.</Typography>) : null}
     {receipt ? <Typography>Publication receipt · {receipt.requestId} · version {receipt.streamVersion} · {receipt.revisionId ?? receipt.terminationId}</Typography>
       : publish.isSuccess ? <Alert severity="warning">Publication response received. Read the publication inputs to verify persistence.</Alert> : null}

@@ -175,6 +175,7 @@ export function PipelineDossier({ companyPartyId, pipelineId, contextKey }: Pipe
             companyPartyId={companyPartyId} pipelineId={pipelineId} sectionId={sectionFacts?.id}
             baselineReceiptId={receiptData?.availability === 'AVAILABLE' && receiptData.pipelineSystemId === pipelineFacts.pipelineSystemId
               ? receiptData.receiptId : undefined}
+            baselineReadPending={receiptAllowed && receipt.isFetching}
             onPublished={() => {
               if (evaluation && pressureAllowed) void pressure.refetch();
               if (evaluation && sectionPressureAllowed) void sectionPressure.refetch();
