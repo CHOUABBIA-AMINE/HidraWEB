@@ -39,6 +39,14 @@ def location(error):
     line = where.get("line")
     if Path(where.get("file", "")).name == "uxr28-native.spec.ts" and type(line) is int and line > 0:
         print(f"UXR28_DIAG FAILURE_LINE={line}", flush=True)
+    # Classify privately; never print raw messages, locator text or stack.
+    message = str(error.get("message", ""))
+    kind = "TEST_TIMEOUT" if "Test timeout of" in message else \
+        "STRICT_LOCATOR" if "strict mode violation" in message else \
+        "ASSERTION" if "expect(" in message else \
+        "CLOSED_CONTEXT" if "has been closed" in message else \
+        "OPERATION_TIMEOUT" if "Timeout" in message or "timed out" in message else "OTHER"
+    print("UXR28_DIAG FAILURE_KIND=" + kind, flush=True)
 def walk(suites):
     for suite in suites:
         for spec in suite.get("specs", []):

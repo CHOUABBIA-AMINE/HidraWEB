@@ -113,14 +113,24 @@ async function openDossier(page: Page, company: string, pipeline: string, code: 
   const search = read<{ features: Feature[] }>(at(page, regional + '/search', 'GET', { ...params, q: code }));
   await page.getByRole('button', { name: 'Search this scope' }).click();
   const features = (await search).features;
-  expect(features.some(feature => feature.properties.layer === 'pipelines' && feature.properties.entityId === pipeline)).toBe(true);
+  const matching = features.filter(feature => feature.properties.layer === 'pipelines' && feature.properties.entityId === pipeline);
+  expect(matching).toHaveLength(1);
   expect(features.every(feature => !excluded.includes(feature.properties.entityId))).toBe(true);
-  const feature = read<Feature>(at(page, regional + '/layers/pipelines/features/' + enc(pipeline), 'GET', params));
-  const facts = read<{ id: string; designPressure: { value: number; unit: string; meaning: string } }>(
-    at(page, dossier + '/' + enc(pipeline), 'GET', params));
-  await page.getByRole('button', { name: code, exact: true }).click();
-  expect((await feature).properties.entityId === pipeline).toBe(true);
-  const result = await facts;
+  // Pipeline and section can share a display code; use the exact owner-issued link.
+  const href = '/network?' + new URLSearchParams({
+    regionalLayer: matching[0].properties.layer, regionalEntityId: matching[0].properties.entityId,
+  });
+  const link = page.getByRole('link').and(page.locator('a[href="' + href + '"]'));
+  await expect(link).toHaveCount(1);
+  await expect(link).toBeVisible();
+  const [feature, result] = await Promise.all([
+    read<Feature>(at(page, regional + '/layers/pipelines/features/' + enc(pipeline), 'GET', params)),
+    read<{ id: string; designPressure: { value: number; unit: string; meaning: string } }>(
+      at(page, dossier + '/' + enc(pipeline), 'GET', params)),
+    link.click(),
+  ]);
+  await expect(page).toHaveURL(origin + href);
+  expect(feature.properties).toMatchObject({ layer: 'pipelines', entityId: pipeline });
   expect(result.id === pipeline).toBe(true);
   await expect(page.getByRole('heading', { name: 'Pipeline dossier', exact: true })).toBeVisible();
   return result;

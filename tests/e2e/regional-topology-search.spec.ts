@@ -74,6 +74,16 @@ async function enterSelectedScope(page: Page, extraRoutes: typeof permissions = 
 }
 
 test('UXR-11 selected company searches T34, navigates canonical exact feature, never uses administrator map', async ({ page }) => {
+  // T61 can assign the same business code to a pipeline and a section.
+  const sameCodeSection = {
+    ...feature, id: 'pipeline-segments:section-1',
+    properties: { ...feature.properties, layer: 'pipeline-segments', entityType: 'segment', entityId: 'section-1' },
+  };
+  const wrongDetails: string[] = [];
+  await page.route('**/api/v1/topology/regional-map/layers/pipeline-segments/features/section-1?**', route => {
+    wrongDetails.push(route.request().url());
+    return route.fulfill({ json: sameCodeSection });
+  });
   const legacy: string[] = [];
   const searches: URL[] = [];
   const details: URL[] = [];
@@ -84,8 +94,8 @@ test('UXR-11 selected company searches T34, navigates canonical exact feature, n
   await page.route('**/api/v1/topology/regional-map/search?**', route => {
     searches.push(new URL(route.request().url()));
     return route.fulfill({ json: {
-      query: 'GZ2', page: 0, size: 25, totalFeatures: 1,
-      totalPages: 1, hasNext: false, features: [feature],
+      query: 'GZ2', page: 0, size: 25, totalFeatures: 2,
+      totalPages: 1, hasNext: false, features: [sameCodeSection, feature],
     } });
   });
   await page.route('**/api/v1/topology/regional-map/layers/pipelines/features/p-1?**', route => {
@@ -95,18 +105,23 @@ test('UXR-11 selected company searches T34, navigates canonical exact feature, n
   await enterSelectedScope(page);
   await page.getByRole('textbox', { name: 'Recherche régionale' }).fill('GZ2');
   await page.getByRole('button', { name: 'Rechercher dans le périmètre' }).click();
-  await expect(page.getByText('1 résultat(s) autorisé(s)')).toBeVisible();
-  await page.getByRole('button', { name: 'GZ2-P' }).click();
+  await expect(page.getByText('2 résultat(s) autorisé(s)')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'GZ2-P', exact: true })).toHaveCount(2);
+  const handoffs = page.getByRole('link', { name: 'Ouvrir la fiche de carte' });
+  await expect(handoffs).toHaveCount(2);
+  const sectionLink = handoffs.and(page.locator('a[href="/network?regionalLayer=pipeline-segments&regionalEntityId=section-1"]'));
+  const handoff = handoffs.and(page.locator('a[href="/network?regionalLayer=pipelines&regionalEntityId=p-1"]'));
+  await expect(sectionLink).toHaveCount(1);
+  await expect(handoff).toHaveCount(1);
+  await handoff.click();
   await expect(page).toHaveURL(/regionalLayer=pipelines&regionalEntityId=p-1/);
   await expect(page.getByRole('heading', { name: 'GZ2-P', level: 3 })).toBeVisible();
-  const handoff = page.getByRole('link', { name: 'Ouvrir la fiche de carte' });
-  await expect(handoff).toHaveAttribute('href', '/network?regionalLayer=pipelines&regionalEntityId=p-1');
-  await handoff.click();
   const returnLink = page.getByRole('link', { name: "Retour à l’espace d’origine" });
   await expect(returnLink).toHaveAttribute('href', '/network');
   await returnLink.click();
   await expect(page).toHaveURL(/\/network$/);
-  await expect(page.getByText('1 résultat(s) autorisé(s)')).toBeVisible();
+  await expect(page.getByText('2 résultat(s) autorisé(s)')).toBeVisible();
+  expect(wrongDetails).toHaveLength(0);
   expect(searches.length).toBeGreaterThan(0);
   expect(searches.every(url => url.searchParams.get('companyPartyId') === 'company' &&
     url.searchParams.get('q') === 'GZ2')).toBe(true);

@@ -175,7 +175,7 @@ method = r'''
         } finally {
             try {
                 if (Files.isRegularFile(log)) for (String line : Files.readAllLines(log)) {
-                    if (line.matches("UXR28_DIAG (PHASE=(regional|before-restart|after-restart)|COUNTS EXPECTED=[0-9]+ UNEXPECTED=[0-9]+ FLAKY=[0-9]+ SKIPPED=[0-9]+|EXIT=[0-9]+|STAGE=(REGIONAL_PRIMARY|REGIONAL_SIBLING|REGIONAL_FOREIGN|REVOKE_BEFORE|REVOKE_AFTER|DOSSIER|LIMITS|TELEMETRY|INTEGRITY|RELOAD|SESSION|RTL|COMPLETE)|FAILURE_LINE=[0-9]+|REPORT_ERRORS=[0-9]+|REPORT_MISSING|PASSED)"))
+                    if (line.matches("UXR28_DIAG (PHASE=(regional|before-restart|after-restart)|COUNTS EXPECTED=[0-9]+ UNEXPECTED=[0-9]+ FLAKY=[0-9]+ SKIPPED=[0-9]+|EXIT=[0-9]+|STAGE=(REGIONAL_PRIMARY|REGIONAL_SIBLING|REGIONAL_FOREIGN|REVOKE_BEFORE|REVOKE_AFTER|DOSSIER|LIMITS|TELEMETRY|INTEGRITY|RELOAD|SESSION|RTL|COMPLETE)|FAILURE_KIND=(TEST_TIMEOUT|STRICT_LOCATOR|ASSERTION|CLOSED_CONTEXT|OPERATION_TIMEOUT|OTHER)|FAILURE_LINE=[0-9]+|REPORT_ERRORS=[0-9]+|REPORT_MISSING|PASSED)"))
                         System.out.println(line);
                 }
             } finally {
