@@ -225,6 +225,8 @@ if fixture.read_text().count(guard) != 1:
     raise SystemExit("Local-only security guard must remain intact")
 PY
 
+python3 "$web_root/scripts/prepare-uxr28-native.py" "$worktree"
+
 # Confirm the accepted production source, migrations and contract files are intact.
 expected=$(printf '%s\n' \
   src/test/java/dz/sh/hidra/qualification/Gz2SignedWorkflowFixture.java \

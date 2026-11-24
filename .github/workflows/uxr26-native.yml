@@ -1,4 +1,4 @@
-name: HidraWEB UXR-26 Signed Native Acceptance
+name: HidraWEB UXR-26 / UXR-28 Signed Native Acceptance
 
 on:
   push:
@@ -7,6 +7,16 @@ on:
     paths:
       - .github/workflows/uxr26-native.yml
       - scripts/run-uxr26-native.sh
+      - scripts/prepare-uxr28-native.py
+      - scripts/run-uxr28-browser.sh
+      - playwright.uxr28.config.ts
+      - tests/e2e/uxr28-native.spec.ts
+      - src/features/telemetry-monitoring/**
+      - src/features/integrity/**
+      - src/features/topology/**
+      - src/features/context/**
+      - src/app/auth/**
+      - src/shell/**
       - playwright.uxr26.config.ts
       - tests/e2e/uxr26-native.spec.ts
       - tests/e2e/audit-workspace.spec.ts
@@ -31,7 +41,7 @@ concurrency:
 
 jobs:
   signed-circle1:
-    name: Signed UXR-26 author reviewer publisher PostgreSQL browser replay
+    name: Signed integrated Circle 1 PostgreSQL browser qualification
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -55,6 +65,9 @@ jobs:
           test -f .uxr26-api/src/test/java/dz/sh/hidra/qualification/Gz2SignedWorkflowNativeHttpPostgresIntegrationTest.java
           test -f playwright.uxr26.config.ts
           test -f tests/e2e/uxr26-native.spec.ts
+          test -f tests/e2e/uxr28-native.spec.ts
+          test -f playwright.uxr28.config.ts
+          printf '%s  %s\n' '07ba52bf28b3d431ab6312ae3966db0020aaa6bc73530df04c78be5c4338f351' '.uxr26-api/doc/api/openapi.yaml' | sha256sum -c -
           docker info >/dev/null
           printf 'UXR26_WEB_SHA=%s\nUXR26_API_SHA=%s\n' "${GITHUB_SHA}" "$(git -C .uxr26-api rev-parse HEAD)"
       - name: Set up Java 21 and Maven cache
@@ -91,7 +104,7 @@ jobs:
       - name: Install Chromium on the ephemeral runner
         shell: bash
         run: npx --no-install playwright install --with-deps chromium
-      - name: Run exact-source synthetic signed UXR-26 replay
+      - name: Run exact-source signed UXR-26 and UXR-28 replay
         shell: bash
         run: |
           set -euo pipefail
@@ -104,5 +117,5 @@ jobs:
         if: success()
         shell: bash
         run: |
-          printf 'UXR26_REPLAY=PASSED\nWEB_SHA=%s\nAPI_SHA=%s\nRUN_ID=%s\nATTEMPT=%s\n' \
+          printf 'UXR26_REPLAY=PASSED\nUXR28_REPLAY=PASSED\nWEB_SHA=%s\nAPI_SHA=%s\nRUN_ID=%s\nATTEMPT=%s\n' \
             "${GITHUB_SHA}" "7624bc900881ccd3957d07f5b1add3f28069bb6d" "${GITHUB_RUN_ID}" "${GITHUB_RUN_ATTEMPT}"
