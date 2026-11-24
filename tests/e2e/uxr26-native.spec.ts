@@ -4,6 +4,7 @@ import type {
   PressureRestrictionPublicationInputs,
   PressureRestrictionRequest,
   PressureRestrictionSubmission,
+  QualifiedOperatingConstraintView,
 } from '../../src/api/generated/topology/model';
 import type { TaskView, WorkflowTransitionExecutionResponse, ExecuteWorkflowTransitionRequest } from '../../src/api/generated/workflow/model';
 
@@ -349,13 +350,35 @@ test('UXR-26 verifies separate signed author, reviewer and publisher in Chromium
     stage('READBACK_SCOPE');
     await openDossier(readback, scope.companyPartyId, scope.pipelineId, fixture.scopeRegistryId);
     await readback.getByLabel('Restriction request ID').fill(requestId);
-    await readback.getByRole('button', { name: 'Read publication inputs' }).click();
+    const [persistedInputsResponse] = await Promise.all([
+      response(readback, root + '/' + requestId + '/publication-inputs', 'GET'),
+      readback.getByRole('button', { name: 'Read publication inputs' }).click(),
+    ]);
+    expect(persistedInputsResponse.status()).toBe(200);
+    const persistedInputs = await persistedInputsResponse.json() as PressureRestrictionPublicationInputs;
+    const receipt = persistedInputs.publication;
+    expect(receipt?.requestId === requestId && Boolean(receipt.revisionId) &&
+      receipt.streamVersion === currentPublication.streamVersion + 1).toBe(true);
     await expect(readback.getByText(new RegExp(`Publication receipt · ${requestId}`))).toBeVisible();
     stage('READBACK_LIMIT');
-    await readback.getByLabel('Condition code', { exact: true }).fill(condition);
-    await readback.getByLabel('Effective instant (UTC, ISO 8601)', { exact: true }).fill(instant);
-    await readback.getByRole('button', { name: 'Read operating limits' }).click();
-    await expect(readback.getByText(/Qualified pipeline limit · 53 bar/)).toBeVisible();
+    const readLimits = readback.getByRole('button', { name: 'Read operating limits', exact: true });
+    const limitsForm = readback.locator('form').filter({ has: readLimits });
+    await limitsForm.getByRole('textbox', { name: /^Condition code(?:\s*\*)?$/ }).fill(condition);
+    await limitsForm.getByRole('textbox', { name: /^Effective instant \(UTC, ISO 8601\)(?:\s*\*)?$/ }).fill(instant);
+    const [limitResponse] = await Promise.all([
+      response(readback, '/api/v1/topology/operating-constraints/pipelines/' + encodeURIComponent(scope.pipelineId), 'GET'),
+      readLimits.click(),
+    ]);
+    expect(limitResponse.status()).toBe(200);
+    const limitQuery = new URL(limitResponse.url()).searchParams;
+    expect(limitQuery.get('companyPartyId') === scope.companyPartyId &&
+      limitQuery.get('conditionCode') === condition && limitQuery.get('effectiveAt') === instant).toBe(true);
+    const limit = await limitResponse.json() as QualifiedOperatingConstraintView;
+    expect(limit.status === 'QUALIFIED' && limit.scopeType === 'PIPELINE' && limit.pipelineId === scope.pipelineId &&
+      limit.conditionCode === condition && limit.revisionId === receipt?.revisionId).toBe(true);
+    expect(limit.upperPressure).toBe(53);
+    expect(limit.pressureUnit).toBe('bar');
+    await expect(readback.getByText(/^Qualified pipeline limit · 53 bar(?: ·|$)/)).toBeVisible();
     stage('AUDIT_READBACK');
     await author.getByRole('button', { name: 'Read decision evidence' }).click();
     await expect(author.getByText(/Approval · .* · Audit ·/)).toHaveCount(2);

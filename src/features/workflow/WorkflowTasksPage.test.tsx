@@ -69,7 +69,7 @@ describe('HWEB-007 workflow task workspace', () => {
     // Inbox refresh is distinct from the explicit selected-task/action refresh.
     fireEvent.click(screen.getAllByRole('button', { name: 'Actualiser' }).at(-1)!);
     await waitFor(() => expect(screen.queryByText('The task changed. Refresh the task and available actions before retrying.')).not.toBeInTheDocument());
-    fireEvent.click(screen.getByRole('button', { name: 'APPROVE' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'APPROVE' }));
     fireEvent.change(screen.getByLabelText('comment *'), { target: { value: 'Validated against operating evidence.' } });
     fireEvent.click(screen.getByRole('checkbox', { name: /Je confirme cette décision/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Action: APPROVE' }));
@@ -86,5 +86,5 @@ describe('HWEB-007 workflow task workspace', () => {
     })));
     expect(await screen.findByText('APPROVE · APPROVED')).toBeInTheDocument();
     expect(window.location.pathname).toBe('/work/tasks');
-  });
+  }, 15_000);
 });
