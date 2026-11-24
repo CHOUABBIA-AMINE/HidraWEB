@@ -1,0 +1,99 @@
+name: HidraWEB UXR-26 Signed Native Acceptance
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/uxr26-native.yml
+      - scripts/run-uxr26-native.sh
+      - playwright.uxr26.config.ts
+      - tests/e2e/uxr26-native.spec.ts
+      - src/features/topology/components/PressureRestrictionWorkflow.tsx
+      - src/features/workflow/WorkflowTasksPage.tsx
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hidraweb-uxr26-native-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  signed-circle1:
+    name: Signed UXR-26 author reviewer publisher PostgreSQL browser replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout HidraWEB implementation
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Checkout immutable accepted HidraAPI T60
+        uses: actions/checkout@v5
+        with:
+          repository: CHOUABBIA-AMINE/HidraAPI
+          ref: 4dcb9e092a715d9942a2b19ad86b3dea9f6bd96f
+          path: .uxr26-api
+          persist-credentials: false
+      - name: Verify exact sources before a signed replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          test "$(git -C .uxr26-api rev-parse HEAD)" = "4dcb9e092a715d9942a2b19ad86b3dea9f6bd96f"
+          test -f .uxr26-api/src/test/java/dz/sh/hidra/qualification/Gz2SignedWorkflowNativeHttpPostgresIntegrationTest.java
+          test -f playwright.uxr26.config.ts
+          test -f tests/e2e/uxr26-native.spec.ts
+          docker info >/dev/null
+          printf 'UXR26_WEB_SHA=%s\nUXR26_API_SHA=%s\n' "${GITHUB_SHA}" "$(git -C .uxr26-api rev-parse HEAD)"
+      - name: Set up Java 21 and Maven cache
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: .uxr26-api/pom.xml
+      - name: Bootstrap exact pinned Maven wrapper with bounded retries
+        working-directory: .uxr26-api
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if bash ./mvnw -B --version; then exit 0; fi
+            if [ "${attempt}" -eq 3 ]; then exit 1; fi
+            sleep "$((attempt * 5))"
+          done
+          exit 1
+      - name: Set up declared HidraWEB Node version
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install WEB and generate the verified API clients
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          npm run openapi:compatibility
+          npm run prebuild
+      - name: Install Chromium on the ephemeral runner
+        shell: bash
+        run: npx --no-install playwright install --with-deps chromium
+      - name: Run exact-source synthetic signed UXR-26 replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The runner script holds a Testcontainers PostgreSQL-backed API at
+          # the accepted T60 SHA, uses distinct signed browser sessions,
+          # and removes the private replay fixture before exit.
+          # Neither secrets nor browser traces are uploaded as CI artifacts.
+          bash scripts/run-uxr26-native.sh .uxr26-api
+      - name: Record non-secret CI provenance
+        if: success()
+        shell: bash
+        run: |
+          printf 'UXR26_REPLAY=PASSED\nWEB_SHA=%s\nAPI_SHA=%s\nRUN_ID=%s\nATTEMPT=%s\n' \
+            "${GITHUB_SHA}" "4dcb9e092a715d9942a2b19ad86b3dea9f6bd96f" "${GITHUB_RUN_ID}" "${GITHUB_RUN_ATTEMPT}"

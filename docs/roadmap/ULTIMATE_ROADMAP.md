@@ -6168,3 +6168,63 @@ OpenAPI compatibility, typechecking, 13 contract tests, six focused component an
 #### UXR-26 browser configuration repair — 24 November 2026
 
 [Code CI #1109](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45352077890) ran the mocked UXR-26 reviewer regression successfully. The mocked suite result check failed because its default Playwright configuration also discovered the dedicated signed UXR-26 replay as an additional skipped test. F18 and A1 native qualification passed. The repair `fix(test): isolate the signed UXR-26 browser replay` changes only `playwright.config.ts` and this append-only record. The mocked configuration excludes the replay spec and retains its existing result checks. The dedicated `playwright.uxr26.config.ts` still selects the signed test. UXR-26 acceptance still requires its signed Chromium/PostgreSQL journey and exact-commit CI.
+
+### P6 / UXR-26 — dedicated signed browser acceptance automation (24 November 2026)
+
+**Predecessor verified:** On `343801cbf0a609759ad71b4dbc4f71ace3720194`,
+[HidraWEB Code CI #1110](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45353628659)
+passed `verify`, the A1 six-module native API/PostgreSQL browser
+job and the F18 LOCAL native session job.
+[Documentation Validation #150](https://github.com/CHOUABBIA-AMINE/HidraWEB/actions/runs/45353628673)
+passed on the same SHA. The registered UXR-26 independent signed
+author/reviewer/publisher Chromium replay was *excluded from the
+mocked Playwright suite* (by design) and **was not a job in #1110**.
+Hence this evidence proves the existing development gates but
+does **not** close the dedicated UXR-26 signed browser gate.
+
+**Owner's `Next` selection:** Continue *only* the remaining UXR-26
+native acceptance; do not move to UXR-27 or execute separate visual
+design alignment (the owner deferred that until completing the roadmap).
+
+**Bounded qualification commit message:**
+`test(ci): qualify UXR-26 native signed browser journey`.
+
+**File scope:**
+- CREATE `.github/workflows/uxr26-native.yml` —
+  an isolated main-path-triggered and manually dispatchable
+  GitHub Actions workflow. On an ephemeral Linux runner,
+  explicitly check out the current exact WEB SHA and accepted
+  HidraAPI T60 `4dcb9e092a715d9942a2b19ad86b3dea9f6bd96f`;
+  use Java 21, the existing Maven wrapper, the repository's
+  declared Node version, verified generated OpenAPI clients,
+  disposable Docker/Testcontainers PostgreSQL and Chromium.
+  Run the **existing** `bash scripts/run-uxr26-native.sh .uxr26-api`
+  without replacing signed authorization with mocked HTTP.
+  Use separate author, reviewer and publisher browser contexts
+  and the existing denied/stale-version checks. Keep the
+  Testcontainers/fixture private and do not upload bearer
+  material, screenshots or browser traces.
+- APPEND this canonical roadmap entry as an exact-SHA CI
+  acceptance receipt and stage handoff.
+- UPDATE runtime frontend, backend, migration, OpenAPI
+  schemas/pins, tests, existing CI or navigation: **none**.
+  DELETE: **none**.
+
+**Reason for the new job:** The existing current-source
+`scripts/run-uxr26-native.sh`, `playwright.uxr26.config.ts`
+and `tests/e2e/uxr26-native.spec.ts` already define a bounded
+synthetic signed replay. The local execution environment
+has no Docker daemon, so no truthful local PostgreSQL/browser
+pass is claimed. The dedicated job is a required acceptance
+runner rather than a new product workflow or a redesign.
+Code CI on this workflow-file change may additionally run;
+the dedicated signed run is the acceptance-specific gate.
+
+**Completion criterion:** Check that the dedicated workflow
+is created and queued/running on the new exact WEB SHA; STOP.
+After that run actually completes, a later evidence-reconciliation
+turn must confirm the signed test passed without skips or flaky
+retries, verify the exact WEB and backend SHA, and only then
+mark the UXR-26 native acceptance CI-PASSED. A green
+mocked Code CI or workflow creation alone is insufficient.
+UXR-27 remains **NOT SELECTED**.
