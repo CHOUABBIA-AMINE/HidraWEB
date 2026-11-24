@@ -29,6 +29,7 @@ const identity = '/api/v1/identity';
 const regional = '/api/v1/topology/regional-map';
 const dossier = '/api/v1/topology/pipeline-dossiers';
 const stage = (name: string) => process.stdout.write('UXR28_STAGE=' + name + '\n');
+const checkpoint = (name: string) => process.stdout.write('UXR28_CHECKPOINT=' + name + '\n');
 const enc = encodeURIComponent;
 function at(page: Page, path: string, method = 'GET', params: Record<string, string> = {}) {
   // Observe actual browser requests, without intercepting or fulfilling them.
@@ -257,23 +258,37 @@ async function verifyTelemetry(page: Page, fixture: Fixture) {
   page.on('request', request => {
     if (new URL(request.url()).pathname.startsWith('/api/v1/telemetry/points/')) legacy++;
   });
-  await page.getByRole('button', { name: 'Operations', exact: true }).click();
+  checkpoint('STATION_DISCOVERY');
+  const [stationMap] = await Promise.all([
+    read<{ features: Array<Feature & { id: string }> }>(at(page, regional + '/layers/facilities/features', 'GET', params)),
+    page.getByRole('button', { name: 'Operations', exact: true }).click(),
+  ]);
+  expect(stationMap.features.filter(feature => feature.id === 'facilities:' + scope.facilityId &&
+    feature.properties.layer === 'facilities' && feature.properties.entityId === scope.facilityId)).toHaveLength(1);
   const panel = page.getByRole('region', { name: 'Trusted asset telemetry', exact: true });
   await expect(panel).toBeVisible();
   const root = '/api/v1/telemetry/assets/FACILITY/' + enc(scope.facilityId) + '/points';
-  const points = read<{ points: Array<{ pointId: string; binding: { id: string } }> }>(at(page, root, 'GET', params));
-  await choose(page, 'Regional station', scope.facilityId);
-  const selected = (await points).points;
+  checkpoint('STATION_SELECT');
+  const [pointPage] = await Promise.all([
+    read<{ points: Array<{ pointId: string; binding: { id: string } }> }>(at(page, root, 'GET', params)),
+    choose(page, 'Regional station', scope.facilityId),
+  ]);
+  checkpoint('POINT_DISCOVERY');
+  const selected = pointPage.points;
   expect(selected.some(item => item.pointId === observation.pointId && item.binding.id === observation.bindingId)).toBe(true);
   expect(selected.some(item => item.pointId === fixture.emptyPointId && Boolean(item.binding.id))).toBe(true);
+  checkpoint('POINT_SELECT');
   await choose(page, 'Commissioned point', observation.pointId);
   const latest = async (point: string, age: string) => {
-    const pending = read<{ status: string; observation?: Observation }>(
-      at(page, root + '/' + enc(point) + '/trusted-readings/latest', 'GET', { ...params, maxAgeSeconds: age }));
     await panel.getByRole('spinbutton', { name: 'Maximum age (seconds)' }).fill(age);
-    await panel.getByRole('button', { name: 'Apply threshold' }).click();
-    return await pending;
+    const [result] = await Promise.all([
+      read<{ status: string; observation?: Observation }>(
+        at(page, root + '/' + enc(point) + '/trusted-readings/latest', 'GET', { ...params, maxAgeSeconds: age })),
+      panel.getByRole('button', { name: 'Apply threshold' }).click(),
+    ]);
+    return result;
   };
+  checkpoint('FRESH');
   const fresh = await latest(observation.pointId, '3600');
   expect(fresh.status).toBe('FRESH');
   expect(fresh.observation).toMatchObject({
@@ -281,22 +296,34 @@ async function verifyTelemetry(page: Page, fixture: Fixture) {
     binding: { id: observation.bindingId }, freshness: 'FRESH',
   });
   await expect(panel.getByText(/^FRESH · /)).toBeVisible();
+  checkpoint('STALE');
   const stale = await latest(observation.pointId, '1');
   expect(stale.status).toBe('STALE');
   expect(stale.observation?.trustedId === observation.trustedId).toBe(true);
   await expect(panel.getByText(/^STALE · /)).toBeVisible();
   const url = new URL(observation.history, fixture.baseUrl);
-  const from = new Date(Date.parse(url.searchParams.get('from')!) - 1000).toISOString();
-  const until = new Date(Date.parse(url.searchParams.get('until')!) + 1000).toISOString();
-  await panel.getByLabel('From', { exact: true }).fill(from.slice(0, 23));
-  await panel.getByLabel('To', { exact: true }).fill(until.slice(0, 23));
-  const history = read<{ observations: Observation[] }>(at(page, url.pathname, 'GET', { ...params, from, until, maxAgeSeconds: '1' }));
-  await panel.getByRole('button', { name: 'History', exact: true }).click();
-  const rows = (await history).observations;
+  checkpoint('HISTORY');
+  // datetime-local has a native default step of 60 seconds. Round the
+  // receipt window outwards, retaining both real observations in UTC.
+  const from = new Date(Math.floor((Date.parse(url.searchParams.get('from')!) - 1000) / 60_000) * 60_000).toISOString();
+  const until = new Date(Math.ceil((Date.parse(url.searchParams.get('until')!) + 1000) / 60_000) * 60_000).toISOString();
+  const fromInput = panel.getByLabel('From', { exact: true });
+  const untilInput = panel.getByLabel('To', { exact: true });
+  await fromInput.fill(from.slice(0, 16));
+  await untilInput.fill(until.slice(0, 16));
+  expect(await fromInput.evaluate(input => (input as HTMLInputElement).validity.valid)).toBe(true);
+  expect(await untilInput.evaluate(input => (input as HTMLInputElement).validity.valid)).toBe(true);
+  const [history] = await Promise.all([
+    read<{ observations: Observation[] }>(at(page, url.pathname, 'GET', { ...params, from, until, maxAgeSeconds: '1' })),
+    panel.getByRole('button', { name: 'History', exact: true }).click(),
+  ]);
+  const rows = history.observations;
   expect(rows.length).toBeGreaterThanOrEqual(2);
   expect(rows.some(item => item.trustedId === observation.trustedId && item.binding.id === observation.bindingId)).toBe(true);
   await expect.poll(() => panel.getByText(observation.bindingId, { exact: false }).count()).toBeGreaterThanOrEqual(2);
+  checkpoint('EMPTY_POINT');
   await choose(page, 'Commissioned point', fixture.emptyPointId);
+  checkpoint('UNAVAILABLE');
   const unavailable = await latest(fixture.emptyPointId, '3600');
   expect(unavailable.status).toBe('UNAVAILABLE');
   expect(unavailable.observation == null).toBe(true);
@@ -308,23 +335,31 @@ async function verifyIntegrity(browser: Browser, fixture: Fixture) {
   await isolated(browser, async page => {
     const item = fixture.integrity;
     const login = await signIn(page, item.actor, fixture.password, false);
-    const resources = read<Array<{ resource: string; javaType: string }>>(at(page, '/api/v1/workbench/integrity/resources'));
-    const list = read<{ items: Array<{ id: string }> }>(at(page, '/api/v1/workbench/integrity/inspection-findings'));
-    await navigate(page, '/engineering');
+    checkpoint('INTEGRITY_RESOURCE');
+    const [resources, list] = await Promise.all([
+      read<Array<{ resource: string; javaType: string }>>(at(page, '/api/v1/workbench/integrity/resources')),
+      read<{ items: Array<{ id: string }> }>(at(page, '/api/v1/workbench/integrity/inspection-findings')),
+      navigate(page, '/engineering'),
+    ]);
     await expect(page.getByRole('heading', { name: 'Integrity & Maintenance' })).toBeVisible();
-    expect((await resources).some(row => row.resource === 'inspection-findings' && row.javaType.endsWith('InspectionFindingJpaEntity'))).toBe(true);
-    expect((await list).items.some(row => row.id === item.findingId)).toBe(true);
-    const finding = read<{ id: string; attributes: Record<string, unknown> }>(
-      at(page, '/api/v1/workbench/integrity/inspection-findings/' + enc(item.findingId)));
-    await page.getByRole('button', { name: item.findingId, exact: true }).click();
-    const selected = await finding;
+    expect(resources.some(row => row.resource === 'inspection-findings' && row.javaType.endsWith('InspectionFindingJpaEntity'))).toBe(true);
+    expect(list.items.some(row => row.id === item.findingId)).toBe(true);
+    checkpoint('INTEGRITY_DETAIL');
+    const [selected] = await Promise.all([
+      read<{ id: string; attributes: Record<string, unknown> }>(
+        at(page, '/api/v1/workbench/integrity/inspection-findings/' + enc(item.findingId))),
+      page.getByRole('button', { name: item.findingId, exact: true }).click(),
+    ]);
     expect(selected.id === item.findingId && selected.attributes.topologyAssetId === item.equipmentId).toBe(true);
     const panel = page.getByRole('region', { name: 'Integrity maintenance receipt' });
-    const receipt = read<{ approvalId: string; recommendationId: string }>(
-      at(page, '/api/v1/integrity/findings/' + enc(item.findingId) + '/maintenance-handoffs/' + enc(item.approvalId)));
+    checkpoint('INTEGRITY_RECEIPT');
     await panel.getByLabel('Approval ID', { exact: true }).fill(item.approvalId);
-    await panel.getByRole('button', { name: 'Read approval receipt' }).click();
-    expect(await receipt).toMatchObject({ approvalId: item.approvalId, recommendationId: item.recommendationId });
+    const [receipt] = await Promise.all([
+      read<{ approvalId: string; recommendationId: string }>(
+        at(page, '/api/v1/integrity/findings/' + enc(item.findingId) + '/maintenance-handoffs/' + enc(item.approvalId))),
+      panel.getByRole('button', { name: 'Read approval receipt' }).click(),
+    ]);
+    expect(receipt).toMatchObject({ approvalId: item.approvalId, recommendationId: item.recommendationId });
     await expect(panel.getByText('Approval ' + item.approvalId, { exact: true })).toBeVisible();
     await expect(panel.getByText('Recommendation ' + item.recommendationId, { exact: true })).toBeVisible();
     const { scope } = fixture.receipt;

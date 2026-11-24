@@ -34,6 +34,7 @@ required = {
     "after-restart": ["DOSSIER","LIMITS","TELEMETRY","INTEGRITY","RELOAD","RTL","SESSION","COMPLETE"],
 }[phase]
 observed = []
+checkpoints = set("STATION_DISCOVERY|STATION_SELECT|POINT_DISCOVERY|POINT_SELECT|FRESH|STALE|HISTORY|EMPTY_POINT|UNAVAILABLE|INTEGRITY_RESOURCE|INTEGRITY_DETAIL|INTEGRITY_RECEIPT".split("|"))
 def location(error):
     where = error.get("location") or {}
     line = where.get("line")
@@ -58,6 +59,8 @@ def walk(suites):
                             if line.startswith("UXR28_STAGE=") and line[12:] in required:
                                 observed.append(line[12:])
                                 print("UXR28_DIAG STAGE=" + line[12:], flush=True)
+                            if line.startswith("UXR28_CHECKPOINT=") and line[17:] in checkpoints:
+                                print("UXR28_DIAG CHECKPOINT=" + line[17:], flush=True)
                     for error in result.get("errors", []):
                         location(error)
         walk(suite.get("suites", []))

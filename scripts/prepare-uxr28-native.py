@@ -52,6 +52,18 @@ source = replace_once(source, before, '''
                         "CUSTOM", "telemetry-source-point:" + field(emptyPoint, "sourceId") + ":" + circleEmptyPoint);
                 circleIntegrity = fixture.seedUxr28Integrity(runtime);
                 String browserReader = runtime.login(fixture.reader);
+                var stationFeatures = runtime.get(query(CIRCLE_MAP + "/layers/facilities/features",
+                        "companyPartyId", fixture.company, "page", "0", "size", "20"), browserReader).path("features");
+                assertTrue(stationFeatures.isArray(), "UXR28 regional station discovery must return features");
+                int stationMatches = 0;
+                for (var station : stationFeatures) {
+                    if (("facilities:" + circleSelection.facilityId()).equals(field(station, "id"))
+                            && "facilities".equals(field(station.path("properties"), "layer"))
+                            && circleSelection.facilityId().equals(field(station.path("properties"), "entityId"))) {
+                        stationMatches++;
+                    }
+                }
+                assertEquals(1, stationMatches, "UXR28 synthetic station must be discoverable under its signed scope");
                 var priorLimit = runtime.get(circleConstraint, browserReader);
                 assertEquals("QUALIFIED", field(priorLimit, "status"));
                 assertEquals("UNAVAILABLE", field(runtime.get(circleSectionLimit, browserReader), "status"));
@@ -73,6 +85,17 @@ source = replace_once(source, after, after + '''
 # received its exact grant in the regional browser callback; don't duplicate it.
 source = replace_once(source, "java.util.List.of(fixture.author, fixture.reviewer, fixture.reader)",
                       "java.util.List.of(fixture.author, fixture.reviewer)")
+
+# The regional map intentionally excludes non-geocoded facilities. Give only
+# the primary disposable Circle 1 station a synthetic point on its seeded section.
+# Do not change owner relationships, regional authorization, or the API source.
+anchor = '        CircleRegion primary = seedCircleSection(primaryPipeline, "PRIMARY", 1);'
+original = replace_once(original, anchor, anchor + '''
+        assertEquals(1, sql.update("""
+                UPDATE hidra_topology_facility SET longitude=1.5, latitude=35
+                WHERE id=? AND longitude IS NULL AND latitude IS NULL
+                """, asset));
+'''.rstrip())
 
 # The generic Workbench is fail-closed by default. Restrict this test-only
 # exposure to a single synthetic Integrity resource; it is NOT a deployment
@@ -175,7 +198,7 @@ method = r'''
         } finally {
             try {
                 if (Files.isRegularFile(log)) for (String line : Files.readAllLines(log)) {
-                    if (line.matches("UXR28_DIAG (PHASE=(regional|before-restart|after-restart)|COUNTS EXPECTED=[0-9]+ UNEXPECTED=[0-9]+ FLAKY=[0-9]+ SKIPPED=[0-9]+|EXIT=[0-9]+|STAGE=(REGIONAL_PRIMARY|REGIONAL_SIBLING|REGIONAL_FOREIGN|REVOKE_BEFORE|REVOKE_AFTER|DOSSIER|LIMITS|TELEMETRY|INTEGRITY|RELOAD|SESSION|RTL|COMPLETE)|FAILURE_KIND=(TEST_TIMEOUT|STRICT_LOCATOR|ASSERTION|CLOSED_CONTEXT|OPERATION_TIMEOUT|OTHER)|FAILURE_LINE=[0-9]+|REPORT_ERRORS=[0-9]+|REPORT_MISSING|PASSED)"))
+                    if (line.matches("UXR28_DIAG (PHASE=(regional|before-restart|after-restart)|COUNTS EXPECTED=[0-9]+ UNEXPECTED=[0-9]+ FLAKY=[0-9]+ SKIPPED=[0-9]+|EXIT=[0-9]+|STAGE=(REGIONAL_PRIMARY|REGIONAL_SIBLING|REGIONAL_FOREIGN|REVOKE_BEFORE|REVOKE_AFTER|DOSSIER|LIMITS|TELEMETRY|INTEGRITY|RELOAD|SESSION|RTL|COMPLETE)|CHECKPOINT=(STATION_DISCOVERY|STATION_SELECT|POINT_DISCOVERY|POINT_SELECT|FRESH|STALE|HISTORY|EMPTY_POINT|UNAVAILABLE|INTEGRITY_RESOURCE|INTEGRITY_DETAIL|INTEGRITY_RECEIPT)|FAILURE_KIND=(TEST_TIMEOUT|STRICT_LOCATOR|ASSERTION|CLOSED_CONTEXT|OPERATION_TIMEOUT|OTHER)|FAILURE_LINE=[0-9]+|REPORT_ERRORS=[0-9]+|REPORT_MISSING|PASSED)"))
                         System.out.println(line);
                 }
             } finally {
