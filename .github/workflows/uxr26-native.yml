@@ -16,6 +16,9 @@ on:
       - openapi/candidates/hidra-identity-organization-7624bc900881ccd3957d07f5b1add3f28069bb6d.json
       - src/features/topology/components/PressureRestrictionWorkflow.tsx
       - src/features/workflow/WorkflowTasksPage.tsx
+      - src/features/audit/**
+      - openapi/candidates/hidra-audit-uxr27.json
+      - orval.audit.config.ts
   workflow_dispatch:
 
 permissions:

@@ -66,7 +66,7 @@ test('legacy Audit methods, generation pin and other source locks remain enforce
   assert.ok(!findings.some((x) =>
     ['path_removed', 'method_removed', 'field_removed', 'response_removed'].includes(x.kind)));
   const config = fs.readFileSync(path.join(root, 'orval.audit.config.ts'), 'utf8');
-  assert.ok(config.includes(`./openapi/candidates/${name}`));
+  assert.ok(config.includes('./openapi/candidates/hidra-audit-uxr27.json'));
   assert.ok(!config.includes('hidra-audit-63f3f60974ce57eb8cd5e42910397615195624fb.json'));
   const gate = fs.readFileSync(path.join(root, 'scripts/check-openapi-compatibility.mjs'), 'utf8');
   for (const proof of [
@@ -78,4 +78,33 @@ test('legacy Audit methods, generation pin and other source locks remain enforce
   ]) {
     assert.ok(gate.includes(proof));
   }
+});
+
+// UXR-27 adds only the four verified T28 scoped routes and four schemas.
+test('UXR-27 pins exact T28 Risk-only scoped Audit transport without legacy drift', () => {
+  const raw = fs.readFileSync(path.join(root, 'openapi/candidates/hidra-audit-uxr27.json'));
+  const candidate = JSON.parse(raw.toString('utf8'));
+  assert.equal(crypto.createHash('sha256').update(raw).digest('hex'), 'baf224945ac2db3f7981f776108a2586286c3a08d1cbc9ea09aea97257d21f41');
+  assert.equal(Object.keys(candidate.paths).length, 11);
+  assert.equal(Object.keys(candidate.components.schemas).length, 10);
+  for (const [key, value] of Object.entries(current.paths)) assert.deepEqual(candidate.paths[key], value);
+  for (const [key, value] of Object.entries(current.components.schemas)) assert.deepEqual(candidate.components.schemas[key], value);
+  const base = '/api/v1/audit/companies/{companyId}/facilities/{facilityId}';
+  for (const [suffix, method, operation, schema] of [
+    ['/events', 'get', 'searchT28AuditEvents', 'T28AuditEventPage'],
+    ['/exports', 'post', 'createT28AuditExport', 'T28AuditExportManifest'],
+    ['/exports/{exportId}', 'get', 'readT28AuditExportManifest', 'T28AuditExportManifest'],
+    ['/exports/{exportId}/content', 'get', 'downloadT28AuditExportContent', null],
+  ]) {
+    const op = candidate.paths[base + suffix][method];
+    assert.equal(op.operationId, operation);
+    assert.deepEqual(op.security, [{ hidraBearerJwt: [] }]);
+    assert.deepEqual(op.parameters.slice(0, 2).map(p => [p.name, p.in, p.required]), [['companyId', 'path', true], ['facilityId', 'path', true]]);
+    const response = op.responses['200'].content['*/*'].schema;
+    if (schema) assert.equal(response.$ref, '#/components/schemas/' + schema);
+    else assert.deepEqual(response, { format: 'byte', type: 'string' });
+  }
+  assert.deepEqual(candidate.paths[base + '/exports'].post.requestBody.content['application/json'].schema,
+    { $ref: '#/components/schemas/T28CreateAuditExport' });
+  assert.deepEqual(Object.keys(candidate.components.schemas.T28CreateAuditExport.properties), ['eventType','from','purpose','requestKey','to']);
 });

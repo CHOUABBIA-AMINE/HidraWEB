@@ -2,7 +2,7 @@ import { defineConfig } from 'orval';
 
 export default defineConfig({
   audit: {
-    input: { target: './openapi/candidates/hidra-audit-76b14cda4520f1eff242bd474c02ce4db317d385.json' },
+    input: { target: './openapi/candidates/hidra-audit-uxr27.json' },
     output: {
       mode: 'single',
       target: './src/api/generated/audit/audit.ts',

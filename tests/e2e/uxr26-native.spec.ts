@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import type {
+  PressureRestrictionDecisionEvidence,
   PressureRestrictionPublicationDecisionReference,
   PressureRestrictionPublicationInputs,
   PressureRestrictionRequest,
@@ -380,7 +381,12 @@ test('UXR-26 verifies separate signed author, reviewer and publisher in Chromium
     expect(limit.pressureUnit).toBe('bar');
     await expect(readback.getByText(/^Qualified pipeline limit · 53 bar(?: ·|$)/)).toBeVisible();
     stage('AUDIT_READBACK');
-    await author.getByRole('button', { name: 'Read decision evidence' }).click();
+    const [ownerEvidenceResponse] = await Promise.all([
+      response(author, root + '/' + requestId + '/evidence', 'GET'),
+      author.getByRole('button', { name: 'Read decision evidence' }).click(),
+    ]);
+    expect(ownerEvidenceResponse.status()).toBe(200);
+    const ownerEvidence = await ownerEvidenceResponse.json() as PressureRestrictionDecisionEvidence;
     await expect(author.getByText(/Approval · .* · Audit ·/)).toHaveCount(2);
 
     stage('STALE_CONFLICT');
@@ -390,7 +396,38 @@ test('UXR-26 verifies separate signed author, reviewer and publisher in Chromium
       headers: { Authorization: authorization ?? '' }, data: { ...body, requestId: crypto.randomUUID() },
     });
     expect(stale.status()).toBe(409);
+    // UXR-27: reuse the exact signed C1 fixture to exercise the independent Audit
+    // workspace, without granting generic workbench access or adding a mock.
+    async function auditTrace(page: Page) {
+      await page.evaluate(() => {
+        window.history.pushState({}, '', '/administration/audit');
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      });
+      await expect(page.getByRole('heading', { name: 'Pressure decision trace' })).toBeVisible();
+      await page.getByRole('textbox', { name: /^Evidence company ID(?:\s*\*)?$/ }).fill(scope.companyPartyId);
+      await page.getByRole('textbox', { name: /^Evidence pipeline ID(?:\s*\*)?$/ }).fill(scope.pipelineId);
+      await page.getByRole('textbox', { name: /^Evidence restriction request ID(?:\s*\*)?$/ }).fill(requestId);
+      const [result] = await Promise.all([
+        response(page, root + '/' + requestId + '/evidence', 'GET'),
+        page.getByRole('button', { name: 'Read pressure decision trace' }).click(),
+      ]);
+      return result;
+    }
+    const auditTraceResponse = await auditTrace(author);
+    expect(auditTraceResponse.status()).toBe(200);
+    const trace = await auditTraceResponse.json() as PressureRestrictionDecisionEvidence;
+    expect(JSON.stringify(trace) === JSON.stringify(ownerEvidence)).toBe(true);
+    expect(trace.publication?.revisionId === receipt?.revisionId).toBe(true);
+    expect(trace.decisions?.length).toBe(2);
+    for (const witness of trace.decisions ?? []) {
+      expect(Boolean(witness.auditEventId && witness.actionId)).toBe(true);
+      await expect(author.getByText('Audit witness · ' + witness.auditEventId, { exact: true })).toBeVisible();
+    }
     stage('MASKED_DENIAL');
+    const deniedTrace = await auditTrace(publisher);
+    expect(deniedTrace.status()).toBe(404);
+    await expect(publisher.getByText('Audit evidence unavailable or not authorized.', { exact: true })).toBeVisible();
+    await expect(publisher.getByRole('group', { name: 'Pressure decision witnesses' })).toHaveCount(0);
     const publisherToken = await publisher.request.post(fixture.baseUrl + '/api/v1/identity/authentication/login', {
       data: { providerType: 'LOCAL', principal: roles.primary, credentials: fixture.password },
     });
