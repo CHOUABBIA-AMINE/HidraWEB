@@ -228,6 +228,13 @@ test('UXR-26 verifies separate signed author, reviewer and publisher in Chromium
       await reviewer.getByRole('checkbox', { name: 'I confirm this decision after reviewing the current task.' }).check();
       await reviewer.getByRole('button', { name: 'Action: APPROVE' }).click();
       await expect(reviewer.getByText('APPROVE · APPROVED')).toBeVisible();
+      // The success banner is durable task readback, but post-success query
+      // invalidation may still be running. Wait for the real completion control
+      // before releasing this actor's context and starting another assignment.
+      const closeReview = reviewer.getByRole('button', { name: 'Close', exact: true });
+      await expect(closeReview).toBeEnabled({ timeout: 90_000 });
+      await expect(reviewer.getByRole('heading', { name: 'Exact pressure restriction proposal' })).toHaveCount(0);
+      await reviewer.context().close();
     }
     stage('PUBLISHER_LOGIN');
     await openSession(publisher, roles.primary, fixture.password, '/overview');

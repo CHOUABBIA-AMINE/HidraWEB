@@ -32,6 +32,9 @@ if any(type(value) is not int or value < 0 for value in counts.values()):
     raise SystemExit("Invalid private Chromium result counts")
 print("UXR26_DIAG COUNTS " + " ".join(f"{key.upper()}={value}" for key, value in counts.items()), flush=True)
 print(f"UXR26_DIAG EXIT={exit_code}", flush=True)
+duration = stats.get("duration")
+if type(duration) in (int, float) and 0 <= duration <= 3_600_000:
+    print(f"UXR26_DIAG DURATION_MS={int(duration)}", flush=True)
 
 # Do not echo raw Playwright errors, locators, HTTP bodies, or worker output.
 # Emit only fixed stage identifiers and native-spec line numbers.
@@ -174,7 +177,7 @@ method = """
             builder.redirectErrorStream(true).redirectOutput(log.toFile());
             var browser = builder.start();
             try {
-                assertTrue(browser.waitFor(5, java.util.concurrent.TimeUnit.MINUTES),
+                assertTrue(browser.waitFor(12, java.util.concurrent.TimeUnit.MINUTES),
                         "UXR26 Chromium exceeded the bounded child lifetime");
                 assertEquals(0, browser.exitValue(), "UXR26 Chromium qualification failed");
                 assertTrue(runtime.child.isAlive(), "The signed API must remain alive throughout Chromium");
@@ -188,7 +191,7 @@ method = """
         } finally {
             try {
                 for (String line : Files.readAllLines(log)) {
-                    if (line.matches("UXR26_DIAG (COUNTS EXPECTED=[0-9]+ UNEXPECTED=[0-9]+ FLAKY=[0-9]+ SKIPPED=[0-9]+|EXIT=[0-9]+|HTTP=(LOGIN|PRINCIPAL|EFFECTIVE_PERMISSIONS|PERMISSION_CATALOG|PERMISSION_ROUTES|DISCOVERY|FOREIGN_DISCOVERY|T33|REVIEW_INBOX|REVIEW_TASK|REVIEW_INSTANCE|REVIEW_ACTIONS|REVIEW_TIMELINE|REVIEW_PROPOSAL|REVIEW_EXECUTE|PUBLICATION_INPUTS|PUBLICATION|LIMIT_READBACK|DECISION_EVIDENCE):[0-9]{3}|STAGE=[A-Z_0-9]+|FAILURE_LINE=[0-9]+|REPORT_ERRORS=[0-9]+|REPORT_MISSING|PASSED)")) {
+                    if (line.matches("UXR26_DIAG (COUNTS EXPECTED=[0-9]+ UNEXPECTED=[0-9]+ FLAKY=[0-9]+ SKIPPED=[0-9]+|EXIT=[0-9]+|DURATION_MS=[0-9]+|HTTP=(LOGIN|PRINCIPAL|EFFECTIVE_PERMISSIONS|PERMISSION_CATALOG|PERMISSION_ROUTES|DISCOVERY|FOREIGN_DISCOVERY|T33|REVIEW_INBOX|REVIEW_TASK|REVIEW_INSTANCE|REVIEW_ACTIONS|REVIEW_TIMELINE|REVIEW_PROPOSAL|REVIEW_EXECUTE|PUBLICATION_INPUTS|PUBLICATION|LIMIT_READBACK|DECISION_EVIDENCE):[0-9]{3}|STAGE=[A-Z_0-9]+|FAILURE_LINE=[0-9]+|REPORT_ERRORS=[0-9]+|REPORT_MISSING|PASSED)")) {
                         System.out.println(line);
                     }
                 }

@@ -52,6 +52,13 @@ import { WorkspaceCanvas, type WorkspaceCanvasState } from '@/shell/workspace/Wo
 
 const INBOX_SIZE = 50;
 
+// Mirrors only the owner's necessary active-review lifecycle conditions. It
+// never grants access: the exact signed proposal and decision remain required.
+export function isActivePressureReview(taskStatus?: string, instanceStatus?: string): boolean {
+  return ['OPEN', 'CLAIMED', 'IN_REVIEW'].includes(taskStatus ?? '') &&
+    ['STARTED', 'IN_PROGRESS', 'WAITING'].includes(instanceStatus ?? '');
+}
+
 export function workflowErrorMessage(error: unknown): string {
   const kind = classifyOwnerError(error).kind;
   if (kind === 'denied') return 'HidraAPI refused workflow access.';
@@ -123,14 +130,16 @@ export function WorkflowTasksPage() {
     ? instanceQuery.data : undefined;
   const pressureCandidate = instance?.targetModule === 'topology' && instance.targetId &&
     instance.targetCode === `t36-v1:${instance.targetId}` ? instance.targetId : undefined;
+  const activePressureReview = Boolean(currentTask && pressureCandidate &&
+    isActivePressureReview(currentTask.status, instance?.status));
   const proposalQuery = useQuery({
     queryKey: ['hidra', 'topology', 'restriction-review', selectedTaskId, pressureCandidate, instance?.targetCode],
-    enabled: Boolean(currentTask && pressureCandidate),
+    enabled: activePressureReview,
     retry: false, staleTime: 0, gcTime: 0,
     queryFn: ({ signal }) => fetchPressureRestrictionReviewProposal(encodeURIComponent(pressureCandidate ?? ''),
       { targetLocator: instance?.targetCode ?? '', taskId: selectedTaskId }, signal),
   });
-  const proposal = proposalQuery.isSuccess && !proposalQuery.isFetching &&
+  const proposal = activePressureReview && proposalQuery.isSuccess && !proposalQuery.isFetching &&
     proposalQuery.data?.candidateId === pressureCandidate ? proposalQuery.data : undefined;
   const awaitingProposal = Boolean(pressureCandidate && !proposal) ||
     Boolean(currentTask && !instance);
@@ -161,6 +170,7 @@ export function WorkflowTasksPage() {
         throw new Error(t('workflow.actionReview'));
       }
       if (pressureCandidate) {
+        if (!isActivePressureReview(liveTask.status, instance?.status)) throw new Error(t('workflow.actionReview'));
         const liveProposal = await fetchPressureRestrictionReviewProposal(encodeURIComponent(pressureCandidate),
           { targetLocator: instance?.targetCode ?? '', taskId });
         if (liveProposal.candidateId !== pressureCandidate || !liveProposal.requestId ||
@@ -185,6 +195,9 @@ export function WorkflowTasksPage() {
         verified = persisted.id === taskId && Boolean(result.taskStatus) &&
           persisted.status === result.taskStatus &&
           Boolean(persisted.updatedAt) && persisted.updatedAt !== request.expectedTaskUpdatedAt;
+        // Immediately retire the stale OPEN task snapshot on verified readback.
+        // Otherwise invalidation can remount the active-only proposal query.
+        if (verified) queryClient.setQueryData(workflowQueryKeys.task(taskId), persisted);
       } catch {
         // Unknown outcome; do not automatically repeat a potentially committed command.
       }
@@ -253,10 +266,20 @@ export function WorkflowTasksPage() {
   const closeTask = () => selectTask('');
   const refreshSelectedTask = async () => {
     if (!canTasks || !selectedTaskId || transitionMutation.isPending) return;
-    const refreshed = await Promise.all([taskQuery.refetch(), actionsQuery.refetch(),
-      ...(canInstances && instanceId ? [instanceQuery.refetch()] : []),
-      ...(pressureCandidate ? [proposalQuery.refetch()] : [])]);
-    if (refreshed.every(result => result.status === 'success')) {
+    // Refresh owner lifecycle before explicitly refreshing the active-only
+    // proposal; never request it for a task which has already closed.
+    const [refreshedTask, refreshedActions, refreshedInstance] = await Promise.all([
+      taskQuery.refetch(), actionsQuery.refetch(),
+      canInstances && instanceId ? instanceQuery.refetch() : Promise.resolve(undefined),
+    ]);
+    const refreshed = [refreshedTask, refreshedActions, ...(refreshedInstance ? [refreshedInstance] : [])];
+    const reviewRefresh = activePressureReview && refreshedTask.status === 'success' &&
+      refreshedTask.data?.id === selectedTaskId && refreshedInstance?.status === 'success' &&
+      refreshedInstance.data?.id === instanceId &&
+      isActivePressureReview(refreshedTask.data.status, refreshedInstance.data.status)
+      ? await proposalQuery.refetch() : undefined;
+    if (refreshed.every(result => result.status === 'success') &&
+      (!reviewRefresh || reviewRefresh.status === 'success')) {
       setActionSelection(null);
       setConfirmed(false);
       setReadbackNotice('');
@@ -333,7 +356,7 @@ export function WorkflowTasksPage() {
                   {currentTask ? <Stack spacing={0.5}><Typography>{t('workflow.status')}: {currentTask.status ?? '—'}</Typography><Typography>{t('workflow.step')}: {currentTask.stepId ?? '—'}</Typography><Typography>{t('workflow.sla')}: {currentTask.slaStatus ?? '—'}</Typography><Typography>{t('workflow.due')}: {currentTask.dueAt ?? '—'}</Typography></Stack> : null}
                   <Button disabled={transitionMutation.isPending} onClick={() => { void refreshSelectedTask(); }}>{t('workflow.refresh')}</Button>
                   {currentTask && !canInstances ? <Alert severity="info">Workflow instance access is required to verify the review target before deciding.</Alert> : null}
-                  {pressureCandidate ? proposal ? <Paper variant="outlined" sx={{ p: 2 }}>
+                  {activePressureReview ? proposal ? <Paper variant="outlined" sx={{ p: 2 }}>
                     <Stack spacing={1}>
                       <Typography component="h3" variant="subtitle1">Exact pressure restriction proposal</Typography>
                       <Typography>Change · {proposal.kind} · {proposal.conditionCode}</Typography>

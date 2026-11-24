@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { HidraApiError } from '@/api/errors/HidraApiError';
-import { workflowErrorMessage } from '@/features/workflow/WorkflowTasksPage';
+import { isActivePressureReview, workflowErrorMessage } from '@/features/workflow/WorkflowTasksPage';
 
 describe('workflow error semantics', () => {
   it('maps stale-task HTTP 409 conflicts to a refresh-before-retry instruction', () => {
@@ -24,5 +24,22 @@ describe('workflow error semantics', () => {
     expect(workflowErrorMessage(new HidraApiError('Sensitive backend log', { status: 500 }))).toBe(
       'Workflow data could not be loaded.',
     );
+  });
+});
+
+
+describe('T60 active pressure review lifecycle', () => {
+  it('permits requesting exact proposal evidence only in the owner active task and instance states', () => {
+    for (const task of ['OPEN', 'CLAIMED', 'IN_REVIEW']) {
+      for (const instance of ['STARTED', 'IN_PROGRESS', 'WAITING']) {
+        expect(isActivePressureReview(task, instance)).toBe(true);
+      }
+    }
+    for (const task of [undefined, 'APPROVED', 'REJECTED', 'RETURNED', 'DELEGATED', 'ESCALATED', 'CANCELLED', 'EXPIRED', 'UNKNOWN']) {
+      expect(isActivePressureReview(task, 'STARTED')).toBe(false);
+    }
+    for (const instance of [undefined, 'COMPLETED', 'CANCELLED', 'UNKNOWN']) {
+      expect(isActivePressureReview('OPEN', instance)).toBe(false);
+    }
   });
 });

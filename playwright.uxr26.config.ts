@@ -10,7 +10,10 @@ export default defineConfig({
   testMatch: 'uxr26-native.spec.ts',
   workers: 1,
   retries: 0,
-  timeout: 180_000,
+  // Five signed sessions, two owner-checked decisions, publication and fresh
+  // persisted readback are intentionally serialized. Bound the complete journey
+  // independently of the owner's short database transaction deadlines.
+  timeout: 600_000,
   reporter: 'list',
   use: { baseURL: 'http://127.0.0.1:5173', ...devices['Desktop Chrome'], trace: 'off', screenshot: 'off', video: 'off' },
   webServer: {
