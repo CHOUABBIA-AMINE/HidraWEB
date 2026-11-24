@@ -21,13 +21,13 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useSearchParams } from 'react-router';
 
-import { readPressureRestrictionReviewProposal } from '@/api/generated/topology/topology';
 import type { AvailableActionView, ExecuteWorkflowTransitionRequest, TaskView } from '@/api/generated/workflow/model';
 import { usePermissions } from '@/features/permissions/usePermissions';
 import {
   executeWorkflowTransition,
   fetchAvailableActions,
   fetchInstance,
+  fetchPressureRestrictionReviewProposal,
   fetchTask,
   fetchTasks,
   fetchTimeline,
@@ -127,7 +127,7 @@ export function WorkflowTasksPage() {
     queryKey: ['hidra', 'topology', 'restriction-review', selectedTaskId, pressureCandidate, instance?.targetCode],
     enabled: Boolean(currentTask && pressureCandidate),
     retry: false, staleTime: 0, gcTime: 0,
-    queryFn: ({ signal }) => readPressureRestrictionReviewProposal(encodeURIComponent(pressureCandidate ?? ''),
+    queryFn: ({ signal }) => fetchPressureRestrictionReviewProposal(encodeURIComponent(pressureCandidate ?? ''),
       { targetLocator: instance?.targetCode ?? '', taskId: selectedTaskId }, signal),
   });
   const proposal = proposalQuery.isSuccess && !proposalQuery.isFetching &&
@@ -161,7 +161,7 @@ export function WorkflowTasksPage() {
         throw new Error(t('workflow.actionReview'));
       }
       if (pressureCandidate) {
-        const liveProposal = await readPressureRestrictionReviewProposal(encodeURIComponent(pressureCandidate),
+        const liveProposal = await fetchPressureRestrictionReviewProposal(encodeURIComponent(pressureCandidate),
           { targetLocator: instance?.targetCode ?? '', taskId });
         if (liveProposal.candidateId !== pressureCandidate || !liveProposal.requestId ||
           liveProposal.requestId !== proposal?.requestId || liveProposal.baselineDigest !== proposal?.baselineDigest) {

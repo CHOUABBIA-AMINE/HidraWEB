@@ -1,4 +1,5 @@
 import * as generatedWorkflow from '@/api/generated/workflow/workflow';
+import { readPressureRestrictionReviewProposal } from '@/api/generated/topology/topology';
 import type { AxiosRequestConfig } from 'axios';
 import { hidraHttpClient } from '@/api/client/hidraHttpClient';
 import type {
@@ -80,3 +81,8 @@ export const readWorkflowTarget = serialized(generatedWorkflow.readInstalledChar
 export const discoverWorkflowDefinitions = serialized(generatedWorkflow.definitions1);
 export const startWorkflowInstance = serialized(generatedWorkflow.startWorkflowInstance);
 export const createWorkflowTask = serialized(generatedWorkflow.createWorkflowTask);
+
+// The exact Topology review read acquires the same protected T07 storage fences
+// as Workflow task, instance and timeline reads. Keep it in their existing lane;
+// neither a failed read nor an approval command is retried by this adapter.
+export const fetchPressureRestrictionReviewProposal = serialized(readPressureRestrictionReviewProposal);

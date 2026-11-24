@@ -10,6 +10,7 @@ import {
   executeWorkflowTransition,
   fetchAvailableActions,
   fetchInstance,
+  fetchPressureRestrictionReviewProposal,
   fetchTask,
   fetchTasks,
   fetchTimeline,
@@ -100,4 +101,32 @@ it('reads exact owner addressing and starts through runtime-generated commands w
   expect(httpClient).toHaveBeenLastCalledWith({ url: '/api/v1/workflow/instances', method: 'POST', data: command, headers: { 'Content-Type': 'application/json' }, signal: undefined });
   await createWorkflowTask({ instanceId: 'i', stepId: 's', assignedActorId: 'reviewer' });
   expect(httpClient).toHaveBeenLastCalledWith(expect.objectContaining({ url: '/api/v1/workflow/tasks', method: 'POST', data: { instanceId: 'i', stepId: 's', assignedActorId: 'reviewer' } }));
+});
+
+
+it('serializes exact pressure proposal reads with protected Workflow reads, without retry or fallback', async () => {
+  httpClient.mockReset();
+  let release!: (value: unknown) => void;
+  const held = new Promise<unknown>(resolve => { release = resolve; });
+  const unavailable = new Error('404');
+  httpClient.mockReturnValueOnce(held).mockRejectedValueOnce(unavailable).mockResolvedValueOnce([]);
+  const timeline = fetchTimeline('instance-1');
+  const proposal = fetchPressureRestrictionReviewProposal('candidate-1', {
+    targetLocator: 't36-v1:candidate-1', taskId: 'task-1',
+  });
+  const rejected = proposal.then(() => undefined, cause => cause);
+  const actions = fetchAvailableActions('task-1');
+  await Promise.resolve();
+  expect(httpClient).toHaveBeenCalledTimes(1);
+  expect(httpClient).toHaveBeenNthCalledWith(1, { method: 'GET', url: '/api/v1/workflow/instances/instance-1/timeline' });
+  release([]);
+  await timeline;
+  expect(await rejected).toBe(unavailable);
+  await actions;
+  expect(httpClient).toHaveBeenCalledTimes(3);
+  expect(httpClient).toHaveBeenNthCalledWith(2, expect.objectContaining({ method: 'GET',
+    url: '/api/v1/topology/operating-constraints/pressure-restriction-review-proposals/candidate-1',
+    params: { targetLocator: 't36-v1:candidate-1', taskId: 'task-1' },
+  }));
+  expect(httpClient).toHaveBeenNthCalledWith(3, { method: 'GET', url: '/api/v1/workflow/tasks/task-1/available-actions' });
 });

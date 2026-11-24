@@ -16,7 +16,10 @@ interface Fixture {
 const webOrigin = 'http://127.0.0.1:5173';
 const stage = (name: string) => { process.stdout.write(`UXR26_STAGE=${name}\n`); };
 const status = (operation: 'LOGIN' | 'PRINCIPAL' | 'EFFECTIVE_PERMISSIONS' | 'PERMISSION_CATALOG' |
-  'PERMISSION_ROUTES' | 'DISCOVERY' | 'FOREIGN_DISCOVERY' | 'T33', code: number) => {
+  'PERMISSION_ROUTES' | 'DISCOVERY' | 'FOREIGN_DISCOVERY' | 'T33' |
+  'REVIEW_INBOX' | 'REVIEW_TASK' | 'REVIEW_INSTANCE' | 'REVIEW_ACTIONS' | 'REVIEW_TIMELINE' |
+  'REVIEW_PROPOSAL' | 'REVIEW_EXECUTE' | 'PUBLICATION_INPUTS' | 'PUBLICATION' |
+  'LIMIT_READBACK' | 'DECISION_EVIDENCE', code: number) => {
   process.stdout.write(`UXR26_HTTP=${operation}:${code}\n`);
 };
 
@@ -131,6 +134,30 @@ test('UXR-26 verifies separate signed author, reviewer and publisher in Chromium
   try {
     const [author, firstReviewer, secondReviewer, publisher, readback] = await Promise.all(contexts.map(context => context.newPage()));
     const reviewers = [firstReviewer, secondReviewer];
+    // Observe only fixed endpoint categories and status codes, never identifiers,
+    // response bodies, raw errors or bearer material. Covers later gates too.
+    for (const reviewer of reviewers) reviewer.on('response', result => {
+      const path = new URL(result.url()).pathname;
+      const method = result.request().method();
+      if (method === 'GET') {
+        if (path === '/api/v1/workflow/tasks') status('REVIEW_INBOX', result.status());
+        else if (/^\/api\/v1\/workflow\/tasks\/[^/]+$/.test(path)) status('REVIEW_TASK', result.status());
+        else if (/^\/api\/v1\/workflow\/tasks\/[^/]+\/available-actions$/.test(path)) status('REVIEW_ACTIONS', result.status());
+        else if (/^\/api\/v1\/workflow\/instances\/[^/]+$/.test(path)) status('REVIEW_INSTANCE', result.status());
+        else if (/^\/api\/v1\/workflow\/instances\/[^/]+\/timeline$/.test(path)) status('REVIEW_TIMELINE', result.status());
+        else if (/^\/api\/v1\/topology\/operating-constraints\/pressure-restriction-review-proposals\/[^/]+$/.test(path)) status('REVIEW_PROPOSAL', result.status());
+      } else if (method === 'POST' && /^\/api\/v1\/workflow\/tasks\/[^/]+\/transitions\/[^/]+\/execute$/.test(path)) {
+        status('REVIEW_EXECUTE', result.status());
+      }
+    });
+    for (const page of [author, publisher, readback]) page.on('response', result => {
+      const path = new URL(result.url()).pathname;
+      const method = result.request().method();
+      if (method === 'GET' && path.endsWith('/publication-inputs')) status('PUBLICATION_INPUTS', result.status());
+      else if (method === 'POST' && path.endsWith('/publication')) status('PUBLICATION', result.status());
+      else if (method === 'GET' && path.endsWith('/evidence')) status('DECISION_EVIDENCE', result.status());
+      else if (method === 'GET' && /^\/api\/v1\/topology\/operating-constraints\/pipelines\/[^/]+$/.test(path)) status('LIMIT_READBACK', result.status());
+    });
     stage('AUTHOR_LOGIN');
     await openSession(author, roles.author, fixture.password, '/overview');
     stage('AUTHOR_SCOPE');
@@ -177,7 +204,21 @@ test('UXR-26 verifies separate signed author, reviewer and publisher in Chromium
       const taskId: string = (await result.json()).id;
       const url = `/work/tasks?taskId=${encodeURIComponent(taskId)}`;
       stage(`REVIEW_${index + 1}_LOGIN`);
+      const exactProposal = reviewer.waitForResponse(result => {
+        const address = new URL(result.url());
+        return address.pathname === '/api/v1/topology/operating-constraints/pressure-restriction-review-proposals/' +
+          encodeURIComponent(candidate.candidateId!) && address.searchParams.get('taskId') === taskId &&
+          address.searchParams.get('targetLocator') === candidate.workflowLocator && result.request().method() === 'GET';
+      });
+      // Attach a rejection handler immediately to avoid an unhandled rejection if
+      // session navigation itself fails before the protected read is issued.
+      const proposalResult = exactProposal.then(result => ({ result }), () => ({ result: undefined }));
       await openSession(reviewer, roles.reviewer, fixture.password, url);
+      const { result: reviewed } = await proposalResult;
+      expect(Boolean(reviewed), 'Exact owner proposal GET must be issued for the assigned task').toBe(true);
+      expect(reviewed!.status()).toBe(200);
+      const reviewedProposal = await reviewed!.json();
+      expect(reviewedProposal.candidateId === candidate.candidateId && reviewedProposal.requestId === requestId).toBe(true);
       await expect(reviewer.getByRole('heading', { name: 'Exact pressure restriction proposal' })).toBeVisible();
       await expect(reviewer.getByText(`Request · ${requestId}`, { exact: true })).toBeVisible();
       if (candidate.kind === 'REVISION') await expect(reviewer.getByText(/Proposed upper pressure · 53 bar/)).toBeVisible();

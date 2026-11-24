@@ -62,7 +62,7 @@ def diagnostics(suites):
                                 print("UXR26_DIAG STAGE=" + line[12:], flush=True)
                             if line.startswith("UXR26_HTTP="):
                                 operation, separator, code = line[11:].partition(":")
-                                if separator and operation in {"LOGIN", "PRINCIPAL", "EFFECTIVE_PERMISSIONS", "PERMISSION_CATALOG", "PERMISSION_ROUTES", "DISCOVERY", "FOREIGN_DISCOVERY", "T33"} and code.isascii() and code.isdigit() and len(code) == 3:
+                                if separator and operation in {"LOGIN", "PRINCIPAL", "EFFECTIVE_PERMISSIONS", "PERMISSION_CATALOG", "PERMISSION_ROUTES", "DISCOVERY", "FOREIGN_DISCOVERY", "T33", "REVIEW_INBOX", "REVIEW_TASK", "REVIEW_INSTANCE", "REVIEW_ACTIONS", "REVIEW_TIMELINE", "REVIEW_PROPOSAL", "REVIEW_EXECUTE", "PUBLICATION_INPUTS", "PUBLICATION", "LIMIT_READBACK", "DECISION_EVIDENCE"} and code.isascii() and code.isdigit() and len(code) == 3:
                                     print("UXR26_DIAG HTTP=" + operation + ":" + code, flush=True)
                     if result.get("status") != "passed":
                         for error in result.get("errors", []):
@@ -188,7 +188,7 @@ method = """
         } finally {
             try {
                 for (String line : Files.readAllLines(log)) {
-                    if (line.matches("UXR26_DIAG (COUNTS EXPECTED=[0-9]+ UNEXPECTED=[0-9]+ FLAKY=[0-9]+ SKIPPED=[0-9]+|EXIT=[0-9]+|HTTP=(LOGIN|PRINCIPAL|EFFECTIVE_PERMISSIONS|PERMISSION_CATALOG|PERMISSION_ROUTES|DISCOVERY|FOREIGN_DISCOVERY|T33):[0-9]{3}|STAGE=[A-Z_0-9]+|FAILURE_LINE=[0-9]+|REPORT_ERRORS=[0-9]+|REPORT_MISSING|PASSED)")) {
+                    if (line.matches("UXR26_DIAG (COUNTS EXPECTED=[0-9]+ UNEXPECTED=[0-9]+ FLAKY=[0-9]+ SKIPPED=[0-9]+|EXIT=[0-9]+|HTTP=(LOGIN|PRINCIPAL|EFFECTIVE_PERMISSIONS|PERMISSION_CATALOG|PERMISSION_ROUTES|DISCOVERY|FOREIGN_DISCOVERY|T33|REVIEW_INBOX|REVIEW_TASK|REVIEW_INSTANCE|REVIEW_ACTIONS|REVIEW_TIMELINE|REVIEW_PROPOSAL|REVIEW_EXECUTE|PUBLICATION_INPUTS|PUBLICATION|LIMIT_READBACK|DECISION_EVIDENCE):[0-9]{3}|STAGE=[A-Z_0-9]+|FAILURE_LINE=[0-9]+|REPORT_ERRORS=[0-9]+|REPORT_MISSING|PASSED)")) {
                         System.out.println(line);
                     }
                 }
