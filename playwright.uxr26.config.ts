@@ -15,7 +15,8 @@ export default defineConfig({
   // independently of the owner's short database transaction deadlines.
   timeout: 600_000,
   reporter: 'list',
-  use: { baseURL: 'http://127.0.0.1:5173', ...devices['Desktop Chrome'], trace: 'off', screenshot: 'off', video: 'off' },
+  use: { baseURL: 'http://127.0.0.1:5173', ...devices['Desktop Chrome'],
+    actionTimeout: 30_000, navigationTimeout: 30_000, trace: 'off', screenshot: 'off', video: 'off' },
   webServer: {
     command: 'npm run dev',
     url: 'http://127.0.0.1:5173/overview',

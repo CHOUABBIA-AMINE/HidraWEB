@@ -128,16 +128,39 @@ test('UXR-26 hides decisions until the exact assigned pressure proposal is reada
   await mockWorkflow(page);
   const candidateId = 'a021e8b0-2de0-4272-87cb-74357a27ef96';
   const locator = `t36-v1:${candidateId}`;
-  await page.route('**/api/v1/workflow/instances/instance-1', route => route.fulfill({
-    json: { id: 'instance-1', targetId: candidateId, targetModule: 'topology', targetCode: locator },
+  // Match the owner contract: a review is active only with an active task
+  // AND an active instance. The prior mock omitted instance.status entirely.
+  const currentTask = { ...task };
+  const currentInstance = { id: 'instance-1', targetId: candidateId, targetModule: 'topology',
+    targetCode: locator, status: 'STARTED', correlationId: 'review-correlation' };
+  await page.route('**/api/v1/workflow/tasks?**', route => route.fulfill({
+    json: { content: [currentTask], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false },
   }));
+  await page.route('**/api/v1/workflow/tasks/task-1', route => route.fulfill({ json: currentTask }));
+  await page.route('**/api/v1/workflow/instances/instance-1', route => route.fulfill({ json: currentInstance }));
   let denied = true;
   let decisionRequests = 0;
+  let proposalReadsAfterCompletion = 0;
   await page.route('**/api/v1/workflow/tasks/task-1/transitions/**', route => {
     decisionRequests += 1;
-    return route.fulfill({ status: 404 });
+    if (denied || currentTask.status !== 'OPEN') return route.fulfill({ status: 404 });
+    expect(route.request().method()).toBe('POST');
+    expect(route.request().postDataJSON()).toMatchObject({
+      expectedTaskUpdatedAt: task.updatedAt, commentText: 'Reviewed exact proposal.',
+      correlationId: currentInstance.correlationId,
+    });
+    currentTask.status = 'APPROVED';
+    currentTask.updatedAt = '2026-09-11T10:31:00Z';
+    currentInstance.status = 'COMPLETED';
+    return route.fulfill({ json: { actionId: 'act-1', taskId: 'task-1', taskStatus: 'APPROVED',
+      instanceId: 'instance-1', instanceStatus: 'COMPLETED', transitionId: 'tr-1',
+      decision: 'APPROVE', currentStepId: 'approved', executedAt: currentTask.updatedAt } });
   });
   await page.route(`**/pressure-restriction-review-proposals/${candidateId}?**`, route => {
+    if (currentTask.status === 'APPROVED') {
+      proposalReadsAfterCompletion += 1;
+      return route.fulfill({ status: 404 });
+    }
     expect(new URL(route.request().url()).searchParams.get('targetLocator')).toBe(locator);
     expect(new URL(route.request().url()).searchParams.get('taskId')).toBe('task-1');
     return denied ? route.fulfill({ status: 404 }) : route.fulfill({
@@ -160,4 +183,26 @@ test('UXR-26 hides decisions until the exact assigned pressure proposal is reada
   await expect(page.getByText('Proposed upper pressure · 53 bar · GAUGE')).toBeVisible();
   await expect(page.getByRole('button', { name: 'APPROVE', exact: true })).toBeEnabled();
   expect(decisionRequests).toBe(0);
+
+  await page.getByRole('button', { name: 'APPROVE', exact: true }).click();
+  await page.getByLabel('comment *').fill('Reviewed exact proposal.');
+  await expect(page.getByRole('button', { name: 'Action: APPROVE' })).toBeDisabled();
+  await page.getByRole('checkbox', { name: /Je confirme cette décision/ }).check();
+  await page.getByRole('button', { name: 'Action: APPROVE' }).click();
+  await expect(page.getByText('APPROVE · APPROVED', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Fermer', exact: true })).toBeEnabled();
+  await expect(page.getByRole('heading', { name: 'Exact pressure restriction proposal' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'APPROVE', exact: true })).toHaveCount(0);
+  // Explicit terminal-task refresh must also avoid the active-only endpoint.
+  await Promise.all([
+    page.waitForResponse(response => new URL(response.url()).pathname === '/api/v1/workflow/tasks/task-1' &&
+      response.request().method() === 'GET' && response.status() === 200),
+    page.waitForResponse(response => new URL(response.url()).pathname === '/api/v1/workflow/instances/instance-1' &&
+      response.request().method() === 'GET' && response.status() === 200),
+    page.getByRole('button', { name: 'Actualiser', exact: true }).last().click(),
+  ]);
+  await expect(page.getByText('APPROVE · APPROVED', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'APPROVE', exact: true })).toHaveCount(0);
+  expect(decisionRequests).toBe(1);
+  expect(proposalReadsAfterCompletion).toBe(0);
 });

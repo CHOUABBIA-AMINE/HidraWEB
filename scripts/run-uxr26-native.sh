@@ -40,8 +40,10 @@ if type(duration) in (int, float) and 0 <= duration <= 3_600_000:
 # Emit only fixed stage identifiers and native-spec line numbers.
 stages = {
     "AUTHOR_LOGIN", "AUTHOR_SCOPE", "AUTHOR_STREAM", "AUTHOR_SUBMIT",
-    "REVIEW_1_ASSIGN", "REVIEW_1_LOGIN", "REVIEW_1_DECISION",
-    "REVIEW_2_ASSIGN", "REVIEW_2_LOGIN", "REVIEW_2_DECISION",
+    "REVIEW_1_SELECT_CANDIDATE", "REVIEW_1_DISCOVER", "REVIEW_1_START", "REVIEW_1_ASSIGN",
+    "REVIEW_1_LOGIN", "REVIEW_1_DECISION", "REVIEW_1_READBACK", "REVIEW_1_DONE",
+    "REVIEW_2_SELECT_CANDIDATE", "REVIEW_2_DISCOVER", "REVIEW_2_START", "REVIEW_2_ASSIGN",
+    "REVIEW_2_LOGIN", "REVIEW_2_DECISION", "REVIEW_2_READBACK", "REVIEW_2_DONE",
     "PUBLISHER_LOGIN", "PUBLISHER_SCOPE", "PUBLISHER_PUBLISH",
     "READBACK_LOGIN", "READBACK_SCOPE", "READBACK_LIMIT",
     "AUDIT_READBACK", "STALE_CONFLICT", "MASKED_DENIAL", "COMPLETE",
@@ -52,6 +54,14 @@ def failure_location(error):
     line = location.get("line")
     if Path(location.get("file", "")).name == "uxr26-native.spec.ts" and type(line) is int and line > 0:
         print(f"UXR26_DIAG FAILURE_LINE={line}", flush=True)
+    # Classify privately, never echo the message or raw locator/stack.
+    message = str(error.get("message", ""))
+    kind = "TEST_TIMEOUT" if "Test timeout of" in message else \
+        "STRICT_LOCATOR" if "strict mode violation" in message else \
+        "ASSERTION" if "expect(" in message else \
+        "CLOSED_CONTEXT" if "has been closed" in message else \
+        "OPERATION_TIMEOUT" if "Timeout" in message or "timed out" in message else "OTHER"
+    print("UXR26_DIAG FAILURE_KIND=" + kind, flush=True)
 
 def diagnostics(suites):
     for suite in suites:
@@ -65,8 +75,12 @@ def diagnostics(suites):
                                 print("UXR26_DIAG STAGE=" + line[12:], flush=True)
                             if line.startswith("UXR26_HTTP="):
                                 operation, separator, code = line[11:].partition(":")
-                                if separator and operation in {"LOGIN", "PRINCIPAL", "EFFECTIVE_PERMISSIONS", "PERMISSION_CATALOG", "PERMISSION_ROUTES", "DISCOVERY", "FOREIGN_DISCOVERY", "T33", "REVIEW_INBOX", "REVIEW_TASK", "REVIEW_INSTANCE", "REVIEW_ACTIONS", "REVIEW_TIMELINE", "REVIEW_PROPOSAL", "REVIEW_EXECUTE", "PUBLICATION_INPUTS", "PUBLICATION", "LIMIT_READBACK", "DECISION_EVIDENCE"} and code.isascii() and code.isdigit() and len(code) == 3:
+                                if separator and operation in {"LOGIN", "PRINCIPAL", "EFFECTIVE_PERMISSIONS", "PERMISSION_CATALOG", "PERMISSION_ROUTES", "DISCOVERY", "FOREIGN_DISCOVERY", "T33", "REVIEW_INBOX", "REVIEW_TASK", "REVIEW_INSTANCE", "REVIEW_ACTIONS", "REVIEW_TIMELINE", "REVIEW_PROPOSAL", "REVIEW_EXECUTE", "PUBLICATION_INPUTS", "PUBLICATION", "LIMIT_READBACK", "DECISION_EVIDENCE", "REVIEW_TARGET", "REVIEW_DEFINITIONS", "REVIEW_START", "REVIEW_ASSIGN"} and code.isascii() and code.isdigit() and len(code) == 3:
                                     print("UXR26_DIAG HTTP=" + operation + ":" + code, flush=True)
+                            if line.startswith("UXR26_CHECK="):
+                                name, separator, value = line[12:].partition(":")
+                                if separator and name in {"COMMAND_MATCH", "READBACK_MATCH", "READBACK_VERSION", "READBACK_ACTOR", "UI_SUCCESS", "UI_UNVERIFIED", "BROWSER_ERROR"} and value in {"0", "1"}:
+                                    print("UXR26_DIAG CHECK=" + name + ":" + value, flush=True)
                     if result.get("status") != "passed":
                         for error in result.get("errors", []):
                             failure_location(error)
@@ -191,7 +205,7 @@ method = """
         } finally {
             try {
                 for (String line : Files.readAllLines(log)) {
-                    if (line.matches("UXR26_DIAG (COUNTS EXPECTED=[0-9]+ UNEXPECTED=[0-9]+ FLAKY=[0-9]+ SKIPPED=[0-9]+|EXIT=[0-9]+|DURATION_MS=[0-9]+|HTTP=(LOGIN|PRINCIPAL|EFFECTIVE_PERMISSIONS|PERMISSION_CATALOG|PERMISSION_ROUTES|DISCOVERY|FOREIGN_DISCOVERY|T33|REVIEW_INBOX|REVIEW_TASK|REVIEW_INSTANCE|REVIEW_ACTIONS|REVIEW_TIMELINE|REVIEW_PROPOSAL|REVIEW_EXECUTE|PUBLICATION_INPUTS|PUBLICATION|LIMIT_READBACK|DECISION_EVIDENCE):[0-9]{3}|STAGE=[A-Z_0-9]+|FAILURE_LINE=[0-9]+|REPORT_ERRORS=[0-9]+|REPORT_MISSING|PASSED)")) {
+                    if (line.matches("UXR26_DIAG (COUNTS EXPECTED=[0-9]+ UNEXPECTED=[0-9]+ FLAKY=[0-9]+ SKIPPED=[0-9]+|EXIT=[0-9]+|DURATION_MS=[0-9]+|HTTP=(LOGIN|PRINCIPAL|EFFECTIVE_PERMISSIONS|PERMISSION_CATALOG|PERMISSION_ROUTES|DISCOVERY|FOREIGN_DISCOVERY|T33|REVIEW_INBOX|REVIEW_TASK|REVIEW_INSTANCE|REVIEW_ACTIONS|REVIEW_TIMELINE|REVIEW_PROPOSAL|REVIEW_EXECUTE|PUBLICATION_INPUTS|PUBLICATION|LIMIT_READBACK|DECISION_EVIDENCE|REVIEW_TARGET|REVIEW_DEFINITIONS|REVIEW_START|REVIEW_ASSIGN):[0-9]{3}|CHECK=(COMMAND_MATCH|READBACK_MATCH|READBACK_VERSION|READBACK_ACTOR|UI_SUCCESS|UI_UNVERIFIED|BROWSER_ERROR):[01]|FAILURE_KIND=(TEST_TIMEOUT|STRICT_LOCATOR|ASSERTION|CLOSED_CONTEXT|OPERATION_TIMEOUT|OTHER)|STAGE=[A-Z_0-9]+|FAILURE_LINE=[0-9]+|REPORT_ERRORS=[0-9]+|REPORT_MISSING|PASSED)")) {
                         System.out.println(line);
                     }
                 }

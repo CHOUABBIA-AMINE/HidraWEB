@@ -126,18 +126,27 @@ export function WorkflowTasksPage() {
   const instanceQuery = useQuery({ queryKey: workflowQueryKeys.instance(instanceId), queryFn: () => fetchInstance(instanceId), enabled: canInstances && Boolean(instanceId) });
   const timelineQuery = useQuery({ queryKey: workflowQueryKeys.timeline(instanceId), queryFn: () => fetchTimeline(instanceId), enabled: canInstances && Boolean(instanceId) });
 
-  const instance = instanceQuery.isSuccess && !instanceQuery.isFetching && instanceQuery.data?.id === instanceId
+  // Keep the exact owner-issued address stable while the same instance is
+  // refreshing. Cached coordinates are not fresh admission or display evidence.
+  const instanceSnapshot = canInstances && instanceQuery.isSuccess && instanceQuery.data?.id === instanceId
     ? instanceQuery.data : undefined;
-  const pressureCandidate = instance?.targetModule === 'topology' && instance.targetId &&
-    instance.targetCode === `t36-v1:${instance.targetId}` ? instance.targetId : undefined;
+  const instance = !instanceQuery.isFetching ? instanceSnapshot : undefined;
+  const addressedCandidate = instanceSnapshot?.targetModule === 'topology' && instanceSnapshot.targetId &&
+    instanceSnapshot.targetCode === `t36-v1:${instanceSnapshot.targetId}` ? instanceSnapshot.targetId : undefined;
+  const pressureCandidate = instance ? addressedCandidate : undefined;
   const activePressureReview = Boolean(currentTask && pressureCandidate &&
     isActivePressureReview(currentTask.status, instance?.status));
   const proposalQuery = useQuery({
-    queryKey: ['hidra', 'topology', 'restriction-review', selectedTaskId, pressureCandidate, instance?.targetCode],
+    queryKey: ['hidra', 'topology', 'restriction-review', selectedTaskId, addressedCandidate, instanceSnapshot?.targetCode],
     enabled: activePressureReview,
     retry: false, staleTime: 0, gcTime: 0,
-    queryFn: ({ signal }) => fetchPressureRestrictionReviewProposal(encodeURIComponent(pressureCandidate ?? ''),
-      { targetLocator: instance?.targetCode ?? '', taskId: selectedTaskId }, signal),
+    queryFn: ({ signal }) => {
+      if (!selectedTaskId || !addressedCandidate || !instanceSnapshot?.targetCode) {
+        throw new Error(t('workflow.actionReview'));
+      }
+      return fetchPressureRestrictionReviewProposal(encodeURIComponent(addressedCandidate),
+        { targetLocator: instanceSnapshot.targetCode, taskId: selectedTaskId }, signal);
+    },
   });
   const proposal = activePressureReview && proposalQuery.isSuccess && !proposalQuery.isFetching &&
     proposalQuery.data?.candidateId === pressureCandidate ? proposalQuery.data : undefined;
@@ -203,12 +212,12 @@ export function WorkflowTasksPage() {
       }
       if (verified) setSuccessMessage(String(result.decision ?? '') + ' · ' + String(result.taskStatus ?? ''));
       else setReadbackNotice(t('workflow.readbackUnverified'));
+      // Prefix invalidation already includes detail/actions and timeline.
+      // Do not cancel and reissue the same protected reads from overlapping
+      // invalidations: the transport queue would otherwise retain duplicate work.
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['hidra', 'workflow', 'tasks'] }),
-        queryClient.invalidateQueries({ queryKey: workflowQueryKeys.task(taskId) }),
-        queryClient.invalidateQueries({ queryKey: workflowQueryKeys.actions(taskId) }),
         instanceId ? queryClient.invalidateQueries({ queryKey: workflowQueryKeys.instance(instanceId) }) : Promise.resolve(),
-        instanceId ? queryClient.invalidateQueries({ queryKey: workflowQueryKeys.timeline(instanceId) }) : Promise.resolve(),
       ]);
     },
   });
@@ -275,7 +284,10 @@ export function WorkflowTasksPage() {
     const refreshed = [refreshedTask, refreshedActions, ...(refreshedInstance ? [refreshedInstance] : [])];
     const reviewRefresh = activePressureReview && refreshedTask.status === 'success' &&
       refreshedTask.data?.id === selectedTaskId && refreshedInstance?.status === 'success' &&
-      refreshedInstance.data?.id === instanceId &&
+      refreshedInstance.data?.id === instanceId && refreshedTask.data.instanceId === instanceId &&
+      refreshedInstance.data.targetModule === 'topology' &&
+      refreshedInstance.data.targetId === addressedCandidate &&
+      refreshedInstance.data.targetCode === instanceSnapshot?.targetCode &&
       isActivePressureReview(refreshedTask.data.status, refreshedInstance.data.status)
       ? await proposalQuery.refetch() : undefined;
     if (refreshed.every(result => result.status === 'success') &&

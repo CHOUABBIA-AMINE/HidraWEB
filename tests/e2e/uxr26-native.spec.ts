@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import type { PressureRestrictionRequest, PressureRestrictionSubmission } from '../../src/api/generated/topology/model';
+import type { TaskView, WorkflowTransitionExecutionResponse, ExecuteWorkflowTransitionRequest } from '../../src/api/generated/workflow/model';
 
 interface Fixture {
   baseUrl: string;
@@ -19,8 +20,14 @@ const status = (operation: 'LOGIN' | 'PRINCIPAL' | 'EFFECTIVE_PERMISSIONS' | 'PE
   'PERMISSION_ROUTES' | 'DISCOVERY' | 'FOREIGN_DISCOVERY' | 'T33' |
   'REVIEW_INBOX' | 'REVIEW_TASK' | 'REVIEW_INSTANCE' | 'REVIEW_ACTIONS' | 'REVIEW_TIMELINE' |
   'REVIEW_PROPOSAL' | 'REVIEW_EXECUTE' | 'PUBLICATION_INPUTS' | 'PUBLICATION' |
-  'LIMIT_READBACK' | 'DECISION_EVIDENCE', code: number) => {
+  'LIMIT_READBACK' | 'DECISION_EVIDENCE' | 'REVIEW_TARGET' | 'REVIEW_DEFINITIONS' |
+  'REVIEW_START' | 'REVIEW_ASSIGN', code: number) => {
   process.stdout.write(`UXR26_HTTP=${operation}:${code}\n`);
+};
+
+const check = (name: 'COMMAND_MATCH' | 'READBACK_MATCH' | 'READBACK_VERSION' |
+  'READBACK_ACTOR' | 'UI_SUCCESS' | 'UI_UNVERIFIED' | 'BROWSER_ERROR', passed: boolean) => {
+  process.stdout.write(`UXR26_CHECK=${name}:${passed ? 1 : 0}\n`);
 };
 
 async function openSession(page: Page, username: string, password: string, target: string) {
@@ -136,6 +143,7 @@ test('UXR-26 verifies separate signed author, reviewer and publisher in Chromium
     const reviewers = [firstReviewer, secondReviewer];
     // Observe only fixed endpoint categories and status codes, never identifiers,
     // response bodies, raw errors or bearer material. Covers later gates too.
+    for (const reviewer of reviewers) reviewer.on('pageerror', () => check('BROWSER_ERROR', true));
     for (const reviewer of reviewers) reviewer.on('response', result => {
       const path = new URL(result.url()).pathname;
       const method = result.request().method();
@@ -153,7 +161,11 @@ test('UXR-26 verifies separate signed author, reviewer and publisher in Chromium
     for (const page of [author, publisher, readback]) page.on('response', result => {
       const path = new URL(result.url()).pathname;
       const method = result.request().method();
-      if (method === 'GET' && path.endsWith('/publication-inputs')) status('PUBLICATION_INPUTS', result.status());
+      if (method === 'GET' && path === '/api/v1/workflow/definitions/pressure-restriction-target') status('REVIEW_TARGET', result.status());
+      else if (method === 'GET' && path === '/api/v1/workflow/definitions') status('REVIEW_DEFINITIONS', result.status());
+      else if (method === 'POST' && path === '/api/v1/workflow/instances') status('REVIEW_START', result.status());
+      else if (method === 'POST' && path === '/api/v1/workflow/tasks') status('REVIEW_ASSIGN', result.status());
+      else if (method === 'GET' && path.endsWith('/publication-inputs')) status('PUBLICATION_INPUTS', result.status());
       else if (method === 'POST' && path.endsWith('/publication')) status('PUBLICATION', result.status());
       else if (method === 'GET' && path.endsWith('/evidence')) status('DECISION_EVIDENCE', result.status());
       else if (method === 'GET' && /^\/api\/v1\/topology\/operating-constraints\/pipelines\/[^/]+$/.test(path)) status('LIMIT_READBACK', result.status());
@@ -189,19 +201,30 @@ test('UXR-26 verifies separate signed author, reviewer and publisher in Chromium
     const requestId = proposal.requestId!;
     for (const [index, candidate] of proposal.candidates!.entries()) {
       const reviewer = reviewers[index];
-      stage(`REVIEW_${index + 1}_ASSIGN`);
+      stage(`REVIEW_${index + 1}_SELECT_CANDIDATE`);
       await pickById(author, 'Restriction candidate', candidate.candidateId!);
+      stage(`REVIEW_${index + 1}_DISCOVER`);
       await author.getByRole('button', { name: 'Discover review definitions' }).click();
       await pickById(author, 'Review definition', workflowBinding.definitionId);
       await pickById(author, 'Independent reviewer', roles.reviewer);
+      stage(`REVIEW_${index + 1}_START`);
       const instance = response(author, '/workflow/instances', 'POST');
       await author.getByRole('button', { name: 'Start restriction review' }).click();
-      expect((await instance).status()).toBe(200);
+      const started = await instance;
+      expect(started.status()).toBe(200);
+      const startedInstance = await started.json();
+      expect(Boolean(startedInstance.id) && startedInstance.targetId === candidate.candidateId &&
+        startedInstance.definitionId === workflowBinding.definitionId).toBe(true);
+      stage(`REVIEW_${index + 1}_ASSIGN`);
       const task = response(author, '/workflow/tasks', 'POST');
       await author.getByRole('button', { name: 'Assign restriction review' }).click();
       const result = await task;
       expect(result.status()).toBe(200);
-      const taskId: string = (await result.json()).id;
+      const assigned = await result.json();
+      const taskId: string = assigned.id;
+      expect(Boolean(taskId) && assigned.instanceId === startedInstance.id &&
+        assigned.assignedActorId === roles.reviewer && assigned.status === 'OPEN').toBe(true);
+      await expect(author.getByText(`Assigned task · ${taskId}`, { exact: true })).toBeVisible();
       const url = `/work/tasks?taskId=${encodeURIComponent(taskId)}`;
       stage(`REVIEW_${index + 1}_LOGIN`);
       const exactProposal = reviewer.waitForResponse(result => {
@@ -226,8 +249,55 @@ test('UXR-26 verifies separate signed author, reviewer and publisher in Chromium
       await reviewer.getByRole('button', { name: 'APPROVE', exact: true }).click();
       await expect(reviewer.getByRole('button', { name: 'Action: APPROVE' })).toBeDisabled();
       await reviewer.getByRole('checkbox', { name: 'I confirm this decision after reviewing the current task.' }).check();
+      // Observe the actual UI-issued command and its subsequent task readback.
+      // A 200 status alone does not prove the readback predicate or the banner.
+      const taskPath = '/api/v1/workflow/tasks/' + encodeURIComponent(taskId);
+      let commandObserved = false;
+      const execution = reviewer.waitForResponse(result => {
+        const path = new URL(result.url()).pathname;
+        if (result.request().method() !== 'POST' || !path.startsWith(taskPath + '/transitions/') ||
+          !path.endsWith('/execute')) return false;
+        commandObserved = true;
+        return true;
+      }).then(result => ({ result }), () => ({ result: undefined }));
+      const readbackResult = reviewer.waitForResponse(result =>
+        commandObserved && result.request().method() === 'GET' &&
+        new URL(result.url()).pathname === taskPath,
+      ).then(result => ({ result }), () => ({ result: undefined }));
       await reviewer.getByRole('button', { name: 'Action: APPROVE' }).click();
-      await expect(reviewer.getByText('APPROVE · APPROVED')).toBeVisible();
+      const { result: executed } = await execution;
+      expect(Boolean(executed), 'The exact review command must be issued by the browser').toBe(true);
+      expect(executed!.status()).toBe(200);
+      const command = executed!.request().postDataJSON() as ExecuteWorkflowTransitionRequest;
+      const decision = await executed!.json() as WorkflowTransitionExecutionResponse;
+      const commandMatch = decision.taskId === taskId && decision.instanceId === startedInstance.id &&
+        decision.decision === 'APPROVE' && decision.taskStatus === 'APPROVED' &&
+        decision.instanceStatus === 'COMPLETED' && Boolean(decision.actionId);
+      check('COMMAND_MATCH', commandMatch);
+      expect(commandMatch).toBe(true);
+      stage(`REVIEW_${index + 1}_READBACK`);
+      const { result: persistedResponse } = await readbackResult;
+      expect(Boolean(persistedResponse), 'The frontend must read the task after the command').toBe(true);
+      expect(persistedResponse!.status()).toBe(200);
+      const persisted = await persistedResponse!.json() as TaskView;
+      const readbackMatch = persisted.id === taskId && persisted.instanceId === decision.instanceId &&
+        persisted.status === decision.taskStatus;
+      const readbackVersion = Boolean(persisted.updatedAt && command.expectedTaskUpdatedAt &&
+        persisted.updatedAt !== command.expectedTaskUpdatedAt);
+      const readbackActor = persisted.completedByActorId === roles.reviewer && Boolean(persisted.completedAt);
+      check('READBACK_MATCH', readbackMatch);
+      check('READBACK_VERSION', readbackVersion);
+      check('READBACK_ACTOR', readbackActor);
+      expect(readbackMatch && readbackVersion && readbackActor).toBe(true);
+      const success = reviewer.getByText('APPROVE · APPROVED', { exact: true });
+      try {
+        await expect(success).toBeVisible();
+      } finally {
+        check('UI_SUCCESS', await success.isVisible().catch(() => false));
+        check('UI_UNVERIFIED', await reviewer.getByText(
+          'Command submitted, but the persisted state could not be verified. Refresh the task before proceeding.',
+          { exact: true }).isVisible().catch(() => false));
+      }
       // The success banner is durable task readback, but post-success query
       // invalidation may still be running. Wait for the real completion control
       // before releasing this actor's context and starting another assignment.
@@ -235,6 +305,7 @@ test('UXR-26 verifies separate signed author, reviewer and publisher in Chromium
       await expect(closeReview).toBeEnabled({ timeout: 90_000 });
       await expect(reviewer.getByRole('heading', { name: 'Exact pressure restriction proposal' })).toHaveCount(0);
       await reviewer.context().close();
+      stage(`REVIEW_${index + 1}_DONE`);
     }
     stage('PUBLISHER_LOGIN');
     await openSession(publisher, roles.primary, fixture.password, '/overview');
