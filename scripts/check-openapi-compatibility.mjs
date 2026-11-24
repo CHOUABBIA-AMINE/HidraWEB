@@ -138,9 +138,9 @@ const PLANNING_CURRENT_PROOF = {
 };
 const IDENTITY_ORGANIZATION_CURRENT_PROOF = {
  config: 'orval.identity-organization.config.ts',
- path: 'openapi/candidates/hidra-identity-organization-720e9222b30fa45b7423ede9c9f141ab87298024.json',
- sha256: 'sha256:95a9f9d224838d395a8348bf9a56c2374d5a29cb9e4e6dbb428ccc8d40e6c03b',
- paths: 59, schemas: 62,
+ path: 'openapi/candidates/hidra-identity-organization-7624bc900881ccd3957d07f5b1add3f28069bb6d.json',
+ sha256: 'sha256:0a91a666b383c7afcea6e45f8db17cde2f6b7420c5977de49b34531840732992',
+ paths: 61, schemas: 64,
 };
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'openapi/compatibility/hidra-api-baseline.json'), 'utf8'));

@@ -7,7 +7,7 @@ interface Fixture {
   scopeRegistryId: string;
   receipt: {
     roles: Record<'author' | 'reviewer' | 'primary', string>;
-    scope: { companyPartyId: string; pipelineId: string };
+    scope: { companyPartyId: string; foreignCompanyPartyId: string; pipelineId: string };
     currentPublication: { revisionId: string; streamVersion: number };
     workflowBinding: { definitionId: string };
   };
@@ -15,6 +15,9 @@ interface Fixture {
 
 const webOrigin = 'http://127.0.0.1:5173';
 const stage = (name: string) => { process.stdout.write(`UXR26_STAGE=${name}\n`); };
+const status = (operation: 'LOGIN' | 'DISCOVERY' | 'FOREIGN_DISCOVERY' | 'T33', code: number) => {
+  process.stdout.write(`UXR26_HTTP=${operation}:${code}\n`);
+};
 
 async function openSession(page: Page, username: string, password: string, target: string) {
   await page.goto(new URL(target, webOrigin).href);
@@ -22,17 +25,57 @@ async function openSession(page: Page, username: string, password: string, targe
   await page.getByLabel(/^Password(?:\s*\*)?$/).fill(password);
   const login = response(page, '/identity/authentication/login', 'POST');
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
-  expect((await login).status()).toBe(200);
+  const loginResponse = await login;
+  status('LOGIN', loginResponse.status());
+  expect(loginResponse.status()).toBe(200);
   await expect(page).toHaveURL(new URL(target, webOrigin).href);
 }
 
-async function openDossier(page: Page, companyPartyId: string, pipelineId: string, scopeRegistryId: string) {
+async function openDossier(page: Page, companyPartyId: string, pipelineId: string, scopeRegistryId: string, foreignCompanyPartyId?: string) {
   await page.getByRole('button', { name: /Operational context/ }).click();
-  await page.getByRole('textbox', { name: 'Company ID' }).fill(companyPartyId);
-  await page.getByRole('combobox', { name: 'Assigned resource' }).click();
+  const dialog = page.getByRole('dialog');
+  const company = dialog.getByRole('textbox', { name: 'Company ID' });
+  const resource = dialog.getByRole('combobox', { name: 'Assigned resource' });
+  const discover = dialog.getByRole('button', { name: 'Discover authorized resources' });
+  await expect(resource).toBeDisabled();
+  const discoveryResponse = (companyId: string) => page.waitForResponse(result => {
+    const url = new URL(result.url());
+    return url.pathname === '/api/v1/identity/me/regional-access/scopes' &&
+      url.searchParams.get('companyPartyId') === companyId && result.request().method() === 'GET';
+  });
+  if (foreignCompanyPartyId) {
+    await company.fill(foreignCompanyPartyId);
+    const foreign = discoveryResponse(foreignCompanyPartyId);
+    await discover.click();
+    const denied = await foreign;
+    status('FOREIGN_DISCOVERY', denied.status());
+    expect(denied.status()).toBe(200);
+    expect(await denied.json()).toEqual([]);
+    await expect(dialog.getByRole('alert')).toContainText('Context unavailable or not authorized.');
+    await expect(resource).toBeDisabled();
+  }
+  await company.fill(companyPartyId);
+  await expect(resource).toBeDisabled();
+  const discovery = discoveryResponse(companyPartyId);
+  await discover.click();
+  const discovered = await discovery;
+  status('DISCOVERY', discovered.status());
+  expect(discovered.status()).toBe(200);
+  const scopes = await discovered.json() as Array<{ id: number; type: string; targetId: string }>;
+  const exact = scopes.find(scope => String(scope.id) === scopeRegistryId);
+  expect(exact?.type).toBe('PIPELINE_SYSTEM');
+  expect(exact?.targetId).toBeTruthy();
+  await expect(resource).toBeEnabled();
+  await resource.click();
   await page.getByRole('option').and(page.locator(`[data-value="${scopeRegistryId}"]`)).click();
-  await page.getByRole('button', { name: 'Verify and apply' }).click();
-  await expect(page.getByRole('dialog')).toHaveCount(0);
+  const check = response(page, '/identity/me/regional-access/PIPELINE_SYSTEM/' + encodeURIComponent(exact!.targetId), 'GET');
+  await dialog.getByRole('button', { name: 'Verify and apply' }).click();
+  const verified = await check;
+  status('T33', verified.status());
+  expect(verified.status()).toBe(200);
+  expect(await verified.json()).toMatchObject({ permitted: true, companyPartyId,
+    resourceKind: 'PIPELINE_SYSTEM', resourceId: exact!.targetId });
+  await expect(dialog).toHaveCount(0);
   await page.getByRole('button', { name: 'Network', exact: true }).click();
   await page.getByRole('textbox', { name: 'Regional search' }).fill('T35-GZ2-PIPELINE');
   await page.getByRole('button', { name: 'Search this scope' }).click();
@@ -64,13 +107,17 @@ test('UXR-26 verifies separate signed author, reviewer and publisher in Chromium
   const { roles, scope, currentPublication, workflowBinding } = fixture.receipt;
   expect(new Set([roles.author, roles.reviewer, roles.primary]).size).toBe(3);
   const contexts = await Promise.all(Array.from({ length: 5 }, () => browser.newContext({ baseURL: webOrigin, viewport: { width: 1280, height: 900 }, locale: 'en-US', timezoneId: 'UTC' })));
+  let administrativeRequests = 0;
+  for (const context of contexts) context.on('request', request => {
+    if (new URL(request.url()).pathname === '/api/v1/organization/responsibilities') administrativeRequests++;
+  });
   try {
     const [author, firstReviewer, secondReviewer, publisher, readback] = await Promise.all(contexts.map(context => context.newPage()));
     const reviewers = [firstReviewer, secondReviewer];
     stage('AUTHOR_LOGIN');
     await openSession(author, roles.author, fixture.password, '/overview');
     stage('AUTHOR_SCOPE');
-    await openDossier(author, scope.companyPartyId, scope.pipelineId, fixture.scopeRegistryId);
+    await openDossier(author, scope.companyPartyId, scope.pipelineId, fixture.scopeRegistryId, scope.foreignCompanyPartyId);
     const root = `/api/v1/topology/operating-constraints/pipelines/${scope.pipelineId}/restriction-requests`;
     const condition = 'T38-NOMINAL';
     stage('AUTHOR_STREAM');
@@ -169,6 +216,7 @@ test('UXR-26 verifies separate signed author, reviewer and publisher in Chromium
       headers: { Authorization: `Bearer ${(await publisherToken.json()).accessToken}` },
     });
     expect(denied.status()).toBe(404);
+    expect(administrativeRequests).toBe(0);
     stage('COMPLETE');
   } finally {
     await Promise.all(contexts.map(context => context.close()));

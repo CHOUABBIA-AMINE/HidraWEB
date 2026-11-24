@@ -9,6 +9,11 @@ on:
       - scripts/run-uxr26-native.sh
       - playwright.uxr26.config.ts
       - tests/e2e/uxr26-native.spec.ts
+      - src/features/context/components/OperationalContextSelector.tsx
+      - src/features/context/api/identityOrganizationApi.ts
+      - src/features/context/model/operationalContextModel.ts
+      - orval.identity-organization.config.ts
+      - openapi/candidates/hidra-identity-organization-7624bc900881ccd3957d07f5b1add3f28069bb6d.json
       - src/features/topology/components/PressureRestrictionWorkflow.tsx
       - src/features/workflow/WorkflowTasksPage.tsx
   workflow_dispatch:
@@ -30,11 +35,11 @@ jobs:
         uses: actions/checkout@v5
         with:
           persist-credentials: false
-      - name: Checkout immutable accepted HidraAPI T60
+      - name: Checkout immutable accepted HidraAPI T61
         uses: actions/checkout@v5
         with:
           repository: CHOUABBIA-AMINE/HidraAPI
-          ref: 4dcb9e092a715d9942a2b19ad86b3dea9f6bd96f
+          ref: 7624bc900881ccd3957d07f5b1add3f28069bb6d
           path: .uxr26-api
           persist-credentials: false
       - name: Verify exact sources before a signed replay
@@ -42,7 +47,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
-          test "$(git -C .uxr26-api rev-parse HEAD)" = "4dcb9e092a715d9942a2b19ad86b3dea9f6bd96f"
+          test "$(git -C .uxr26-api rev-parse HEAD)" = "7624bc900881ccd3957d07f5b1add3f28069bb6d"
           test -f .uxr26-api/src/test/java/dz/sh/hidra/qualification/Gz2SignedWorkflowNativeHttpPostgresIntegrationTest.java
           test -f playwright.uxr26.config.ts
           test -f tests/e2e/uxr26-native.spec.ts
@@ -86,7 +91,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # The T60 test owns the disposable PostgreSQL and API lifetime.
+          # The T61-pinned test owns the disposable PostgreSQL and API lifetime.
           # Its bounded child runs the mandatory signed Chromium journey.
           # The API's local-only replay guard is unchanged; raw diagnostics
           # and authentication material remain private and are not uploaded.
@@ -96,4 +101,4 @@ jobs:
         shell: bash
         run: |
           printf 'UXR26_REPLAY=PASSED\nWEB_SHA=%s\nAPI_SHA=%s\nRUN_ID=%s\nATTEMPT=%s\n' \
-            "${GITHUB_SHA}" "4dcb9e092a715d9942a2b19ad86b3dea9f6bd96f" "${GITHUB_RUN_ID}" "${GITHUB_RUN_ATTEMPT}"
+            "${GITHUB_SHA}" "7624bc900881ccd3957d07f5b1add3f28069bb6d" "${GITHUB_RUN_ID}" "${GITHUB_RUN_ATTEMPT}"

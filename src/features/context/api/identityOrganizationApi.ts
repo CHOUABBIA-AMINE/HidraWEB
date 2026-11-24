@@ -19,6 +19,7 @@ import type {
   PageEmployeeView,
   PageOrganizationUnitView,
   OperationalScopeResponse,
+  RegionalOperationalScopeResponse,
   PagePermissionView,
   PageRoleView,
   PageUserView,
@@ -35,6 +36,7 @@ import type {
   UserResponse,
 } from '@/api/generated/identity-organization/model';
 import { hidraHttpClient } from '@/api/client/hidraHttpClient';
+import { current, currentScopes } from '@/api/generated/identity-organization/identityOrganization';
 
 export function createIdentityUser(request: CreateUserRequest): Promise<UserResponse> {
   return hidraHttpClient<UserResponse>({ method: 'POST', url: '/api/v1/identity/users', data: request });
@@ -249,13 +251,18 @@ export const activateEmployee = (id: string, data: OrganizationFoundationActivat
 export const fetchEmployeeLifecycleHistory = (id: string) => hidraHttpClient<OrganizationFoundationActivationEvent[]>({ method: 'GET', url: `${employeePath(id)}/lifecycle-history` });
 
 
-/** UXR-09 T39 Identity regional-access check (not in the older Orval slice).
+/** T61 exact-company discovery. Never use the administrator directory for operational selection. */
+export function fetchCurrentOperationalScopes(companyPartyId: string): Promise<RegionalOperationalScopeResponse[]> {
+  return currentScopes({ companyPartyId });
+}
+
+/** T33 Identity regional-access check (pinned in the T61 Orval slice).
  * Keep the response opaque until its complete positive tuple is verified.
  */
 export function fetchCurrentRegionalAccess(kind: string, resourceId: string, companyPartyId: string): Promise<unknown> {
-  return hidraHttpClient<unknown>({
-    method: 'GET',
-    url: '/api/v1/identity/me/regional-access/' + encodeURIComponent(kind) + '/' + encodeURIComponent(resourceId),
-    params: { companyPartyId },
-  });
+  if (kind !== 'PIPELINE_SYSTEM' && kind !== 'PIPELINE' && kind !== 'PIPELINE_SEGMENT' &&
+      kind !== 'FACILITY' && kind !== 'EQUIPMENT') {
+    return Promise.reject(new Error('Unsupported regional resource kind.'));
+  }
+  return current(kind, encodeURIComponent(resourceId), { companyPartyId });
 }

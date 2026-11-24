@@ -27,14 +27,21 @@ async function enterSelectedScope(page: Page, extraRoutes: typeof permissions = 
       permissionFormat: '<module>:<resource>:<action>', routes: [...permissions, ...extraRoutes] },
   }));
   await page.route('**/api/v1/identity/me/permissions', route => route.fulfill({ json: [...grants.filter(permission => allowRegionalSearch || permission !== 'topology:regional-map:search'), ...extraGrants] }));
-  await page.route('**/api/v1/organization/responsibilities?**', route => route.fulfill({
-    json: [{ id: 'r1', scopeId: 7, status: 'ACTIVE',
-      scope: { id: 7, type: 'PIPELINE_SYSTEM', targetId: 'gz2', name: 'GZ2' } }],
-  }));
+  const administrativeRequests: string[] = [];
+  const discoveryCompanies: string[] = [];
+  await page.route('**/api/v1/organization/responsibilities?**', route => {
+    administrativeRequests.push(route.request().url());
+    return route.fulfill({ status: 403 });
+  });
   await page.route('**/api/v1/identity/me/regional-access/**', route => route.fulfill({
     json: { permitted: true, companyPartyId: 'company',
       resourceKind: 'PIPELINE_SYSTEM', resourceId: 'gz2' },
   }));
+  await page.route('**/api/v1/identity/me/regional-access/scopes?**', route => {
+    const company = new URL(route.request().url()).searchParams.get('companyPartyId') ?? '';
+    discoveryCompanies.push(company);
+    return route.fulfill({ json: company === 'company' ? [{ id: 7, type: 'PIPELINE_SYSTEM', targetId: 'gz2' }] : [] });
+  });
   await page.goto('/overview');
   await expect(page).toHaveURL(/\/login$/);
   await page.getByLabel('Nom d’utilisateur').fill('operator');
@@ -43,11 +50,25 @@ async function enterSelectedScope(page: Page, extraRoutes: typeof permissions = 
   await expect(page.getByRole('heading', { name: 'Vue d’ensemble' })).toBeVisible();
 
   await page.getByRole('button', { name: 'Contexte opérationnel : non sélectionné' }).click();
-  await page.getByRole('textbox', { name: 'Identifiant entreprise' }).fill('company');
-  await page.getByRole('combobox', { name: 'Périmètre attribué' }).click();
-  await page.getByRole('option', { name: 'GZ2' }).click();
+  const company = page.getByRole('textbox', { name: 'Identifiant entreprise' });
+  const resource = page.getByRole('combobox', { name: 'Périmètre attribué' });
+  await expect(resource).toBeDisabled();
+  expect(discoveryCompanies).toEqual([]);
+  await company.fill('foreign');
+  await page.getByRole('button', { name: 'Découvrir les périmètres autorisés' }).click();
+  await expect(page.getByRole('dialog').getByRole('alert')).toContainText(/indisponible ou non autorisé/i);
+  await expect(resource).toBeDisabled();
+  await company.fill('company');
+  await expect(resource).toBeDisabled();
+  await page.getByRole('button', { name: 'Découvrir les périmètres autorisés' }).click();
+  await expect(resource).toBeEnabled();
+  await resource.click();
+  await page.getByRole('option', { name: 'PIPELINE_SYSTEM · gz2', exact: true }).click();
   await page.getByRole('button', { name: 'Vérifier et appliquer' }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
+  expect(administrativeRequests).toEqual([]);
+  expect(discoveryCompanies).toContain('company');
+  expect(discoveryCompanies).toContain('foreign');
   await page.getByRole('button', { name: 'Réseau' }).click();
   await expect(page.getByRole('heading', { name: 'Recherche topologique régionale' })).toBeVisible();
 }

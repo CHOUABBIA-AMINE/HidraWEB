@@ -60,6 +60,10 @@ def diagnostics(suites):
                         for line in value.splitlines():
                             if line.startswith("UXR26_STAGE=") and line[12:] in stages:
                                 print("UXR26_DIAG STAGE=" + line[12:], flush=True)
+                            if line.startswith("UXR26_HTTP="):
+                                operation, separator, code = line[11:].partition(":")
+                                if separator and operation in {"LOGIN", "DISCOVERY", "FOREIGN_DISCOVERY", "T33"} and code.isascii() and code.isdigit() and len(code) == 3:
+                                    print("UXR26_DIAG HTTP=" + operation + ":" + code, flush=True)
                     if result.get("status") != "passed":
                         for error in result.get("errors", []):
                             failure_location(error)
@@ -86,7 +90,7 @@ if [[ -v HIDRA_CIRCLE1_REPLAY_DIR && -n "$HIDRA_CIRCLE1_REPLAY_DIR" ]]; then
   echo 'The native qualification must not opt in to the local-only API replay.' >&2
   exit 2
 fi
-api_sha=4dcb9e092a715d9942a2b19ad86b3dea9f6bd96f
+api_sha=7624bc900881ccd3957d07f5b1add3f28069bb6d
 web_root=$(cd "$(dirname "$0")/.." && pwd)
 api_repo=$(cd "$1" && pwd)
 command -v java >/dev/null
@@ -124,11 +128,18 @@ def insert_once(path, anchor, insertion):
 test_anchor = "                if (replayDirectory != null) fixture.holdCircleReplay(replayDirectory, restarted, receipt);"
 insert_once(test, test_anchor, test_anchor + """
                 fixture.global(fixture.author, "identity:me:read", "topology:regional-map:read",
-                        "topology:regional-map:search", "organization:responsibilities:read");
-                fixture.global(fixture.reader, "organization:responsibilities:read");
+                        "topology:regional-map:search");
                 fixture.global(fixture.reviewer, "identity:me:read", "workflow:instances:read");
                 fixture.runUxr26Browser(restarted, receipt);
 """.rstrip())
+
+# Native browser POSTs retain their real Origin through the development proxy.
+# Match the existing native WEB lanes: permit this exact test-only loopback
+# origin in the disposable API child; do not change application defaults.
+cors_anchor = '            launcher.environment().put("SPRING_DATASOURCE_PASSWORD", APP_PASSWORD);'
+insert_once(fixture, cors_anchor,
+            '            launcher.command().add("--hidra.platform.security.cors.allowed-origins=http://127.0.0.1:5173");\n'
+            + cors_anchor)
 
 fixture_anchor = "    void holdCircleReplay(Path directory, Runtime runtime, Map<String, Object> receipt) throws Exception {"
 method = """
@@ -172,7 +183,7 @@ method = """
         } finally {
             try {
                 for (String line : Files.readAllLines(log)) {
-                    if (line.matches("UXR26_DIAG (COUNTS EXPECTED=[0-9]+ UNEXPECTED=[0-9]+ FLAKY=[0-9]+ SKIPPED=[0-9]+|EXIT=[0-9]+|STAGE=[A-Z_0-9]+|FAILURE_LINE=[0-9]+|REPORT_ERRORS=[0-9]+|REPORT_MISSING|PASSED)")) {
+                    if (line.matches("UXR26_DIAG (COUNTS EXPECTED=[0-9]+ UNEXPECTED=[0-9]+ FLAKY=[0-9]+ SKIPPED=[0-9]+|EXIT=[0-9]+|HTTP=(LOGIN|DISCOVERY|FOREIGN_DISCOVERY|T33):[0-9]{3}|STAGE=[A-Z_0-9]+|FAILURE_LINE=[0-9]+|REPORT_ERRORS=[0-9]+|REPORT_MISSING|PASSED)")) {
                         System.out.println(line);
                     }
                 }

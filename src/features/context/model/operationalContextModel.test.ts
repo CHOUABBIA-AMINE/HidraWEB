@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { OperationalScopeResponse } from '@/api/generated/identity-organization/model';
 
-import { activeOperationalScopes, effectiveRegionalScopes, isPositiveRegionalAccess, supportsRegionalAccess } from '@/features/context/model/operationalContextModel';
+import { activeOperationalScopes, authorizedRegionalScopes, effectiveRegionalScopes, isPositiveRegionalAccess, supportsRegionalAccess } from '@/features/context/model/operationalContextModel';
 
 describe('activeOperationalScopes', () => {
   it('uses canonical scope objects from active responsibilities and de-duplicates by registry id', () => {
@@ -50,5 +50,20 @@ describe('UXR-09 exact company and regional access', () => {
     expect(isPositiveRegionalAccess(decision, 'company', { ...scope, targetId: 'other' })).toBe(false);
     expect(isPositiveRegionalAccess({ ...decision, permitted: false }, 'company', scope)).toBe(false);
     expect(isPositiveRegionalAccess(undefined, 'company', scope)).toBe(false);
+  });
+});
+
+
+describe('T61 operational scope discovery', () => {
+  const scope = { id: 7, type: 'PIPELINE_SYSTEM', targetId: 'gz2' };
+  it('retains only the minimal owner-qualified tuple and deduplicates identical rows', () => {
+    expect(authorizedRegionalScopes([scope, { ...scope, name: 'Untrusted label' }])).toEqual([scope]);
+  });
+  it('fails closed for malformed or conflicting receipts', () => {
+    for (const invalid of [undefined, {}, [null], [{ ...scope, id: 0 }],
+      [{ ...scope, id: '7' }], [{ ...scope, targetId: ' gz2' }],
+      [{ ...scope, type: 'ORGANIZATION_UNIT' }], [scope, { ...scope, targetId: 'other' }]]) {
+      expect(authorizedRegionalScopes(invalid)).toEqual([]);
+    }
   });
 });

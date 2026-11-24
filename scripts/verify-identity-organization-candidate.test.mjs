@@ -54,7 +54,7 @@ test('existing clients and all earlier artifact proof locks remain retained', ()
     '/api/v1/organization/responsibilities',
   ]) assert.ok(current.paths[route]);
   const config = fs.readFileSync(path.join(root,'orval.identity-organization.config.ts'),'utf8');
-  assert.ok(config.includes('openapi/candidates/hidra-identity-organization-720e9222b30fa45b7423ede9c9f141ab87298024.json'));
+  assert.ok(config.includes('openapi/candidates/hidra-identity-organization-7624bc900881ccd3957d07f5b1add3f28069bb6d.json'));
   const checker = fs.readFileSync(path.join(root,'scripts/check-openapi-compatibility.mjs'),'utf8');
   for (const lock of [
     'IDENTITY_ORGANIZATION_CURRENT_PROOF','PLANNING_CURRENT_PROOF','WORKBENCH_CURRENT_PROOF',
@@ -87,4 +87,26 @@ test('HAPI-929 repin preserves the accepted Identity and Organization surface', 
     assert.equal(operation.requestBody.content['application/json'].schema.$ref, '#/components/schemas/RefreshTokenRequest');
     assert.ok(operation.responses[status]);
   }
+});
+
+
+test('T61 exact company discovery and T33 revalidation extend the verified Identity slice', () => {
+  const previous = JSON.parse(fs.readFileSync(path.join(root, 'openapi/candidates/hidra-identity-organization-720e9222b30fa45b7423ede9c9f141ab87298024.json'), 'utf8'));
+  const bytes = fs.readFileSync(path.join(root, 'openapi/candidates/hidra-identity-organization-7624bc900881ccd3957d07f5b1add3f28069bb6d.json'));
+  const accepted = JSON.parse(bytes.toString('utf8'));
+  assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'), '0a91a666b383c7afcea6e45f8db17cde2f6b7420c5977de49b34531840732992');
+  assert.equal(accepted['x-hidra-ci-source-sha'], '7624bc900881ccd3957d07f5b1add3f28069bb6d');
+  assert.equal(Object.keys(accepted.paths).length, 61);
+  assert.equal(Object.keys(accepted.components.schemas).length, 64);
+  for (const [route, operation] of Object.entries(previous.paths)) assert.deepEqual(accepted.paths[route], operation);
+  for (const [name, schema] of Object.entries(previous.components.schemas)) assert.deepEqual(accepted.components.schemas[name], schema);
+  assert.deepEqual(accepted.components.securitySchemes, previous.components.securitySchemes);
+  const discovery = accepted.paths['/api/v1/identity/me/regional-access/scopes'].get;
+  const revalidation = accepted.paths['/api/v1/identity/me/regional-access/{resourceKind}/{resourceId}'].get;
+  assert.deepEqual(discovery.security, [{ hidraBearerJwt: [] }]);
+  assert.deepEqual(revalidation.security, [{ hidraBearerJwt: [] }]);
+  assert.deepEqual(discovery.parameters, [{ in: 'query', name: 'companyPartyId', required: true, schema: { type: 'string' } }]);
+  assert.deepEqual(discovery.responses['200'].content['*/*'].schema, { type: 'array', items: { $ref: '#/components/schemas/RegionalOperationalScopeResponse' } });
+  assert.deepEqual(accepted.components.schemas.RegionalOperationalScopeResponse.properties, { id: { format: 'int64', type: 'integer' }, targetId: { type: 'string' }, type: { type: 'string' } });
+  assert.equal(revalidation.responses['200'].content['*/*'].schema.$ref, '#/components/schemas/RegionalAccessResponse');
 });

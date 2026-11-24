@@ -1,4 +1,4 @@
-import type { ResponsibilityResponse } from '@/api/generated/identity-organization/model';
+import type { RegionalOperationalScopeResponse, ResponsibilityResponse } from '@/api/generated/identity-organization/model';
 
 export function activeOperationalScopes(responsibilities: readonly ResponsibilityResponse[]) {
   const byId = new Map<number, NonNullable<ResponsibilityResponse['scope']>>();
@@ -39,4 +39,20 @@ export function isPositiveRegionalAccess(
   const value = response as Record<string, unknown>;
   return value.permitted === true && value.companyPartyId === companyPartyId &&
     value.resourceKind === scope.type && value.resourceId === scope.targetId;
+}
+
+/** Validate the minimal T61 receipt without inferring scope from administrative assignments. */
+export function authorizedRegionalScopes(response: unknown): Array<Required<RegionalOperationalScopeResponse>> {
+  if (!Array.isArray(response)) return [];
+  const result = new Map<number, Required<RegionalOperationalScopeResponse>>();
+  for (const value of response) {
+    if (!value || typeof value !== 'object') return [];
+    const { id, type, targetId } = value as RegionalOperationalScopeResponse;
+    if (typeof id !== 'number' || !Number.isSafeInteger(id) || id <= 0 ||
+      typeof type !== 'string' || typeof targetId !== 'string' || !supportsRegionalAccess({ type, targetId })) return [];
+    const previous = result.get(id);
+    if (previous && (previous.type !== type || previous.targetId !== targetId)) return [];
+    result.set(id, { id, type, targetId });
+  }
+  return [...result.values()];
 }
