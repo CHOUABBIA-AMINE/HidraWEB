@@ -86,10 +86,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # The runner script holds a Testcontainers PostgreSQL-backed API at
-          # the accepted T60 SHA, uses distinct signed browser sessions,
-          # and removes the private replay fixture before exit.
-          # Neither secrets nor browser traces are uploaded as CI artifacts.
+          # The T60 test owns the disposable PostgreSQL and API lifetime.
+          # Its bounded child runs the mandatory signed Chromium journey.
+          # The API's local-only replay guard is unchanged; raw diagnostics
+          # and authentication material remain private and are not uploaded.
           bash scripts/run-uxr26-native.sh .uxr26-api
       - name: Record non-secret CI provenance
         if: success()

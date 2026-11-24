@@ -1,12 +1,10 @@
 import { expect, test, type Page } from '@playwright/test';
-import { readFileSync } from 'node:fs';
 import type { PressureRestrictionRequest, PressureRestrictionSubmission } from '../../src/api/generated/topology/model';
-
-test.skip(!process.env.HIDRA_UXR26_API_URL, 'Requires the disposable signed HidraAPI and PostgreSQL fixture.');
 
 interface Fixture {
   baseUrl: string;
   password: string;
+  scopeRegistryId: string;
   receipt: {
     roles: Record<'author' | 'reviewer' | 'primary', string>;
     scope: { companyPartyId: string; pipelineId: string };
@@ -22,24 +20,24 @@ async function openSession(page: Page, username: string, password: string, targe
   await expect(page).not.toHaveURL(/\/login(?:\?|$)/);
 }
 
-async function openDossier(page: Page, companyPartyId: string, pipelineId: string) {
+async function openDossier(page: Page, companyPartyId: string, pipelineId: string, scopeRegistryId: string) {
   await page.getByRole('button', { name: /Operational context/ }).click();
   await page.getByRole('textbox', { name: 'Company ID' }).fill(companyPartyId);
   await page.getByRole('combobox', { name: 'Assigned resource' }).click();
-  await page.getByRole('option', { name: process.env.HIDRA_UXR26_SCOPE_LABEL ?? /^PIPELINE_SYSTEM · / }).click();
+  await page.getByRole('option').and(page.locator(`[data-value="${scopeRegistryId}"]`)).click();
   await page.getByRole('button', { name: 'Verify and apply' }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.getByRole('button', { name: 'Network', exact: true }).click();
   await page.getByRole('textbox', { name: 'Regional search' }).fill('T35-GZ2-PIPELINE');
   await page.getByRole('button', { name: 'Search this scope' }).click();
-  await page.getByRole('button', { name: 'T35-GZ2-PIPELINE', exact: true }).first().click();
+  await page.getByRole('button', { name: 'T35-GZ2-PIPELINE', exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`regionalEntityId=${encodeURIComponent(pipelineId)}`));
   await expect(page.getByRole('heading', { name: 'Pressure restriction requests' })).toBeVisible();
 }
 
 async function pick(page: Page, label: string, option: string | RegExp) {
   await page.getByRole('combobox', { name: label, exact: true }).click();
-  await page.getByRole('option', { name: option }).first().click();
+  await page.getByRole('option', { name: option }).click();
 }
 
 const response = (page: Page, path: string, method: string) => page.waitForResponse(
@@ -47,17 +45,19 @@ const response = (page: Page, path: string, method: string) => page.waitForRespo
 );
 
 test('UXR-26 verifies separate signed author, reviewer and publisher in Chromium', async ({ browser }) => {
-  const fixturePath = process.env.HIDRA_UXR26_FIXTURE;
-  if (!fixturePath) throw new Error('Set HIDRA_UXR26_FIXTURE to the private synthetic replay receipt.');
-  const fixture = JSON.parse(readFileSync(fixturePath, 'utf8')) as Fixture;
+  const fixtureJson = process.env.HIDRA_UXR26_FIXTURE_JSON;
+  if (!fixtureJson) throw new Error('Requires the private, test-owned synthetic browser input.');
+  const fixture = JSON.parse(fixtureJson) as Fixture;
+  expect(fixture.scopeRegistryId).toMatch(/^\d+$/);
   expect(fixture.baseUrl).toBe(process.env.HIDRA_UXR26_API_URL);
   const { roles, scope, currentPublication } = fixture.receipt;
   expect(new Set([roles.author, roles.reviewer, roles.primary]).size).toBe(3);
-  const contexts = await Promise.all([roles.author, roles.reviewer, roles.primary].map(() => browser.newContext()));
+  const contexts = await Promise.all(Array.from({ length: 5 }, () => browser.newContext()));
   try {
-    const [author, reviewer, publisher] = await Promise.all(contexts.map(context => context.newPage()));
+    const [author, firstReviewer, secondReviewer, publisher, readback] = await Promise.all(contexts.map(context => context.newPage()));
+    const reviewers = [firstReviewer, secondReviewer];
     await openSession(author, roles.author, fixture.password, '/overview');
-    await openDossier(author, scope.companyPartyId, scope.pipelineId);
+    await openDossier(author, scope.companyPartyId, scope.pipelineId, fixture.scopeRegistryId);
     const root = `/api/v1/topology/operating-constraints/pipelines/${scope.pipelineId}/restriction-requests`;
     const condition = 'T38-NOMINAL';
     await author.getByLabel('Restriction condition').fill(condition);
@@ -78,11 +78,12 @@ test('UXR-26 verifies separate signed author, reviewer and publisher in Chromium
     const proposal: PressureRestrictionRequest = await submitted.json();
     expect(proposal.candidates).toHaveLength(2);
     const requestId = proposal.requestId!;
-    for (const candidate of proposal.candidates!) {
+    for (const [index, candidate] of proposal.candidates!.entries()) {
+      const reviewer = reviewers[index];
       await pick(author, 'Restriction candidate', new RegExp(candidate.candidateId!));
       await author.getByRole('button', { name: 'Discover review definitions' }).click();
       await pick(author, 'Review definition', 'Synthetic GZ2 review');
-      await pick(author, 'Independent reviewer', /.+/);
+      await pick(author, 'Independent reviewer', 'Synthetic GZ2 reviewer');
       const instance = response(author, '/workflow/instances', 'POST');
       await author.getByRole('button', { name: 'Start restriction review' }).click();
       expect((await instance).status()).toBe(200);
@@ -103,7 +104,7 @@ test('UXR-26 verifies separate signed author, reviewer and publisher in Chromium
       await expect(reviewer.getByText('APPROVE · APPROVED')).toBeVisible();
     }
     await openSession(publisher, roles.primary, fixture.password, '/overview');
-    await openDossier(publisher, scope.companyPartyId, scope.pipelineId);
+    await openDossier(publisher, scope.companyPartyId, scope.pipelineId, fixture.scopeRegistryId);
     await publisher.getByLabel('Restriction request ID').fill(requestId);
     await publisher.getByRole('button', { name: 'Read publication inputs' }).click();
     await expect(publisher.getByText(/Eligible approvals · 2/)).toBeVisible();
@@ -111,15 +112,15 @@ test('UXR-26 verifies separate signed author, reviewer and publisher in Chromium
     await publisher.getByRole('checkbox', { name: 'Confirm publishing this exact restriction request' }).check();
     await publisher.getByRole('button', { name: 'Publish restriction' }).click();
     await expect(publisher.getByText(new RegExp(`Publication receipt · ${requestId}`))).toBeVisible();
-    await openSession(publisher, roles.primary, fixture.password, '/overview');
-    await openDossier(publisher, scope.companyPartyId, scope.pipelineId);
-    await publisher.getByLabel('Restriction request ID').fill(requestId);
-    await publisher.getByRole('button', { name: 'Read publication inputs' }).click();
-    await expect(publisher.getByText(new RegExp(`Publication receipt · ${requestId}`))).toBeVisible();
-    await publisher.getByLabel('Condition code', { exact: true }).fill(condition);
-    await publisher.getByLabel('Effective instant (UTC, ISO 8601)', { exact: true }).fill(instant);
-    await publisher.getByRole('button', { name: 'Read operating limits' }).click();
-    await expect(publisher.getByText(/Qualified pipeline limit · 53 bar/)).toBeVisible();
+    await openSession(readback, roles.primary, fixture.password, '/overview');
+    await openDossier(readback, scope.companyPartyId, scope.pipelineId, fixture.scopeRegistryId);
+    await readback.getByLabel('Restriction request ID').fill(requestId);
+    await readback.getByRole('button', { name: 'Read publication inputs' }).click();
+    await expect(readback.getByText(new RegExp(`Publication receipt · ${requestId}`))).toBeVisible();
+    await readback.getByLabel('Condition code', { exact: true }).fill(condition);
+    await readback.getByLabel('Effective instant (UTC, ISO 8601)', { exact: true }).fill(instant);
+    await readback.getByRole('button', { name: 'Read operating limits' }).click();
+    await expect(readback.getByText(/Qualified pipeline limit · 53 bar/)).toBeVisible();
     await author.getByRole('button', { name: 'Read decision evidence' }).click();
     await expect(author.getByText(/Approval · .* · Audit ·/)).toHaveCount(2);
 
