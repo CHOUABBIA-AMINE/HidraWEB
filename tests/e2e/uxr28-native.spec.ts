@@ -13,12 +13,13 @@ interface Receipt {
   };
   systems: Record<'primary' | 'sibling' | 'foreign', string>;
   limits: { pipeline: string; section: string; currentBaselineReceiptId: string };
-  observation: { pointId: string; bindingId: string; observedAt: string; trustedId: string; sourceId: string; history: string };
+  observation: { pointId: string; bindingId: string; observedAt: string; trustedId: string; staleTrustedId: string; sourceId: string; history: string };
 }
 interface Fixture {
   baseUrl: string; password: string; receipt: Receipt; primarySystemId: string; emptyPointId: string;
   integrity: { actor: string; findingId: string; approvalId: string; equipmentId: string; recommendationId: string };
   expectedLimit: { upperPressure: number; revisionId: string; sourceBaselineReceiptId: string };
+  historyWindow: { from: string; until: string };
 }
 interface Login { userId: string; accessToken: string; expiresAt: string; authenticationType: string; refreshToken: string }
 interface Feature { properties: { layer: string; entityId: string } }
@@ -41,6 +42,7 @@ function at(page: Page, path: string, method = 'GET', params: Record<string, str
 }
 async function read<T>(response: Promise<Response>): Promise<T> {
   const result = await response;
+  if (result.status() !== 200) process.stdout.write('UXR28_HTTP_STATUS=' + result.status() + '\n');
   expect(result.status()).toBe(200);
   return await result.json() as T;
 }
@@ -303,23 +305,31 @@ async function verifyTelemetry(page: Page, fixture: Fixture) {
   await expect(panel.getByText(/^STALE · /)).toBeVisible();
   const url = new URL(observation.history, fixture.baseUrl);
   checkpoint('HISTORY');
-  // datetime-local has a native default step of 60 seconds. Round the
-  // receipt window outwards, retaining both real observations in UTC.
-  const from = new Date(Math.floor((Date.parse(url.searchParams.get('from')!) - 1000) / 60_000) * 60_000).toISOString();
-  const until = new Date(Math.ceil((Date.parse(url.searchParams.get('until')!) + 1000) / 60_000) * 60_000).toISOString();
+  // Use the fixed, signed API-preflighted minute window for both JVMs.
+  // The upper bound is strictly after the latest observation but never future.
+  const from = new Date(fixture.historyWindow.from).toISOString();
+  const until = new Date(fixture.historyWindow.until).toISOString();
+  expect(Date.parse(from) < Date.parse(observation.observedAt)).toBe(true);
+  expect(Date.parse(observation.observedAt) < Date.parse(until)).toBe(true);
+  expect(Date.parse(until) <= Date.now()).toBe(true);
   const fromInput = panel.getByLabel('From', { exact: true });
   const untilInput = panel.getByLabel('To', { exact: true });
   await fromInput.fill(from.slice(0, 16));
   await untilInput.fill(until.slice(0, 16));
   expect(await fromInput.evaluate(input => (input as HTMLInputElement).validity.valid)).toBe(true);
   expect(await untilInput.evaluate(input => (input as HTMLInputElement).validity.valid)).toBe(true);
+  checkpoint('HISTORY_HTTP');
   const [history] = await Promise.all([
-    read<{ observations: Observation[] }>(at(page, url.pathname, 'GET', { ...params, from, until, maxAgeSeconds: '1' })),
+    read<{ observations: Observation[] }>(at(page, url.pathname, 'GET', { ...params, from, until, maxAgeSeconds: '1', limit: '20' })),
     panel.getByRole('button', { name: 'History', exact: true }).click(),
   ]);
   const rows = history.observations;
-  expect(rows.length).toBeGreaterThanOrEqual(2);
-  expect(rows.some(item => item.trustedId === observation.trustedId && item.binding.id === observation.bindingId)).toBe(true);
+  expect(rows).toHaveLength(2);
+  expect(rows[0]).toMatchObject({ trustedId: observation.trustedId, binding: { id: observation.bindingId } });
+  expect(rows[1]).toMatchObject({ trustedId: observation.staleTrustedId, binding: { id: observation.bindingId } });
+  checkpoint('HISTORY_RENDER');
+  await expect(panel.getByText(rows[1].observedAt, { exact: false })).toBeVisible();
+  await expect.poll(() => panel.getByText(observation.observedAt, { exact: false }).count()).toBeGreaterThanOrEqual(2);
   await expect.poll(() => panel.getByText(observation.bindingId, { exact: false }).count()).toBeGreaterThanOrEqual(2);
   checkpoint('EMPTY_POINT');
   await choose(page, 'Commissioned point', fixture.emptyPointId);
@@ -380,37 +390,58 @@ async function afterRestart(page: Page, fixture: Fixture) {
   await page.reload();
   await expect(page).toHaveURL(/\/login$/);
   await page.clock.install();
+  checkpoint('RELOAD_LOGIN');
   const login = await signIn(page, fixture.receipt.roles.primary, fixture.password);
+  checkpoint('RELOAD_SCOPE');
   await selectScope(page, scope.companyPartyId, fixture.primarySystemId);
   const baseline = read<{ receiptId: string }>(at(page, dossier + '/' + enc(scope.pipelineId) + '/baseline', 'GET', { companyPartyId: scope.companyPartyId }));
   await openDossier(page, scope.companyPartyId, scope.pipelineId, 'T35-GZ2-PIPELINE', [scope.siblingPipelineId, scope.foreignPipelineId]);
   expect((await baseline).receiptId === limits.currentBaselineReceiptId).toBe(true);
   stage('RTL');
+  checkpoint('RTL_AR');
   await page.getByRole('combobox', { name: 'Language', exact: true }).click();
   await page.getByRole('option', { name: 'AR', exact: true }).click();
   await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
   await expect(page.getByRole('heading', { name: 'ملف خط الأنابيب', exact: true })).toBeVisible();
+  checkpoint('RTL_EN');
   await page.getByRole('combobox', { name: 'اللغة', exact: true }).click();
   await page.getByRole('option', { name: 'EN', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Pipeline dossier', exact: true })).toBeVisible();
   stage('SESSION');
   expect(typeof login.refreshToken === 'string' && login.refreshToken.length === 80).toBe(true);
-  const refresh = at(page, identity + '/authentication/refresh', 'POST');
-  await page.clock.setSystemTime(Date.parse(login.expiresAt) - 1_000);
-  expect(await Promise.all([protectedRead(page, identity + '/me'), protectedRead(page, identity + '/me/permissions')])).toEqual([200, 200]);
-  const renewed = await refresh;
+  checkpoint('SESSION_ROTATE');
+  let rotations = 0;
+  page.on('request', request => {
+    if (new URL(request.url()).pathname === identity + '/authentication/refresh') rotations++;
+  });
+  // Trigger the existing 30-second renewal window without simulating a
+  // nearly-expired replacement. Restore real time once the two reads finish.
+  const [renewed, statuses] = await Promise.all([
+    at(page, identity + '/authentication/refresh', 'POST'),
+    (async () => {
+      await page.clock.setSystemTime(Date.parse(login.expiresAt) - 25_000);
+      return Promise.all([protectedRead(page, identity + '/me'), protectedRead(page, identity + '/me/permissions')]);
+    })(),
+  ]);
+  await page.clock.setSystemTime(Date.now());
+  expect(statuses).toEqual([200, 200]);
+  expect(rotations).toBe(1);
   expect(renewed.status()).toBe(200);
   expect(renewed.request().headers().authorization === undefined).toBe(true);
   const replacement = (await renewed.json() as Login).accessToken;
   expect(Boolean(replacement) && replacement !== login.accessToken).toBe(true);
   expect([401, 403]).toContain(await signedGet(page, fixture, identity + '/me', login.accessToken));
   expect(await signedGet(page, fixture, identity + '/me', replacement)).toBe(200);
-  const logout = at(page, identity + '/authentication/logout', 'POST');
+  checkpoint('SESSION_LOGOUT');
   await page.getByRole('button', { name: 'Profile', exact: true }).press('Enter');
-  await page.getByRole('menuitem', { name: 'Sign out', exact: true }).press('Enter');
-  expect((await logout).status()).toBe(204);
+  const [logout] = await Promise.all([
+    at(page, identity + '/authentication/logout', 'POST'),
+    page.getByRole('menuitem', { name: 'Sign out', exact: true }).press('Enter'),
+  ]);
+  expect(logout.status()).toBe(204);
   await expect(page).toHaveURL(/\/login$/);
   expect([401, 403]).toContain(await signedGet(page, fixture, identity + '/me', replacement));
+  expect(rotations).toBe(1);
 }
 
 test('UXR-28 signed integrated Circle 1 native browser phase', async ({ browser }) => {

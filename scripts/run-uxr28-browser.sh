@@ -34,7 +34,7 @@ required = {
     "after-restart": ["DOSSIER","LIMITS","TELEMETRY","INTEGRITY","RELOAD","RTL","SESSION","COMPLETE"],
 }[phase]
 observed = []
-checkpoints = set("STATION_DISCOVERY|STATION_SELECT|POINT_DISCOVERY|POINT_SELECT|FRESH|STALE|HISTORY|EMPTY_POINT|UNAVAILABLE|INTEGRITY_RESOURCE|INTEGRITY_DETAIL|INTEGRITY_RECEIPT".split("|"))
+checkpoints = set("STATION_DISCOVERY|STATION_SELECT|POINT_DISCOVERY|POINT_SELECT|FRESH|STALE|HISTORY|EMPTY_POINT|UNAVAILABLE|INTEGRITY_RESOURCE|INTEGRITY_DETAIL|INTEGRITY_RECEIPT|HISTORY_HTTP|HISTORY_RENDER|RELOAD_LOGIN|RELOAD_SCOPE|RTL_AR|RTL_EN|SESSION_ROTATE|SESSION_LOGOUT".split("|"))
 def location(error):
     where = error.get("location") or {}
     line = where.get("line")
@@ -61,6 +61,10 @@ def walk(suites):
                                 print("UXR28_DIAG STAGE=" + line[12:], flush=True)
                             if line.startswith("UXR28_CHECKPOINT=") and line[17:] in checkpoints:
                                 print("UXR28_DIAG CHECKPOINT=" + line[17:], flush=True)
+                            if line.startswith("UXR28_HTTP_STATUS="):
+                                code = line[18:]
+                                if len(code) == 3 and code.isascii() and code.isdigit() and 100 <= int(code) <= 599:
+                                    print("UXR28_DIAG HTTP_STATUS=" + code, flush=True)
                     for error in result.get("errors", []):
                         location(error)
         walk(suite.get("suites", []))
