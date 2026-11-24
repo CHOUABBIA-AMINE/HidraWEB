@@ -8,16 +8,22 @@ interface Fixture {
   receipt: {
     roles: Record<'author' | 'reviewer' | 'primary', string>;
     scope: { companyPartyId: string; pipelineId: string };
-    currentPublication: { revisionId: string };
+    currentPublication: { revisionId: string; streamVersion: number };
+    workflowBinding: { definitionId: string };
   };
 }
 
+const webOrigin = 'http://127.0.0.1:5173';
+const stage = (name: string) => { process.stdout.write(`UXR26_STAGE=${name}\n`); };
+
 async function openSession(page: Page, username: string, password: string, target: string) {
-  await page.goto(target);
+  await page.goto(new URL(target, webOrigin).href);
   await page.getByLabel(/^Username(?:\s*\*)?$/).fill(username);
   await page.getByLabel(/^Password(?:\s*\*)?$/).fill(password);
+  const login = response(page, '/identity/authentication/login', 'POST');
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
-  await expect(page).not.toHaveURL(/\/login(?:\?|$)/);
+  expect((await login).status()).toBe(200);
+  await expect(page).toHaveURL(new URL(target, webOrigin).href);
 }
 
 async function openDossier(page: Page, companyPartyId: string, pipelineId: string, scopeRegistryId: string) {
@@ -40,6 +46,11 @@ async function pick(page: Page, label: string, option: string | RegExp) {
   await page.getByRole('option', { name: option }).click();
 }
 
+async function pickById(page: Page, label: string, id: string) {
+  await page.getByRole('combobox', { name: label, exact: true }).click();
+  await page.getByRole('option').and(page.locator(`[data-value="${id}"]`)).click();
+}
+
 const response = (page: Page, path: string, method: string) => page.waitForResponse(
   result => new URL(result.url()).pathname.endsWith(path) && result.request().method() === method,
 );
@@ -50,20 +61,27 @@ test('UXR-26 verifies separate signed author, reviewer and publisher in Chromium
   const fixture = JSON.parse(fixtureJson) as Fixture;
   expect(fixture.scopeRegistryId).toMatch(/^\d+$/);
   expect(fixture.baseUrl).toBe(process.env.HIDRA_UXR26_API_URL);
-  const { roles, scope, currentPublication } = fixture.receipt;
+  const { roles, scope, currentPublication, workflowBinding } = fixture.receipt;
   expect(new Set([roles.author, roles.reviewer, roles.primary]).size).toBe(3);
-  const contexts = await Promise.all(Array.from({ length: 5 }, () => browser.newContext()));
+  const contexts = await Promise.all(Array.from({ length: 5 }, () => browser.newContext({ baseURL: webOrigin, viewport: { width: 1280, height: 900 }, locale: 'en-US', timezoneId: 'UTC' })));
   try {
     const [author, firstReviewer, secondReviewer, publisher, readback] = await Promise.all(contexts.map(context => context.newPage()));
     const reviewers = [firstReviewer, secondReviewer];
+    stage('AUTHOR_LOGIN');
     await openSession(author, roles.author, fixture.password, '/overview');
+    stage('AUTHOR_SCOPE');
     await openDossier(author, scope.companyPartyId, scope.pipelineId, fixture.scopeRegistryId);
     const root = `/api/v1/topology/operating-constraints/pipelines/${scope.pipelineId}/restriction-requests`;
     const condition = 'T38-NOMINAL';
+    stage('AUTHOR_STREAM');
     await author.getByLabel('Restriction condition').fill(condition);
     const stream = response(author, root + '/stream', 'GET');
     await author.getByRole('button', { name: 'Read stream version' }).click();
-    expect((await stream).status()).toBe(200);
+    const streamResponse = await stream;
+    expect(streamResponse.status()).toBe(200);
+    expect((await streamResponse.json()).expectedVersion).toBe(currentPublication.streamVersion);
+    await expect(author.getByText(`Stream version ${currentPublication.streamVersion}`, { exact: true })).toBeVisible();
+    stage('AUTHOR_SUBMIT');
     await pick(author, 'Restriction change', 'Replacement');
     await author.getByLabel('Predecessor revision ID').fill(currentPublication.revisionId);
     const instant = new Date().toISOString();
@@ -80,10 +98,11 @@ test('UXR-26 verifies separate signed author, reviewer and publisher in Chromium
     const requestId = proposal.requestId!;
     for (const [index, candidate] of proposal.candidates!.entries()) {
       const reviewer = reviewers[index];
-      await pick(author, 'Restriction candidate', new RegExp(candidate.candidateId!));
+      stage(`REVIEW_${index + 1}_ASSIGN`);
+      await pickById(author, 'Restriction candidate', candidate.candidateId!);
       await author.getByRole('button', { name: 'Discover review definitions' }).click();
-      await pick(author, 'Review definition', 'Synthetic GZ2 review');
-      await pick(author, 'Independent reviewer', 'Synthetic GZ2 reviewer');
+      await pickById(author, 'Review definition', workflowBinding.definitionId);
+      await pickById(author, 'Independent reviewer', roles.reviewer);
       const instance = response(author, '/workflow/instances', 'POST');
       await author.getByRole('button', { name: 'Start restriction review' }).click();
       expect((await instance).status()).toBe(200);
@@ -93,18 +112,23 @@ test('UXR-26 verifies separate signed author, reviewer and publisher in Chromium
       expect(result.status()).toBe(200);
       const taskId: string = (await result.json()).id;
       const url = `/work/tasks?taskId=${encodeURIComponent(taskId)}`;
+      stage(`REVIEW_${index + 1}_LOGIN`);
       await openSession(reviewer, roles.reviewer, fixture.password, url);
       await expect(reviewer.getByRole('heading', { name: 'Exact pressure restriction proposal' })).toBeVisible();
       await expect(reviewer.getByText(`Request · ${requestId}`, { exact: true })).toBeVisible();
       if (candidate.kind === 'REVISION') await expect(reviewer.getByText(/Proposed upper pressure · 53 bar/)).toBeVisible();
+      stage(`REVIEW_${index + 1}_DECISION`);
       await reviewer.getByRole('button', { name: 'APPROVE', exact: true }).click();
       await expect(reviewer.getByRole('button', { name: 'Action: APPROVE' })).toBeDisabled();
       await reviewer.getByRole('checkbox', { name: 'I confirm this decision after reviewing the current task.' }).check();
       await reviewer.getByRole('button', { name: 'Action: APPROVE' }).click();
       await expect(reviewer.getByText('APPROVE · APPROVED')).toBeVisible();
     }
+    stage('PUBLISHER_LOGIN');
     await openSession(publisher, roles.primary, fixture.password, '/overview');
+    stage('PUBLISHER_SCOPE');
     await openDossier(publisher, scope.companyPartyId, scope.pipelineId, fixture.scopeRegistryId);
+    stage('PUBLISHER_PUBLISH');
     await publisher.getByLabel('Restriction request ID').fill(requestId);
     await publisher.getByRole('button', { name: 'Read publication inputs' }).click();
     await expect(publisher.getByText(/Eligible approvals · 2/)).toBeVisible();
@@ -112,24 +136,30 @@ test('UXR-26 verifies separate signed author, reviewer and publisher in Chromium
     await publisher.getByRole('checkbox', { name: 'Confirm publishing this exact restriction request' }).check();
     await publisher.getByRole('button', { name: 'Publish restriction' }).click();
     await expect(publisher.getByText(new RegExp(`Publication receipt · ${requestId}`))).toBeVisible();
+    stage('READBACK_LOGIN');
     await openSession(readback, roles.primary, fixture.password, '/overview');
+    stage('READBACK_SCOPE');
     await openDossier(readback, scope.companyPartyId, scope.pipelineId, fixture.scopeRegistryId);
     await readback.getByLabel('Restriction request ID').fill(requestId);
     await readback.getByRole('button', { name: 'Read publication inputs' }).click();
     await expect(readback.getByText(new RegExp(`Publication receipt · ${requestId}`))).toBeVisible();
+    stage('READBACK_LIMIT');
     await readback.getByLabel('Condition code', { exact: true }).fill(condition);
     await readback.getByLabel('Effective instant (UTC, ISO 8601)', { exact: true }).fill(instant);
     await readback.getByRole('button', { name: 'Read operating limits' }).click();
     await expect(readback.getByText(/Qualified pipeline limit · 53 bar/)).toBeVisible();
+    stage('AUDIT_READBACK');
     await author.getByRole('button', { name: 'Read decision evidence' }).click();
     await expect(author.getByText(/Approval · .* · Audit ·/)).toHaveCount(2);
 
+    stage('STALE_CONFLICT');
     const authorization = await submitted.request().headerValue('authorization');
     expect(authorization).toMatch(/^Bearer /);
     const stale = await author.request.post(fixture.baseUrl + root, {
       headers: { Authorization: authorization ?? '' }, data: { ...body, requestId: crypto.randomUUID() },
     });
     expect(stale.status()).toBe(409);
+    stage('MASKED_DENIAL');
     const publisherToken = await publisher.request.post(fixture.baseUrl + '/api/v1/identity/authentication/login', {
       data: { providerType: 'LOCAL', principal: roles.primary, credentials: fixture.password },
     });
@@ -139,6 +169,7 @@ test('UXR-26 verifies separate signed author, reviewer and publisher in Chromium
       headers: { Authorization: `Bearer ${(await publisherToken.json()).accessToken}` },
     });
     expect(denied.status()).toBe(404);
+    stage('COMPLETE');
   } finally {
     await Promise.all(contexts.map(context => context.close()));
   }

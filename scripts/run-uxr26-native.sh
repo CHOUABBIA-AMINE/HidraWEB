@@ -23,27 +23,57 @@ from pathlib import Path
 
 path, exit_code = Path(sys.argv[1]), int(sys.argv[2])
 if not path.is_file():
+    print("UXR26_DIAG REPORT_MISSING", flush=True)
     raise SystemExit("UXR26 Chromium did not produce its private result report")
 report = json.loads(path.read_text())
 stats = report["stats"]
 counts = {name: stats[name] for name in ("expected", "unexpected", "flaky", "skipped")}
-print("UXR26 Chromium result counts:", counts, flush=True)
-if exit_code != 0 or counts != dict(expected=1, unexpected=0, flaky=0, skipped=0):
-    def locations(suites):
-        for suite in suites:
-            for spec in suite.get("specs", []):
-                for test in spec.get("tests", []):
-                    for result in test.get("results", []):
-                        if result.get("status") != "passed":
-                            for error in result.get("errors", []):
-                                location = error.get("location") or {}
-                                if location.get("line"):
-                                    print("Failure at", Path(location.get("file", "unknown")).name,
-                                          "line", location["line"], flush=True)
-            locations(suite.get("suites", []))
-    locations(report.get("suites", []))
+if any(type(value) is not int or value < 0 for value in counts.values()):
+    raise SystemExit("Invalid private Chromium result counts")
+print("UXR26_DIAG COUNTS " + " ".join(f"{key.upper()}={value}" for key, value in counts.items()), flush=True)
+print(f"UXR26_DIAG EXIT={exit_code}", flush=True)
+
+# Do not echo raw Playwright errors, locators, HTTP bodies, or worker output.
+# Emit only fixed stage identifiers and native-spec line numbers.
+stages = {
+    "AUTHOR_LOGIN", "AUTHOR_SCOPE", "AUTHOR_STREAM", "AUTHOR_SUBMIT",
+    "REVIEW_1_ASSIGN", "REVIEW_1_LOGIN", "REVIEW_1_DECISION",
+    "REVIEW_2_ASSIGN", "REVIEW_2_LOGIN", "REVIEW_2_DECISION",
+    "PUBLISHER_LOGIN", "PUBLISHER_SCOPE", "PUBLISHER_PUBLISH",
+    "READBACK_LOGIN", "READBACK_SCOPE", "READBACK_LIMIT",
+    "AUDIT_READBACK", "STALE_CONFLICT", "MASKED_DENIAL", "COMPLETE",
+}
+
+def failure_location(error):
+    location = error.get("location") or {}
+    line = location.get("line")
+    if Path(location.get("file", "")).name == "uxr26-native.spec.ts" and type(line) is int and line > 0:
+        print(f"UXR26_DIAG FAILURE_LINE={line}", flush=True)
+
+def diagnostics(suites):
+    for suite in suites:
+        for spec in suite.get("specs", []):
+            for test in spec.get("tests", []):
+                for result in test.get("results", []):
+                    for entry in result.get("stdout", []):
+                        value = entry if isinstance(entry, str) else entry.get("text", "")
+                        for line in value.splitlines():
+                            if line.startswith("UXR26_STAGE=") and line[12:] in stages:
+                                print("UXR26_DIAG STAGE=" + line[12:], flush=True)
+                    if result.get("status") != "passed":
+                        for error in result.get("errors", []):
+                            failure_location(error)
+                        if isinstance(result.get("error"), dict):
+                            failure_location(result["error"])
+        diagnostics(suite.get("suites", []))
+
+diagnostics(report.get("suites", []))
+for error in report.get("errors", []):
+    failure_location(error)
+print(f"UXR26_DIAG REPORT_ERRORS={len(report.get('errors', []))}", flush=True)
+if exit_code != 0 or counts != dict(expected=1, unexpected=0, flaky=0, skipped=0) or report.get("errors"):
     raise SystemExit("UXR26 Chromium qualification did not pass exactly once without retries or skips")
-print("UXR26_BROWSER=PASSED", flush=True)
+print("UXR26_DIAG PASSED", flush=True)
 PY
   exit 0
 fi
@@ -113,22 +143,41 @@ method = """
                 Long.class, pipeline);
         assertNotNull(scopeId);
         var builder = new ProcessBuilder("bash", "scripts/run-uxr26-native.sh", "--browser")
-                .directory(root.toFile()).inheritIO();
+                .directory(root.toFile());
         builder.environment().put("HIDRA_UXR26_API_URL", runtime.base);
         builder.environment().put("HIDRA_UXR26_FIXTURE_JSON", JSON.writeValueAsString(Map.of(
                 "baseUrl", runtime.base, "password", HUMAN_PASSWORD, "receipt", receipt,
                 "scopeRegistryId", scopeId.toString())));
-        var browser = builder.start();
+        // Never inherit Surefire's fork communication streams. Retain the
+        // private child output only until its fixed diagnostic records are copied
+        // through the JVM's captured System.out.
+        var log = Files.createTempFile("uxr26-browser-", ".log",
+                java.nio.file.attribute.PosixFilePermissions.asFileAttribute(
+                        java.nio.file.attribute.PosixFilePermissions.fromString("rw-------")));
         try {
-            assertTrue(browser.waitFor(5, java.util.concurrent.TimeUnit.MINUTES),
-                    "UXR26 Chromium exceeded the bounded child lifetime");
-            assertEquals(0, browser.exitValue(), "UXR26 Chromium qualification failed");
-            assertTrue(runtime.child.isAlive(), "The signed API must remain alive throughout Chromium");
+            builder.redirectErrorStream(true).redirectOutput(log.toFile());
+            var browser = builder.start();
+            try {
+                assertTrue(browser.waitFor(5, java.util.concurrent.TimeUnit.MINUTES),
+                        "UXR26 Chromium exceeded the bounded child lifetime");
+                assertEquals(0, browser.exitValue(), "UXR26 Chromium qualification failed");
+                assertTrue(runtime.child.isAlive(), "The signed API must remain alive throughout Chromium");
+            } finally {
+                browser.descendants().forEach(ProcessHandle::destroyForcibly);
+                if (browser.isAlive()) {
+                    browser.destroyForcibly();
+                    browser.waitFor();
+                }
+            }
         } finally {
-            browser.descendants().forEach(ProcessHandle::destroyForcibly);
-            if (browser.isAlive()) {
-                browser.destroyForcibly();
-                browser.waitFor();
+            try {
+                for (String line : Files.readAllLines(log)) {
+                    if (line.matches("UXR26_DIAG (COUNTS EXPECTED=[0-9]+ UNEXPECTED=[0-9]+ FLAKY=[0-9]+ SKIPPED=[0-9]+|EXIT=[0-9]+|STAGE=[A-Z_0-9]+|FAILURE_LINE=[0-9]+|REPORT_ERRORS=[0-9]+|REPORT_MISSING|PASSED)")) {
+                        System.out.println(line);
+                    }
+                }
+            } finally {
+                Files.deleteIfExists(log);
             }
         }
     }
