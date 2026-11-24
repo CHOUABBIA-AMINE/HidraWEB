@@ -15,7 +15,8 @@ interface Fixture {
 
 const webOrigin = 'http://127.0.0.1:5173';
 const stage = (name: string) => { process.stdout.write(`UXR26_STAGE=${name}\n`); };
-const status = (operation: 'LOGIN' | 'DISCOVERY' | 'FOREIGN_DISCOVERY' | 'T33', code: number) => {
+const status = (operation: 'LOGIN' | 'PRINCIPAL' | 'EFFECTIVE_PERMISSIONS' | 'PERMISSION_CATALOG' |
+  'PERMISSION_ROUTES' | 'DISCOVERY' | 'FOREIGN_DISCOVERY' | 'T33', code: number) => {
   process.stdout.write(`UXR26_HTTP=${operation}:${code}\n`);
 };
 
@@ -23,11 +24,27 @@ async function openSession(page: Page, username: string, password: string, targe
   await page.goto(new URL(target, webOrigin).href);
   await page.getByLabel(/^Username(?:\s*\*)?$/).fill(username);
   await page.getByLabel(/^Password(?:\s*\*)?$/).fill(password);
-  const login = response(page, '/identity/authentication/login', 'POST');
-  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
-  const loginResponse = await login;
-  status('LOGIN', loginResponse.status());
-  expect(loginResponse.status()).toBe(200);
+  const observe = async (operation: Parameters<typeof status>[0], path: string, method: string) => {
+    const result = await response(page, path, method);
+    status(operation, result.status());
+    expect(result.status()).toBe(200);
+    return result;
+  };
+  const [loginResponse, principal, permissions] = await Promise.all([
+    observe('LOGIN', '/identity/authentication/login', 'POST'),
+    observe('PRINCIPAL', '/identity/me', 'GET'),
+    observe('EFFECTIVE_PERMISSIONS', '/identity/me/permissions', 'GET'),
+    observe('PERMISSION_CATALOG', '/security/permissions/catalog', 'GET'),
+    observe('PERMISSION_ROUTES', '/security/permissions/routes', 'GET'),
+    page.getByRole('button', { name: 'Sign in', exact: true }).click(),
+  ]);
+  // No tokens, identities, grants or response bodies are printed to CI.
+  expect((await loginResponse.json()).userId === username).toBe(true);
+  const current = await principal.json();
+  expect(current.userId === username && Boolean(current.employeeReferenceId)).toBe(true);
+  const effective: string[] = await permissions.json();
+  expect(effective.includes('security:permissions:read')).toBe(true);
+  expect(effective.includes('*')).toBe(false);
   await expect(page).toHaveURL(new URL(target, webOrigin).href);
 }
 

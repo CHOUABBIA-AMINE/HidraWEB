@@ -47,8 +47,18 @@ describe('T61 current employee discovery adapter', () => {
   });
   it('preserves unavailable discovery without fallback', async () => {
     const error = new Error('403');
-    http.mockRejectedValue(error);
-    await expect(fetchCurrentOperationalScopes('company')).rejects.toBe(error);
+    http.mockRejectedValueOnce(error);
+    let received: unknown;
+    try {
+      await fetchCurrentOperationalScopes('company');
+    } catch (cause) {
+      received = cause;
+    }
+    expect(received).toBe(error);
+    expect(http).toHaveBeenCalledWith(expect.objectContaining({
+      method: 'GET', url: '/api/v1/identity/me/regional-access/scopes',
+      params: { companyPartyId: 'company' },
+    }));
     expect(http).toHaveBeenCalledTimes(1);
   });
 });
