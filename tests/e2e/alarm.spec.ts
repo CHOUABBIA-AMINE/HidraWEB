@@ -13,15 +13,17 @@ const alarm = {
 };
 
 async function mockAlarm(page: Page) {
+  let acknowledged = false;
   await page.route('**/api/v1/security/permissions/routes', (route) => route.fulfill({ json: routes }));
   await page.route('**/api/v1/security/permissions/catalog', (route) => route.fulfill({ json: { strategy: 'derived-route-permission-catalog', enforcement: 'backend-enforced', permissionFormat: '<module>:<resource>:<action>', routes } }));
   await page.route('**/api/v1/identity/me/permissions', (route) => route.fulfill({ json: effectivePermissions }));
   await page.route('**/api/v1/alarm/alarms?**', (route) => route.fulfill({ json: { content: [alarm], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false } }));
   await page.route('**/api/v1/alarm/alarms/alarm-1/shelvings', (route) => route.fulfill({ json: [{ id: 'shelf-1', alarmId: 'alarm-1', shelvingReasonId: 'MAINT', reasonText: 'Inspection', shelvedByActorId: 'actor-1', shelvedAt: '2026-09-11T08:00:00Z', shelvedUntil: '2026-09-11T12:00:00Z', status: 'ACTIVE' }] }));
-  await page.route('**/api/v1/alarm/alarms/alarm-1', (route) => route.fulfill({ json: alarm }));
+  await page.route('**/api/v1/alarm/alarms/alarm-1', (route) => route.fulfill({ json: acknowledged ? { ...alarm, currentState: 'ACKNOWLEDGED', acknowledgedByActorId: 'actor-1', acknowledgedAt: '2026-09-11T10:05:00Z' } : alarm }));
   await page.route('**/api/v1/alarm/alarms/acknowledgements', async (route) => {
     expect(route.request().postDataJSON()).toEqual({ alarmId: 'alarm-1' });
     await new Promise((resolve) => setTimeout(resolve, 250));
+    acknowledged = true;
     await route.fulfill({ json: 'ack-1' });
   });
   await page.route('**/api/v1/alarm/alarms/alarm-1/shelvings/shelf-1/unshelve', (route) => route.fulfill({ json: 'unshelve-1' }));
@@ -76,6 +78,12 @@ test('HWEB-008 presents backend-governed alarm response and suppression semantic
   await expect(page.getByRole('button', { name: 'Mettre en étagère' })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Retirer de l’étagère' })).toBeDisabled();
   await expect(page.getByText('Opération enregistrée par HidraAPI.')).toBeVisible();
+  await expect(page.getByText('Acquittée par: actor-1')).toBeVisible();
+  await expect(page.getByText('Acquittée le: 2026-09-11T10:05:00Z')).toBeVisible();
+  await page.getByRole('button', { name: 'Fermer', exact: true }).click();
+  await alarmRow.getByRole('button', { name: 'Ouvrir', exact: true }).click();
+  await expect(page.getByText('Acquittée par: actor-1')).toBeVisible();
+  await expect(page.getByText('Opération enregistrée par HidraAPI.')).toHaveCount(0);
 });
 
 test('UXR-07 alarm view tabs survive Back/Forward through allowlisted URL state', async ({ page }) => {

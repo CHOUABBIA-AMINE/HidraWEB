@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { HidraApiError } from '@/api/errors/HidraApiError';
 import { App } from '@/app/App';
 import { AppProviders } from '@/app/providers/AppProviders';
 
@@ -13,6 +14,8 @@ const fixtures = vi.hoisted(() => {
   ];
   return {
     routes,
+    acknowledged: false,
+    denied: false,
     permissions: ['alarm:alarms:read', 'alarm:alarms:execute', 'alarm:suppressions:read', 'alarm:suppressions:execute'],
     alarm: {
       id: 'alarm-1', alarmNumber: 'ALM-001', alarmTypeId: 'PRESSURE', severityId: 'SEV-CRITICAL', priorityId: 'P1',
@@ -29,11 +32,14 @@ const hidraHttpClient = vi.hoisted(() => vi.fn(async (config: { url?: string; me
   if (config.url === '/api/v1/identity/me') return { authenticationName: 'operator', authenticationType: 'LOCAL', userId: 'user-operator', username: 'operator', displayName: 'Operator', employeeReferenceId: 'employee-operator', authenticationAuthorities: [], effectivePermissions: [] };
   if (config.url?.endsWith('/identity/me/permissions')) return fixtures.permissions;
   if (config.url === '/api/v1/alarm/alarms' && config.method === 'GET') return { content: [fixtures.alarm], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false };
-  if (config.url === '/api/v1/alarm/alarms/alarm-1' && config.method === 'GET') return fixtures.alarm;
+  if (config.url === '/api/v1/alarm/alarms/alarm-1' && config.method === 'GET') {
+    if (fixtures.denied) throw new HidraApiError('Unavailable', { status: 404 });
+    return fixtures.acknowledged ? { ...fixtures.alarm, currentState: 'ACKNOWLEDGED', acknowledgedByActorId: 'user-operator', acknowledgedAt: '2026-09-11T10:05:00Z' } : fixtures.alarm;
+  }
   if (config.url === '/api/v1/alarm/alarms/alarm-1/shelvings' && config.method === 'GET') return [{ id: 'shelf-1', alarmId: 'alarm-1', shelvingReasonId: 'MAINT', reasonText: 'Inspection', shelvedByActorId: 'actor-1', shelvedAt: '2026-09-11T08:00:00Z', shelvedUntil: '2026-09-11T12:00:00Z', status: 'ACTIVE' }];
   if (config.url === '/api/v1/alarm/suppressions' && config.method === 'GET') return { content: [], page: 0, size: 50, totalElements: 0, totalPages: 0, hasNext: false };
   if (config.url === '/api/v1/alarm/suppressions' && config.method === 'POST') return { id: 'suppression-1', alarmId: 'alarm-1', scopeType: 'ALARM', scopeReferenceId: 'alarm-1', suppressionReasonId: 'MAINT', status: 'ACTIVE' };
-  if (config.url === '/api/v1/alarm/alarms/acknowledgements' && config.method === 'POST') return 'ack-1';
+  if (config.url === '/api/v1/alarm/alarms/acknowledgements' && config.method === 'POST') { fixtures.acknowledged = true; return 'ack-1'; }
   if (config.url?.endsWith('/shelvings/shelf-1/unshelve') && config.method === 'POST') return 'unshelve-1';
   throw new Error(`Unexpected request ${config.method} ${config.url}`);
 }));
@@ -51,6 +57,8 @@ async function signInAndOpenAlarms() {
 describe('HWEB-008 alarm console', () => {
   beforeEach(() => {
     hidraHttpClient.mockClear();
+    fixtures.acknowledged = false;
+    fixtures.denied = false;
     window.history.replaceState({}, '', '/overview');
   });
 
@@ -94,5 +102,14 @@ describe('HWEB-008 alarm console', () => {
       url: '/api/v1/alarm/alarms/acknowledgements',
     }));
     expect(window.location.pathname).toBe('/alarms');
+    expect(await screen.findByText('Acquittée par: user-operator')).toBeInTheDocument();
+    expect(screen.getByText('Acquittée le: 2026-09-11T10:05:00Z')).toBeInTheDocument();
+    // A fresh masked denial must remove the previous actor/receipt and all actions.
+    fixtures.denied = true;
+    fireEvent.click(screen.getByRole('button', { name: 'Actualiser' }));
+    expect(await screen.findByText(/Alarme indisponible/)).toBeInTheDocument();
+    expect(screen.queryByText('Acquittée par: user-operator')).not.toBeInTheDocument();
+    expect(screen.queryByText('Opération enregistrée par HidraAPI.')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Acquitter' })).not.toBeInTheDocument();
   });
 });

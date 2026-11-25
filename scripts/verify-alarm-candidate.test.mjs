@@ -7,17 +7,17 @@ import { fileURLToPath } from 'node:url';
 import { compareContractSlice } from './audit-openapi-drift.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const name = 'hidra-alarm-76b14cda4520f1eff242bd474c02ce4db317d385.json';
+const name = 'hidra-alarm-b451302179eb3a5877aefcb105dab0f3ccb47897.json';
 const bytes = fs.readFileSync(path.join(root, 'openapi/candidates', name));
 const current = JSON.parse(bytes.toString('utf8'));
 const legacy = JSON.parse(fs.readFileSync(path.join(root,
   'openapi/hidra-alarm-5028a90248ddf3a04d344308f6cfc2510f1d0ca2.json'), 'utf8'));
 
 test('Alarm OpenAPI pin exactly matches the CI-published HidraAPI contract', () => {
-  assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'), '85bebb810ae40e8250dc316ab1f8dde60ac1d17cff2f6c7aa0f8c95f3c0dd6a1');
+  assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'), 'cf152e52ad51591a385327439f27f79fc741ab9b9c3dd6a025b301ca320432ab');
   assert.equal(current.openapi, '3.1.0');
-  assert.equal(Object.keys(current.paths).length, 13);
-  assert.equal(Object.keys(current.components.schemas).length, 11);
+  assert.equal(Object.keys(current.paths).length, 15);
+  assert.equal(Object.keys(current.components.schemas).length, 13);
   assert.equal(current.servers, undefined);
   assert.equal(current['x-hidra-contract-source'], undefined);
   assert.ok(Object.keys(current.paths).every(route => route.startsWith('/api/v1/alarm/')));
@@ -60,7 +60,7 @@ test('published alarm raise and lifecycle aliases carry backend security and req
     assert.equal(operation.requestBody.content['application/json'].schema.$ref,
       `#/components/schemas/${request}`);
   }
-  assert.equal(current.paths['/api/v1/alarm/capabilities'].get.operationId,'capabilities_24');
+  assert.equal(current.paths['/api/v1/alarm/capabilities'].get.operationId,'capabilities_25');
   for (const methods of Object.values(current.paths)) {
     for (const operation of Object.values(methods)) assert.deepEqual(operation.security,[{hidraBearerJwt:[]}]);
   }
@@ -88,4 +88,32 @@ test('Alarm pin maintains legacy transport and all existing source proof checks'
     'WORKFLOW_CURRENT_PROOF','TELEMETRY_CURRENT_PROOF','TOPOLOGY_CURRENT_PROOF',
     'RISK_CURRENT_PROOF','compareSlice(config, slice);',
   ]) assert.ok(checker.includes(lock));
+});
+
+test('F16 is an exact additive Alarm slice, not new browser command authority', () => {
+  const prior = JSON.parse(fs.readFileSync(path.join(root, 'openapi/candidates/hidra-alarm-76b14cda4520f1eff242bd474c02ce4db317d385.json'), 'utf8'));
+  assert.equal(Object.values(current.paths).reduce((sum, methods) => sum + Object.keys(methods).length, 0), 18);
+  assert.deepEqual(current.components.securitySchemes, {hidraBearerJwt: {
+    bearerFormat: 'JWT', description: 'Hidra-issued bearer JWT used by ordinary protected HidraAPI operations.',
+    scheme: 'bearer', type: 'http',
+  }});
+  for (const [name, schema] of Object.entries(prior.components.schemas)) {
+    assert.deepEqual(current.components.schemas[name], schema);
+  }
+  for (const [route, methods] of Object.entries(prior.paths)) {
+    for (const [method, operation] of Object.entries(methods)) {
+      const expected = route === '/api/v1/alarm/capabilities' ? {...operation, operationId: 'capabilities_25'} : operation;
+      assert.deepEqual(current.paths[route][method], expected);
+    }
+  }
+  assert.deepEqual(Object.keys(current.paths).filter(route => !prior.paths[route]).sort(), [
+    '/api/v1/alarm/alarms/from-evaluation', '/api/v1/alarm/alarms/{id}/evidence',
+  ]);
+  assert.equal(current.paths['/api/v1/alarm/alarms/from-evaluation'].post.requestBody.content['application/json'].schema.$ref,
+    '#/components/schemas/EvidenceLinkedAlarmRequest');
+  assert.equal(current.paths['/api/v1/alarm/alarms/{id}/evidence'].get.responses['200'].content['*/*'].schema.$ref,
+    '#/components/schemas/EvidenceLinkedAlarmResponse');
+  const changed = JSON.parse(JSON.stringify(current));
+  delete changed.components.schemas.AlarmView.properties.acknowledgedByActorId;
+  assert.ok(compareContractSlice('alarm', current, changed).some(item => item.kind === 'field_removed'));
 });

@@ -589,3 +589,150 @@ jobs:
           PY
           printf 'WEB_SHA=%s\nAPI_SHA=%s\n' "${GITHUB_SHA}" "$(git -C .local-session-api rev-parse HEAD)"
           sha256sum openapi/candidates/hidra-identity-organization-720e9222b30fa45b7423ede9c9f141ab87298024.json
+
+  alarm-native:
+    name: F16 signed scoped Alarm browser and PostgreSQL qualification
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: hidra_alarm_f16
+          POSTGRES_USER: hidra
+          POSTGRES_PASSWORD: hidra-f16-disposable-ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U hidra -d hidra_alarm_f16"
+          --health-interval=5s --health-timeout=5s --health-retries=12
+    env:
+      SPRING_PROFILES_ACTIVE: test
+      HIDRA_TEST_DATASOURCE_URL: jdbc:postgresql://127.0.0.1:5432/hidra_alarm_f16
+      HIDRA_TEST_DATASOURCE_USERNAME: hidra
+      HIDRA_TEST_DATASOURCE_PASSWORD: hidra-f16-disposable-ci
+      HIDRA_SECURITY_AUTHENTICATION_MODE: jwt
+      HIDRA_UXR26_API_URL: http://127.0.0.1:8080
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: hidra
+      PGPASSWORD: hidra-f16-disposable-ci
+      PGDATABASE: hidra_alarm_f16
+    steps:
+      - name: Checkout WEB
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Checkout immutable qualified T62 API
+        uses: actions/checkout@v5
+        with:
+          repository: CHOUABBIA-AMINE/HidraAPI
+          ref: b451302179eb3a5877aefcb105dab0f3ccb47897
+          path: .alarm-native-api
+          persist-credentials: false
+      - name: Set up Java 21 and Maven
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: .alarm-native-api/pom.xml
+      - name: Set up declared Node version
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Verify contract and install generated clients and Chromium
+        run: |
+          npm ci --no-audit --no-fund
+          npm run openapi:compatibility
+          npm run prebuild
+          npx playwright install --with-deps chromium
+          if ! command -v psql >/dev/null || ! command -v htpasswd >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install --yes --no-install-recommends postgresql-client apache2-utils
+          fi
+      - name: Build immutable accepted API
+        working-directory: .alarm-native-api
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = b451302179eb3a5877aefcb105dab0f3ccb47897
+          for attempt in 1 2 3; do
+            if bash ./mvnw -B --version; then break; fi
+            test "$attempt" -lt 3
+            sleep "$((attempt * 5))"
+          done
+          bash ./mvnw -B -q -Dmaven.test.skip=true package
+      - name: Run mandatory F16 signed native acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          export HIDRA_F16_PRIVATE_DIR="$(mktemp -d "$RUNNER_TEMP/f16-private.XXXXXXXX")"
+          export HIDRA_JWT_HMAC_SECRET="$(openssl rand -hex 32)"
+          printf '::add-mask::%s\n' "$HIDRA_JWT_HMAC_SECRET"
+          api_pid=
+          cleanup() {
+            if [ -n "$api_pid" ]; then
+              kill "$api_pid" 2>/dev/null || true
+              wait "$api_pid" || true
+            fi
+            rm -rf -- "$HIDRA_F16_PRIVATE_DIR"
+          }
+          trap cleanup EXIT
+          app_jar="$(find .alarm-native-api/target -maxdepth 1 -type f -name '*.jar' ! -name '*.original' -print -quit)"
+          test -n "$app_jar"
+          java -jar "$app_jar" --server.address=127.0.0.1 --server.port=8080 \
+            --management.server.port=8080 --hidra.security.bootstrap.enabled=false \
+            --springdoc.api-docs.enabled=true --springdoc.swagger-ui.enabled=false \
+            --hidra.platform.security.jwt.token-issuer=https://alarm-f16.synthetic.invalid \
+            --hidra.platform.security.cors.allowed-origins=http://127.0.0.1:5173 \
+            >"$HIDRA_F16_PRIVATE_DIR/api.log" 2>&1 &
+          api_pid=$!
+          ready=false
+          for attempt in $(seq 1 75); do
+            if curl --fail --silent http://127.0.0.1:8080/actuator/health >/dev/null; then ready=true; break; fi
+            if ! kill -0 "$api_pid" 2>/dev/null; then break; fi
+            sleep 2
+          done
+          if [ "$ready" != true ]; then echo "F16 disposable API startup failed."; exit 1; fi
+          node scripts/prepare-alarm-native.mjs
+          export PLAYWRIGHT_JSON_OUTPUT_NAME="$HIDRA_F16_PRIVATE_DIR/results.json"
+          browser_status=0
+          npx playwright test --config=playwright.alarm-native.config.ts --reporter=list,json \
+            >"$HIDRA_F16_PRIVATE_DIR/browser.log" 2>&1 || browser_status=$?
+          export F16_BROWSER_STATUS="$browser_status"
+          mkdir -p "$RUNNER_TEMP/f16-evidence"
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          private = Path(os.environ['HIDRA_F16_PRIVATE_DIR'])
+          expected = {'SIGNED_SCOPED_LISTS','DENIED_NO_HISTORY','BROWSER_ACK_PERSISTED','FRESH_LOGIN_READBACK','REVOCATION_CLEAR','CURRENT_OWNER_FAIL_CLOSED'}
+          found = {line.split('=',1)[1] for line in (private/'browser.log').read_text(errors='replace').splitlines()
+                   if line.startswith('F16_CHECKPOINT=')}
+          print('F16 completed checkpoints: ' + ', '.join(sorted(expected & found)))
+          if os.environ['F16_BROWSER_STATUS'] != '0' or not (private/'results.json').is_file():
+              raise SystemExit('F16 native browser failed; private raw diagnostics are not published.')
+          stats = json.loads((private/'results.json').read_text())['stats']
+          assert stats['expected'] == 1 and stats['unexpected'] == stats['flaky'] == stats['skipped'] == 0
+          assert expected <= found, 'F16 required checkpoints are missing'
+          summary = {'web_sha':os.environ['GITHUB_SHA'],
+                     'api_sha':'b451302179eb3a5877aefcb105dab0f3ccb47897',
+                     'run_id':os.environ['GITHUB_RUN_ID'],'run_attempt':os.environ['GITHUB_RUN_ATTEMPT'],
+                     'database':'hidra_alarm_f16','mode':'synthetic-development-only',
+                     'expected':stats['expected'],'unexpected':stats['unexpected'],
+                     'flaky':stats['flaky'],'skipped':stats['skipped'],'checkpoints':sorted(expected)}
+          (Path(os.environ['RUNNER_TEMP'])/'f16-evidence'/'summary.json').write_text(json.dumps(summary,sort_keys=True)+'\n')
+          print('F16 native qualification: 1 passed, 0 failed/flaky/skipped.')
+          PY
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C .alarm-native-api rev-parse HEAD)" = b451302179eb3a5877aefcb105dab0f3ccb47897
+          sha256sum openapi/candidates/hidra-alarm-b451302179eb3a5877aefcb105dab0f3ccb47897.json > "$RUNNER_TEMP/f16-evidence/contract.sha256"
+          psql -X -v ON_ERROR_STOP=1 --csv -c 'SELECT installed_rank,version,script,checksum,success FROM public.flyway_schema_history ORDER BY installed_rank' > "$RUNNER_TEMP/f16-evidence/migrations.csv"
+      - name: Upload redacted F16 development evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: hidraweb-f16-${{ github.sha }}
+          path: ${{ runner.temp }}/f16-evidence
+          if-no-files-found: error

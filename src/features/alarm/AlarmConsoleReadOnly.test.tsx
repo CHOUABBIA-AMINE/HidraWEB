@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { HidraApiError } from '@/api/errors/HidraApiError';
 import { App } from '@/app/App';
 import { AppProviders } from '@/app/providers/AppProviders';
 
@@ -13,6 +14,7 @@ const fixtures = vi.hoisted(() => {
   ];
   return {
     routes,
+    denied: false,
     permissions: ['alarm:alarms:read'],
     alarm: {
       id: 'alarm-1', alarmNumber: 'ALM-001', alarmTypeId: 'PRESSURE', severityId: 'SEV-CRITICAL', priorityId: 'P1',
@@ -27,7 +29,10 @@ const hidraHttpClient = vi.hoisted(() => vi.fn(async (config: { url?: string; me
   if (config.url === '/api/v1/identity/me') return { authenticationName: 'operator', authenticationType: 'LOCAL', userId: 'user-operator', username: 'operator', displayName: 'Operator', employeeReferenceId: 'employee-operator', authenticationAuthorities: [], effectivePermissions: [] };
   if (config.url?.endsWith('/identity/me/permissions')) return fixtures.permissions;
   if (config.url === '/api/v1/alarm/alarms' && config.method === 'GET') return { content: [fixtures.alarm], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false };
-  if (config.url === '/api/v1/alarm/alarms/alarm-1' && config.method === 'GET') return fixtures.alarm;
+  if (config.url === '/api/v1/alarm/alarms/alarm-1' && config.method === 'GET') {
+    if (fixtures.denied) throw new HidraApiError('Unavailable', { status: 404 });
+    return fixtures.alarm;
+  }
   if (config.url === '/api/v1/alarm/alarms/alarm-1/shelvings' && config.method === 'GET') return [];
   throw new Error(`Unexpected request ${config.method} ${config.url}`);
 }));
@@ -58,6 +63,7 @@ afterEach(async () => {
 describe('HWEB-008 alarm console read-only authorization', () => {
   beforeEach(() => {
     hidraHttpClient.mockClear();
+    fixtures.denied = false;
     window.history.replaceState({}, '', '/overview');
   });
 
@@ -77,5 +83,10 @@ describe('HWEB-008 alarm console read-only authorization', () => {
     expect(screen.queryByRole('button', { name: 'Mettre en étagère' })).not.toBeInTheDocument();
     expect(screen.getByText('Vous ne disposez pas de l’autorisation de lire les suppressions.')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Créer la suppression' })).not.toBeInTheDocument();
+    fixtures.denied = true;
+    fireEvent.click(screen.getByRole('button', { name: 'Actualiser' }));
+    expect(await screen.findByText(/Alarme indisponible/)).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Pression élevée', level: 2 })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Acquitter' })).not.toBeInTheDocument();
   });
 });

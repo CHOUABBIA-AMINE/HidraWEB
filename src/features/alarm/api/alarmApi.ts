@@ -48,8 +48,8 @@ export function fetchAlarms(params: AlarmListParams): Promise<PageAlarmView> {
   return hidraHttpClient<PageAlarmView>({ method: 'GET', url: '/api/v1/alarm/alarms', params: compactParams(params) });
 }
 
-export function fetchAlarm(id: string): Promise<AlarmView> {
-  return hidraHttpClient<AlarmView>({ method: 'GET', url: `/api/v1/alarm/alarms/${encodeURIComponent(id)}` });
+export function fetchAlarm(id: string, signal?: AbortSignal): Promise<AlarmView> {
+  return hidraHttpClient<AlarmView>({ method: 'GET', url: `/api/v1/alarm/alarms/${encodeURIComponent(id)}`, ...(signal ? { signal } : {}) });
 }
 
 export function fetchShelvings(id: string): Promise<ShelvingView[]> {
@@ -91,4 +91,28 @@ export function unshelveAlarm(id: string, shelvingId: string, correlationId?: st
     url: `/api/v1/alarm/alarms/${encodeURIComponent(id)}/shelvings/${encodeURIComponent(shelvingId)}/unshelve`,
     headers: correlationId ? { 'X-Correlation-Id': correlationId } : undefined,
   });
+}
+
+/** One command, followed by a fresh protected read. Never replay a committed POST
+ * just because the subsequent read is denied or unavailable. */
+export class AlarmAcknowledgementReadbackError extends Error {
+  constructor() {
+    super('Acknowledgement was submitted, but persisted readback could not be confirmed. Refresh before another action.');
+    this.name = 'AlarmAcknowledgementReadbackError';
+  }
+}
+
+export async function acknowledgeAlarmWithReadback(request: AcknowledgeAlarmRequest): Promise<string> {
+  if (!request.alarmId) throw new Error('Select an authorized alarm before acknowledgement.');
+  const receipt = await acknowledgeAlarm(request);
+  try {
+    const detail = await fetchAlarm(request.alarmId);
+    if (!receipt || detail.id !== request.alarmId || !detail.acknowledgedAt || !detail.acknowledgedByActorId) {
+      throw new AlarmAcknowledgementReadbackError();
+    }
+  } catch {
+    // Never replay the submitted command. The console retires this selection.
+    throw new AlarmAcknowledgementReadbackError();
+  }
+  return receipt;
 }
