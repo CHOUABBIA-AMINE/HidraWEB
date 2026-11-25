@@ -11,6 +11,8 @@ import type {
   PlanningApprovalExecutionResponse,
   PlanningApprovalResponse,
   PlanningPeriodView,
+  SubmitPlanningRevisionRequest,
+  SubmitPlanningRevisionResponse,
   Request as UpdatePlanRevisionRequest,
   Response as UpdatePlanRevisionResponse,
 } from '@/api/generated/planning/model';
@@ -32,23 +34,23 @@ export const planningQueryKeys = {
   approval: (revisionId: string) => ['hidra', 'planning', 'revisions', revisionId, 'approval'] as const,
 };
 
-export function fetchPlanningPeriods(params: PlanningPageParams): Promise<PagePlanningPeriodView> {
-  return hidraHttpClient<PagePlanningPeriodView>({ method: 'GET', url: '/api/v1/planning/periods', params });
+export function fetchPlanningPeriods(params: PlanningPageParams, signal?: AbortSignal): Promise<PagePlanningPeriodView> {
+  return hidraHttpClient<PagePlanningPeriodView>({ method: 'GET', url: '/api/v1/planning/periods', params, ...(signal ? { signal } : {}) });
 }
-export function fetchPlanningPeriod(id: string): Promise<PlanningPeriodView> {
-  return hidraHttpClient<PlanningPeriodView>({ method: 'GET', url: `/api/v1/planning/periods/${encodeURIComponent(id)}` });
+export function fetchPlanningPeriod(id: string, signal?: AbortSignal): Promise<PlanningPeriodView> {
+  return hidraHttpClient<PlanningPeriodView>({ method: 'GET', url: `/api/v1/planning/periods/${encodeURIComponent(id)}`, ...(signal ? { signal } : {}) });
 }
-export function fetchOperationalPlans(params: PlanningPageParams): Promise<PageOperationalPlanView> {
-  return hidraHttpClient<PageOperationalPlanView>({ method: 'GET', url: '/api/v1/planning/operational-plans', params });
+export function fetchOperationalPlans(params: PlanningPageParams, signal?: AbortSignal): Promise<PageOperationalPlanView> {
+  return hidraHttpClient<PageOperationalPlanView>({ method: 'GET', url: '/api/v1/planning/operational-plans', params, ...(signal ? { signal } : {}) });
 }
-export function fetchOperationalPlan(id: string): Promise<OperationalPlanView> {
-  return hidraHttpClient<OperationalPlanView>({ method: 'GET', url: `/api/v1/planning/operational-plans/${encodeURIComponent(id)}` });
+export function fetchOperationalPlan(id: string, signal?: AbortSignal): Promise<OperationalPlanView> {
+  return hidraHttpClient<OperationalPlanView>({ method: 'GET', url: `/api/v1/planning/operational-plans/${encodeURIComponent(id)}`, ...(signal ? { signal } : {}) });
 }
-export function fetchPlanRevisions(params: RevisionListParams): Promise<PagePlanRevisionView> {
-  return hidraHttpClient<PagePlanRevisionView>({ method: 'GET', url: '/api/v1/planning/revisions', params });
+export function fetchPlanRevisions(params: RevisionListParams, signal?: AbortSignal): Promise<PagePlanRevisionView> {
+  return hidraHttpClient<PagePlanRevisionView>({ method: 'GET', url: '/api/v1/planning/revisions', params, ...(signal ? { signal } : {}) });
 }
-export function fetchPlanRevision(id: string): Promise<PlanRevisionView> {
-  return hidraHttpClient<PlanRevisionView>({ method: 'GET', url: `/api/v1/planning/revisions/${encodeURIComponent(id)}` });
+export function fetchPlanRevision(id: string, signal?: AbortSignal): Promise<PlanRevisionView> {
+  return hidraHttpClient<PlanRevisionView>({ method: 'GET', url: `/api/v1/planning/revisions/${encodeURIComponent(id)}`, ...(signal ? { signal } : {}) });
 }
 export function updatePlanRevision(id: string, request: UpdatePlanRevisionRequest): Promise<UpdatePlanRevisionResponse> {
   return hidraHttpClient<UpdatePlanRevisionResponse>({
@@ -57,14 +59,14 @@ export function updatePlanRevision(id: string, request: UpdatePlanRevisionReques
     data: request,
   });
 }
-export function fetchPlanTargets(params: TargetListParams): Promise<PagePlanTargetView> {
-  return hidraHttpClient<PagePlanTargetView>({ method: 'GET', url: '/api/v1/planning/targets', params });
+export function fetchPlanTargets(params: TargetListParams, signal?: AbortSignal): Promise<PagePlanTargetView> {
+  return hidraHttpClient<PagePlanTargetView>({ method: 'GET', url: '/api/v1/planning/targets', params, ...(signal ? { signal } : {}) });
 }
-export function fetchPlanTarget(id: string): Promise<PlanTargetView> {
-  return hidraHttpClient<PlanTargetView>({ method: 'GET', url: `/api/v1/planning/targets/${encodeURIComponent(id)}` });
+export function fetchPlanTarget(id: string, signal?: AbortSignal): Promise<PlanTargetView> {
+  return hidraHttpClient<PlanTargetView>({ method: 'GET', url: `/api/v1/planning/targets/${encodeURIComponent(id)}`, ...(signal ? { signal } : {}) });
 }
-export function fetchPlanningApproval(revisionId: string): Promise<PlanningApprovalResponse> {
-  return hidraHttpClient<PlanningApprovalResponse>({ method: 'GET', url: `/api/v1/planning/revisions/${encodeURIComponent(revisionId)}/approval` });
+export function fetchPlanningApproval(revisionId: string, signal?: AbortSignal): Promise<PlanningApprovalResponse> {
+  return hidraHttpClient<PlanningApprovalResponse>({ method: 'GET', url: `/api/v1/planning/revisions/${encodeURIComponent(revisionId)}/approval`, ...(signal ? { signal } : {}) });
 }
 export function executePlanningApprovalAction(
   revisionId: string,
@@ -75,5 +77,13 @@ export function executePlanningApprovalAction(
     method: 'POST',
     url: `/api/v1/planning/revisions/${encodeURIComponent(revisionId)}/approval/actions/${encodeURIComponent(transitionId)}/execute`,
     data: request,
+  });
+}
+
+/** A single explicit submission. UI orchestration must freshly read protected
+ * owner state and never replay the POST after a failed readback or conflict. */
+export function submitPlanningRevision(revisionId: string, request: SubmitPlanningRevisionRequest): Promise<SubmitPlanningRevisionResponse> {
+  return hidraHttpClient<SubmitPlanningRevisionResponse>({
+    method: 'POST', url: `/api/v1/planning/revisions/${encodeURIComponent(revisionId)}/submit`, data: request,
   });
 }

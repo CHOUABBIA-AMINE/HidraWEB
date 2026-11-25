@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { HidraApiError } from '@/api/errors/HidraApiError';
 import { App } from '@/app/App';
 import { AppProviders } from '@/app/providers/AppProviders';
 
@@ -12,9 +13,20 @@ const fixtures = vi.hoisted(() => {
     { route: '/api/v1/hse/cases', methods: ['GET'], module: 'hse', resource: 'cases', action: 'read', permission: 'hse:cases:read', enforcementStatus: 'backend-enforced' },
     { route: '/api/v1/hse/capas', methods: ['GET'], module: 'hse', resource: 'capas', action: 'read', permission: 'hse:capas:read', enforcementStatus: 'backend-enforced' },
   ];
+  routes.push(...routes.map(route => ({ ...route, route: route.route + '/{id}' })));
+  const newRoutes = [
+    ['/api/v1/incident/incidents/{id}/timeline', 'incident:incidents:read'],
+    ['/api/v1/incident/incidents/{id}/investigation', 'incident:incidents:read'],
+    ['/api/v1/incident/incidents/{id}/escalation', 'incident:incidents:read'],
+    ['/api/v1/leakdetection/candidates/{id}/evidence', 'leakdetection:candidates:read'],
+    ['/api/v1/leakdetection/cases/{id}/investigation', 'leakdetection:cases:read'],
+  ];
+  for (const [route, permission] of newRoutes) {
+    routes.push({ route, permission, methods: ['GET'], module: permission.split(':')[0], resource: permission.split(':')[1], action: 'read', enforcementStatus: 'backend-enforced' });
+  }
   const incident = {
     id: 'inc-1', incidentNumber: 'INC-2026-001', title: 'Pipeline pressure event', description: 'Operational incident under investigation.',
-    status: 'OPEN', sourceType: 'ALARM', severityId: 'SEV-2', priorityId: 'P1', topologyAssetId: 'PIPE-1', topologyAssetCode: 'PL-001',
+    status: 'OPEN', sourceType: 'ALARM', sourceReferenceId: 'alarm-1', severityId: 'SEV-2', priorityId: 'P1', topologyAssetId: 'PIPE-1', topologyAssetCode: 'PL-001',
     topologyAssetName: 'Pipeline Nord', responsibleActorId: 'actor-1', responsibleActorName: 'Operator One', workflowInstanceId: 'wf-1',
     occurredAt: '2026-09-11T10:00:00Z', updatedAt: '2026-09-11T11:00:00Z', currentEscalationLevel: 1,
   };
@@ -43,6 +55,7 @@ const fixtures = vi.hoisted(() => {
   };
   return {
     routes,
+    evidenceDenied: false,
     permissions: ['incident:incidents:read', 'leakdetection:candidates:read', 'leakdetection:cases:read', 'hse:cases:read', 'hse:capas:read'],
     incident, candidate, leakCase, hseCase, capa,
   };
@@ -55,6 +68,14 @@ const hidraHttpClient = vi.hoisted(() => vi.fn(async (config: { url?: string; me
   if (config.url?.endsWith('/identity/me/permissions')) return fixtures.permissions;
   if (config.url === '/api/v1/incident/incidents' && config.method === 'GET') return { content: [fixtures.incident], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false };
   if (config.url === '/api/v1/incident/incidents/inc-1' && config.method === 'GET') return fixtures.incident;
+  if (config.url === '/api/v1/incident/incidents/inc-1/investigation' && config.method === 'GET') {
+    if (fixtures.evidenceDenied) throw new HidraApiError('Unavailable', { status: 404 });
+    return { incidentId: 'inc-1', investigationState: 'REVIEWED', investigatorId: 'investigator-uxr29', version: 2, history: [{ id: 'event-1', operation: 'REVIEW', actorId: 'reviewer-uxr29' }] };
+  }
+  if (config.url === '/api/v1/incident/incidents/inc-1/escalation' && config.method === 'GET') return { incidentId: 'inc-1', sourceType: 'ALARM', sourceId: 'alarm-1', evaluationId: 'eval-uxr29' };
+  if (config.url === '/api/v1/incident/incidents/inc-1/timeline' && config.method === 'GET') return [{ incidentId: 'inc-1', sourceType: 'ALARM', sourceId: 'alarm-1', evaluationId: 'eval-uxr29' }, { incidentId: 'inc-1', sourceType: 'LEAK_CANDIDATE', sourceId: 'cand-1', evaluationId: 'eval-uxr29' }];
+  if (config.url === '/api/v1/leakdetection/candidates/cand-1/evidence' && config.method === 'GET') return { candidateId: 'cand-1', trustedReadingId: 'trusted-uxr29', declaredConfidence: 0.91 };
+  if (config.url === '/api/v1/leakdetection/cases/case-1/investigation' && config.method === 'GET') return { caseId: 'case-1', candidateId: 'cand-1', disposition: 'DISMISSED', investigationState: 'REVIEWED', history: [] };
   if (config.url === '/api/v1/leakdetection/candidates' && config.method === 'GET') return { content: [fixtures.candidate], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false };
   if (config.url === '/api/v1/leakdetection/candidates/cand-1' && config.method === 'GET') return fixtures.candidate;
   if (config.url === '/api/v1/leakdetection/cases' && config.method === 'GET') return { content: [fixtures.leakCase], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false };
@@ -71,6 +92,7 @@ vi.mock('@/api/client/hidraHttpClient', () => ({ hidraHttpClient }));
 describe('HWEB-009 events workspace', () => {
   beforeEach(() => {
     hidraHttpClient.mockClear();
+    fixtures.evidenceDenied = false;
     window.history.replaceState({}, '', '/overview');
   });
 
@@ -86,14 +108,18 @@ describe('HWEB-009 events workspace', () => {
     expect(await screen.findByText('INC-2026-001')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Open' }));
     expect(await screen.findByText('Operator One')).toBeInTheDocument();
+    expect(await screen.findByText(/investigator-uxr29/)).toBeInTheDocument();
+    expect(await screen.findByText(/cand-1/)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('tab', { name: 'Leak detection' }));
     expect(await screen.findByText('LKC-001')).toBeInTheDocument();
     expect(screen.getByText('LEAK-001')).toBeInTheDocument();
     fireEvent.click(screen.getAllByRole('button', { name: 'Open' })[0]);
     expect(await screen.findByText('Pressure imbalance candidate')).toBeInTheDocument();
+    expect(await screen.findByText(/trusted-uxr29/)).toBeInTheDocument();
     fireEvent.click(screen.getAllByRole('button', { name: 'Open' })[1]);
     expect(await screen.findByText('actor-2')).toBeInTheDocument();
+    expect(await screen.findByText(/DISMISSED/)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('tab', { name: 'HSE' }));
     expect(await screen.findByText('HSE-2026-001')).toBeInTheDocument();
@@ -106,3 +132,21 @@ describe('HWEB-009 events workspace', () => {
     expect(screen.getByText('task-hse-1')).toBeInTheDocument();
   });
 });
+
+it('does not disclose previous Incident evidence after the selected owner masks a reread', async () => {
+  fixtures.evidenceDenied = false;
+  window.history.replaceState({}, '', '/overview');
+  render(<AppProviders><App /></AppProviders>);
+  fireEvent.change(await screen.findByLabelText(/Nom d’utilisateur/), { target: { value: 'operator' } });
+  fireEvent.change(screen.getByLabelText(/Mot de passe/), { target: { value: 'secret' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Se connecter' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'Événements & incidents' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'Open' }));
+  expect(await screen.findByText(/investigator-uxr29/)).toBeInTheDocument();
+  fixtures.evidenceDenied = true;
+  fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'Open' }));
+  expect(await screen.findByText('Cette ressource est indisponible ou inaccessible.')).toBeInTheDocument();
+  expect(screen.queryByText(/investigator-uxr29/)).not.toBeInTheDocument();
+  expect(screen.queryByText('Operator One')).not.toBeInTheDocument();
+}, 15_000);

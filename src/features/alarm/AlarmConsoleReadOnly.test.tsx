@@ -83,6 +83,8 @@ describe('HWEB-008 alarm console read-only authorization', () => {
     expect(screen.queryByRole('button', { name: 'Mettre en étagère' })).not.toBeInTheDocument();
     expect(screen.getByText('Vous ne disposez pas de l’autorisation de lire les suppressions.')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Créer la suppression' })).not.toBeInTheDocument();
+    expect(screen.getByText('Preuve d’évaluation indisponible.')).toBeInTheDocument();
+    expect(hidraHttpClient.mock.calls.some(([config]) => config.url?.endsWith('/evidence'))).toBe(false);
     fixtures.denied = true;
     fireEvent.click(screen.getByRole('button', { name: 'Actualiser' }));
     expect(await screen.findByText(/Alarme indisponible/)).toBeInTheDocument();

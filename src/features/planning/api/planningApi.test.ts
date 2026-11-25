@@ -17,6 +17,7 @@ import {
   fetchPlanningApproval,
   fetchPlanningPeriod,
   fetchPlanningPeriods,
+  submitPlanningRevision,
 } from '@/features/planning/api/planningApi';
 
 describe('planning API adapter', () => {
@@ -136,4 +137,22 @@ describe('planning API adapter', () => {
     });
     expect(request.expectedTaskUpdatedAt).toBe('2026-09-29T18:00:00Z');
   });
+});
+
+it('submits the exact selected revision with both owner tokens and discovered reviewer', async () => {
+  httpClient.mockReset();
+  const request = {
+    definitionId: 'definition-1', definitionVersion: 3,
+    expectedPlanUpdatedAt: '2026-11-25T11:00:00Z', expectedRevisionUpdatedAt: '2026-11-25T11:01:00Z',
+    reviewerActorId: 'reviewer-1', targetTypeId: 'target-type-1', workflowPurposeId: 'purpose-1',
+  };
+  httpClient.mockResolvedValueOnce({ revisionId: 'rev/1', revisionStatus: 'SUBMITTED' });
+  expect(await submitPlanningRevision('rev/1', request)).toEqual({ revisionId: 'rev/1', revisionStatus: 'SUBMITTED' });
+  expect(httpClient).toHaveBeenCalledTimes(1);
+  expect(httpClient).toHaveBeenCalledWith({ method: 'POST', url: '/api/v1/planning/revisions/rev%2F1/submit', data: request });
+  httpClient.mockReset();
+  const conflict = new Error('conflict');
+  httpClient.mockRejectedValueOnce(conflict);
+  await expect(submitPlanningRevision('rev/1', request)).rejects.toBe(conflict);
+  expect(httpClient).toHaveBeenCalledTimes(1);
 });

@@ -11,6 +11,7 @@ import {
   closeAlarm,
   createSuppression,
   fetchAlarm,
+  fetchAlarmEvidence,
   fetchAlarms,
   fetchShelvings,
   fetchSuppressions,
@@ -137,4 +138,13 @@ describe('alarm API adapter', () => {
       headers: { 'X-Correlation-Id': 'corr-2' },
     });
   });
+});
+
+it('reads only the selected encoded Alarm evidence route and propagates cancellation', async () => {
+  httpClient.mockReset();
+  const signal = new AbortController().signal;
+  httpClient.mockResolvedValueOnce({ alarmId: 'alarm/1', evaluationId: 'evaluation-1' });
+  expect(await fetchAlarmEvidence('alarm/1', signal)).toEqual({ alarmId: 'alarm/1', evaluationId: 'evaluation-1' });
+  expect(httpClient).toHaveBeenCalledTimes(1);
+  expect(httpClient).toHaveBeenCalledWith({ method: 'GET', url: '/api/v1/alarm/alarms/alarm%2F1/evidence', signal });
 });

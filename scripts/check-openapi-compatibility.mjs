@@ -39,10 +39,11 @@ const WORKFLOW_CURRENT_PROOF = {
 };
 const INCIDENT_CURRENT_PROOF = {
   config: 'orval.incident.config.ts',
-  path: 'openapi/candidates/hidra-incident-da4ce33ead7db40776049c861027947b61b96270.json',
-  sha256: 'sha256:54dd4419087f18f52804bb3924fef3ada98c71c16b3b612984f28764dbc7c3eb',
-  paths: 8,
-  schemas: 6,
+  path: 'openapi/candidates/hidra-incident-b451302179eb3a5877aefcb105dab0f3ccb47897.json',
+  sha256: 'sha256:b0c20686eaec127ff41d3a4381b47317bab200876f02e437c2b699933e1590a3',
+  paths: 11,
+  schemas: 9,
+  operations: 12,
 };
 const CUSTODY_CURRENT_PROOF = {
   config: 'orval.custody.config.ts',
@@ -53,17 +54,19 @@ const CUSTODY_CURRENT_PROOF = {
 };
 const LEAK_CURRENT_PROOF = {
   config: 'orval.leak.config.ts',
-  path: 'openapi/candidates/hidra-leak-da4ce33ead7db40776049c861027947b61b96270.json',
-  sha256: 'sha256:4c55a76cdf581954c2a35fce197ce4c0df3b0f827c09752fe9091b3649bfc91c',
-  paths: 9,
-  schemas: 9,
+  path: 'openapi/candidates/hidra-leak-b451302179eb3a5877aefcb105dab0f3ccb47897.json',
+  sha256: 'sha256:38ccba87706d93edfaaae763622e3b5eb2e44a855d0503385bd54904486af062',
+  paths: 11,
+  schemas: 12,
+  operations: 13,
 };
 const HSE_CURRENT_PROOF = {
   config: 'orval.hse.config.ts',
-  path: 'openapi/candidates/hidra-hse-da4ce33ead7db40776049c861027947b61b96270.json',
-  sha256: 'sha256:137b5f0f0020a20c3ed956a489ac08d798f0b29f5085e5a28d8abd7102d869ed',
-  paths: 9,
-  schemas: 9,
+  path: 'openapi/candidates/hidra-hse-b451302179eb3a5877aefcb105dab0f3ccb47897.json',
+  sha256: 'sha256:33a24003336a6ff2197d09918b7480f106f89de06b4f2312a24eb5d0f8936da7',
+  paths: 14,
+  schemas: 15,
+  operations: 16,
 };
 const ASSETS_CURRENT_PROOF = {
   config: 'orval.assets.config.ts',
@@ -131,10 +134,11 @@ const WORKBENCH_CURRENT_PROOF = {
 };
 const PLANNING_CURRENT_PROOF = {
   config: 'orval.planning.config.ts',
-  path: 'openapi/candidates/hidra-planning-d14c44fc527ea1115ad87baafa21a3264bf6950c.json',
-  sha256: 'sha256:82982efde1b8eaa6ee66976025af9382aaa45b79a7c96553c4b035a8c41195de',
-  paths: 16,
-  schemas: 20,
+  path: 'openapi/candidates/hidra-planning-b451302179eb3a5877aefcb105dab0f3ccb47897.json',
+  sha256: 'sha256:009e81a44bb64412cf7f45b6640873eb421814616a87674f40708c0d13ee5df7',
+  paths: 17,
+  schemas: 22,
+  operations: 19,
 };
 const IDENTITY_ORGANIZATION_CURRENT_PROOF = {
  config: 'orval.identity-organization.config.ts',
@@ -240,6 +244,7 @@ for (const config of configs) {
     if (slice.openapi !== '3.1.0'
       || Object.keys(slice.paths ?? {}).length !== INCIDENT_CURRENT_PROOF.paths
       || Object.keys(slice.components?.schemas ?? {}).length !== INCIDENT_CURRENT_PROOF.schemas
+      || Object.values(slice.paths ?? {}).reduce((total, item) => total + Object.keys(item).length, 0) !== INCIDENT_CURRENT_PROOF.operations
       || Object.keys(slice.paths ?? {}).some((route) => !route.startsWith('/api/v1/incident/'))) {
       errors.push(`${config}: Incident contract structure differs from the verified artifact`);
     }
@@ -266,6 +271,7 @@ for (const config of configs) {
     if (slice.openapi !== '3.1.0'
       || Object.keys(slice.paths ?? {}).length !== LEAK_CURRENT_PROOF.paths
       || Object.keys(slice.components?.schemas ?? {}).length !== LEAK_CURRENT_PROOF.schemas
+      || Object.values(slice.paths ?? {}).reduce((total, item) => total + Object.keys(item).length, 0) !== LEAK_CURRENT_PROOF.operations
       || Object.keys(slice.paths ?? {}).some((route) => !route.startsWith('/api/v1/leakdetection/'))) {
       errors.push(`${config}: Leak Detection contract structure differs from the verified artifact`);
     }
@@ -279,6 +285,7 @@ for (const config of configs) {
     if (slice.openapi !== '3.1.0'
       || Object.keys(slice.paths ?? {}).length !== HSE_CURRENT_PROOF.paths
       || Object.keys(slice.components?.schemas ?? {}).length !== HSE_CURRENT_PROOF.schemas
+      || Object.values(slice.paths ?? {}).reduce((total, item) => total + Object.keys(item).length, 0) !== HSE_CURRENT_PROOF.operations
       || Object.keys(slice.paths ?? {}).some((route) => !route.startsWith('/api/v1/hse/'))) {
       errors.push(`${config}: HSE contract structure differs from the verified artifact`);
     }
@@ -417,6 +424,7 @@ for (const config of configs) {
     if (slice.openapi !== '3.1.0'
       || Object.keys(slice.paths ?? {}).length !== PLANNING_CURRENT_PROOF.paths
       || Object.keys(slice.components?.schemas ?? {}).length !== PLANNING_CURRENT_PROOF.schemas
+      || Object.values(slice.paths ?? {}).reduce((total, item) => total + Object.keys(item).length, 0) !== PLANNING_CURRENT_PROOF.operations
       || Object.keys(slice.paths ?? {}).some((route) => !route.startsWith('/api/v1/planning/'))) {
       errors.push(`${config}: Planning contract structure differs from the verified artifact`);
     }
@@ -453,7 +461,7 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exit(1);
 }
-console.log(`\nOpenAPI compatibility gate passed for ${configs.length} contracts: Risk from verified HidraAPI 81d46bcb8bc8821f67eafbb26cd1279f6d091457; Topology with additive UXR-23 and UXR-26 source evidence and Configuration from verified HidraAPI f1fdc206c916a5266f609810c045c6b5688bfd49; Workflow with additive UXR-26 evidence over verified HidraAPI 5817406923e53761577ac41bbc3f318b517c3977; Telemetry/Monitoring with additive UXR-24 source evidence, and Incident, Custody, Leak Detection and HSE from verified HidraAPI da4ce33ead7db40776049c861027947b61b96270; Integrity with additive UXR-25 source evidence; Audit with additive T28 source evidence from verified HidraAPI 7624bc900881ccd3957d07f5b1add3f28069bb6d; Assets, Documents, Reporting, Analytics and Simulation from verified HidraAPI 76b14cda4520f1eff242bd474c02ce4db317d385; Alarm from verified HidraAPI b451302179eb3a5877aefcb105dab0f3ccb47897; Workbench from verified HidraAPI 016d972725ac9a02a46f08ec024e0a4b0f95bda6; Planning from verified HidraAPI d14c44fc527ea1115ad87baafa21a3264bf6950c; Identity/Organization from verified HidraAPI 720e9222b30fa45b7423ede9c9f141ab87298024; Party from verified HidraAPI 18e7a7596aea1b26e958130996c8811ae7fe27e4; all feature source pins SHA-256 verified against HidraAPI ${manifest.backendCommit}.`);
+console.log(`\nOpenAPI compatibility gate passed for ${configs.length} contracts: Risk from verified HidraAPI 81d46bcb8bc8821f67eafbb26cd1279f6d091457; Topology with additive UXR-23 and UXR-26 source evidence and Configuration from verified HidraAPI f1fdc206c916a5266f609810c045c6b5688bfd49; Workflow with additive UXR-26 evidence over verified HidraAPI 5817406923e53761577ac41bbc3f318b517c3977; Telemetry/Monitoring with additive UXR-24 source evidence, and Custody from verified HidraAPI da4ce33ead7db40776049c861027947b61b96270; Incident, Leak Detection and HSE from verified HidraAPI b451302179eb3a5877aefcb105dab0f3ccb47897; Integrity with additive UXR-25 source evidence; Audit with additive T28 source evidence from verified HidraAPI 7624bc900881ccd3957d07f5b1add3f28069bb6d; Assets, Documents, Reporting, Analytics and Simulation from verified HidraAPI 76b14cda4520f1eff242bd474c02ce4db317d385; Alarm from verified HidraAPI b451302179eb3a5877aefcb105dab0f3ccb47897; Workbench from verified HidraAPI 016d972725ac9a02a46f08ec024e0a4b0f95bda6; Planning from verified HidraAPI b451302179eb3a5877aefcb105dab0f3ccb47897; Identity/Organization from verified HidraAPI 720e9222b30fa45b7423ede9c9f141ab87298024; Party from verified HidraAPI 18e7a7596aea1b26e958130996c8811ae7fe27e4; all feature source pins SHA-256 verified against HidraAPI ${manifest.backendCommit}.`);
 
 function checkEvidence() {
   const required = ['repository', 'backendCommit', 'workflowRunId', 'artifactId', 'artifactName', 'artifactDigest', 'fullSpecSha256', 'fullContractGzipBase64Parts', 'fullContractGzipSha256', 'expectedOrvalContracts'];

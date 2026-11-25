@@ -7,10 +7,14 @@ const routes = [
   { route: '/api/v1/hse/cases', methods: ['GET'], module: 'hse', resource: 'cases', action: 'read', permission: 'hse:cases:read', enforcementStatus: 'backend-enforced' },
   { route: '/api/v1/hse/capas', methods: ['GET'], module: 'hse', resource: 'capas', action: 'read', permission: 'hse:capas:read', enforcementStatus: 'backend-enforced' },
 ];
+routes.push(...routes.map(route => ({ ...route, route: route.route + '/{id}' })));
+for (const [index, suffix] of [[0, '/timeline'], [0, '/escalation'], [0, '/investigation'], [1, '/evidence'], [2, '/investigation']] as const) {
+  routes.push({ ...routes[index], route: routes[index].route + '/{id}' + suffix });
+}
 const effectivePermissions = ['incident:incidents:read', 'leakdetection:candidates:read', 'leakdetection:cases:read', 'hse:cases:read', 'hse:capas:read'];
 const incident = {
   id: 'inc-1', incidentNumber: 'INC-2026-001', title: 'Pipeline pressure event', description: 'Operational incident under investigation.',
-  status: 'OPEN', sourceType: 'ALARM', severityId: 'SEV-2', priorityId: 'P1', topologyAssetId: 'PIPE-1', topologyAssetCode: 'PL-001',
+  status: 'OPEN', sourceType: 'ALARM', sourceReferenceId: 'alarm-1', severityId: 'SEV-2', priorityId: 'P1', topologyAssetId: 'PIPE-1', topologyAssetCode: 'PL-001',
   topologyAssetName: 'Pipeline Nord', responsibleActorId: 'actor-1', responsibleActorName: 'Operator One', workflowInstanceId: 'wf-1',
   occurredAt: '2026-09-11T10:00:00Z', updatedAt: '2026-09-11T11:00:00Z', currentEscalationLevel: 1,
 };
@@ -37,11 +41,19 @@ const capa = {
 };
 
 async function mockEvents(page: Page) {
+  let denied = false;
   await page.route('**/api/v1/security/permissions/routes', (route) => route.fulfill({ json: routes }));
   await page.route('**/api/v1/security/permissions/catalog', (route) => route.fulfill({ json: { strategy: 'derived-route-permission-catalog', enforcement: 'backend-enforced', permissionFormat: '<module>:<resource>:<action>', routes } }));
   await page.route('**/api/v1/identity/me/permissions', (route) => route.fulfill({ json: effectivePermissions }));
   await page.route('**/api/v1/incident/incidents?**', (route) => route.fulfill({ json: { content: [incident], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false } }));
   await page.route('**/api/v1/incident/incidents/inc-1', (route) => route.fulfill({ json: incident }));
+  await page.route('**/api/v1/incident/incidents/inc-1/investigation', route => denied
+    ? route.fulfill({ status: 404, json: { title: 'Unavailable' } })
+    : route.fulfill({ json: { incidentId: 'inc-1', investigatorId: 'INV-29', investigationState: 'REVIEWED', history: [] } }));
+  await page.route('**/api/v1/incident/incidents/inc-1/escalation', route => route.fulfill({ json: { incidentId: 'inc-1', sourceId: 'alarm-1', sourceType: 'ALARM', evaluationId: 'EVAL-29' } }));
+  await page.route('**/api/v1/incident/incidents/inc-1/timeline', route => route.fulfill({ json: [{ incidentId: 'inc-1', sourceId: 'alarm-1', sourceType: 'ALARM', evaluationId: 'EVAL-29' }] }));
+  await page.route('**/api/v1/leakdetection/candidates/cand-1/evidence', route => route.fulfill({ json: { candidateId: 'cand-1', trustedReadingId: 'TRUST-29' } }));
+  await page.route('**/api/v1/leakdetection/cases/case-1/investigation', route => route.fulfill({ json: { caseId: 'case-1', candidateId: 'cand-1', disposition: 'DISMISSED', history: [] } }));
   await page.route('**/api/v1/leakdetection/candidates?**', (route) => route.fulfill({ json: { content: [candidate], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false } }));
   await page.route('**/api/v1/leakdetection/candidates/cand-1', (route) => route.fulfill({ json: candidate }));
   await page.route('**/api/v1/leakdetection/cases?**', (route) => route.fulfill({ json: { content: [leakCase], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false } }));
@@ -50,6 +62,7 @@ async function mockEvents(page: Page) {
   await page.route('**/api/v1/hse/cases/hse-1', (route) => route.fulfill({ json: hseCase }));
   await page.route('**/api/v1/hse/capas?**', (route) => route.fulfill({ json: { content: [capa], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false } }));
   await page.route('**/api/v1/hse/capas/capa-1', (route) => route.fulfill({ json: capa }));
+  return { deny: () => { denied = true; } };
 }
 
 async function signIn(page: Page) {
@@ -71,6 +84,7 @@ test('HWEB-009 exposes published incident, leak, HSE and CAPA reads', async ({ p
 
   await page.getByRole('button', { name: 'Open' }).click();
   await expect(page.getByText('Operator One')).toBeVisible();
+  await expect(page.getByText(/INV-29/)).toBeVisible();
   await expect(page.getByText('Pipeline Nord', { exact: true }).last()).toBeVisible();
 
   await page.getByRole('tab', { name: 'Leak detection' }).click();
@@ -78,8 +92,10 @@ test('HWEB-009 exposes published incident, leak, HSE and CAPA reads', async ({ p
   await expect(page.getByText('LEAK-001')).toBeVisible();
   await page.getByRole('button', { name: 'Open' }).first().click();
   await expect(page.getByText('Pressure imbalance candidate')).toBeVisible();
+  await expect(page.getByText(/TRUST-29/)).toBeVisible();
   await page.getByRole('button', { name: 'Open' }).last().click();
   await expect(page.getByText('actor-2')).toBeVisible();
+  await expect(page.getByText(/DISMISSED/)).toBeVisible();
 
   await page.getByRole('tab', { name: 'HSE' }).click();
   await expect(page.getByText('HSE-2026-001')).toBeVisible();
@@ -90,4 +106,23 @@ test('HWEB-009 exposes published incident, leak, HSE and CAPA reads', async ({ p
   await page.getByRole('button', { name: 'Open' }).last().click();
   await expect(page.getByText('wo-1')).toBeVisible();
   await expect(page.getByText('task-hse-1')).toBeVisible();
+});
+
+test('UXR-29 owner denial retires Incident detail and a facility-less HSE view does not fall back', async ({ page }) => {
+  const mock = await mockEvents(page);
+  await signIn(page);
+  await page.getByRole('button', { name: 'Événements & incidents' }).click();
+  await page.getByRole('button', { name: 'Open' }).click();
+  await expect(page.getByText(/INV-29/)).toBeVisible();
+  mock.deny();
+  await page.getByRole('button', { name: 'Refresh' }).click();
+  await page.getByRole('button', { name: 'Open' }).click();
+  await expect(page.getByText('Cette ressource est indisponible ou inaccessible.')).toBeVisible();
+  await expect(page.getByText(/INV-29/)).toHaveCount(0);
+  await expect(page.getByText('Operator One')).toHaveCount(0);
+  await page.getByRole('tab', { name: 'HSE' }).click();
+  await page.getByRole('button', { name: 'HSE par installation' }).click();
+  await expect(page.getByText('Sélectionnez une installation autorisée dans le contexte opérationnel.')).toBeVisible();
+  await expect(page.getByText('HSE-2026-001')).toHaveCount(0);
+  await expect(page.getByText('CAPA-001')).toHaveCount(0);
 });

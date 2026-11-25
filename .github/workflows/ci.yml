@@ -110,6 +110,7 @@ jobs:
         run: |
           npm run test:e2e -- --reporter=list,json
           node scripts/check-browser-results.mjs "$PLAYWRIGHT_JSON_OUTPUT_NAME"
+          node --input-type=module -e 'import { readFileSync } from "node:fs"; const report=JSON.parse(readFileSync(process.argv[1],"utf8")); if(report.stats.expected < 122) throw new Error("UXR29 requires the 119 existing mocked tests and three added regressions");' "$PLAYWRIGHT_JSON_OUTPUT_NAME"
       # This suite uses synthetic/mocked API data only. Native JWT and PostgreSQL
       # runs deliberately keep trace/screenshot/video disabled and are not uploaded.
       - name: Preserve mocked-browser failure diagnostics
@@ -735,4 +736,118 @@ jobs:
         with:
           name: hidraweb-f16-${{ github.sha }}
           path: ${{ runner.temp }}/f16-evidence
+          if-no-files-found: error
+
+  uxr29-native:
+    name: UXR-29 signed response, HSE and Planning browser qualification
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - name: Checkout exact WEB
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Checkout immutable accepted T62 API
+        uses: actions/checkout@v5
+        with:
+          repository: CHOUABBIA-AMINE/HidraAPI
+          ref: b451302179eb3a5877aefcb105dab0f3ccb47897
+          path: .uxr29-api
+          persist-credentials: false
+      - name: Set up Java 21 and Maven
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: .uxr29-api/pom.xml
+      - name: Set up declared Node version
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Verify immutable contracts and prepare Chromium
+        run: |
+          npm ci --no-audit --no-fund
+          npm run openapi:compatibility
+          npm run prebuild
+          npx playwright install --with-deps chromium
+          docker info >/dev/null
+      - name: Run original API witnesses and mandatory four signed WEB phases
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C .uxr29-api rev-parse HEAD)" = b451302179eb3a5877aefcb105dab0f3ccb47897
+          export HIDRA_UXR29_WEB_ROOT="$GITHUB_WORKSPACE"
+          export HIDRA_UXR29_EVIDENCE_DIR="$RUNNER_TEMP/uxr29-evidence"
+          export HIDRA_E2E_AUTH_MOCK=0
+          private="$(mktemp -d "$RUNNER_TEMP/uxr29-private.XXXXXXXX")"
+          trap 'rm -rf -- "$private"' EXIT
+          mkdir -p "$HIDRA_UXR29_EVIDENCE_DIR"
+          python3 scripts/prepare-uxr29-native.py .uxr29-api
+          git -C .uxr29-api diff --check
+          status=0
+          (
+            cd .uxr29-api
+            for attempt in 1 2 3; do
+              if bash ./mvnw -B --version; then break; fi
+              test "$attempt" -lt 3
+              sleep "$((attempt * 5))"
+            done
+            bash ./mvnw -B -q test -DfailIfNoTests=true -Dtest=Gz2IncidentLeakInvestigationNativeHttpPostgresIntegrationTest,Gz2HseCapaNativeHttpPostgresIntegrationTest,Gz2PlanningNominationNativeHttpPostgresIntegrationTest
+          ) >"$private/maven.log" 2>&1 || status=$?
+          grep -E '^UXR29_DIAG (PHASE=(RESPONSE_BEFORE|RESPONSE_AFTER|HSE_AFTER|PLANNING_SUBMIT_REVIEW)|COUNTS EXPECTED=[0-9]+ UNEXPECTED=[0-9]+ FLAKY=[0-9]+ SKIPPED=[0-9]+|CHECKPOINT=[A-Z_]+|FAILURE_LINE=[0-9]+|REPORT_MISSING|PASSED)$' "$private/maven.log" || true
+          test "$status" -eq 0 || { echo 'UXR29 native execution failed; private logs are not exported.'; exit 1; }
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          from xml.etree import ElementTree as ET
+          pin = "b451302179eb3a5877aefcb105dab0f3ccb47897"
+          expected_methods = {
+              "Gz2IncidentLeakInvestigationNativeHttpPostgresIntegrationTest": {"signedInvestigationAndIndependentDispositionSurviveRestart"},
+              "Gz2HseCapaNativeHttpPostgresIntegrationTest": {"signedCompanyAndFacilityReadsConcealNonexistentCasesAndRejectWrongScope","signedImpactAssessmentAndApprovedClosureSurviveRestart"},
+              "Gz2PlanningNominationNativeHttpPostgresIntegrationTest": {"currentApprovedRevisionSupportsIndependentNominationDisposition","uxr29BrowserSubmitsAndIndependentlyDecidesCurrentDrafts"},
+          }
+          for name, methods in expected_methods.items():
+              report = Path(".uxr29-api/target/surefire-reports") / ("TEST-dz.sh.hidra.qualification." + name + ".xml")
+              root = ET.parse(report).getroot()
+              assert root.get("tests") == str(len(methods))
+              assert all(root.get(k) == "0" for k in ("failures","errors","skipped"))
+              assert {c.get("name") for c in root.findall("testcase")} == methods
+          pins = {
+              "alarm":"cf152e52ad51591a385327439f27f79fc741ab9b9c3dd6a025b301ca320432ab",
+              "incident":"b0c20686eaec127ff41d3a4381b47317bab200876f02e437c2b699933e1590a3",
+              "leak":"38ccba87706d93edfaaae763622e3b5eb2e44a855d0503385bd54904486af062",
+              "hse":"33a24003336a6ff2197d09918b7480f106f89de06b4f2312a24eb5d0f8936da7",
+              "planning":"009e81a44bb64412cf7f45b6640873eb421814616a87674f40708c0d13ee5df7",
+          }
+          for name, digest in pins.items():
+              candidate = Path("openapi/candidates") / ("hidra-" + name + "-" + pin + ".json")
+              assert hashlib.sha256(candidate.read_bytes()).hexdigest() == digest
+          phases = {"RESPONSE_BEFORE","RESPONSE_AFTER","HSE_AFTER","PLANNING_SUBMIT_REVIEW"}
+          evidence = Path(os.environ["HIDRA_UXR29_EVIDENCE_DIR"])
+          assert {p.name for p in evidence.iterdir()} == {p+".json" for p in phases}
+          inventories = []
+          for phase in phases:
+              record = json.loads((evidence/(phase+".json")).read_text())
+              assert record["api_sha"] == pin and record["web_sha"] == os.environ["GITHUB_SHA"]
+              assert record["run_id"] == os.environ["GITHUB_RUN_ID"] and record["run_attempt"] == os.environ["GITHUB_RUN_ATTEMPT"]
+              assert record["browser"]["phase"] == phase
+              assert record["browser"]["counts"] == dict(expected=1,unexpected=0,flaky=0,skipped=0)
+              assert record["browser"]["checkpoints"][-1] == "COMPLETE"
+              assert record["contracts"] == pins
+              assert record["migrations"] and all(m["success"] is True for m in record["migrations"])
+              inventories.append(record["migrations"])
+          assert all(i == inventories[0] for i in inventories)
+          print("UXR29 native: four exact phase passes; five backend test methods passed; all contract and migration inventories match.")
+          PY
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C .uxr29-api rev-parse HEAD)" = b451302179eb3a5877aefcb105dab0f3ccb47897
+      - name: Upload redacted UXR-29 development evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: hidraweb-uxr29-${{ github.sha }}
+          path: ${{ runner.temp }}/uxr29-evidence
           if-no-files-found: error

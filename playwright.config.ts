@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests/e2e',
-  testIgnore: ['**/uxr26-native.spec.ts', '**/uxr28-native.spec.ts', '**/alarm-native-live.spec.ts'],
+  testIgnore: ['**/uxr26-native.spec.ts', '**/uxr28-native.spec.ts', '**/uxr29-native.spec.ts', '**/alarm-native-live.spec.ts'],
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,

@@ -15,8 +15,9 @@ const fixtures = vi.hoisted(() => {
     { route: '/api/v1/planning/revisions/{revisionId}/approval', methods: ['GET'], module: 'planning', resource: 'revisions', action: 'read', permission: 'planning:revisions:read', enforcementStatus: 'backend-enforced' },
     { route: '/api/v1/planning/revisions/{revisionId}/approval/actions/{transitionId}/execute', methods: ['POST'], module: 'planning', resource: 'revisions', action: 'execute', permission: 'planning:revisions:execute', enforcementStatus: 'backend-enforced' },
   ];
+  routes.push({ route: '/api/v1/planning/targets', methods: ['GET'], module: 'planning', resource: 'targets', action: 'read', permission: 'planning:targets:read', enforcementStatus: 'backend-enforced' });
   const period = { id: 'period-1', code: 'PLN-2026-Q4', nameFr: 'Planification T4 2026', nameEn: 'Q4 2026 Planning', periodStart: '2026-10-01T00:00:00Z', periodEnd: '2026-12-31T23:59:59Z', timeZone: 'Africa/Algiers', status: 'OPEN', periodTypeId: 'QUARTER', createdByActorId: 'planner-1', createdAt: '2026-09-12T08:00:00Z', updatedAt: '2026-09-12T09:00:00Z' };
-  const plan = { id: 'plan-1', periodId: 'period-1', code: 'OP-2026-Q4-NORTH', nameFr: 'Plan Nord T4', nameEn: 'North Q4 Plan', topologyScopeType: 'PIPELINE', topologyScopeId: 'pipe-1', topologyScopeCode: 'PL-NORTH', topologyScopeNameSnapshot: 'Pipeline Nord', status: 'DRAFT', currentRevisionId: 'rev-2', approvedRevisionId: 'rev-1', responsibleOrganizationUnitId: 'org-trc', createdByActorId: 'planner-1', createdAt: '2026-09-12T08:30:00Z', updatedAt: '2026-09-12T09:30:00Z' };
+  const plan = { id: 'plan-1', periodId: 'period-1', code: 'OP-2026-Q4-NORTH', nameFr: 'Plan Nord T4', nameEn: 'North Q4 Plan', topologyScopeType: 'PIPELINE', topologyScopeId: 'pipe-1', topologyScopeCode: 'PL-NORTH', topologyScopeNameSnapshot: 'Pipeline Nord', status: 'SUBMITTED', currentRevisionId: 'rev-2', approvedRevisionId: 'rev-1', responsibleOrganizationUnitId: 'org-trc', createdByActorId: 'planner-1', createdAt: '2026-09-12T08:30:00Z', updatedAt: '2026-09-12T09:30:00Z' };
   const revision = { id: 'rev-2', planId: 'plan-1', revisionNumber: 2, revisionCode: 'R02', baseRevisionId: 'rev-1', status: 'SUBMITTED', changeReasonCodeId: 'OPS_CHANGE', changeReasonText: 'Updated throughput assumptions', submittedAt: '2026-09-12T10:00:00Z', submittedByActorId: 'planner-2', workflowInstanceId: 'wf-plan-2', createdAt: '2026-09-12T09:45:00Z', updatedAt: '2026-09-12T10:00:00Z' };
   const approval = {
     revisionId: 'rev-2',
@@ -33,7 +34,7 @@ const fixtures = vi.hoisted(() => {
     plan,
     revision,
     approval,
-    permissions: ['planning:periods:read', 'planning:operational-plans:read', 'planning:revisions:read', 'planning:revisions:execute', 'planning:revisions:approve'],
+    permissions: ['planning:periods:read', 'planning:operational-plans:read', 'planning:revisions:read', 'planning:revisions:execute', 'planning:revisions:approve', 'planning:targets:read'],
   };
 });
 

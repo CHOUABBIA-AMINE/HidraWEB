@@ -2,7 +2,7 @@ import { defineConfig } from 'orval';
 
 export default defineConfig({
   planning: {
-    input: { target: './openapi/candidates/hidra-planning-d14c44fc527ea1115ad87baafa21a3264bf6950c.json' },
+    input: { target: './openapi/candidates/hidra-planning-b451302179eb3a5877aefcb105dab0f3ccb47897.json' },
     output: {
       mode: 'single',
       target: './src/api/generated/planning/planning.ts',

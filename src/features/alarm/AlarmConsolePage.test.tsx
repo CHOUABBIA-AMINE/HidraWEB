@@ -8,12 +8,14 @@ import { AppProviders } from '@/app/providers/AppProviders';
 const fixtures = vi.hoisted(() => {
   const routes = [
     { route: '/api/v1/alarm/alarms', methods: ['GET'], module: 'alarm', resource: 'alarms', action: 'read', permission: 'alarm:alarms:read', enforcementStatus: 'backend-enforced' },
+    { route: '/api/v1/alarm/alarms/{id}/evidence', methods: ['GET'], module: 'alarm', resource: 'alarms', action: 'read', permission: 'alarm:alarms:read', enforcementStatus: 'backend-enforced' },
     { route: '/api/v1/alarm/alarms/acknowledgements', methods: ['POST'], module: 'alarm', resource: 'alarms', action: 'execute', permission: 'alarm:alarms:execute', enforcementStatus: 'backend-enforced' },
     { route: '/api/v1/alarm/suppressions', methods: ['GET'], module: 'alarm', resource: 'suppressions', action: 'read', permission: 'alarm:suppressions:read', enforcementStatus: 'backend-enforced' },
     { route: '/api/v1/alarm/suppressions', methods: ['POST'], module: 'alarm', resource: 'suppressions', action: 'execute', permission: 'alarm:suppressions:execute', enforcementStatus: 'backend-enforced' },
   ];
   return {
     routes,
+    evidenceDenied: false,
     acknowledged: false,
     denied: false,
     permissions: ['alarm:alarms:read', 'alarm:alarms:execute', 'alarm:suppressions:read', 'alarm:suppressions:execute'],
@@ -35,6 +37,10 @@ const hidraHttpClient = vi.hoisted(() => vi.fn(async (config: { url?: string; me
   if (config.url === '/api/v1/alarm/alarms/alarm-1' && config.method === 'GET') {
     if (fixtures.denied) throw new HidraApiError('Unavailable', { status: 404 });
     return fixtures.acknowledged ? { ...fixtures.alarm, currentState: 'ACKNOWLEDGED', acknowledgedByActorId: 'user-operator', acknowledgedAt: '2026-09-11T10:05:00Z' } : fixtures.alarm;
+  }
+  if (config.url === '/api/v1/alarm/alarms/alarm-1/evidence' && config.method === 'GET') {
+    if (fixtures.evidenceDenied) throw new HidraApiError('Unavailable', { status: 404 });
+    return { alarmId: 'alarm-1', evaluationId: 'DEV-1', ruleId: 'RULE-UXR29', ruleRevision: 2, trustedReadingId: 'READING-UXR29', difference: 3, unitId: 'unit-1' };
   }
   if (config.url === '/api/v1/alarm/alarms/alarm-1/shelvings' && config.method === 'GET') return [{ id: 'shelf-1', alarmId: 'alarm-1', shelvingReasonId: 'MAINT', reasonText: 'Inspection', shelvedByActorId: 'actor-1', shelvedAt: '2026-09-11T08:00:00Z', shelvedUntil: '2026-09-11T12:00:00Z', status: 'ACTIVE' }];
   if (config.url === '/api/v1/alarm/suppressions' && config.method === 'GET') return { content: [], page: 0, size: 50, totalElements: 0, totalPages: 0, hasNext: false };
@@ -59,6 +65,7 @@ describe('HWEB-008 alarm console', () => {
     hidraHttpClient.mockClear();
     fixtures.acknowledged = false;
     fixtures.denied = false;
+    fixtures.evidenceDenied = false;
     window.history.replaceState({}, '', '/overview');
   });
 
@@ -119,3 +126,20 @@ describe('HWEB-008 alarm console', () => {
     // Keep the individual Testing Library assertion deadlines and all checks intact.
   }, 15_000);
 });
+
+it('retires the selected detail on a fresh masked evidence denial without leaking the old receipt', async () => {
+  fixtures.denied = false;
+  fixtures.evidenceDenied = false;
+  fixtures.acknowledged = false;
+  window.history.replaceState({}, '', '/overview');
+  render(<AppProviders><App /></AppProviders>);
+  await signInAndOpenAlarms();
+  fireEvent.click(await screen.findByRole('button', { name: 'Ouvrir' }));
+  expect(await screen.findByText('ID mesure qualifiée: READING-UXR29')).toBeInTheDocument();
+  fixtures.evidenceDenied = true;
+  fireEvent.click(screen.getByRole('button', { name: 'Actualiser' }));
+  expect(await screen.findByText(/Alarme indisponible/)).toBeInTheDocument();
+  expect(screen.queryByText('ID mesure qualifiée: READING-UXR29')).not.toBeInTheDocument();
+  expect(screen.queryByRole('heading', { name: 'Pression élevée', level: 2 })).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Acquitter' })).not.toBeInTheDocument();
+}, 15_000);

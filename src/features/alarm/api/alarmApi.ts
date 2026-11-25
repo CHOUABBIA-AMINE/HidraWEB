@@ -5,6 +5,7 @@ import type {
   AlarmSuppressionDto,
   AlarmSuppressionPageDto,
   CloseAlarmRequest,
+  EvidenceLinkedAlarmResponse,
   CreateSuppressionRequest,
   PageAlarmView,
   ShelveAlarmRequest,
@@ -40,20 +41,21 @@ export const alarmQueryKeys = {
   all: ['hidra', 'alarm'] as const,
   list: (params: AlarmListParams) => ['hidra', 'alarm', 'alarms', params] as const,
   detail: (id: string) => ['hidra', 'alarm', 'alarms', id] as const,
+  evidence: (id: string) => ['hidra', 'alarm', 'alarms', id, 'evidence'] as const,
   shelvings: (id: string) => ['hidra', 'alarm', 'alarms', id, 'shelvings'] as const,
   suppressions: (params: AlarmSuppressionListParams) => ['hidra', 'alarm', 'suppressions', params] as const,
 };
 
-export function fetchAlarms(params: AlarmListParams): Promise<PageAlarmView> {
-  return hidraHttpClient<PageAlarmView>({ method: 'GET', url: '/api/v1/alarm/alarms', params: compactParams(params) });
+export function fetchAlarms(params: AlarmListParams, signal?: AbortSignal): Promise<PageAlarmView> {
+  return hidraHttpClient<PageAlarmView>({ method: 'GET', url: '/api/v1/alarm/alarms', params: compactParams(params), ...(signal ? { signal } : {}) });
 }
 
 export function fetchAlarm(id: string, signal?: AbortSignal): Promise<AlarmView> {
   return hidraHttpClient<AlarmView>({ method: 'GET', url: `/api/v1/alarm/alarms/${encodeURIComponent(id)}`, ...(signal ? { signal } : {}) });
 }
 
-export function fetchShelvings(id: string): Promise<ShelvingView[]> {
-  return hidraHttpClient<ShelvingView[]>({ method: 'GET', url: `/api/v1/alarm/alarms/${encodeURIComponent(id)}/shelvings` });
+export function fetchShelvings(id: string, signal?: AbortSignal): Promise<ShelvingView[]> {
+  return hidraHttpClient<ShelvingView[]>({ method: 'GET', url: `/api/v1/alarm/alarms/${encodeURIComponent(id)}/shelvings`, ...(signal ? { signal } : {}) });
 }
 
 export function fetchSuppressions(params: AlarmSuppressionListParams): Promise<AlarmSuppressionPageDto> {
@@ -115,4 +117,8 @@ export async function acknowledgeAlarmWithReadback(request: AcknowledgeAlarmRequ
     throw new AlarmAcknowledgementReadbackError();
   }
   return receipt;
+}
+
+export function fetchAlarmEvidence(id: string, signal?: AbortSignal): Promise<EvidenceLinkedAlarmResponse> {
+  return hidraHttpClient<EvidenceLinkedAlarmResponse>({ method: 'GET', url: `/api/v1/alarm/alarms/${encodeURIComponent(id)}/evidence`, ...(signal ? { signal } : {}) });
 }

@@ -4,6 +4,7 @@ const routes = [
   { route: '/api/v1/alarm/alarms', methods: ['GET'], module: 'alarm', resource: 'alarms', action: 'read', permission: 'alarm:alarms:read', enforcementStatus: 'backend-enforced' },
   { route: '/api/v1/alarm/alarms/acknowledgements', methods: ['POST'], module: 'alarm', resource: 'alarms', action: 'execute', permission: 'alarm:alarms:execute', enforcementStatus: 'backend-enforced' },
 ];
+routes.push({ ...routes[0], route: '/api/v1/alarm/alarms/{id}/evidence' });
 const effectivePermissions = ['alarm:alarms:read', 'alarm:alarms:execute'];
 const alarm = {
   id: 'alarm-1', alarmNumber: 'ALM-001', alarmTypeId: 'PRESSURE', severityId: 'SEV-CRITICAL', priorityId: 'P1',
@@ -14,10 +15,14 @@ const alarm = {
 
 async function mockAlarm(page: Page) {
   let acknowledged = false;
+  let evidenceDenied = false;
   await page.route('**/api/v1/security/permissions/routes', (route) => route.fulfill({ json: routes }));
   await page.route('**/api/v1/security/permissions/catalog', (route) => route.fulfill({ json: { strategy: 'derived-route-permission-catalog', enforcement: 'backend-enforced', permissionFormat: '<module>:<resource>:<action>', routes } }));
   await page.route('**/api/v1/identity/me/permissions', (route) => route.fulfill({ json: effectivePermissions }));
   await page.route('**/api/v1/alarm/alarms?**', (route) => route.fulfill({ json: { content: [alarm], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false } }));
+  await page.route('**/api/v1/alarm/alarms/alarm-1/evidence', route => evidenceDenied
+    ? route.fulfill({ status: 404, json: { title: 'Unavailable' } })
+    : route.fulfill({ json: { alarmId: 'alarm-1', evaluationId: 'DEV-1', ruleId: 'RULE-29', trustedReadingId: 'READ-29', currentState: 'ACTIVE' } }));
   await page.route('**/api/v1/alarm/alarms/alarm-1/shelvings', (route) => route.fulfill({ json: [{ id: 'shelf-1', alarmId: 'alarm-1', shelvingReasonId: 'MAINT', reasonText: 'Inspection', shelvedByActorId: 'actor-1', shelvedAt: '2026-09-11T08:00:00Z', shelvedUntil: '2026-09-11T12:00:00Z', status: 'ACTIVE' }] }));
   await page.route('**/api/v1/alarm/alarms/alarm-1', (route) => route.fulfill({ json: acknowledged ? { ...alarm, currentState: 'ACKNOWLEDGED', acknowledgedByActorId: 'actor-1', acknowledgedAt: '2026-09-11T10:05:00Z' } : alarm }));
   await page.route('**/api/v1/alarm/alarms/acknowledgements', async (route) => {
@@ -27,6 +32,7 @@ async function mockAlarm(page: Page) {
     await route.fulfill({ json: 'ack-1' });
   });
   await page.route('**/api/v1/alarm/alarms/alarm-1/shelvings/shelf-1/unshelve', (route) => route.fulfill({ json: 'unshelve-1' }));
+  return { denyEvidence: () => { evidenceDenied = true; } };
 }
 
 async function signIn(page: Page) {
@@ -106,4 +112,17 @@ test('UXR-07 alarm view tabs survive Back/Forward through allowlisted URL state'
   await page.goForward();
   await expect(page).toHaveURL(/\/alarms\?tab=history$/);
   await expect(page.getByRole('tab').nth(1)).toHaveAttribute('aria-selected', 'true');
+});
+
+test('UXR-29 clears an Alarm evidence receipt on a masked protected reread', async ({ page }) => {
+  const mock = await mockAlarm(page);
+  await signIn(page);
+  await page.getByRole('button', { name: 'Alarmes' }).click();
+  await page.getByRole('button', { name: 'Ouvrir' }).click();
+  await expect(page.getByText(/READ-29/)).toBeVisible();
+  mock.denyEvidence();
+  await page.getByRole('button', { name: 'Actualiser' }).click();
+  await expect(page.getByText(/Alarme indisponible/)).toBeVisible();
+  await expect(page.getByText(/READ-29/)).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Acquitter' })).toHaveCount(0);
 });

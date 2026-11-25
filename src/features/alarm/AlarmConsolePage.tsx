@@ -4,6 +4,7 @@ import {
   Button,
   Checkbox,
   Chip,
+  CircularProgress,
   Container,
   Divider,
   FormControlLabel,
@@ -34,6 +35,7 @@ import {
   alarmQueryKeys,
   closeAlarm as closeAlarmRecord,
   fetchAlarm,
+  fetchAlarmEvidence,
   fetchAlarms,
   fetchShelvings,
   shelveAlarm,
@@ -47,6 +49,7 @@ import { useShellUiStore } from '@/shell/model/useShellUiStore';
 import { readLocalTab, writeLocalTab } from '@/shell/navigation/localTabRoute';
 
 const PAGE_SIZE = 50;
+const ALARM_EVIDENCE_ROUTE = '/api/v1/alarm/alarms/{id}/evidence';
 const ALARM_STATES = ['RAISED', 'ACTIVE', 'ACKNOWLEDGED', 'SHELVED', 'SUPPRESSED', 'CLEARED', 'CLOSED', 'ESCALATED', 'CANCELLED'] as const;
 const CLOSURE_TYPES = ['NORMALIZED', 'FALSE_ALARM', 'DUPLICATE', 'MAINTENANCE', 'CANCELLED', 'ESCALATED_TO_INCIDENT'] as const;
 
@@ -124,9 +127,9 @@ export function AlarmConsolePage() {
   const context = useShellUiStore(state => state.operationalContext);
   const permissions = usePermissions();
   const [searchParams] = useSearchParams();
-  const scope = JSON.stringify([auth.session?.principal?.userId, auth.session?.sessionId,
-    context?.scopeId, context?.companyPartyId, context?.targetId,
-    readLocalTab(searchParams.get('tab'), ['active', 'history'] as const, 'active'), permissions.status, [...permissions.permissions].sort()]);
+  const scope = JSON.stringify([auth.status, auth.session?.principal?.userId, auth.session?.sessionId,
+    context?.principalId, context?.scopeId, context?.companyPartyId, context?.type, context?.targetId,
+    readLocalTab(searchParams.get('tab'), ['active', 'history'] as const, 'active'), permissions.status, [...permissions.permissions].sort(), permissions.routes.map(r => [r.route, r.methods, r.permission])]);
   return <ScopedAlarmConsole key={scope} scope={scope} />;
 }
 
@@ -142,6 +145,8 @@ function ScopedAlarmConsole({ scope }: { scope: string }) {
   const [selectionEpoch, setSelectionEpoch] = useState(0);
   const [readDenied, setReadDenied] = useState(false);
   const [readbackUnconfirmed, setReadbackUnconfirmed] = useState(false);
+  const [evidenceUnavailable, setEvidenceUnavailable] = useState(false);
+  const [hadEvidence, setHadEvidence] = useState(false);
   const [draftFilters, setDraftFilters] = useState({ state: '', severityId: '', topologyAssetId: '', from: '', to: '' });
   const [filters, setFilters] = useState(draftFilters);
   const [ackForm, setAckForm] = useState({ organizationUnitId: '', organizationUnitCode: '', comment: '' });
@@ -150,6 +155,8 @@ function ScopedAlarmConsole({ scope }: { scope: string }) {
   const [suppressionBusy, setSuppressionBusy] = useState(false);
 
   const canRead = permissions.can(ALARM_PERMISSIONS.read);
+  const evidencePermission = permissions.routes.find(route => route.route === ALARM_EVIDENCE_ROUTE && route.methods.includes('GET'))?.permission;
+  const canReadEvidence = Boolean(evidencePermission && permissions.can(evidencePermission));
   const canExecute = permissions.can(ALARM_PERMISSIONS.execute);
   const canSuppressionRead = permissions.can(ALARM_PERMISSIONS.suppressionRead);
   const canSuppressionExecute = permissions.can(ALARM_PERMISSIONS.suppressionExecute);
@@ -164,9 +171,39 @@ function ScopedAlarmConsole({ scope }: { scope: string }) {
     size: PAGE_SIZE,
   }), [filters, page, view]);
 
-  const alarmsQuery = useQuery({ queryKey: [...alarmQueryKeys.list(listParams), scope], queryFn: () => fetchAlarms(listParams), enabled: canRead, retry: false, refetchOnMount: 'always' });
-  const detailQuery = useQuery({ queryKey: [...alarmQueryKeys.detail(selectedAlarmId), scope, selectionEpoch], queryFn: ({ signal }) => fetchAlarm(selectedAlarmId, signal), enabled: canRead && Boolean(selectedAlarmId), retry: false, refetchOnMount: 'always' });
-  const shelvingQuery = useQuery({ queryKey: [...alarmQueryKeys.shelvings(selectedAlarmId), scope, selectionEpoch], queryFn: () => fetchShelvings(selectedAlarmId), enabled: canRead && Boolean(selectedAlarmId) && detailQuery.isSuccess, retry: false });
+  const alarmsQuery = useQuery({ queryKey: [...alarmQueryKeys.list(listParams), scope], queryFn: ({ signal }) => fetchAlarms(listParams, signal), enabled: canRead, retry: false, refetchOnMount: 'always', gcTime: 0 });
+  const freshList = canRead && !readDenied && alarmsQuery.isSuccess && alarmsQuery.isFetchedAfterMount && !alarmsQuery.isFetching ? alarmsQuery.data : undefined;
+  const listed = Boolean(freshList?.content?.some(row => row.id === selectedAlarmId));
+  const detailQuery = useQuery({ queryKey: [...alarmQueryKeys.detail(selectedAlarmId), scope, selectionEpoch], queryFn: ({ signal }) => fetchAlarm(selectedAlarmId, signal), enabled: canRead && Boolean(selectedAlarmId) && listed, retry: false, refetchOnMount: 'always', gcTime: 0 });
+  const currentDetail = canRead && listed && !alarmsQuery.isError && detailQuery.isSuccess
+    && detailQuery.isFetchedAfterMount && !detailQuery.isFetching && detailQuery.data.id === selectedAlarmId
+    ? detailQuery.data : undefined;
+  // T12 stores monitoringEvaluationId separately from sourceReferenceId;
+  // AlarmView does not expose that field. Only the owner GET establishes
+  // positive evidence, even when the generic source reference is absent.
+  const evidenceQuery = useQuery({
+    queryKey: [...alarmQueryKeys.evidence(selectedAlarmId), scope, selectionEpoch, evidencePermission],
+    queryFn: ({ signal }) => fetchAlarmEvidence(selectedAlarmId, signal),
+    enabled: Boolean(currentDetail && canReadEvidence),
+    retry: false, refetchOnMount: 'always', gcTime: 0,
+  });
+  const evidence = canReadEvidence && currentDetail && evidenceQuery.isSuccess
+    && evidenceQuery.isFetchedAfterMount && !evidenceQuery.isFetching
+    && evidenceQuery.data.alarmId === selectedAlarmId
+    && Boolean(evidenceQuery.data.evaluationId)
+    && (!currentDetail.sourceReferenceId || evidenceQuery.data.evaluationId === currentDetail.sourceReferenceId)
+    ? evidenceQuery.data : undefined;
+  const evidenceMismatch = Boolean(canReadEvidence && currentDetail && evidenceQuery.isSuccess
+    && evidenceQuery.isFetchedAfterMount && !evidenceQuery.isFetching && !evidence);
+  if (evidence && !hadEvidence) setHadEvidence(true);
+  // A masked first 404 without an owner reference or prior positive receipt
+  // cannot establish whether a link exists. Render only generic unavailable;
+  // no evidence is inferred. A denied reread of a known receipt retires detail.
+  const missingUnlinked = evidenceQuery.isError && normalizeHidraApiError(evidenceQuery.error).status === 404
+    && !hadEvidence && !currentDetail?.sourceReferenceId;
+  const evidenceDenied = Boolean(currentDetail && canReadEvidence &&
+    ((evidenceQuery.isError && !missingUnlinked) || evidenceMismatch));
+  const shelvingQuery = useQuery({ queryKey: [...alarmQueryKeys.shelvings(selectedAlarmId), scope, selectionEpoch], queryFn: ({ signal }) => fetchShelvings(selectedAlarmId, signal), enabled: Boolean(currentDetail), retry: false, gcTime: 0, refetchOnMount: 'always' });
 
   const refreshAlarmData = async () => {
     await queryClient.invalidateQueries({ queryKey: alarmQueryKeys.all });
@@ -222,21 +259,21 @@ function ScopedAlarmConsole({ scope }: { scope: string }) {
   const mutationError = acknowledgeMutation.error ?? closeMutation.error ?? shelveMutation.error ?? unshelveMutation.error;
   const mutationSucceeded = Boolean(acknowledgeMutation.data ?? closeMutation.data ?? shelveMutation.data ?? unshelveMutation.data);
   const firstError = alarmsQuery.error ?? detailQuery.error ?? shelvingQuery.error;
-  const list = canRead && alarmsQuery.isSuccess && alarmsQuery.isFetchedAfterMount && !alarmsQuery.isFetching ? alarmsQuery.data : undefined;
+  const list = freshList;
   // Never display a previous successful response following a protected read failure.
-  const detail = canRead && !alarmsQuery.isError && detailQuery.isSuccess && detailQuery.isFetchedAfterMount && detailQuery.data.id === selectedAlarmId
-    ? detailQuery.data : undefined;
-  const shelvings = detail && shelvingQuery.isSuccess && shelvingQuery.isFetchedAfterMount ? shelvingQuery.data : [];
+  const detail = currentDetail;
+  const shelvings = detail && shelvingQuery.isSuccess && shelvingQuery.isFetchedAfterMount && !shelvingQuery.isFetching ? shelvingQuery.data : [];
   const alarms = list?.content ?? [];
   const totalPages = Math.max(list?.totalPages ?? 1, 1);
-  const actionDisabled = mutationBusy || detailQuery.isFetching || alarmsQuery.isFetching || shelvingQuery.isError;
+  const actionDisabled = mutationBusy || detailQuery.isFetching || alarmsQuery.isFetching || shelvingQuery.isError || evidenceDenied || (canReadEvidence && evidenceQuery.isFetching);
   const unconfirmed = mutationError instanceof AlarmAcknowledgementReadbackError;
-  const denied = Boolean(selectedAlarmId) && (!canRead || alarmsQuery.isError || detailQuery.isError
-    || shelvingQuery.isError || unconfirmed || [401, 403, 404].includes(normalizeHidraApiError(mutationError).status ?? 0));
+  const denied = Boolean(selectedAlarmId) && (!canRead || alarmsQuery.isError || (freshList && !listed) || detailQuery.isError
+    || shelvingQuery.isError || evidenceDenied || unconfirmed || [401, 403, 404].includes(normalizeHidraApiError(mutationError).status ?? 0));
   // A failed fresh read retires the selection; a later refresh cannot resurrect it.
   if (denied) {
     setReadDenied(true);
     setReadbackUnconfirmed(unconfirmed);
+    setEvidenceUnavailable(evidenceDenied);
     setSelectedAlarmId('');
   }
 
@@ -251,6 +288,8 @@ function ScopedAlarmConsole({ scope }: { scope: string }) {
     setSuppressionBusy(false);
     setReadDenied(false);
     setReadbackUnconfirmed(false);
+    setEvidenceUnavailable(false);
+    setHadEvidence(false);
     if (id) queryClient.removeQueries({ queryKey: alarmQueryKeys.suppressions({ alarmId: id, page: 0, size: 50 }), exact: true });
     setSelectionEpoch(value => value + 1);
     setSelectedAlarmId(id);
@@ -269,6 +308,7 @@ function ScopedAlarmConsole({ scope }: { scope: string }) {
         </Box>
 
         <Alert severity="info">{t('alarm.realtimeNotice')}</Alert>
+        {evidenceUnavailable ? <Alert severity="warning">{t('alarm.evidenceUnavailable')}</Alert> : null}
         <Alert severity="info">{t('alarm.suppressionNotice')}</Alert>
         {!canRead ? <Alert severity="warning">{t('alarm.unavailable')}</Alert> : null}
         {firstError ? <Alert severity="error">{displayError(firstError)}</Alert> : null}
@@ -287,7 +327,7 @@ function ScopedAlarmConsole({ scope }: { scope: string }) {
                     <Tab label={t('alarm.active')} value="active" />
                     <Tab label={t('alarm.history')} value="history" />
                   </Tabs>
-                  <Button onClick={() => void refreshAlarmData()}>{t('alarm.refresh')}</Button>
+                  <Button onClick={() => { setReadDenied(false); setEvidenceUnavailable(false); void refreshAlarmData(); }}>{t('alarm.refresh')}</Button>
                 </Box>
                 <Typography component="h2" variant="subtitle1">{t('alarm.filters')}</Typography>
                 <Box sx={{ display: 'grid', gap: 1.5, gridTemplateColumns: { xs: '1fr', md: 'repeat(5, minmax(150px, 1fr))' } }}>
@@ -345,6 +385,23 @@ function ScopedAlarmConsole({ scope }: { scope: string }) {
                         <Typography>{t('alarm.closed')}: {detail.closedAt ?? '—'}</Typography><Typography>{t('alarm.correlation')}: {detail.correlationId ?? '—'}</Typography>
                       </Box>
                     ) : null}
+
+                    <Divider />
+                    <Box aria-label={t('alarm.evidenceTitle')}>
+                      <Typography component="h3" variant="subtitle1">{t('alarm.evidenceTitle')}</Typography>
+                      {!canReadEvidence ? <Typography color="text.secondary">{t('alarm.evidenceUnavailable')}</Typography>
+                        : evidenceQuery.isFetching ? <CircularProgress size={20} />
+                        : evidence ? <Stack spacing={0.5}>
+                          <Typography>{t('alarm.evaluationId')}: {evidence.evaluationId}</Typography>
+                          <Typography>{t('alarm.ruleId')}: {evidence.ruleId ?? '—'} / {evidence.ruleRevision ?? '—'}</Typography>
+                          <Typography>{t('alarm.targetId')}: {evidence.targetId ?? '—'}</Typography>
+                          <Typography>{t('alarm.approvalId')}: {evidence.approvalId ?? '—'}</Typography>
+                          <Typography>{t('alarm.trustedReadingId')}: {evidence.trustedReadingId ?? '—'}</Typography>
+                          <Typography>{t('alarm.evaluatedAt')}: {evidence.evaluatedAt ?? '—'}</Typography>
+                          <Typography>{t('alarm.difference')}: {evidence.difference ?? '—'} ({evidence.unitId ?? '—'})</Typography>
+                          <Typography>{t('alarm.state')}: {evidence.currentState ?? '—'}</Typography>
+                        </Stack> : <Typography color="text.secondary">{t('alarm.evidenceUnavailable')}</Typography>}
+                    </Box>
 
                     {detail?.topologyAssetId ? <><Divider /><Box><Typography component="h3" variant="subtitle1">{t('alarm.topologyContext')}</Typography><Typography>{detail.topologyAssetName ?? detail.topologyAssetCode ?? detail.topologyAssetId}</Typography><Button onClick={() => navigate('/network')} size="small">{t('alarm.openNetwork')}</Button></Box></> : null}
                     {detail?.workflowInstanceId ? <Box><Typography component="h3" variant="subtitle1">{t('alarm.workflowContext')}</Typography><Typography>{detail.workflowInstanceId}</Typography><Button onClick={() => navigate(`/work/tasks?instanceId=${encodeURIComponent(detail.workflowInstanceId ?? '')}`)} size="small">{t('alarm.openTasks')}</Button></Box> : null}
