@@ -85,7 +85,7 @@ test('F16 native signed company and FACILITY alarm acknowledgement and durable d
   const privateDir = process.env.HIDRA_F16_PRIVATE_DIR;
   if (!privateDir) throw new Error('F16 fixture is mandatory.');
   const fixture = JSON.parse(readFileSync(join(privateDir, 'fixture.json'), 'utf8')) as Fixture;
-  const [primary, sibling, foreign] = fixture.actors;
+  const [primary] = fixture.actors;
   expect(fixture.actors.length).toBe(3);
   expect(pg('SELECT current_database()')).toBe('hidra_alarm_f16');
   const contexts = await Promise.all(fixture.actors.map(() => browser.newContext()));
