@@ -102,13 +102,18 @@ async function mockOperations(page: Page) {
 }
 
 async function mockAlarm(page: Page) {
+  // Model the owner-maintained snapshot; the command receipt alone is not readback.
+  let currentAlarm: typeof alarm & { acknowledgedByActorId?: string; acknowledgedAt?: string } = { ...alarm };
   await page.route('**/api/v1/alarm/alarms?**', (route) => route.fulfill({
-    json: { content: [alarm], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false },
+    json: { content: [currentAlarm], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false },
   }));
   await page.route('**/api/v1/alarm/alarms/alarm-1/shelvings', (route) => route.fulfill({ json: [] }));
-  await page.route('**/api/v1/alarm/alarms/alarm-1', (route) => route.fulfill({ json: alarm }));
+  await page.route('**/api/v1/alarm/alarms/alarm-1', (route) => route.fulfill({ json: currentAlarm }));
   await page.route('**/api/v1/alarm/alarms/acknowledgements', async (route) => {
+    expect(route.request().method()).toBe('POST');
     expect(route.request().postDataJSON()).toEqual({ alarmId: 'alarm-1' });
+    currentAlarm = { ...currentAlarm, currentState: 'ACKNOWLEDGED',
+      acknowledgedByActorId: 'e2e-playwright-user', acknowledgedAt: '2026-09-11T10:05:00Z' };
     await route.fulfill({ json: 'ack-1' });
   });
 }
@@ -210,8 +215,17 @@ test('HWEB-015-09 protects the monitor-to-response-to-workflow operator journey'
   await expect(page.getByText('Pipeline Nord', { exact: true }).last()).toBeVisible();
   await expect(page.getByText(/dérive l’identité de l’acteur/)).toBeVisible();
   await expect(page.getByLabel('Référence acteur')).toHaveCount(0);
+  const readback = page.waitForResponse(response =>
+    new URL(response.url()).pathname === '/api/v1/alarm/alarms/alarm-1'
+    && response.request().method() === 'GET' && response.status() === 200);
   await page.getByRole('button', { name: 'Acquitter' }).click();
+  expect(await (await readback).json()).toMatchObject({
+    id: 'alarm-1', currentState: 'ACKNOWLEDGED', acknowledgedByActorId: 'e2e-playwright-user',
+    acknowledgedAt: '2026-09-11T10:05:00Z',
+  });
   await expect(page.getByText('Opération enregistrée par HidraAPI.')).toBeVisible();
+  await expect(page.getByText('Acquittée par: e2e-playwright-user', { exact: true })).toBeVisible();
+  await expect(page.getByText('Acquittée le: 2026-09-11T10:05:00Z', { exact: true })).toBeVisible();
 
   // UXR-06 exposes one group at a time. Switch to Work before selecting
   // the authorized workflow destination; never click the global shortcut.
