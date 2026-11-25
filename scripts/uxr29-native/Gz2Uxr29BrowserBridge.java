@@ -25,7 +25,54 @@ final class Gz2Uxr29BrowserBridge {
     static void shellGrants(Gz2SignedWorkflowFixture f, String actor) {
         f.global(actor, "identity:me:read", "security:permissions:read");
     }
+    /** T33/T61 resolve a facility only through one current link to an ACTIVE
+     * system with an exact foundation owner. Preserve an existing link and
+     * never invent a cross-company entitlement from a facility grant alone. */
+    static void ensureRegionalLineage(Gz2SignedWorkflowFixture f, String station) {
+        String company = f.sql.queryForObject(
+            "SELECT owner_party_id FROM hidra_topology_facility WHERE id=? AND status='ACTIVE'", String.class, station);
+        assertNotNull(company);
+        var systems = f.sql.queryForList("""
+            SELECT pipeline_system_id FROM hidra_topology_pipeline_system_facility
+            WHERE facility_id=? AND status='ACTIVE'
+              AND (valid_from IS NULL OR valid_from<=now())
+              AND (valid_to IS NULL OR valid_to>now())
+            """, String.class, station);
+        assertTrue(systems.size() <= 1, "Ambiguous synthetic regional facility lineage");
+        String system;
+        if (systems.isEmpty()) {
+            system = id();
+            assertEquals(1, f.sql.update("""
+                INSERT INTO hidra_topology_pipeline_system(id,code,system_type_id,status,created_at,updated_at)
+                SELECT ?,?,system_type_id,'ACTIVE',now(),now()
+                FROM hidra_topology_pipeline_system WHERE id=?
+                """, system, "UXR29-" + system, f.pipeline));
+            assertEquals(1, f.sql.update("""
+                INSERT INTO hidra_topology_pipeline_system_facility
+                    (id,pipeline_system_id,facility_id,status,created_at,updated_at)
+                VALUES (?,?,?,'ACTIVE',now(),now())
+                """, id(), system, station));
+        } else {
+            system = systems.getFirst();
+            // The original GZ2 fixture seeds a DRAFT system; activate only
+            // that fixture's existing lineage, not arbitrary retired systems.
+            f.sql.update("UPDATE hidra_topology_pipeline_system SET status='ACTIVE' WHERE id=? AND status='DRAFT'", system);
+        }
+        var owners = f.sql.queryForList("""
+            SELECT company_party_id FROM hidra_topology_foundation_system_owner
+            WHERE pipeline_system_id=?
+            """, String.class, system);
+        if (owners.isEmpty()) {
+            assertEquals(1, f.sql.update("""
+                INSERT INTO hidra_topology_foundation_system_owner(pipeline_system_id,company_party_id)
+                VALUES (?,?)
+                """, system, company));
+        } else assertEquals(List.of(company), owners, "Synthetic regional owner mismatch");
+        assertEquals("ACTIVE", f.sql.queryForObject(
+            "SELECT status FROM hidra_topology_pipeline_system WHERE id=?", String.class, system));
+    }
     static void facility(Gz2SignedWorkflowFixture f, String actor, String station) {
+        ensureRegionalLineage(f, station);
         // Same synthetic employee/assignment shape as the existing Circle fixture.
         String employee = f.sql.queryForObject("SELECT employee_reference_id FROM hidra_identity_user WHERE id=?", String.class, actor);
         if (employee == null) {

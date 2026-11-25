@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ScopedHseWorkspace } from './ScopedHseWorkspace';
+import type * as HseApi from './api/hseApi';
 
 const f = vi.hoisted(() => ({
   context: { scopeId: 1, companyPartyId: 'company-1', principalId: 'user-1', type: 'FACILITY', targetId: 'facility-1' },
@@ -26,7 +27,7 @@ vi.mock('@/features/permissions/usePermissions', () => ({ usePermissions: () => 
 }) }));
 vi.mock('@/features/context/api/identityOrganizationApi', () => ({ fetchCurrentOperationalScopes: f.scopes, fetchCurrentRegionalAccess: f.region }));
 vi.mock('@/features/incident/api/hseApi', async importOriginal => {
-  const original = await importOriginal<typeof import('./api/hseApi')>();
+  const original = await importOriginal<typeof HseApi>();
   return { ...original, fetchScopedHseCases: f.cases, fetchScopedHseCase: f.detail, fetchScopedHseCapas: f.capas, fetchScopedHseCapa: f.capa, fetchScopedHseHistory: f.history, fetchHseCases: f.legacy, fetchCapas: f.legacy };
 });
 

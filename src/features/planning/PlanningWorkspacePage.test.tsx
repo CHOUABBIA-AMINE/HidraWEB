@@ -26,7 +26,7 @@ const fixtures = vi.hoisted(() => {
     workflowInstanceStatus: 'IN_PROGRESS',
     currentTaskId: 'task-plan-2',
     currentTaskUpdatedAt: '2026-09-12T10:05:00Z',
-    actions: [{ transitionId: 'transition-approve', decision: 'APPROVE', reasonRequired: false, commentRequired: true, requiredPermissionCode: 'planning:revisions:approve', permitted: true }],
+    actions: [{ transitionId: 'transition-approve', decision: 'APPROVE', reasonRequired: false, commentRequired: true, requiredPermissionCode: 'planning:revisions:approve', permitted: true }, { transitionId: 'transition-reject', decision: 'REJECT', reasonRequired: false, commentRequired: false, requiredPermissionCode: 'planning:revisions:approve', permitted: true }],
   };
   return {
     routes,
@@ -82,6 +82,13 @@ describe('HWEB-010 planning workspace', () => {
     expect(screen.getByText(/2026-09-12T10:05:00Z/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'APPROVE' })).toBeEnabled();
     expect(screen.getByText('comment required')).toBeInTheDocument();
-    expect(screen.getByText('planning:revisions:approve')).toBeInTheDocument();
+    expect(screen.getAllByText('planning:revisions:approve')).toHaveLength(2);
+    fireEvent.click(screen.getByRole('button', { name: 'REJECT', exact: true }));
+    const reject = screen.getByRole('button', { name: 'Execute REJECT', exact: true });
+    expect(reject).toBeDisabled();
+    fireEvent.change(screen.getByLabelText(/Reason ID/), { target: { value: '  ' } });
+    expect(reject).toBeDisabled();
+    fireEvent.change(screen.getByLabelText(/Reason ID/), { target: { value: 'owner-catalog-reason' } });
+    expect(reject).toBeEnabled();
   });
 });

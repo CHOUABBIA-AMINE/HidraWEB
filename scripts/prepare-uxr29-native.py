@@ -43,6 +43,7 @@ fixture_name, response_name, hse_name, planning_name = anchors
 fixture = once(original[fixture_name], "    static String id() {", '''
     String uxr29Actor(String label) { return human(label); }
     String uxr29Password() { return HUMAN_PASSWORD; }
+    String uxr29RejectionReason() { return workflowType("WORKFLOW_REASON", "UXR29_SYNTHETIC_REJECTION"); }
 
 ''', before=True)
 fixture = once(fixture, "        long pid() {", '''
@@ -108,6 +109,7 @@ planning_add = '''
             grantPlanning(f);
             var review=f.review("planning","PLAN_REVISION","PLAN_REVISION_APPROVAL",true);
             String reject=Gz2SignedWorkflowFixture.id();
+            String rejectionReason=f.uxr29RejectionReason();
             f.sql.update("""
                 INSERT INTO hidra_workflow_transition(id,definition_id,from_step_id,to_step_id,decision,reason_required,comment_required,created_at,updated_at)
                 SELECT ?,definition_id,from_step_id,to_step_id,'REJECT',false,false,now(),now()
@@ -154,6 +156,7 @@ planning_add = '''
                     Map.entry("foreign",foreign),Map.entry("foreignFacility",foreignFacility),
                     Map.entry("definition",review.definition()),Map.entry("type",review.type()),Map.entry("purpose",review.purpose()),
                     Map.entry("approveTransition",review.transition()),Map.entry("rejectTransition",reject),
+                    Map.entry("rejectionReason",rejectionReason),
                     Map.entry("approveDraft",approveDraft),Map.entry("rejectDraft",rejectDraft),
                     Map.entry("priorRevision",prior.id()),Map.entry("priorTarget",prior.targetId())),null);
                 assertEquals("APPROVED",runtime.get(PLAN+"/revisions/"+approveDraft.get("revision"),author).path("status").asText());

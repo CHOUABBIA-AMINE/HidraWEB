@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { expect, test, type Browser, type Page, type Response } from '@playwright/test';
+import { expect, test, type Browser, type Page, type Request, type Response } from '@playwright/test';
 
 type Phase = 'RESPONSE_BEFORE' | 'RESPONSE_AFTER' | 'HSE_AFTER' | 'PLANNING_SUBMIT_REVIEW';
 type Draft = { plan: string; revision: string; target: string };
@@ -14,7 +14,7 @@ type Fixture = {
   alarm: string; manualAlarm: string; candidate: string; incident: string; leakCase: string; evaluation: string; incidentReview: string; leakReview: string; missing: string;
   actor: string; caseNumber: string; caseId: string; capaId: string; closureId: string; assessmentId: string;
   author: string; reviewer: string; sibling: string; foreign: string; foreignFacility: string;
-  definition: string; type: string; purpose: string; approveTransition: string; rejectTransition: string;
+  definition: string; type: string; purpose: string; approveTransition: string; rejectTransition: string; rejectionReason: string;
   approveDraft: Draft; rejectDraft: Draft; priorRevision: string; priorTarget: string;
 };
 type Session = { page: Page; token: string; grants: string[]; close: () => Promise<void> };
@@ -348,7 +348,7 @@ async function submitDraft(s:Session,draft:Draft,stale:boolean, proveSelf=stale)
     expect(refreshed.status).toBe('DRAFT');
     expect(refreshed.updatedAt).not.toBe(revision.updatedAt);
     let attempts=0;
-    const observe=(request:import('@playwright/test').Request)=> {
+    const observe=(request: Request)=> {
       if(new URL(request.url()).pathname===path+'/submit'&&request.method()==='POST')attempts++;
     };
     p.on('request',observe);
@@ -401,14 +401,19 @@ async function decide(browser:Browser,draft:Draft,decision:'APPROVE'|'REJECT'){
     await p.getByRole('button',{name:decision,exact:true}).click();
     const transition=decision==='APPROVE'?f.approveTransition:f.rejectTransition;
     const actionPath=path+'/approval/actions/'+enc(transition)+'/execute';
-    const stale=await p.request.post(origin+actionPath,{headers:{Authorization:'Bearer '+s.token},data:{expectedTaskUpdatedAt:'2000-01-01T00:00:00Z'}});
+    const reason = decision === 'REJECT' ? {reasonId: f.rejectionReason} : {};
+    if (decision === 'REJECT') {
+      await expect(p.getByRole('button',{name:'Execute REJECT',exact:true})).toBeDisabled();
+      await p.getByLabel('Reason ID').fill(f.rejectionReason);
+    }
+    const stale=await p.request.post(origin+actionPath,{headers:{Authorization:'Bearer '+s.token},data:{expectedTaskUpdatedAt:'2000-01-01T00:00:00Z', ...reason}});
     expect(stale.status()).toBe(409);
     expect(await get<Record<string,unknown>>(s,path+'/approval')).toMatchObject({revisionStatus:'SUBMITTED',currentTaskId:projection.currentTaskId,currentTaskUpdatedAt:projection.currentTaskUpdatedAt});
     const response=at(p,actionPath,'POST');
     await p.getByRole('button',{name:'Execute '+decision,exact:true}).click();
     const result=await response;
     expect(result.status()).toBe(200);
-    expect(result.request().postDataJSON()).toEqual({expectedTaskUpdatedAt:projection.currentTaskUpdatedAt});
+    expect(result.request().postDataJSON()).toEqual({expectedTaskUpdatedAt:projection.currentTaskUpdatedAt, ...reason});
     const revision=await get<Row>(s,path);
     expect(revision).toMatchObject({id:draft.revision,status:decision==='APPROVE'?'APPROVED':'REJECTED'});
     if(decision==='APPROVE') expect(revision.approvedByActorId).toBe(f.reviewer);

@@ -64,6 +64,17 @@ function valueOrDash(value?: string | number | null): string {
   return value === undefined || value === null || value === '' ? '—' : String(value);
 }
 
+// WorkflowDecisionGuard requires a reason for these decisions regardless of
+// the optional transition configuration flag. The backend still validates
+// the supplied reason against its active WORKFLOW_REASON catalog.
+function requiresReason(action: PlanningApprovalAction): boolean {
+  return action.reasonRequired === true || ['REJECT', 'REQUEST_CORRECTION', 'RETURN', 'DELEGATE', 'ESCALATE', 'CANCEL'].includes(action.decision ?? '');
+}
+
+function requiresComment(action: PlanningApprovalAction): boolean {
+  return action.commentRequired === true || action.decision === 'REQUEST_CORRECTION';
+}
+
 function optional(value: string): string | undefined {
   const normalized = value.trim();
   return normalized ? normalized : undefined;
@@ -219,7 +230,7 @@ function CurrentPlanningWorkspace({ scope, tab, setTab }: { scope: string; tab: 
       if (!eligibleReview || !selectedPlanId || !selectedRevisionId || !action.transitionId ||
         !approval?.currentTaskUpdatedAt || selectedTaskToken !== approval.currentTaskUpdatedAt ||
         !approval.actions?.some(a => a.transitionId === action.transitionId && a.permitted === true) ||
-        (action.reasonRequired && !reasonId.trim()) || (action.commentRequired && !commentText.trim())) throw new Error('Approval unavailable');
+        (requiresReason(action) && !reasonId.trim()) || (requiresComment(action) && !commentText.trim())) throw new Error('Approval unavailable');
       const currentPlan = await fetchOperationalPlan(selectedPlanId, signal);
       const currentRevision = await fetchPlanRevision(selectedRevisionId, signal);
       const currentApproval = await fetchPlanningApproval(selectedRevisionId, signal);
@@ -425,7 +436,7 @@ function CurrentPlanningWorkspace({ scope, tab, setTab }: { scope: string; tab: 
                                 const permitted = action.permitted === true && Boolean(action.transitionId);
                                 const executable = permitted && eligibleReview && Boolean(approval?.currentTaskUpdatedAt);
                                 const selected = executable && action.transitionId === selectedTransitionId && selectedTaskToken === approval?.currentTaskUpdatedAt;
-                                return <Paper key={action.transitionId ?? index} variant="outlined" sx={{ p: 1.5 }}><Stack spacing={1}><Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}><Chip label={action.decision ?? action.transitionId ?? 'Action'} size="small" /><>{action.reasonRequired ? <Chip label="reason required" size="small" variant="outlined" /> : null}</><>{action.commentRequired ? <Chip label="comment required" size="small" variant="outlined" /> : null}</></Stack>{action.requiredPermissionCode ? <Typography color="text.secondary" variant="caption">{action.requiredPermissionCode}</Typography> : null}{executable ? <Button size="small" variant={selected ? 'contained' : 'outlined'} onClick={() => { setSelectedTransitionId(action.transitionId ?? ''); setSelectedTaskToken(approval?.currentTaskUpdatedAt ?? ''); setReasonId(''); setCommentText(''); setDecisionNote(''); setCorrelationId(''); setApprovalSuccess(''); }}>{action.decision ?? 'Select action'}</Button> : null}{selected ? <Stack spacing={1}>{action.reasonRequired ? <TextField label="Reason ID" required size="small" value={reasonId} onChange={(event) => setReasonId(event.target.value)} /> : null}{action.commentRequired ? <TextField label="Comment" required multiline rows={2} size="small" value={commentText} onChange={(event) => setCommentText(event.target.value)} /> : null}<TextField label="Decision note" multiline rows={2} size="small" value={decisionNote} onChange={(event) => setDecisionNote(event.target.value)} /><TextField label="Correlation ID" size="small" value={correlationId} onChange={(event) => setCorrelationId(event.target.value)} /><Button variant="contained" disabled={approvalMutation.isPending || (action.reasonRequired === true && !reasonId.trim()) || (action.commentRequired === true && !commentText.trim())} onClick={() => { if (actionLock.current) return; actionLock.current = true; approvalMutation.mutate(action); }}>{approvalMutation.isPending ? '…' : `Execute ${action.decision ?? 'action'}`}</Button></Stack> : null}</Stack></Paper>;
+                                return <Paper key={action.transitionId ?? index} variant="outlined" sx={{ p: 1.5 }}><Stack spacing={1}><Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}><Chip label={action.decision ?? action.transitionId ?? 'Action'} size="small" /><>{requiresReason(action) ? <Chip label="reason required" size="small" variant="outlined" /> : null}</><>{requiresComment(action) ? <Chip label="comment required" size="small" variant="outlined" /> : null}</></Stack>{action.requiredPermissionCode ? <Typography color="text.secondary" variant="caption">{action.requiredPermissionCode}</Typography> : null}{executable ? <Button size="small" variant={selected ? 'contained' : 'outlined'} onClick={() => { setSelectedTransitionId(action.transitionId ?? ''); setSelectedTaskToken(approval?.currentTaskUpdatedAt ?? ''); setReasonId(''); setCommentText(''); setDecisionNote(''); setCorrelationId(''); setApprovalSuccess(''); }}>{action.decision ?? 'Select action'}</Button> : null}{selected ? <Stack spacing={1}>{requiresReason(action) ? <TextField label="Reason ID" required size="small" value={reasonId} onChange={(event) => setReasonId(event.target.value)} /> : null}{requiresComment(action) ? <TextField label="Comment" required multiline rows={2} size="small" value={commentText} onChange={(event) => setCommentText(event.target.value)} /> : null}<TextField label="Decision note" multiline rows={2} size="small" value={decisionNote} onChange={(event) => setDecisionNote(event.target.value)} /><TextField label="Correlation ID" size="small" value={correlationId} onChange={(event) => setCorrelationId(event.target.value)} /><Button variant="contained" disabled={approvalMutation.isPending || (requiresReason(action) && !reasonId.trim()) || (requiresComment(action) && !commentText.trim())} onClick={() => { if (actionLock.current) return; actionLock.current = true; approvalMutation.mutate(action); }}>{approvalMutation.isPending ? '…' : `Execute ${action.decision ?? 'action'}`}</Button></Stack> : null}</Stack></Paper>;
                               }) : <Typography color="text.secondary">No executable approval actions were returned by HidraAPI.</Typography>}
                             </>
                           ) : null}
