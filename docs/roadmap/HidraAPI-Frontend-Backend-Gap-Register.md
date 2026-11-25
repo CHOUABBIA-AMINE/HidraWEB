@@ -945,3 +945,7 @@ Mandatory F16 native Code CI job uses exact T62 API, PostgreSQL 16, genuine LOCA
 ## HWEB-F16 — CI #1129 recovery (2026-11-25)
 
 The mandatory native Alarm qualification passed all six checkpoints (one test, zero failed/flaky/skipped) on `cf8f94b046899d7334b9d3243fb44eca21664194`; the aggregate Code CI failed on two unused test bindings. Typecheck and subsequent sequential verification did not run. The bounded repair removes only the unused bindings; all three actors and assertions remain. See the [canonical recovery record](ULTIMATE_ROADMAP.md#2026-11-25--hweb-f16-ci-1129-recovery-qualification-pending). F16 remains HOLD pending exact-repair-SHA aggregate acceptance; UXR-29 remains blocked.
+
+## HWEB-F16 — CI #1130 component recovery (2026-11-25)
+
+On `74c0044dc203b2dfb66b59825df749e217888094` F16 native, A1, F18 and Docs passed; aggregate Code CI #1130 failed one of 320 Vitest tests by timeout after lint/typecheck success. The exact stalled assertion is unknown. The bounded test-only recovery explicitly waits for suppression success and acknowledgement re-enable, uses detail-specific text selection, and sets a local 15-second integration test budget; all existing assertions, individual assertion deadlines and global gates preserved. [Canonical recovery record](ULTIMATE_ROADMAP.md#2026-11-25--hweb-f16-ci-1130-component-recovery-qualification-pending). No product or backend change; F16 and UXR-29 remain HOLD until applicable acceptance.

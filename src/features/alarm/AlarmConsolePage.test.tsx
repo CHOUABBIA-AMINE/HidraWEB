@@ -71,7 +71,8 @@ describe('HWEB-008 alarm console', () => {
     expect(screen.getByText(/HidraAPI expose désormais la suppression gouvernée/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Ouvrir' }));
 
-    expect(await screen.findByText('Pipeline Nord')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Pression élevée', level: 2 })).toBeInTheDocument();
+    expect(await screen.findByText('Pipeline Nord', { selector: 'p' })).toBeInTheDocument();
     expect(await screen.findByText('MAINT')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Ouvrir le réseau' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Ouvrir mes tâches' })).toBeInTheDocument();
@@ -93,6 +94,9 @@ describe('HWEB-008 alarm console', () => {
       }));
     });
 
+    // Observing the POST is not completion: the mutation awaits protected query refreshes.
+    expect(await screen.findByText('Suppression enregistrée par HidraAPI.')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Acquitter' })).toBeEnabled());
     fireEvent.click(screen.getByRole('button', { name: 'Acquitter' }));
 
     expect(await screen.findByText('Opération enregistrée par HidraAPI.')).toBeInTheDocument();
@@ -111,5 +115,7 @@ describe('HWEB-008 alarm console', () => {
     expect(screen.queryByText('Acquittée par: user-operator')).not.toBeInTheDocument();
     expect(screen.queryByText('Opération enregistrée par HidraAPI.')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Acquitter' })).not.toBeInTheDocument();
-  });
+    // This is a multi-step integration journey, not a five-second latency benchmark.
+    // Keep the individual Testing Library assertion deadlines and all checks intact.
+  }, 15_000);
 });
