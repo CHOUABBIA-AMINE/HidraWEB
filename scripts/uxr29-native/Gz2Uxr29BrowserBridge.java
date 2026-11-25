@@ -238,7 +238,7 @@ final class Gz2Uxr29BrowserBridge {
                 if(browser.isAlive()){browser.destroyForcibly(); browser.waitFor();}
             }
             if(Files.isRegularFile(log)) for(String line:Files.readAllLines(log))
-                if(line.matches("UXR29_DIAG (PHASE=(RESPONSE_BEFORE|RESPONSE_AFTER|HSE_AFTER|PLANNING_SUBMIT_REVIEW)|COUNTS EXPECTED=[0-9]+ UNEXPECTED=[0-9]+ FLAKY=[0-9]+ SKIPPED=[0-9]+|CHECKPOINT=[A-Z_]+|FAILURE_LINE=[0-9]+|REPORT_MISSING|PASSED)"))
+                if(line.matches("UXR29_DIAG (PHASE=(RESPONSE_BEFORE|RESPONSE_AFTER|HSE_AFTER|PLANNING_SUBMIT_REVIEW)|COUNTS EXPECTED=[0-9]+ UNEXPECTED=[0-9]+ FLAKY=[0-9]+ SKIPPED=[0-9]+|CHECKPOINT=[A-Z_]+|FAILURE_LINE=[0-9]+|REQUEST=(ALARM_MANUAL_DETAIL|ALARM_MANUAL_EVIDENCE|INCIDENT_TIMELINE|INCIDENT_INVESTIGATION|INCIDENT_ESCALATION|HSE_CAPA_LIST|HSE_HISTORY|HSE_CAPA_DETAIL|SIGNED_ALARM_MANUAL_EVIDENCE|SIGNED_INCIDENT_TIMELINE|SIGNED_INCIDENT_INVESTIGATION|SIGNED_INCIDENT_ESCALATION|SIGNED_HSE_CAPA_LIST|SIGNED_HSE_HISTORY|SIGNED_HSE_CAPA_DETAIL):([1-5][0-9]{2}|WAIT_FAILED)|REPORT_MISSING|PASSED)"))
                     System.out.println(line);
             try(var files=Files.walk(dir)){
                 for(Path file:files.sorted(Comparator.reverseOrder()).toList())Files.deleteIfExists(file);

@@ -83,8 +83,8 @@ describe('HWEB-010 planning workspace', () => {
     expect(screen.getByRole('button', { name: 'APPROVE' })).toBeEnabled();
     expect(screen.getByText('comment required')).toBeInTheDocument();
     expect(screen.getAllByText('planning:revisions:approve')).toHaveLength(2);
-    fireEvent.click(screen.getByRole('button', { name: 'REJECT', exact: true }));
-    const reject = screen.getByRole('button', { name: 'Execute REJECT', exact: true });
+    fireEvent.click(screen.getByRole('button', { name: /^REJECT$/ }));
+    const reject = screen.getByRole('button', { name: /^Execute REJECT$/ });
     expect(reject).toBeDisabled();
     fireEvent.change(screen.getByLabelText(/Reason ID/), { target: { value: '  ' } });
     expect(reject).toBeDisabled();

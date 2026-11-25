@@ -34,7 +34,7 @@ function Fields({ value, fields }: { value: object; fields: readonly string[] })
 
 function Pager({ page, total, next, previous }: { page: number; total?: number; next: () => void; previous: () => void }) {
   const { t } = useTranslation();
-  return <Stack direction="row" spacing={1} alignItems="center">
+  return <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
     <Button disabled={page === 0 || total === undefined} onClick={previous}>{t('uxr29.previous')}</Button>
     <Typography>{t('uxr29.page', { page: page + 1 })}</Typography>
     <Button disabled={total === undefined || total <= (page + 1) * SIZE} onClick={next}>{t('uxr29.next')}</Button>

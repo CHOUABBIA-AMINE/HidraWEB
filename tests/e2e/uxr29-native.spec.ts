@@ -35,17 +35,36 @@ const checkpoint = (name: string) => process.stdout.write('UXR29_CHECKPOINT=' + 
 const enc = encodeURIComponent;
 const field = (row: Record<string, unknown>, name: string) => String(row[name] ?? '');
 
-function at(page: Page, path: string, method = 'GET', params: Record<string,string> = {}) {
-  return page.waitForResponse(response => {
+// Only fixed operation labels and numeric HTTP status are exported. Never log
+// URLs, IDs, query values, payloads, credentials, headers or error messages.
+type DiagnosticOperation = 'ALARM_MANUAL_DETAIL' | 'ALARM_MANUAL_EVIDENCE' | 'INCIDENT_TIMELINE' | 'INCIDENT_INVESTIGATION' | 'INCIDENT_ESCALATION' | 'HSE_CAPA_LIST' | 'HSE_HISTORY' | 'HSE_CAPA_DETAIL' | 'SIGNED_ALARM_MANUAL_EVIDENCE' | 'SIGNED_INCIDENT_TIMELINE' | 'SIGNED_INCIDENT_INVESTIGATION' | 'SIGNED_INCIDENT_ESCALATION' | 'SIGNED_HSE_CAPA_LIST' | 'SIGNED_HSE_HISTORY' | 'SIGNED_HSE_CAPA_DETAIL';
+function diagnostic(operation: DiagnosticOperation, result: number | 'WAIT_FAILED') {
+  process.stdout.write('UXR29_REQUEST=' + operation + ':' + result + '\n');
+}
+function at(page: Page, path: string, method = 'GET', params: Record<string,string> = {}, operation?: DiagnosticOperation) {
+  const pending = page.waitForResponse(response => {
     const url = new URL(response.url());
     return url.pathname === path && response.request().method() === method &&
       Object.entries(params).every(([key,value]) => url.searchParams.get(key) === value);
-  }, { timeout: 30_000 });
+  }, { timeout: 30_000 }).then(response => {
+    if (operation) diagnostic(operation, response.status());
+    return response;
+  }, (error: unknown) => {
+    if (operation) diagnostic(operation, 'WAIT_FAILED');
+    throw error;
+  });
+  // Parallel waiters are armed before clicks. Handle early rejection until the
+  // actual assertion awaits the original promise; never convert failure to success.
+  void pending.catch(() => undefined);
+  return pending;
 }
-async function read<T>(promise: Promise<Response>): Promise<T> {
-  const result = await promise;
-  expect(result.status()).toBe(200);
-  return await result.json() as T;
+function read<T>(promise: Promise<Response>): Promise<T> {
+  const pending = promise.then(async result => {
+    expect(result.status()).toBe(200);
+    return await result.json() as T;
+  });
+  void pending.catch(() => undefined);
+  return pending;
 }
 async function session(browser: Browser, actor: string): Promise<Session> {
   const ctx = await browser.newContext({ locale: 'en-US' });
@@ -69,8 +88,9 @@ async function session(browser: Browser, actor: string): Promise<Session> {
     return { page, token:login.accessToken, grants: [...permissions].sort(), close:()=>ctx.close() };
   } catch(error) { await ctx.close(); throw error; }
 }
-async function get<T>(s: Session, path: string): Promise<T> {
+async function get<T>(s: Session, path: string, operation?: DiagnosticOperation): Promise<T> {
   const result = await s.page.request.get(origin+path,{ headers:{ Authorization:'Bearer '+s.token } });
+  if (operation) diagnostic(operation, result.status());
   expect(result.status()).toBe(200);
   return await result.json() as T;
 }
@@ -151,22 +171,36 @@ async function responseReads(s:Session) {
   if (phase === 'RESPONSE_BEFORE') {
     const manual=await get<Row>(s,alarm+'/'+enc(f.manualAlarm));
     await p.getByRole('button',{name:'Close',exact:true}).click();
-    const missing=at(p,alarm+'/'+enc(f.manualAlarm)+'/evidence');
+    const manualPath=alarm+'/'+enc(f.manualAlarm);
+    const signedMissing=await p.request.get(origin+manualPath+'/evidence',{headers:{Authorization:'Bearer '+s.token}});
+    diagnostic('SIGNED_ALARM_MANUAL_EVIDENCE',signedMissing.status());
+    expect(signedMissing.status()).toBe(404);
+    const manualDetail=read<Row>(at(p,manualPath,'GET',{},'ALARM_MANUAL_DETAIL'));
+    const missing=at(p,manualPath+'/evidence','GET',{},'ALARM_MANUAL_EVIDENCE');
     await openRow(p,alarmLabel(manual));
-    expect((await missing).status()).toBe(404);
+    const [openedManual,missingResponse]=await Promise.all([manualDetail,missing]);
+    expect(openedManual.id).toBe(f.manualAlarm);
+    expect(missingResponse.status()).toBe(404);
     await expect(p.getByText('Evaluation evidence unavailable.',{exact:true})).toBeVisible();
     await expect(p.getByText('Evaluation ID: '+f.evaluation,{exact:true})).toHaveCount(0);
   }
   await p.getByRole('button',{name:'Events & Incidents',exact:true}).click();
-  const timeline=read<Record<string,unknown>[]>(at(p,incident+'/'+enc(f.incident)+'/timeline'));
-  const investigation=read<Record<string,unknown>>(at(p,incident+'/'+enc(f.incident)+'/investigation'));
-  const escalation=read<Record<string,unknown>>(at(p,incident+'/'+enc(f.incident)+'/escalation'));
+  const incidentPath=incident+'/'+enc(f.incident);
+  const signedTimeline=await get<Record<string,unknown>[]>(s,incidentPath+'/timeline','SIGNED_INCIDENT_TIMELINE');
+  const signedInvestigation=await get<Record<string,unknown>>(s,incidentPath+'/investigation','SIGNED_INCIDENT_INVESTIGATION');
+  const signedEscalation=await get<Record<string,unknown>>(s,incidentPath+'/escalation','SIGNED_INCIDENT_ESCALATION');
+  const timeline=read<Record<string,unknown>[]>(at(p,incidentPath+'/timeline','GET',{},'INCIDENT_TIMELINE'));
+  const investigation=read<Record<string,unknown>>(at(p,incidentPath+'/investigation','GET',{},'INCIDENT_INVESTIGATION'));
+  const escalation=read<Record<string,unknown>>(at(p,incidentPath+'/escalation','GET',{},'INCIDENT_ESCALATION'));
   await openRow(p,field(i,'incidentNumber')||i.id);
-  const history=await investigation;
+  const [history,timelineRows,escalationRow]=await Promise.all([investigation,timeline,escalation]);
+  expect(history).toEqual(signedInvestigation);
+  expect(timelineRows).toEqual(signedTimeline);
+  expect(escalationRow).toEqual(signedEscalation);
   expect(history).toMatchObject({incidentId:f.incident,incidentStatus:'CLOSED',investigationState:'CLOSED',version:6});
   expect(JSON.stringify(history).includes(f.incidentReview)).toBe(true);
-  expect((await timeline).map(row=>row.sourceId).sort()).toEqual([f.alarm,f.candidate].sort());
-  expect(await escalation).toMatchObject({incidentId:f.incident,evaluationId:f.evaluation});
+  expect(timelineRows.map(row=>row.sourceId).sort()).toEqual([f.alarm,f.candidate].sort());
+  expect(escalationRow).toMatchObject({incidentId:f.incident,evaluationId:f.evaluation});
   await expect(p.getByText('Investigation state: CLOSED',{exact:true})).toBeVisible();
   await expect(p.getByText('ID: '+f.incidentReview,{exact:true})).toBeVisible();
   checkpoint('INCIDENT_HISTORY');
@@ -256,22 +290,27 @@ async function hsePhase(browser:Browser){
     expect(one.total===2&&two.total===2&&one.items.length===1&&two.items.length===1&&one.items[0].id!==two.items[0].id).toBe(true);
     checkpoint('DUPLICATE_DISCOVERY');
     const path=base+'/'+enc(f.caseId);
+    const signedCapas=await get<ScopedPage>(s,path+'/capas?page=0&size=25','SIGNED_HSE_CAPA_LIST');
+    const signedHistory=await get<ScopedPage>(s,path+'/history?page=0&size=25','SIGNED_HSE_HISTORY');
+    const signedCapa=await get<Row>(s,path+'/capas/'+enc(f.capaId),'SIGNED_HSE_CAPA_DETAIL');
     const detail=read<Row>(at(p,path));
-    const capas=read<ScopedPage>(at(p,path+'/capas','GET',{page:'0',size:'25'}));
-    const history=read<ScopedPage>(at(p,path+'/history','GET',{page:'0',size:'25'}));
+    const capas=read<ScopedPage>(at(p,path+'/capas','GET',{page:'0',size:'25'},'HSE_CAPA_LIST'));
+    const history=read<ScopedPage>(at(p,path+'/history','GET',{page:'0',size:'25'},'HSE_HISTORY'));
     await openRow(p,f.caseId,'Open case');
     expect(await detail).toMatchObject({id:f.caseId,status:'CLOSED',closureId:f.closureId,companyId:f.company,facilityId:f.facility});
     await expect(p.getByText('Closure ID: '+f.closureId,{exact:true})).toBeVisible();
     checkpoint('SCOPED_CASE');
-    const capaPage=await capas;
+    const [capaPage,events]=await Promise.all([capas,history]);
+    expect(capaPage).toEqual(signedCapas);
+    expect(events).toEqual(signedHistory);
     expect(capaPage.items.some(row=>row.id===f.capaId)).toBe(true);
-    const cap=read<Row>(at(p,path+'/capas/'+enc(f.capaId)));
+    const cap=read<Row>(at(p,path+'/capas/'+enc(f.capaId),'GET',{},'HSE_CAPA_DETAIL'));
     await openRow(p,f.capaId,'Open CAPA');
     const receipt=await cap;
+    expect(receipt).toEqual(signedCapa);
     expect(receipt).toMatchObject({id:f.capaId,caseId:f.caseId,status:'CLOSED'});
     expect(Boolean(receipt.evidenceId)).toBe(true);
     await expect(p.getByText('Evidence ID: '+receipt.evidenceId,{exact:true})).toBeVisible();
-    const events=await history;
     expect(events.total).toBeGreaterThanOrEqual(9);
     expect(events.items.some(row=>row.referenceId===f.assessmentId&&row.operation==='ASSESS_IMPACT')).toBe(true);
     await expect(p.getByText('Reference ID: '+f.assessmentId,{exact:true})).toBeVisible();

@@ -14,6 +14,7 @@ status=0
 npx --no-install playwright test --config playwright.uxr29.config.ts --reporter=json >"$HIDRA_UXR29_PRIVATE_DIR/browser.log" 2>&1 || status=$?
 python3 - "$HIDRA_UXR29_PRIVATE_DIR" "$HIDRA_UXR29_PHASE" "$status" <<'PY'
 import json
+import re
 from pathlib import Path
 import sys
 root, phase, status = Path(sys.argv[1]), sys.argv[2], int(sys.argv[3])
@@ -42,6 +43,8 @@ def walk(suites):
                     for entry in result.get("stdout", []):
                         value = entry if isinstance(entry,str) else entry.get("text","")
                         for line in value.splitlines():
+                            if re.fullmatch(r"UXR29_REQUEST=(ALARM_MANUAL_DETAIL|ALARM_MANUAL_EVIDENCE|INCIDENT_TIMELINE|INCIDENT_INVESTIGATION|INCIDENT_ESCALATION|HSE_CAPA_LIST|HSE_HISTORY|HSE_CAPA_DETAIL|SIGNED_ALARM_MANUAL_EVIDENCE|SIGNED_INCIDENT_TIMELINE|SIGNED_INCIDENT_INVESTIGATION|SIGNED_INCIDENT_ESCALATION|SIGNED_HSE_CAPA_LIST|SIGNED_HSE_HISTORY|SIGNED_HSE_CAPA_DETAIL):(?:[1-5][0-9]{2}|WAIT_FAILED)", line):
+                                print("UXR29_DIAG " + line.removeprefix("UXR29_"), flush=True)
                             if line.startswith("UXR29_CHECKPOINT="):
                                 code = line.split("=",1)[1]
                                 observed.append(code)
