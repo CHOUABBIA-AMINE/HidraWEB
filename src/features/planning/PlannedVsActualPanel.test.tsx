@@ -6,6 +6,11 @@ import { PlannedVsActualPanel } from '@/features/planning/PlannedVsActualPanel';
 
 const hidraHttpClient = vi.hoisted(() => vi.fn());
 const grants = vi.hoisted(() => ({ comparison: true }));
+const activeTarget = {
+  id: 'target-1', revisionId: 'rev-2', telemetryPointId: 'point-1',
+  telemetryPointCodeSnapshot: 'PT-001', targetValue: 100, unitId: 'm3/h', status: 'ACTIVE',
+  updatedAt: '2026-09-12T09:55:00Z', validFrom: '2026-10-01T00:00:00Z', validTo: '2026-12-31T23:59:59Z',
+};
 
 vi.mock('@/api/client/hidraHttpClient', () => ({ hidraHttpClient }));
 vi.mock('@/features/permissions/usePermissions', () => ({
@@ -29,17 +34,19 @@ function renderPanel() {
 afterEach(cleanup);
 
 describe('HWEB-010-05 planned-vs-actual panel', () => {
+  let detectedAt = '2026-10-12T10:30:00Z';
   beforeEach(() => {
+    detectedAt = '2026-10-12T10:30:00Z';
     grants.comparison = true;
     hidraHttpClient.mockReset();
     hidraHttpClient.mockImplementation(async (config: { url?: string; params?: Record<string, unknown> }) => {
       if (config.url === '/api/v1/planning/revisions/rev-2') return { id: 'rev-2', planId: 'plan-1', status: 'APPROVED' };
       if (config.url === '/api/v1/planning/operational-plans/plan-1') return { id: 'plan-1', currentRevisionId: 'rev-2', approvedRevisionId: 'rev-2' };
-      if (config.url === '/api/v1/planning/targets/target-1') return { id: 'target-1', revisionId: 'rev-2', unitId: 'm3/h', status: 'ACTIVE', telemetryPointId: 'point-1' };
+      if (config.url === '/api/v1/planning/targets/target-1') return activeTarget;
       if (config.url === '/api/v1/planning/targets') {
         expect(config.params).toEqual({ revisionId: 'rev-2', page: 0, size: 50 });
         return {
-          content: [{ id: 'target-1', revisionId: 'rev-2', telemetryPointId: 'point-1', telemetryPointCodeSnapshot: 'PT-001', targetValue: 100, unitId: 'm3/h', status: 'ACTIVE' }],
+          content: [activeTarget],
           page: 0,
           size: 50,
           totalElements: 1,
@@ -50,7 +57,7 @@ describe('HWEB-010-05 planned-vs-actual panel', () => {
       if (config.url === '/api/v1/monitoring/deviations') {
         expect(config.params).toEqual({ planTargetId: 'target-1', page: 0, size: 50 });
         return {
-          content: [{ id: 'dev-1', planTargetId: 'target-1', trustedTelemetryReadingId: 'reading-9', telemetryPointId: 'point-1', actualValue: 105, expectedValue: 100, differenceValue: 5, differencePercent: 5, unitId: 'm3/h', severity: 'HIGH', status: 'OPEN', detectedAt: '2026-09-12T10:30:00Z' }],
+          content: [{ id: 'dev-1', planTargetId: 'target-1', trustedTelemetryReadingId: 'reading-9', telemetryPointId: 'point-1', actualValue: 105, expectedValue: 100, differenceValue: 5, differencePercent: 5, unitId: 'm3/h', severity: 'HIGH', status: 'OPEN', detectedAt }],
           page: 0,
           size: 50,
           totalElements: 1,
@@ -83,6 +90,24 @@ describe('HWEB-010-05 planned-vs-actual panel', () => {
     expect(screen.getByText('OPEN')).toBeInTheDocument();
     expect(screen.getByText('reading-9')).toBeInTheDocument();
   });
+
+it.each(['2026-09-30T23:59:59Z', '2027-01-01T00:00:00Z'])(
+  'retires comparison when owner evidence is outside the approved validity window: %s',
+  async (outsideWindow) => {
+    detectedAt = outsideWindow;
+    renderPanel();
+    fireEvent.mouseDown(await screen.findByLabelText('Plan target'));
+    fireEvent.click(await screen.findByText(/target-1 · PT-001/));
+    await waitFor(() => expect(hidraHttpClient).toHaveBeenCalledWith({
+      method: 'GET',
+      url: '/api/v1/monitoring/deviations',
+      params: { planTargetId: 'target-1', page: 0, size: 50 },
+    }));
+    expect(await screen.findByText(/uxr29\.comparisonUnavailable|Comparaison indisponible|Comparison unavailable|المقارنة غير متاحة/)).toBeInTheDocument();
+    expect(screen.queryByRole('table', { name: 'Planned versus actual deviations' })).not.toBeInTheDocument();
+    expect(screen.queryByText('reading-9')).not.toBeInTheDocument();
+  },
+);
 
 it('does not issue a Monitoring request when the published grant is absent', async () => {
   grants.comparison = false;

@@ -17,7 +17,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * the browser authenticates through the actual LOCAL endpoint. */
 final class Gz2Uxr29BrowserBridge {
     private static final ObjectMapper JSON = new ObjectMapper();
-    static final String PIN = "b451302179eb3a5877aefcb105dab0f3ccb47897";
+    static final String PIN = "6aad877c2681a278d141b5dc8d9deea6d18544e5";
+    // T29 runtime passed strict canonical equality with the existing T62 contract.
+    // Preserve the original slice bytes and verify every operation/schema at runtime.
+    private static final String CONTRACT_SOURCE = "b451302179eb3a5877aefcb105dab0f3ccb47897";
     private static final List<String> PHASES = List.of("RESPONSE_BEFORE","RESPONSE_AFTER","HSE_AFTER","PLANNING_SUBMIT_REVIEW");
     private static final List<String> SLICES = List.of("alarm","incident","leak","hse","planning");
     private Gz2Uxr29BrowserBridge() {}
@@ -157,7 +160,7 @@ final class Gz2Uxr29BrowserBridge {
     static void verifyContracts(Gz2SignedWorkflowFixture.Runtime r, Path web) throws Exception {
         JsonNode runtime = r.get("/v3/api-docs", null);
         for (String name : SLICES) {
-            Path file = web.resolve("openapi/candidates/hidra-" + name + "-" + PIN + ".json");
+            Path file = web.resolve("openapi/candidates/hidra-" + name + "-" + CONTRACT_SOURCE + ".json");
             JsonNode pin = JSON.readTree(file.toFile());
             var paths = pin.path("paths").fields();
             while (paths.hasNext()) {
@@ -219,6 +222,7 @@ final class Gz2Uxr29BrowserBridge {
             var summary=JSON.createObjectNode();
             summary.set("browser",safe);
             summary.put("api_sha",PIN);
+            summary.put("contract_source_sha",CONTRACT_SOURCE);
             summary.put("web_sha",System.getenv("GITHUB_SHA"));
             summary.put("run_id",System.getenv("GITHUB_RUN_ID"));
             summary.put("run_attempt",System.getenv("GITHUB_RUN_ATTEMPT"));
@@ -226,7 +230,7 @@ final class Gz2Uxr29BrowserBridge {
                 "SELECT installed_rank,version,script,checksum,success FROM public.flyway_schema_history ORDER BY installed_rank")));
             var contractDigests = summary.putObject("contracts");
             for (String name : SLICES) {
-                byte[] bytes=Files.readAllBytes(web.resolve("openapi/candidates/hidra-"+name+"-"+PIN+".json"));
+                byte[] bytes=Files.readAllBytes(web.resolve("openapi/candidates/hidra-"+name+"-"+CONTRACT_SOURCE+".json"));
                 contractDigests.put(name,java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(bytes)));
             }
             Path output=evidence.resolve(phase+".json");

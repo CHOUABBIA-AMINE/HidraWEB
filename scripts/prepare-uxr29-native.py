@@ -6,14 +6,14 @@ import shutil
 import subprocess
 import sys
 
-PIN = "b451302179eb3a5877aefcb105dab0f3ccb47897"
+PIN = "6aad877c2681a278d141b5dc8d9deea6d18544e5"
 api = Path(sys.argv[1]).resolve()
 web = Path(__file__).resolve().parent.parent
 root = api / "src/test/java/dz/sh/hidra/qualification"
 anchors = {
     "Gz2SignedWorkflowFixture.java": "5e127551ee10429b7c4c433e4cb101d640411200",
     "Gz2IncidentLeakInvestigationNativeHttpPostgresIntegrationTest.java": "7a73790379e83a79dc940a378de51fbd56b14b14",
-    "Gz2HseCapaNativeHttpPostgresIntegrationTest.java": "a26e7005825dd77f32cdf7ded8a74aa27fc6007c",
+    "Gz2HseCapaNativeHttpPostgresIntegrationTest.java": "57e044d61e77481f1a9871f8f8bef38389ebac76",
     "Gz2PlanningNominationNativeHttpPostgresIntegrationTest.java": "76d6a9828afbb9b15325a39ec3567ee795dbadae",
 }
 

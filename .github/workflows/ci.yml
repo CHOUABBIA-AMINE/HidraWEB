@@ -759,11 +759,11 @@ jobs:
         uses: actions/checkout@v5
         with:
           persist-credentials: false
-      - name: Checkout immutable accepted T62 API
+      - name: Checkout immutable qualified T29-corrected API
         uses: actions/checkout@v5
         with:
           repository: CHOUABBIA-AMINE/HidraAPI
-          ref: b451302179eb3a5877aefcb105dab0f3ccb47897
+          ref: 6aad877c2681a278d141b5dc8d9deea6d18544e5
           path: .uxr29-api
           persist-credentials: false
       - name: Set up Java 21 and Maven
@@ -791,7 +791,7 @@ jobs:
           set -euo pipefail
           umask 077
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          test "$(git -C .uxr29-api rev-parse HEAD)" = b451302179eb3a5877aefcb105dab0f3ccb47897
+          test "$(git -C .uxr29-api rev-parse HEAD)" = 6aad877c2681a278d141b5dc8d9deea6d18544e5
           export HIDRA_UXR29_WEB_ROOT="$GITHUB_WORKSPACE"
           export HIDRA_UXR29_EVIDENCE_DIR="$RUNNER_TEMP/uxr29-evidence"
           export HIDRA_E2E_AUTH_MOCK=0
@@ -816,7 +816,9 @@ jobs:
           import hashlib, json, os
           from pathlib import Path
           from xml.etree import ElementTree as ET
-          pin = "b451302179eb3a5877aefcb105dab0f3ccb47897"
+          pin = "6aad877c2681a278d141b5dc8d9deea6d18544e5"
+          # T29 changes no OpenAPI operation/schema; preserve exact T62 contract provenance.
+          contract_source = "b451302179eb3a5877aefcb105dab0f3ccb47897"
           expected_methods = {
               "Gz2IncidentLeakInvestigationNativeHttpPostgresIntegrationTest": {"signedInvestigationAndIndependentDispositionSurviveRestart"},
               "Gz2HseCapaNativeHttpPostgresIntegrationTest": {"signedCompanyAndFacilityReadsConcealNonexistentCasesAndRejectWrongScope","signedImpactAssessmentAndApprovedClosureSurviveRestart"},
@@ -836,7 +838,7 @@ jobs:
               "planning":"009e81a44bb64412cf7f45b6640873eb421814616a87674f40708c0d13ee5df7",
           }
           for name, digest in pins.items():
-              candidate = Path("openapi/candidates") / ("hidra-" + name + "-" + pin + ".json")
+              candidate = Path("openapi/candidates") / ("hidra-" + name + "-" + contract_source + ".json")
               assert hashlib.sha256(candidate.read_bytes()).hexdigest() == digest
           phases = {"RESPONSE_BEFORE","RESPONSE_AFTER","HSE_AFTER","PLANNING_SUBMIT_REVIEW"}
           evidence = Path(os.environ["HIDRA_UXR29_EVIDENCE_DIR"])
@@ -845,6 +847,7 @@ jobs:
           for phase in phases:
               record = json.loads((evidence/(phase+".json")).read_text())
               assert record["api_sha"] == pin and record["web_sha"] == os.environ["GITHUB_SHA"]
+              assert record["contract_source_sha"] == contract_source
               assert record["run_id"] == os.environ["GITHUB_RUN_ID"] and record["run_attempt"] == os.environ["GITHUB_RUN_ATTEMPT"]
               assert record["browser"]["phase"] == phase
               assert record["browser"]["counts"] == dict(expected=1,unexpected=0,flaky=0,skipped=0)
@@ -856,7 +859,7 @@ jobs:
           print("UXR29 native: four exact phase passes; five backend test methods passed; all contract and migration inventories match.")
           PY
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          test "$(git -C .uxr29-api rev-parse HEAD)" = b451302179eb3a5877aefcb105dab0f3ccb47897
+          test "$(git -C .uxr29-api rev-parse HEAD)" = 6aad877c2681a278d141b5dc8d9deea6d18544e5
       - name: Upload redacted UXR-29 development evidence
         uses: actions/upload-artifact@v4
         with:

@@ -30,7 +30,7 @@ const approval = {
   actions: [{ transitionId: 'transition-approve', decision: 'APPROVE', reasonRequired: false, commentRequired: true, requiredPermissionCode: 'planning:revisions:approve', permitted: true }],
 };
 const target = { id: 'target-1', revisionId: 'rev-2', telemetryPointId: 'point-1', telemetryPointCodeSnapshot: 'PT-001', targetValue: 100, unitId: 'm3/h', status: 'ACTIVE' };
-const deviation = { id: 'dev-1', planTargetId: 'target-1', trustedTelemetryReadingId: 'reading-9', telemetryPointId: 'point-1', actualValue: 105, expectedValue: 100, differenceValue: 5, differencePercent: 5, unitId: 'm3/h', severity: 'HIGH', status: 'OPEN', detectedAt: '2026-09-12T10:30:00Z' };
+const deviation = { id: 'dev-1', planTargetId: 'target-1', trustedTelemetryReadingId: 'reading-9', telemetryPointId: 'point-1', actualValue: 105, expectedValue: 100, differenceValue: 5, differencePercent: 5, unitId: 'm3/h', severity: 'HIGH', status: 'OPEN', detectedAt: '2026-10-12T10:30:00Z' };
 
 async function mockPlanning(page: Page, mode: 'submitted' | 'approved' | 'draft' = 'submitted') {
   let currentPlan = { ...plan, updatedAt: '2026-09-12T09:30:00Z', status: mode === 'approved' ? 'ACTIVE' : mode === 'draft' ? 'DRAFT' : 'SUBMITTED', approvedRevisionId: mode === 'approved' ? 'rev-2' : 'rev-1' };

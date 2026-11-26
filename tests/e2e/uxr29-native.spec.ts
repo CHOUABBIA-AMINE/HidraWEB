@@ -324,7 +324,15 @@ async function hsePhase(browser:Browser){
     const first=await get<ScopedPage>(s,otherPath+'?actionNumber='+enc(actionNumber)+'&page=0&size=1');
     const second=await get<ScopedPage>(s,otherPath+'?actionNumber='+enc(actionNumber)+'&page=1&size=1');
     expect(first.total===2 && second.total===2 && first.items[0].id!==second.items[0].id).toBe(true);
+    // Finish the second parent's unfiltered owner read before changing its filter.
+    // This proves both corrected default discovery and exact browser parity.
+    const signedOther=await get<ScopedPage>(s,otherPath+'?page=0&size=25','SIGNED_HSE_CAPA_LIST');
+    expect(signedOther.total).toBe(2);
+    expect(signedOther.items.map(row=>row.id).sort()).toEqual(duplicateCapas.items.map(row=>row.id).sort());
+    const otherUnfiltered=read<ScopedPage>(at(p,otherPath,'GET',{page:'0',size:'25'},'HSE_CAPA_LIST'));
     await openRow(p,otherId,'Open case');
+    expect(await otherUnfiltered).toEqual(signedOther);
+    for(const row of signedOther.items) await expect(p.getByRole('cell',{name:row.id,exact:true})).toBeVisible();
     await p.getByLabel('Action number',{exact:true}).fill(actionNumber);
     const capFilter=read<ScopedPage>(at(p,otherPath,'GET',{actionNumber,page:'0',size:'25'}));
     await p.getByRole('button',{name:'Filter',exact:true}).last().click();
