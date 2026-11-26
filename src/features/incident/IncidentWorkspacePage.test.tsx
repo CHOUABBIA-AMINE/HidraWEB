@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { HidraApiError } from '@/api/errors/HidraApiError';
 import { App } from '@/app/App';
@@ -56,6 +56,7 @@ const fixtures = vi.hoisted(() => {
   return {
     routes,
     evidenceDenied: false,
+    omitIncidentOrigin: false,
     permissions: ['incident:incidents:read', 'leakdetection:candidates:read', 'leakdetection:cases:read', 'hse:cases:read', 'hse:capas:read'],
     incident, candidate, leakCase, hseCase, capa,
   };
@@ -67,7 +68,7 @@ const hidraHttpClient = vi.hoisted(() => vi.fn(async (config: { url?: string; me
   if (config.url === '/api/v1/identity/me') return { authenticationName: 'operator', authenticationType: 'LOCAL', userId: 'user-operator', username: 'operator', displayName: 'Operator', employeeReferenceId: 'employee-operator', authenticationAuthorities: [], effectivePermissions: [] };
   if (config.url?.endsWith('/identity/me/permissions')) return fixtures.permissions;
   if (config.url === '/api/v1/incident/incidents' && config.method === 'GET') return { content: [fixtures.incident], page: 0, size: 50, totalElements: 1, totalPages: 1, hasNext: false };
-  if (config.url === '/api/v1/incident/incidents/inc-1' && config.method === 'GET') return fixtures.incident;
+  if (config.url === '/api/v1/incident/incidents/inc-1' && config.method === 'GET') return fixtures.omitIncidentOrigin ? { ...fixtures.incident, sourceReferenceId: undefined, sourceType: undefined } : fixtures.incident;
   if (config.url === '/api/v1/incident/incidents/inc-1/investigation' && config.method === 'GET') {
     if (fixtures.evidenceDenied) throw new HidraApiError('Unavailable', { status: 404 });
     return { incidentId: 'inc-1', investigationState: 'REVIEWED', investigatorId: 'investigator-uxr29', version: 2, history: [{ id: 'event-1', operation: 'REVIEW', actorId: 'reviewer-uxr29' }] };
@@ -89,10 +90,13 @@ const hidraHttpClient = vi.hoisted(() => vi.fn(async (config: { url?: string; me
 
 vi.mock('@/api/client/hidraHttpClient', () => ({ hidraHttpClient }));
 
+afterEach(cleanup);
+
 describe('HWEB-009 events workspace', () => {
   beforeEach(() => {
     hidraHttpClient.mockClear();
     fixtures.evidenceDenied = false;
+    fixtures.omitIncidentOrigin = false;
     window.history.replaceState({}, '', '/overview');
   });
 
@@ -110,6 +114,7 @@ describe('HWEB-009 events workspace', () => {
     expect(await screen.findByText('Operator One')).toBeInTheDocument();
     expect(await screen.findByText(/investigator-uxr29/)).toBeInTheDocument();
     expect(await screen.findByText(/cand-1/)).toBeInTheDocument();
+    await waitFor(() => expect(hidraHttpClient).toHaveBeenCalledWith(expect.objectContaining({ method: 'GET', url: '/api/v1/incident/incidents/inc-1/escalation' })));
 
     fireEvent.click(screen.getByRole('tab', { name: 'Leak detection' }));
     expect(await screen.findByText('LKC-001')).toBeInTheDocument();
@@ -134,7 +139,9 @@ describe('HWEB-009 events workspace', () => {
 });
 
 it('does not disclose previous Incident evidence after the selected owner masks a reread', async () => {
+  hidraHttpClient.mockClear();
   fixtures.evidenceDenied = false;
+  fixtures.omitIncidentOrigin = true;
   window.history.replaceState({}, '', '/overview');
   render(<AppProviders><App /></AppProviders>);
   fireEvent.change(await screen.findByLabelText(/Nom d’utilisateur/), { target: { value: 'operator' } });
@@ -143,6 +150,8 @@ it('does not disclose previous Incident evidence after the selected owner masks 
   fireEvent.click(await screen.findByRole('button', { name: 'Événements & incidents' }));
   fireEvent.click(await screen.findByRole('button', { name: 'Open' }));
   expect(await screen.findByText(/investigator-uxr29/)).toBeInTheDocument();
+  // A positive current owner timeline is sufficient even without the optional generic source tuple.
+  await waitFor(() => expect(hidraHttpClient).toHaveBeenCalledWith(expect.objectContaining({ method: 'GET', url: '/api/v1/incident/incidents/inc-1/escalation' })));
   fixtures.evidenceDenied = true;
   fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
   fireEvent.click(await screen.findByRole('button', { name: 'Open' }));

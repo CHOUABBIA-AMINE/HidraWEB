@@ -348,23 +348,29 @@ function CurrentEventsWorkspace({ identity, tab, setTab, hseMode, setHseMode }: 
   const escalationAllowed = allows(INCIDENT_LIST_ROUTE + '/{id}/escalation');
   const candidateEvidenceAllowed = allows(LEAK_CANDIDATE_LIST_ROUTE + '/{id}/evidence');
   const leakInvestigationAllowed = allows(LEAK_CASE_LIST_ROUTE + '/{id}/investigation');
-  const hasIncidentOrigin = Boolean(incident?.sourceReferenceId && ['ALARM', 'LEAK_CANDIDATE'].includes(incident.sourceType ?? ''));
   const timeline = useQuery({ queryKey: [...incidentQueryKeys.timeline(selectedIncidentId), identity, refreshEpoch, selectionEpoch], queryFn: ({ signal }) => fetchIncidentTimeline(selectedIncidentId, signal), enabled: Boolean(incident && timelineAllowed), ...protectedReadPolicy });
   const investigation = useQuery({ queryKey: [...incidentQueryKeys.investigation(selectedIncidentId), identity, refreshEpoch, selectionEpoch], queryFn: ({ signal }) => fetchIncidentInvestigation(selectedIncidentId, signal), enabled: Boolean(incident && investigationAllowed), ...protectedReadPolicy });
+  const timelineData = incident && timelineAllowed ? fresh(timeline) : undefined;
+  // T62 receipt() returns the first current owner-authorized timeline entry.
+  // Generic IncidentView source metadata is optional and is not that receipt.
+  const timelineMatches = !timelineData || (Array.isArray(timelineData) && timelineData.every(row =>
+    row.incidentId === selectedIncidentId && Boolean(row.sourceId && row.evaluationId) &&
+    ['ALARM', 'LEAK_CANDIDATE'].includes(row.sourceType ?? '')));
+  const firstOwnerReceipt = timelineMatches && Array.isArray(timelineData) ? timelineData[0] : undefined;
+  const explicitOrigin = Boolean(incident?.sourceReferenceId && ['ALARM', 'LEAK_CANDIDATE'].includes(incident.sourceType ?? ''));
+  const hasIncidentOrigin = timelineAllowed ? Boolean(firstOwnerReceipt) : explicitOrigin;
   const escalation = useQuery({ queryKey: [...incidentQueryKeys.escalation(selectedIncidentId), identity, refreshEpoch, selectionEpoch], queryFn: ({ signal }) => fetchIncidentEscalation(selectedIncidentId, signal), enabled: Boolean(incident && hasIncidentOrigin && escalationAllowed), ...protectedReadPolicy });
   const candidateEvidence = useQuery({ queryKey: [...leakQueryKeys.evidence(selectedCandidateId), identity, refreshEpoch, selectionEpoch], queryFn: ({ signal }) => fetchLeakCandidateEvidence(selectedCandidateId, signal), enabled: Boolean(candidate && candidateEvidenceAllowed), ...protectedReadPolicy });
   const leakInvestigation = useQuery({ queryKey: [...leakQueryKeys.investigation(selectedCaseId), identity, refreshEpoch, selectionEpoch], queryFn: ({ signal }) => fetchLeakInvestigation(selectedCaseId, signal), enabled: Boolean(leakCase && leakInvestigationAllowed), ...protectedReadPolicy });
-  const timelineData = incident && timelineAllowed ? fresh(timeline) : undefined;
   const investigationData = incident && investigationAllowed ? fresh(investigation) : undefined;
   const escalationData = incident && hasIncidentOrigin && escalationAllowed ? fresh(escalation) : undefined;
   const candidateEvidenceData = candidate && candidateEvidenceAllowed ? fresh(candidateEvidence) : undefined;
   const leakInvestigationData = leakCase && leakInvestigationAllowed ? fresh(leakInvestigation) : undefined;
-  // The same owner incident can contain independently authorized Alarm and Leak
-  // escalation receipts. Validate their owner ID, not equality to the primary source.
-  const timelineMatches = !timelineData || (Array.isArray(timelineData) && timelineData.every(row =>
-    row.incidentId === selectedIncidentId && Boolean(row.sourceId) &&
-    ['ALARM', 'LEAK_CANDIDATE'].includes(row.sourceType ?? '')));
-  const escalationMatches = !escalationData || (escalationData.incidentId === selectedIncidentId && escalationData.sourceId === incident?.sourceReferenceId && escalationData.sourceType === incident?.sourceType);
+  const escalationMatches = !escalationData || (escalationData.incidentId === selectedIncidentId &&
+    Boolean(escalationData.evaluationId && escalationData.sourceId) &&
+    (timelineAllowed ? Boolean(firstOwnerReceipt && escalationData.sourceId === firstOwnerReceipt.sourceId &&
+      escalationData.sourceType === firstOwnerReceipt.sourceType && escalationData.evaluationId === firstOwnerReceipt.evaluationId)
+      : escalationData.sourceId === incident?.sourceReferenceId && escalationData.sourceType === incident?.sourceType));
   const incidentFailed = Boolean(selectedIncidentId && ((incidentList && !incidentList.content?.some(row => row.id === selectedIncidentId)) || incidentsQuery.isError || incidentDetailQuery.isError ||
     (fresh(incidentDetailQuery) && !incident && incidentList) || timeline.isError || investigation.isError || escalation.isError ||
     !timelineMatches || !escalationMatches || (investigationData && investigationData.incidentId !== selectedIncidentId)));

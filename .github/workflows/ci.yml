@@ -653,6 +653,12 @@ jobs:
             sudo apt-get update
             sudo apt-get install --yes --no-install-recommends postgresql-client apache2-utils
           fi
+      - name: Restore pinned Maven wrapper distribution for F16
+        id: f16-maven-wrapper
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.m2/wrapper/dists
+          key: ${{ runner.os }}-w1-maven-wrapper-${{ hashFiles('.alarm-native-api/.mvn/wrapper/maven-wrapper.properties') }}
       - name: Build immutable accepted API
         working-directory: .alarm-native-api
         shell: bash
@@ -665,6 +671,12 @@ jobs:
             sleep "$((attempt * 5))"
           done
           bash ./mvnw -B -q -Dmaven.test.skip=true package
+      - name: Save completed pinned Maven wrapper distribution for F16
+        if: steps.f16-maven-wrapper.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.m2/wrapper/dists
+          key: ${{ steps.f16-maven-wrapper.outputs.cache-primary-key }}
       - name: Run mandatory F16 signed native acceptance
         shell: bash
         run: |

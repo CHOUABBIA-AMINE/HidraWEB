@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PlannedVsActualPanel } from '@/features/planning/PlannedVsActualPanel';
 
@@ -25,6 +25,8 @@ function renderPanel() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(<QueryClientProvider client={queryClient}><PlannedVsActualPanel revisionId="rev-2" /></QueryClientProvider>);
 }
+
+afterEach(cleanup);
 
 describe('HWEB-010-05 planned-vs-actual panel', () => {
   beforeEach(() => {

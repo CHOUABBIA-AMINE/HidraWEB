@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PlanningSubmissionPanel } from './PlanningSubmissionPanel';
 
 const f = vi.hoisted(() => ({
@@ -35,6 +35,8 @@ async function discover() {
   expect(screen.queryByRole('option', { name: 'Author' })).not.toBeInTheDocument();
   fireEvent.click(await screen.findByRole('option', { name: 'Independent reviewer' }));
 }
+afterEach(cleanup);
+
 describe('UXR-29 explicit Planning submission', () => {
   beforeEach(() => {
     vi.resetAllMocks(); f.permitted = true;

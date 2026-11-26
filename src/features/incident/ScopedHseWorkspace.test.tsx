@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ScopedHseWorkspace } from './ScopedHseWorkspace';
 import type * as HseApi from './api/hseApi';
@@ -38,6 +38,8 @@ function mount() {
   const tree = <QueryClientProvider client={client}><ScopedHseWorkspace /></QueryClientProvider>;
   return { ...render(tree), tree };
 }
+
+afterEach(cleanup);
 
 describe('UXR-29 scoped HSE owner reads', () => {
   beforeEach(() => {

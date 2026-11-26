@@ -1,5 +1,5 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { HidraApiError } from '@/api/errors/HidraApiError';
 import { App } from '@/app/App';
@@ -59,6 +59,8 @@ async function signInAndOpenAlarms() {
   fireEvent.click(await screen.findByRole('button', { name: 'Alarmes' }));
   expect(await screen.findByRole('heading', { name: 'Console des alarmes' })).toBeInTheDocument();
 }
+
+afterEach(cleanup);
 
 describe('HWEB-008 alarm console', () => {
   beforeEach(() => {
